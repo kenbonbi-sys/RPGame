@@ -63,6 +63,8 @@ Tools/
 - **Steps/1–6** — chạy từng bước, cũng theo chế độ authoring. **Steps/6. Rebuild Scenes** luôn dựng lại Core và các scene vùng từ các prefab đang có.
 - Batchmode: `-executeMethod RPG.EditorTools.Batch.BuildAll` (authoring), `Batch.ForceBuildAll`, `Batch.RebuildScene`.
 - **Build Windows Player** — xuất `Builds/Windows/RungThiTham.exe`.
+- **VFX Gallery** — mở scene `Assets/Scenes/Tools/VFXGallery.unity` (tự tạo nếu chưa có) và bấm Play: mọi hiệu ứng xếp lưới 3×3 theo trang, mỗi ô ghi số hạt cao nhất và số Light2D so với ngân sách (150 hạt, 1 Light2D; Tuyệt kỹ gấp đôi, chỉnh trong `Assets/Data/VFXLibrary.asset`). Phím: 1–9 phát một ô · Space cả trang · ←/→ đổi trang · B bật/tắt Bloom · L lặp · M đo tất cả rồi in báo cáo · Tab bảng tổng.
+- **VFX Budget Report** — đo mọi hiệu ứng ngay trong Editor (không cần Play) và in báo cáo ngân sách ra Console.
 
 ## Mở rộng
 

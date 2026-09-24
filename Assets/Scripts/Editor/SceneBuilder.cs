@@ -88,6 +88,9 @@ namespace RPG.EditorTools
         /// <summary>Builds the missing scenes (or all of them when <paramref name="all"/>), then the build settings.</summary>
         static void BuildScenes(bool all)
         {
+            // the VFX Gallery tool scene first, so Core is the scene left open at the end
+            if (all || AssetDatabase.LoadAssetAtPath<SceneAsset>(VFXGalleryBuilder.ScenePath) == null) VFXGalleryBuilder.Build();
+            else EditorUtil.Kept++;
             var db = AssetFactory.Database;
             foreach (var zone in db.zones)
             {
