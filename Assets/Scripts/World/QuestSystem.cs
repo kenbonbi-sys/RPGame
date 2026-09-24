@@ -40,10 +40,12 @@ namespace RPG
         {
             I = this;
             Build();
+            SaveRegistry.Register(this);
         }
 
         void OnDestroy()
         {
+            SaveRegistry.Unregister(this);
             if (I == this) I = null;
             if (boundInventory != null) boundInventory.Changed -= OnInventoryChanged;
         }
@@ -184,7 +186,7 @@ namespace RPG
             if (announce)
             {
                 GameEvents.RaiseLog($"Nhiệm vụ mới: {s.def.title}", Palette.LogQuest);
-                if (HUD.I != null) HUD.I.banner.ShowQuest("Nhiệm vụ mới", s.def.title);
+                GameEvents.RaiseBanner(BannerKind.Quest, "Nhiệm vụ mới", s.def.title);
                 AudioManager.Play("sfx_quest", 0.8f, 0f);
             }
             Evaluate(s);

@@ -34,6 +34,7 @@ namespace RPG
         void Awake()
         {
             I = this;
+            SaveRegistry.Register(this);
             if (project == null && GameManager.I != null && GameManager.I.db != null) project = GameManager.I.db.dialogue;
             if (project != null) CreateRunner();
             else Debug.LogWarning("[Dialogue] No Yarn project assigned; NPCs use their fallback lines.");
@@ -41,6 +42,7 @@ namespace RPG
 
         void OnDestroy()
         {
+            SaveRegistry.Unregister(this);
             if (I == this) I = null;
         }
 

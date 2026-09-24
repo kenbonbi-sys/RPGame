@@ -56,14 +56,13 @@ namespace RPG
         LogLineUI AddLine(string msg, Color c)
         {
             if (linePrefab == null || container == null) return null;
-            var l = Instantiate(linePrefab, container);
-            l.gameObject.SetActive(true);
+            var l = Pool.Get(linePrefab, container);
             l.lifetime = lineLifetime;
             l.Set(msg, c);
             lines.Add(l);
             while (lines.Count > maxLines)
             {
-                if (lines[0] != null) Destroy(lines[0].gameObject);
+                if (lines[0] != null) Pool.Release(lines[0].gameObject, true);
                 lines.RemoveAt(0);
             }
             return l;
@@ -75,7 +74,7 @@ namespace RPG
             {
                 if (lines[i] == null || lines[i].Expired)
                 {
-                    if (lines[i] != null) Destroy(lines[i].gameObject);
+                    if (lines[i] != null) Pool.Release(lines[i].gameObject, true);
                     lines.RemoveAt(i);
                 }
             }

@@ -260,8 +260,7 @@ namespace RPG
 
         static IEnumerable<ISaveable> Saveables()
         {
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include))
-                if (mb is ISaveable s) yield return s;
+            foreach (var s in new List<ISaveable>(SaveRegistry.Items)) yield return s;
             foreach (var s in StaticSaveables) yield return s;
         }
     }

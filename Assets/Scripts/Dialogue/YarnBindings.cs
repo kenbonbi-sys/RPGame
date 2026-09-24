@@ -77,7 +77,7 @@ namespace RPG
         [YarnCommand("victory")]
         public static void Victory(string title, string subtitle)
         {
-            if (HUD.I != null && HUD.I.banner != null) HUD.I.banner.ShowVictory(title, subtitle);
+            GameEvents.RaiseBanner(BannerKind.Victory, title, subtitle);
             AudioManager.Play("sfx_levelup", 1f, 0f);
         }
     }

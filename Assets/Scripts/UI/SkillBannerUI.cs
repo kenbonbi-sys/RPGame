@@ -22,8 +22,14 @@ namespace RPG
             if (text != null) text.text = s;
             // only one banner per owner at a time
             foreach (var other in layer.GetComponentsInChildren<SkillBannerUI>())
-                if (other != this && other.owner == h) Destroy(other.gameObject);
+                if (other != this && other.owner == h) other.Release();
             LateUpdate();
+        }
+
+        void Release()
+        {
+            owner = null;
+            Pool.Release(gameObject, true);
         }
 
         void LateUpdate()
@@ -31,7 +37,7 @@ namespace RPG
             t += Time.unscaledDeltaTime;
             if (owner == null || t > duration)
             {
-                Destroy(gameObject);
+                Release();
                 return;
             }
             bool vis = UIUtil.WorldToLayer(owner.HeadPosition + Vector3.up * 0.25f, layer, out Vector2 local);

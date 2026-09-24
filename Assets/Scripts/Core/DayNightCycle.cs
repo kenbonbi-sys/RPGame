@@ -30,7 +30,13 @@ namespace RPG
 
         float night;
 
-        void Awake() => I = this;
+        void Awake()
+        {
+            I = this;
+            SaveRegistry.Register(this);
+        }
+
+        void OnDestroy() => SaveRegistry.Unregister(this);
 
         [System.Serializable]
         class SaveState

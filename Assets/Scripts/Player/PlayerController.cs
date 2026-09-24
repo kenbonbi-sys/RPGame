@@ -72,7 +72,10 @@ namespace RPG
             health.Died += OnDied;
             if (anim != null) anim.FrameChanged += OnFrame;
             skills.BufferedCast += OnKeySkillCast;
+            SaveRegistry.Register(this);
         }
+
+        void OnDestroy() => SaveRegistry.Unregister(this);
 
         // ------------------------------------------------------------------ buffs
         public void AddBuff(string id, string name, Sprite icon, float duration)

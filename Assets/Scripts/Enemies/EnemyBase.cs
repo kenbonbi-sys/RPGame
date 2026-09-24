@@ -33,6 +33,9 @@ namespace RPG
 
         [HideInInspector] public EnemySpawner spawner;
 
+        /// <summary>Every enabled enemy (debug tools and AI queries use this instead of scene searches).</summary>
+        public static readonly List<EnemyBase> All = new List<EnemyBase>();
+
         protected enum State { Idle, Wander, Chase, Attack, Return, Dead }
         protected State state;
         protected float stateTime;
@@ -60,6 +63,7 @@ namespace RPG
 
         protected virtual void OnEnable()
         {
+            All.Add(this);
             health.displayName = displayName;
             health.level = level;
             health.ResetHealth(maxHp);
@@ -72,9 +76,10 @@ namespace RPG
 
         protected virtual void OnDisable()
         {
+            All.Remove(this);
             if (plate != null)
             {
-                Destroy(plate.gameObject);
+                plate.Release();
                 plate = null;
             }
         }
@@ -228,7 +233,7 @@ namespace RPG
             VFX.Spawn("enemy_death", transform.position + Vector3.up * 0.4f, Quaternion.identity);
             if (plate != null)
             {
-                Destroy(plate.gameObject);
+                plate.Release();
                 plate = null;
             }
             StartCoroutine(Despawn());

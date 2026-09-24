@@ -54,6 +54,9 @@ namespace RPG
         Vector2 home;
 
         public bool Engaged => state != State.Dormant && state != State.Dead && state != State.Returning;
+
+        /// <summary>Every boss in the loaded scenes, alive or defeated.</summary>
+        public static readonly List<BossBear> All = new List<BossBear>();
         PlayerController Player => GameManager.I != null ? GameManager.I.player : null;
         Vector2 Pos => transform.position;
         float CdMul => enraged ? 0.65f : 1f;
@@ -67,6 +70,14 @@ namespace RPG
             health.Died += OnDied;
             if (poise == null) poise = GetComponent<Poise>();
             if (poise != null) poise.Broken += OnPoiseBroken;
+            All.Add(this);
+            SaveRegistry.Register(this);
+        }
+
+        void OnDestroy()
+        {
+            All.Remove(this);
+            SaveRegistry.Unregister(this);
         }
 
         void OnPoiseBroken()
@@ -140,7 +151,7 @@ namespace RPG
             health.ResetHealth(maxHp);
             if (poise != null) poise.ResetPoise();
             state = State.Returning;
-            if (HUD.I != null) HUD.I.bossBar.Hide();
+            GameEvents.RaiseBossDisengaged();
             CameraRig.SetZoom(1f);
             CameraRig.SetFocus(null);
             AudioManager.PlayMusic("music_forest", 2f);
@@ -250,7 +261,7 @@ namespace RPG
 
         void Announce(string skill)
         {
-            if (HUD.I != null) HUD.I.ShowSkillBanner(health, "Kỹ năng: " + skill);
+            GameEvents.RaiseSkillAnnounced(health, "Kỹ năng: " + skill);
             Bestiary.RecordSkill(displayName, skill);
         }
 
@@ -282,11 +293,8 @@ namespace RPG
             VFX.Spawn("boss_roar", Pos + Vector2.up * 2.4f, Quaternion.identity);
             CameraRig.Shake(0.7f);
             ScreenFX.Impact(0.8f, 0.8f);
-            if (HUD.I != null)
-            {
-                HUD.I.banner.ShowTitle(displayName, title, new Color(1f, 0.45f, 0.4f));
-                HUD.I.bossBar.Show(health, displayName, level);
-            }
+            GameEvents.RaiseBanner(BannerKind.Title, displayName, title, new Color(1f, 0.45f, 0.4f));
+            GameEvents.RaiseBossEngaged(health, displayName, level);
             AudioManager.PlayMusic("music_boss", 0.8f);
             Bestiary.RecordSeen(bossId, displayName);
             yield return new WaitForSeconds(1.6f);
@@ -302,7 +310,7 @@ namespace RPG
         {
             enraged = true;
             anim.Play("roar", true);
-            if (HUD.I != null) HUD.I.ShowSkillBanner(health, "Cuồng Nộ!");
+            GameEvents.RaiseSkillAnnounced(health, "Cuồng Nộ!");
             GameEvents.RaiseLog($"{displayName} nổi cơn cuồng nộ!", new Color(1f, 0.5f, 0.5f));
             AudioManager.Play("sfx_enrage", 1f, 0.02f);
             VFX.Spawn("enrage_burst", Pos + Vector2.up * 1.6f, Quaternion.identity);
@@ -534,11 +542,8 @@ namespace RPG
             Loot.DropCoins(Pos, 12);
             GameEvents.RaiseEnemyKilled(new KillInfo { id = bossId, name = displayName, level = level, rank = EnemyRank.Boss, position = Pos });
             Bestiary.RecordKill(bossId, displayName);
-            if (HUD.I != null)
-            {
-                HUD.I.banner.ShowVictory("CHIẾN THẮNG!", $"Đã đánh bại {displayName}");
-                HUD.I.bossBar.Hide(1.5f);
-            }
+            GameEvents.RaiseBanner(BannerKind.Victory, "CHIẾN THẮNG!", $"Đã đánh bại {displayName}");
+            GameEvents.RaiseBossDisengaged(1.5f);
             AudioManager.Play("sfx_victory", 1f, 0f);
             CameraRig.SetZoom(1f);
             CameraRig.SetFocus(null);

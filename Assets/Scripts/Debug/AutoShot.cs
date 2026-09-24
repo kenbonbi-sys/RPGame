@@ -74,7 +74,7 @@ namespace RPG
         {
             EnemyBase best = null;
             float bd = float.MaxValue;
-            foreach (var e in FindObjectsByType<EnemyBase>(FindObjectsInactive.Exclude))
+            foreach (var e in EnemyBase.All)
             {
                 if (e.IsDead || e.enemyId != id) continue;
                 float d = Vector2.Distance(e.transform.position, near);
@@ -223,7 +223,7 @@ namespace RPG
             }
 
             // --- boss
-            var boss = FindAnyObjectByType<BossBear>();
+            var boss = BossBear.All.Count > 0 ? BossBear.All[0] : null;
             if (boss != null)
             {
                 Place(p, (Vector2)gm.bossSpot.position + new Vector2(0.5f, -5.5f));

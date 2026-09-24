@@ -22,7 +22,13 @@ namespace RPG
 
         public event Action Changed;
 
-        void Awake() => I = this;
+        void Awake()
+        {
+            I = this;
+            SaveRegistry.Register(this);
+        }
+
+        void OnDestroy() => SaveRegistry.Unregister(this);
 
         public int Count(ItemDef item)
         {

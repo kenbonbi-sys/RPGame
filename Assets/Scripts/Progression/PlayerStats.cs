@@ -186,7 +186,7 @@ namespace RPG
             FillUp();
             GameEvents.RaiseLevelUp(level);
             GameEvents.RaiseLog($"Lên cấp {level}! Nhận {Config.statPointsPerLevel} điểm chỉ số — bấm C để phân bổ.", Palette.Xp);
-            if (HUD.I != null && HUD.I.banner != null) HUD.I.banner.ShowQuest("Lên cấp!", $"Cấp {level}");
+            GameEvents.RaiseBanner(BannerKind.Quest, "Lên cấp!", $"Cấp {level}");
             AudioManager.Play("sfx_levelup", 1f, 0f);
             VFX.Spawn("quest_complete", transform.position, Quaternion.identity, 1.2f, transform);
             if (pc != null && pc.health != null)

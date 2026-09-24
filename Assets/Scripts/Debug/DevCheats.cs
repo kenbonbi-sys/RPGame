@@ -44,7 +44,7 @@ namespace RPG
             }
             if (InputReader.Pressed(Key.F9))
             {
-                foreach (var e in FindObjectsByType<EnemyBase>())
+                foreach (var e in EnemyBase.All.ToArray())
                     if (!e.IsDead && Vector2.Distance(e.transform.position, p.transform.position) < 12f) e.health.Kill();
             }
         }

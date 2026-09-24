@@ -37,6 +37,18 @@ namespace RPG
             UIUtil.SetAlpha(group, 0);
         }
 
+        void OnEnable()
+        {
+            GameEvents.BossEngaged += Show;
+            GameEvents.BossDisengaged += Hide;
+        }
+
+        void OnDisable()
+        {
+            GameEvents.BossEngaged -= Show;
+            GameEvents.BossDisengaged -= Hide;
+        }
+
         public void Show(Health h, string bossName, int level)
         {
             target = h;

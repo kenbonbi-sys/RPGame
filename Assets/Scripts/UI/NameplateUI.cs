@@ -30,6 +30,7 @@ namespace RPG
             layer = (RectTransform)transform.parent;
             if (nameText != null)
             {
+                nameText.gameObject.SetActive(true);   // pooled: a previous owner may have hidden it
                 nameText.text = label;
                 nameText.color = showStar ? new Color(1f, 0.86f, 0.45f)
                     : h != null ? new Color(1f, 0.78f, 0.72f) : new Color(0.96f, 0.93f, 0.86f);
@@ -41,6 +42,14 @@ namespace RPG
             if (promptText != null) promptText.gameObject.SetActive(false);
             chip = h != null ? h.Fraction : 1f;
             LateUpdate();
+        }
+
+        /// <summary>Gives the plate back to the pool (its owner died or went away).</summary>
+        public void Release()
+        {
+            target = null;
+            health = null;
+            Pool.Release(gameObject, true);
         }
 
         public void SetPrompt(string s)
@@ -56,7 +65,7 @@ namespace RPG
             if (target == null || !target.gameObject.activeInHierarchy)
             {
                 if (group != null) group.alpha = 0;
-                if (target == null) Destroy(gameObject);
+                if (target == null) Release();
                 return;
             }
             bool visible = UIUtil.WorldToLayer(target.position + Vector3.up * height, layer, out Vector2 local);

@@ -289,6 +289,35 @@ namespace RPG.EditorTools.Tests
         }
 
         [UnityTest]
+        public IEnumerator EverySaveableRegistersItself()
+        {
+            var registered = new System.Collections.Generic.List<ISaveable>(SaveRegistry.Items);
+            foreach (var mb in Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include))
+                if (mb is ISaveable s) Assert.IsTrue(registered.Contains(s), mb.GetType().Name + " is not in SaveRegistry");
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator UiIsPooled()
+        {
+            var enemy = EnemyBase.All.Find(e => !e.IsDead);
+            Assert.NotNull(enemy);
+            var hero = GameManager.I.player.gameObject;
+            enemy.health.TakeDamage(DamageInfo.Make(1, Team.Player, hero, enemy.transform.position, Vector2.up));
+            yield return null;
+            var layer = HUD.I.worldLayer;
+            int plates = layer.GetComponentsInChildren<NameplateUI>(true).Length;
+            int active = layer.GetComponentsInChildren<NameplateUI>(false).Length;
+            enemy.health.Kill();                  // its nameplate goes back to the pool
+            yield return null;
+            Assert.AreEqual(plates, layer.GetComponentsInChildren<NameplateUI>(true).Length, "released, not destroyed");
+            Assert.AreEqual(active - 1, layer.GetComponentsInChildren<NameplateUI>(false).Length, "switched off");
+            GameEvents.RaiseBanner(BannerKind.Victory, "T", "S");
+            GameEvents.RaiseSkillAnnounced(enemy.health, "Kỹ năng: thử");
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator DamagedSaveFallsBackToBackup()
         {
             Inventory.I.gold = 123;

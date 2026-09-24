@@ -38,7 +38,7 @@ namespace RPG
             All.Remove(this);
             if (plate != null)
             {
-                Destroy(plate.gameObject);
+                plate.Release();
                 plate = null;
             }
         }

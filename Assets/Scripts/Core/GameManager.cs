@@ -163,14 +163,14 @@ namespace RPG
         IEnumerator RespawnRoutine()
         {
             yield return new WaitForSecondsRealtime(1.2f);
-            if (HUD.I != null && HUD.I.death != null) HUD.I.death.Show(4f);
+            GameEvents.RaisePlayerDowned(4f);
             yield return new WaitForSecondsRealtime(4f);
             if (player != null && respawnPoint != null)
             {
                 player.Respawn(respawnPoint.position);
                 if (CameraRig.I != null) CameraRig.I.SnapToTarget();
             }
-            if (HUD.I != null && HUD.I.death != null) HUD.I.death.Hide();
+            GameEvents.RaisePlayerRespawned();
             dead = false;
             GameEvents.RaiseLog("Bạn đã hồi sinh tại Làng Lá Xanh.", Palette.LogInfo);
         }
