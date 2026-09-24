@@ -317,6 +317,34 @@ namespace RPG.EditorTools.Tests
             yield return null;
         }
 
+        class TestLever : MonoBehaviour, IWorldState
+        {
+            public bool pulled;
+            public string CaptureWorldState() => pulled ? "1" : "0";
+            public void RestoreWorldState(string json) => pulled = json == "1";
+        }
+
+        [UnityTest]
+        public IEnumerator WorldObjectsSaveByStableId()
+        {
+            var go = new GameObject("Lever");
+            go.SetActive(false);
+            go.AddComponent<WorldId>().SetId("lever_test");
+            var lever = go.AddComponent<TestLever>();
+            go.SetActive(true);
+            Assert.AreEqual(go.GetComponent<WorldId>(), WorldId.Find("lever_test"));
+
+            lever.pulled = true;
+            Assert.IsTrue(SaveManager.I.Save(3));
+            lever.pulled = false;
+            new WorldStateStore().RestoreState(SaveManager.Read(3).Get("world"));
+            Assert.IsTrue(lever.pulled, "restored from the save file");
+
+            Object.Destroy(go);
+            yield return Frames(2);
+            Assert.IsTrue(WorldId.Find("lever_test") == null, "unregistered when destroyed");
+        }
+
         [UnityTest]
         public IEnumerator DamagedSaveFallsBackToBackup()
         {

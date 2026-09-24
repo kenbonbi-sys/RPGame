@@ -35,7 +35,7 @@ namespace RPG
 
         public float PlayTime { get; private set; }
 
-        static readonly List<ISaveable> StaticSaveables = new List<ISaveable> { new Bestiary.Saveable() };
+        static readonly List<ISaveable> StaticSaveables = new List<ISaveable> { new Bestiary.Saveable(), new WorldStateStore() };
 
         float nextAutosave;
         float lastCombat = -999f;
