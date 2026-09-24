@@ -6,6 +6,8 @@ Lộ trình biến bản prototype hiện có (1 vùng, 1 boss, 8 chiêu) thành
 
 Bản HTML có sơ đồ tương tác và bộ lọc backlog: https://claude.ai/artifact/9g8PZSohsGFxQz1ykcadMe (link riêng tư, cần bật chia sẻ để người khác xem).
 
+> **Đổi hướng (24/09/2026): game cày cuốc kiểu Terraria, không phải RPG cốt truyện tuyến tính.** Thế giới online liền mạch nhiều người chơi (`Docs/KeHoach-Online.md`), càng đi xa quái càng mạnh. Mọi boss và quái đều hồi sinh để cày lại (boss sau 3 phút, cả khi chơi một mình); tiến bộ đến từ cấp, đồ rơi, chế tạo và mở vùng mới, không từ các hồi truyện. Các vùng mới nối liền vào cùng một bản đồ thay vì mỗi vùng một màn riêng. Cốt truyện (mục 12) chỉ còn là bối cảnh và nhiệm vụ phụ; các mục khác giữ nguyên cho tới khi được xem lại.
+
 **Phạm vi bản 1.0**
 
 | Hạng mục | Số lượng |

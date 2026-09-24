@@ -181,6 +181,33 @@ namespace RPG.EditorTools.Tests
         }
 
         [UnityTest]
+        public IEnumerator TheBossComesBackToBeFoughtAgain()
+        {
+            var boss = BossBear.All.Find(b => b != null && b.gameObject.activeSelf);
+            Assert.NotNull(boss, "the bear is in the zone");
+            boss.respawnSeconds = 1f;
+            var hero = Players.Local;
+            int xp = hero.stats.level * 100000 + hero.stats.xp;
+            var hit = DamageInfo.Make(999999f, Team.Player, hero.gameObject, boss.transform.position, Vector2.up);
+            hit.pure = true;
+            boss.health.TakeDamage(hit);
+            Assert.IsTrue(boss.health.IsDead);
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while (boss.gameObject.activeSelf && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.IsFalse(boss.gameObject.activeSelf, "it falls and fades");
+            Assert.Greater(hero.stats.level * 100000 + hero.stats.xp, xp, "the kill gave XP");
+
+            // a save made while it is down does not keep it down: nothing about the boss is saved
+            Assert.IsTrue(SaveManager.I.Save(1));
+            StringAssert.DoesNotContain("boss:", string.Join(",", SaveManager.Read(1).sections.ConvertAll(s => s.key)));
+
+            deadline = Time.realtimeSinceStartup + 20f;
+            while (!(boss.gameObject.activeSelf && !boss.health.IsDead) && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.IsTrue(boss.gameObject.activeSelf && !boss.health.IsDead, "playing alone it comes back too, to be farmed");
+            Assert.AreEqual(boss.maxHp, boss.health.hp, "at full health");
+        }
+
+        [UnityTest]
         public IEnumerator BossPoiseBreaksStunsAndRecovers()
         {
             var boss = Object.FindAnyObjectByType<BossBear>();

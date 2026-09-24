@@ -13,11 +13,12 @@ namespace RPG
     /// (<see cref="hpPerExtraHero"/>), so a crowd does not melt it.
     /// Online (Docs/KeHoach-Online.md, phase 3) the server fights; every screen near the arena gets
     /// its warnings, roars and effects (<see cref="NetCues"/>), its big moments
-    /// (<see cref="Present"/>), and shows its bar and music while its hero is in the fight. It
-    /// comes back <see cref="respawnSeconds"/> after it falls, and everyone who hurt it gets the
-    /// kill and their own loot.
+    /// (<see cref="Present"/>), and shows its bar and music while its hero is in the fight.
+    /// A grinding game (Terraria-like, not a linear story): it comes back
+    /// <see cref="respawnSeconds"/> after every fall, online and offline, and everyone who hurt it
+    /// gets the kill and their own loot each time. Nothing about it is saved.
     /// </summary>
-    public class BossBear : MonoBehaviour, ISaveable
+    public class BossBear : MonoBehaviour
     {
         [Header("Identity")]
         public string bossId = "bear";
@@ -30,7 +31,7 @@ namespace RPG
         public Transform arenaCenter;
         public float arenaRadius = 11f;
         public float wakeRadius = 7.5f;
-        [Tooltip("Online: seconds after its fall before the bear is back (a shared world has more than one hero).")]
+        [Tooltip("Seconds after its fall before the bear is back (every time, to be farmed again).")]
         public float respawnSeconds = 180f;
         [Tooltip("Extra health for every hero in the fight after the first, as a share of maxHp (0.7: two heroes face 170%). " +
                  "Counted as heroes arrive; it does not shrink before the fight ends.")]
@@ -111,14 +112,9 @@ namespace RPG
             if (poise != null) poise.Broken += OnPoiseBroken;
             baseWalkSpeed = walkSpeed;
             All.Add(this);
-            SaveRegistry.Register(this);
         }
 
-        void OnDestroy()
-        {
-            All.Remove(this);
-            SaveRegistry.Unregister(this);
-        }
+        void OnDestroy() => All.Remove(this);
 
         void OnPoiseBroken()
         {
@@ -654,8 +650,8 @@ namespace RPG
                 }
             }
             gameObject.SetActive(false);
-            // a shared world has more heroes to come: the bear returns
-            if (GameSession.Online && respawnSeconds > 0f && GameManager.I != null) GameManager.I.StartCoroutine(ReturnLater(respawnSeconds));
+            // the bear returns, to be fought again (on the game manager: this object is switched off)
+            if (respawnSeconds > 0f && GameManager.I != null) GameManager.I.StartCoroutine(ReturnLater(respawnSeconds));
         }
 
         IEnumerator ReturnLater(float seconds)
@@ -802,26 +798,6 @@ namespace RPG
                 remoteEnraged = isEnraged;
                 Present(isEnraged ? Moment.Enrage : Moment.Reset);
             }
-        }
-
-        // ================================================================= save
-        [System.Serializable]
-        class SaveState
-        {
-            public bool defeated;
-        }
-
-        public string SaveKey => "boss:" + bossId;
-
-        public string CaptureState() => JsonUtility.ToJson(new SaveState { defeated = state == State.Dead || health.IsDead });
-
-        public void RestoreState(string json)
-        {
-            if (!JsonUtility.FromJson<SaveState>(json).defeated) return;
-            StopAllCoroutines();
-            ClearTelegraphs();
-            state = State.Dead;
-            gameObject.SetActive(false);
         }
 
         void OnDrawGizmosSelected()
