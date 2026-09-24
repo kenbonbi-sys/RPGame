@@ -10,6 +10,7 @@ namespace RPG.EditorTools
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.ForceBuildAll
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildScene
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.MoveHeroState
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildOnline
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildPlayer
     /// </summary>
     public static class Batch
@@ -37,6 +38,13 @@ namespace RPG.EditorTools
         public static void RebuildScene()
         {
             SceneBuilder.RebuildSceneOnly();
+        }
+
+        /// <summary>Builds the NetHero prefab and links the network prefabs into the GameDatabase (online phase 1).</summary>
+        public static void BuildOnline()
+        {
+            PrefabFactory.BuildOnline();
+            Debug.Log("[RPG] Batch.BuildOnline done");
         }
 
         /// <summary>Moves the bag and the quest log of an older Core scene onto the Player prefab (online phase 0).</summary>

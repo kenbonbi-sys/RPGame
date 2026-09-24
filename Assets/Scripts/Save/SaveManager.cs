@@ -128,7 +128,8 @@ namespace RPG
             reason = null;
             var gm = GameManager.I;
             var me = Players.Local;
-            if (gm == null || me == null) reason = "Chưa thể lưu lúc này.";
+            if (GameSession.Mode != SessionMode.Offline) reason = "Chơi online chưa lưu được (giai đoạn 2 sẽ lưu trên máy chủ).";
+            else if (gm == null || me == null) reason = "Chưa thể lưu lúc này.";
             else if (me.IsDead || gm.State == GameState.Dead) reason = "Không thể lưu khi đã gục.";
             else if (gm.State == GameState.Dialogue || gm.State == GameState.Cinematic) reason = "Không thể lưu lúc này.";
             return reason == null;
@@ -228,6 +229,11 @@ namespace RPG
         /// <summary>Reloads the scene and restores the slot once it is running.</summary>
         public bool Load(int slot)
         {
+            if (GameSession.Mode != SessionMode.Offline)
+            {
+                GameEvents.RaiseLog("Chơi online không tải được file lưu. Gõ \"leave\" để quay về chơi một mình.", new Color(1f, 0.6f, 0.5f));
+                return false;
+            }
             var f = Read(slot);
             if (f == null)
             {

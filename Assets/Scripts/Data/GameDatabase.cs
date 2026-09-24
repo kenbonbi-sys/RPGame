@@ -52,6 +52,12 @@ namespace RPG
         public GameObject fireballPrefab;
         public GameObject sporePrefab;
 
+        [Header("Online (Docs/KeHoach-Online.md)")]
+        [Tooltip("The hero spawned for every player of an online session (Prefabs/Characters/NetHero).")]
+        public GameObject netHeroPrefab;
+        [Tooltip("FishNet's NetworkManager with its transport and network prefab list (Prefabs/Net/NetworkManager).")]
+        public GameObject networkManagerPrefab;
+
         Dictionary<string, ItemDef> itemMap;
 
         public ItemDef Item(string id)

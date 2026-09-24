@@ -8,6 +8,14 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 - **Mở trong Unity:** Unity Hub → *Add project from disk* → chọn thư mục `RPG` → mở bằng **Unity 6000.6.0f1** → mở scene `Assets/Scenes/Core.unity` → bấm **Play**.
 - **Cấu trúc scene:** `Core.unity` (quản lý, nhân vật, camera, ánh sáng, HUD — luôn được tải) + mỗi vùng một scene trong `Assets/Scenes/Zones` (địa hình, NPC, quái, boss), tải thêm bởi `SceneLoader` có màn chuyển. Mở riêng một scene vùng rồi bấm Play cũng chạy được: Core tự được tải kèm.
 
+## Chơi online (thử nghiệm)
+
+Nhiều người vào cùng một thế giới và thấy nhau đi lại (giai đoạn 1 của `Docs/KeHoach-Online.md`, dùng FishNet, cổng UDP 7770):
+
+- **Mở thế giới:** `RungThiTham.exe -host`. **Vào:** `RungThiTham.exe -client <IP máy mở>` (thử trên một máy: `-client 127.0.0.1`). **Máy chủ riêng:** `RungThiTham.exe -server -batchmode -nographics`. Đổi cổng: `-port <n>`.
+- Trong game, bảng lệnh `` ` ``: `host`, `join <IP>`, `leave`, `net`.
+- Chưa có ở giai đoạn này: quái và boss (tạm tắt khi online), đồng bộ nhiệm vụ và túi đồ, lưu game online.
+
 ## Điều khiển (theo layout của game tham khảo)
 
 | Phím | Chức năng |
@@ -81,11 +89,13 @@ Tools/
 - **Thêm nhiệm vụ / hội thoại:** tạo asset qua *Create → RPG → Quest*, thêm vào `GameDatabase.quests`; viết node trong một file `.yarn` ở `Assets/Dialogue` và đặt tên node vào `NPC.yarnNode`.
 - **Thêm quái:** kế thừa `EnemyBase` (xem `SlimeAI`, `ShroomAI`), boss tham khảo `BossBear`.
 - **Nhiều người chơi (chuẩn bị online):** code không còn giả định chỉ có một nhân vật. Logic game dùng nhân vật cụ thể hoặc `Players.All`; `Players.Local` chỉ dành cho HUD, camera và phím bấm. Dữ liệu của nhân vật (chỉ số, túi đồ, nhiệm vụ, Bách Khoa Trùm) nằm trên nhân vật. Kế hoạch và quy tắc: `Docs/KeHoach-Online.md`.
+- **Kiểm tra online tự động:** chạy cùng lúc `RungThiTham.exe -host -netsmoke` và `RungThiTham.exe -client 127.0.0.1 -netsmoke -batchmode -nographics`; mỗi bên đi qua lại, phải thấy nhân vật bên kia đi, rồi thoát (mã 0 là đạt).
 - **Chạy test tự động:** `RungThiTham.exe -autoshot -autoshotDir "D:\shots"` sẽ tự chơi một vòng, chụp màn hình rồi thoát. Mã thoát 0 là sạch, 1 là có lỗi trong log, 2 là quá thời hạn (`-autoshotTimeout`, mặc định 300 giây).
 - **CI (GitHub Actions):** mỗi lần push đều biên dịch thử C#; test Unity, bản build Windows mỗi đêm và AutoShot chạy khi repo có secret giấy phép Unity. Xem `Docs/CI.md`.
 
 ## Giấy phép
 
 - Font **Inter** (SIL Open Font License 1.1), lấy từ bộ cài Unity.
+- **FishNet** (thư viện mạng, FirstGearGames): giấy phép riêng của FishNet, miễn phí khi dùng trong game; cài qua Package Manager, không chép mã nguồn vào repo.
 - Font pixel **Galmuri7**, **Galmuri11** của Lee Minseo (SIL Open Font License 1.1), bản rút gọn Latin + tiếng Việt do `Tools/FontGen/make_pixel_fonts.py` tạo; giấy phép ở `Assets/Fonts/Galmuri-LICENSE.txt`.
 - Toàn bộ art/âm thanh còn lại do script trong `Tools/` sinh ra. Bộ icon Franuka chỉ dùng làm tham khảo phong cách, không có trong project.

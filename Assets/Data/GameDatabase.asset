@@ -80,3 +80,5 @@ MonoBehaviour:
   rockProjectilePrefab: {fileID: 4887976638785927589, guid: 99d4a012649b7944c966d828601841ee, type: 3}
   fireballPrefab: {fileID: 1260040946324525447, guid: f1d1754b37fb14245927ca86a84d88c4, type: 3}
   sporePrefab: {fileID: 6042711782838213100, guid: fd31be627857a9e42acb63795f625cd5, type: 3}
+  netHeroPrefab: {fileID: 4885084979465001528, guid: ae3e903ab7b28a648b5a6f37a73a1646, type: 3}
+  networkManagerPrefab: {fileID: 3420617665053863353, guid: c2b98b4a3e3834f4db920baf9ec1f0d0, type: 3}

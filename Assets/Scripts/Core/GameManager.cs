@@ -56,7 +56,13 @@ namespace RPG
             GameEvents.Reset();
             Players.Reset();
             ZoneArea.Reset();
-            if (localPlayer != null) Players.SetLocal(localPlayer);
+            OnlineSession.ReadCommandLine();
+            if (localPlayer != null)
+            {
+                // online, the server spawns a hero for every player (OnlineSession)
+                if (GameSession.Mode == SessionMode.Offline) Players.SetLocal(localPlayer);
+                else localPlayer.gameObject.SetActive(false);
+            }
             Pool.ClearAll();
             SetupPhysics();
             Pool.SetHome(gameObject.scene);   // pooled objects outlive zone changes
@@ -67,6 +73,8 @@ namespace RPG
             if (GetComponent<DialogueDirector>() == null) gameObject.AddComponent<DialogueDirector>();
             if (GetComponent<SceneLoader>() == null) gameObject.AddComponent<SceneLoader>();
             if (GetComponent<DebugConsole>() == null) gameObject.AddComponent<DebugConsole>();
+            if (GetComponent<OnlineSession>() == null) gameObject.AddComponent<OnlineSession>();
+            if (NetSmoke.Active && GetComponent<NetSmoke>() == null) gameObject.AddComponent<NetSmoke>();
         }
 
         static void SetupPhysics()
@@ -76,13 +84,15 @@ namespace RPG
                 Physics2D.IgnoreLayerCollision(Layers.Projectile, i, true);
                 Physics2D.IgnoreLayerCollision(Layers.Pickup, i, true);
             }
+            Physics2D.IgnoreLayerCollision(Layers.Player, Layers.Player, true);   // heroes walk through each other
         }
 
         void Start()
         {
             SetCursor(false);
             if (SaveManager.HasPendingLoad) return;   // loading a save: no welcome
-            if (showHelpOnStart && HUD.I != null && HUD.I.help != null && !AutoShot.Active) HUD.I.help.Show();
+            bool screen = GameSession.Mode != SessionMode.Server && !AutoShot.Active && !NetSmoke.Active;
+            if (showHelpOnStart && screen && HUD.I != null && HUD.I.help != null) HUD.I.help.Show();
             GameEvents.RaiseLog("Chào mừng đến Làng Lá Xanh! Bấm F1 để xem hướng dẫn.", Palette.LogQuest);
         }
 

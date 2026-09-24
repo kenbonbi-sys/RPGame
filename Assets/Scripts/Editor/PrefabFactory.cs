@@ -16,7 +16,7 @@ namespace RPG.EditorTools
 
         public static readonly Dictionary<string, GameObject> Props = new Dictionary<string, GameObject>();
 
-        public static GameObject Player, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
+        public static GameObject Player, NetHero, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
 
         /// <summary>Abilities on Q W E R A S D Space.</summary>
         static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
@@ -42,6 +42,87 @@ namespace RPG.EditorTools
             EditorUtil.Assign(ref db.lootPrefab, Loot);
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
+            BuildOnline();
+        }
+
+        /// <summary>
+        /// Online phase 1 (Docs/KeHoach-Online.md): the NetHero prefab, FishNet's list of network
+        /// prefabs, the NetworkManager prefab, and the GameDatabase links to them.
+        /// </summary>
+        public static void BuildOnline()
+        {
+            NetHero = BuildNetHero();
+            // FishNet's import hook lists every NetworkObject prefab in DefaultPrefabObjects
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            var prefabs = AssetDatabase.LoadAssetAtPath<FishNet.Managing.Object.DefaultPrefabObjects>(NetworkPrefabsPath);
+            var nob = NetHero != null ? NetHero.GetComponent<FishNet.Object.NetworkObject>() : null;
+            if (prefabs != null && nob != null && !prefabs.Prefabs.Contains(nob))
+            {
+                Debug.LogWarning("[RPG] FishNet did not list NetHero in DefaultPrefabObjects; adding it");
+                prefabs.AddObject(nob, true);
+                EditorUtility.SetDirty(prefabs);
+            }
+            var db = AssetFactory.Database;
+            EditorUtil.Assign(ref db.netHeroPrefab, NetHero);
+            EditorUtil.Assign(ref db.networkManagerPrefab, BuildNetworkManager(prefabs));
+            EditorUtility.SetDirty(db);
+            AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>Where FishNet keeps the prefabs the network may spawn.</summary>
+        public const string NetworkPrefabsPath = "Assets/DefaultPrefabObjects.asset";
+        public const string NetFolder = "Assets/Prefabs/Net";
+
+        /// <summary>
+        /// FishNet's NetworkManager, its UDP transport (Tugboat) and the list of network prefabs,
+        /// instantiated when an online session starts. A prefab rather than components added at
+        /// runtime: the manager must already know its prefab list when it wakes up.
+        /// </summary>
+        static GameObject BuildNetworkManager(FishNet.Managing.Object.PrefabObjects prefabs)
+        {
+            string path = $"{NetFolder}/NetworkManager.prefab";
+            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (EditorUtil.Keep(existing)) return existing;
+            var go = new GameObject("NetworkManager");
+            var tugboat = go.AddComponent<FishNet.Transporting.Tugboat.Tugboat>();
+            go.AddComponent<FishNet.Managing.Transporting.TransportManager>().Transport = tugboat;
+            go.AddComponent<FishNet.Managing.NetworkManager>().SpawnablePrefabs = prefabs;
+            return EditorUtil.SavePrefab(go, path);
+        }
+
+        /// <summary>
+        /// The hero an online session spawns for every player: a variant of the Player prefab with a
+        /// NetworkObject (global, so it outlives zone changes), a NetworkTransform (its owner sends
+        /// where it walks; every other copy turns kinematic and follows, and long jumps snap) and a
+        /// NetworkHero.
+        /// </summary>
+        static GameObject BuildNetHero()
+        {
+            string path = $"{CharFolder}/NetHero.prefab";
+            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (EditorUtil.Keep(existing)) return existing;
+            var basePrefab = Player != null ? Player : AssetDatabase.LoadAssetAtPath<GameObject>($"{CharFolder}/Player.prefab");
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(basePrefab);
+            var nob = go.AddComponent<FishNet.Object.NetworkObject>();
+            var nobSo = new SerializedObject(nob);
+            nobSo.FindProperty("_isGlobal").boolValue = true;
+            nobSo.ApplyModifiedPropertiesWithoutUndo();
+            var nt = go.AddComponent<FishNet.Component.Transforming.NetworkTransform>();
+            var ntSo = new SerializedObject(nt);
+            ntSo.FindProperty("_clientAuthoritative").boolValue = true;
+            ntSo.FindProperty("_synchronizeRotation").boolValue = false;
+            ntSo.FindProperty("_synchronizeScale").boolValue = false;
+            ntSo.FindProperty("_componentConfiguration").intValue = (int)FishNet.Component.Transforming.NetworkTransform.ComponentConfigurationType.Rigidbody2D;
+            ntSo.FindProperty("_enableTeleport").boolValue = true;
+            ntSo.FindProperty("_teleportThreshold").floatValue = 2f;   // a dash moves under 1 unit per tick; cheats and zone entries jump
+            ntSo.ApplyModifiedPropertiesWithoutUndo();
+            go.AddComponent<NetworkHero>();
+            go.name = "NetHero";
+            EditorUtil.Written++;
+            var prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
+            Object.DestroyImmediate(go);
+            return prefab;
         }
 
         /// <summary>Adds components introduced after the prefabs were first generated, keeping hand edits.</summary>
@@ -110,6 +191,7 @@ namespace RPG.EditorTools
         {
             GameObject L(string p) => AssetDatabase.LoadAssetAtPath<GameObject>(p + ".prefab");
             Player = L($"{CharFolder}/Player");
+            NetHero = L($"{CharFolder}/NetHero");
             Chief = L($"{CharFolder}/Chief");
             Girl = L($"{CharFolder}/Girl");
             Slime = L($"{CharFolder}/Slime");

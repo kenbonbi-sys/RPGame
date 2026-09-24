@@ -1,6 +1,6 @@
 # Kế hoạch online — Rừng Thì Thầm (hướng C: thế giới online nhiều người)
 
-> Trạng thái: **giai đoạn 0 xong** (24/09/2026, nhánh `claude/online-phase0`), tiếp theo là giai đoạn 1. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
+> Trạng thái: **giai đoạn 0 và 1 xong** (24/09/2026, nhánh `claude/online-phase0` rồi `claude/online-phase1`): nhiều người vào cùng một thế giới và thấy nhau đi lại. Tiếp theo là giai đoạn 2. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
 
 ## 1. Mục tiêu
 
@@ -63,7 +63,7 @@ Code đã chia save thành từng phần (`SaveKey`), nên có thể **dùng l�
 
 Game có Lướt Hoàn Hảo (cửa sổ 0.15 s), input buffer 150 ms, vòng cảnh báo né đòn boss — rất nhạy với độ trễ mạng (ping 50–150 ms ở Việt Nam đi server trong nước).
 
-- **Di chuyển và Lướt:** client tự chạy trước (prediction), server kiểm tra và sửa lại nếu lệch.
+- **Di chuyển và Lướt:** máy người chơi tự điều khiển nhân vật mình (client-authoritative, xem mục 9) nên không có độ trễ khi bấm; giai đoạn 3 thêm kiểm tra trên server (tốc độ, dịch chuyển bất thường) để chống gian lận di chuyển.
 - **Né đòn:** server "tua lại" vị trí theo thời điểm người chơi bấm (lag compensation), và nghiêng về phía người né — né thấy trên màn hình là né được.
 - **Vòng cảnh báo của boss:** hiện sớm hơn trên client một chút để bù trễ.
 - **Server đặt ở Việt Nam hoặc Singapore** để giữ ping thấp.
@@ -73,7 +73,7 @@ Game có Lướt Hoàn Hảo (cửa sổ 0.15 s), input buffer 150 ms, vòng c�
 | Giai đoạn | Nội dung | Kết quả kiểm tra được | Ước lượng |
 |---|---|---|---|
 | **0. Chuẩn bị** ✓ | Tách logic khỏi hiển thị; bỏ giả định 1 người chơi (16 file); đổi `TimeFX` thành hiệu ứng cục bộ; quái chọn mục tiêu theo aggro. Game vẫn chơi một người như cũ. | Toàn bộ test hiện có vẫn qua; chơi offline không đổi. **Xong** — xem mục 8. | 2–4 tuần |
-| **1. Hai người thấy nhau** | Cài FishNet; build dedicated server; 2 client vào cùng vùng, đi lại, Lướt, thấy nhau. | Chạy server trên máy, 2 cửa sổ game thấy nhau di chuyển mượt. | 3–5 tuần |
+| **1. Hai người thấy nhau** ✓ | Cài FishNet; build dedicated server; 2 client vào cùng vùng, đi lại, Lướt, thấy nhau. | Chạy server trên máy, 2 cửa sổ game thấy nhau di chuyển mượt. **Xong** — xem mục 9. | 3–5 tuần |
 | **2. Tài khoản và lưu nhân vật** | Nakama + PostgreSQL bằng Docker; đăng ký/đăng nhập; tạo/chọn nhân vật; server nạp và ghi dữ liệu nhân vật. | Thoát game, mở lại trên máy khác, nhân vật còn nguyên. | 3–5 tuần |
 | **3. Chiến đấu online** | Skill, sát thương, trạng thái, quái, bãi hồi sinh, boss Gấu Ma, Thanh Trấn Áp, rơi đồ, XP, nhiệm vụ, hội thoại — tất cả do server quyết định; lag compensation. | 3–5 người cùng hạ Gấu Ma, ai cũng nhận thưởng đúng. | 6–10 tuần |
 | **4. Thế giới** | Nhiều vùng, chuyển vùng giữa các zone server, kênh (k1, k2…), chat, party, danh sách bạn. | Đi từ Làng sang Rừng, đổi kênh, chat được. | 4–6 tuần |
@@ -96,6 +96,7 @@ Game có Lướt Hoàn Hảo (cửa sổ 0.15 s), input buffer 150 ms, vòng c�
 | Giữ bản offline một người | **Giữ, dùng chung code** (đã chốt). |
 | Tự thuê VPS hay dịch vụ có sẵn | Còn mở. Mặc định: tự thuê VPS + Docker. |
 | Chỉ Windows/PC | Còn mở. Mặc định: có. |
+| Ai quyết định vị trí nhân vật | Đề xuất (giai đoạn 1, có thể đổi): máy người chơi, server kiểm tra từ giai đoạn 3. Mọi thứ khác do server quyết định. |
 
 ## 8. Giai đoạn 0 đã làm gì
 
@@ -121,3 +122,45 @@ Game offline chơi như cũ (93 test EditMode qua, AutoShot trên bản build th
 - Thông báo cho người chơi (log, banner, âm thanh 2D) chỉ phát khi nhân vật đó là `IsLocal`.
 
 **Để lại cho giai đoạn sau:** camera, nhạc, cảnh mở màn và thanh máu của boss vẫn phát cho máy đang chơi (giai đoạn 3 sẽ chỉ phát cho người ở gần); hội thoại chạy trên máy người chơi và lệnh Yarn vẫn đổi dữ liệu trực tiếp (giai đoạn 3 chuyển thành yêu cầu gửi server).
+
+## 9. Giai đoạn 1 đã làm gì
+
+Nhiều người vào cùng một thế giới, thấy nhau và thấy nhau đi lại mượt. Thư viện mạng: **FishNet 4.7.3**, cài bằng Package Manager từ GitHub và ghim đúng phiên bản trong `Packages/manifest.json`. Truyền qua UDP (Tugboat), cổng mặc định **7770**.
+
+### Cách chạy
+
+| Muốn | Chạy | Ghi chú |
+|---|---|---|
+| Mở thế giới trên máy mình và chơi luôn | `RungThiTham.exe -host` | Máy này vừa là máy chủ vừa chơi. |
+| Vào thế giới của máy khác | `RungThiTham.exe -client 192.168.1.5` | Thay bằng địa chỉ IP của máy mở. Không ghi địa chỉ thì vào máy này. |
+| Máy chủ riêng, không có nhân vật | `RungThiTham.exe -server -batchmode -nographics` | Chạy nền, không mở cửa sổ; xem log để biết ai vào/ra. |
+| Đổi cổng | thêm `-port 7780` | Máy mở và máy vào phải cùng cổng. |
+
+Trong game, bảng lệnh `` ` `` có `host`, `join <địa chỉ>`, `leave` (về chơi một mình) và `net` (xem trạng thái). Bảng lệnh khởi động lại game ở chế độ mới; tiến độ chơi một mình chưa lưu sẽ mất, nên lưu trước.
+
+- **Thử trên một máy:** mở một cửa sổ `-host` và một cửa sổ `-client`.
+- **Trong cùng mạng LAN:** máy mở chạy `-host`, máy khác `-client <IP LAN của máy mở>`. Lần đầu mở, Windows có thể hỏi cho phép game dùng mạng: chọn cho phép trong mạng riêng (Private), nếu không máy khác không vào được.
+- **Qua Internet:** máy mở phải mở cổng UDP 7770 trên router, hoặc cả nhóm dùng một mạng LAN ảo (VPN). Giai đoạn 5 sẽ có máy chủ thuê riêng nên không cần bước này.
+
+### Cách hoạt động
+
+- **Không đụng tới bản offline:** mọi thứ về mạng chỉ được tạo khi chơi online (`OnlineSession`). Chơi offline không có đối tượng mạng nào.
+- **Nhân vật online** là `Prefabs/Characters/NetHero`, một biến thể (variant) của prefab Player có thêm `NetworkObject`, `NetworkTransform` và `NetworkHero`. Máy chủ tạo một nhân vật cho mỗi người khi họ kết nối xong. Online, nhân vật đặt sẵn trong scene Core không được dùng.
+- **Di chuyển do người chơi điều khiển** (client-authoritative): máy của mỗi người tự di chuyển nhân vật mình như lúc offline, `NetworkTransform` gửi vị trí cho máy chủ và máy chủ chuyển cho mọi người. Lý do: game hành động cần điều khiển tức thì cả khi mạng trễ, và game chỉ PvE nên rủi ro gian lận di chuyển thấp. Giai đoạn 3 thêm kiểm tra tốc độ trên máy chủ. Mọi thứ khác (sát thương, quái, rơi đồ, XP, nhiệm vụ) sẽ do máy chủ quyết định.
+- **Nhân vật của người khác** trên màn hình mình là "con rối" (`PlayerController.Puppet`): đi theo vị trí nhận được, tự chọn hoạt ảnh đi/lướt/đứng theo tốc độ, có bảng tên "Người chơi N" và không tự làm gì. Các nhân vật đi xuyên qua nhau.
+
+### Chưa có ở giai đoạn 1 (có chủ đích)
+
+- **Quái và boss tắt** khi chơi online, vì chưa đồng bộ (giai đoạn 3). Nếu để lại, mỗi người sẽ đánh một bản quái khác nhau.
+- NPC, hội thoại, nhiệm vụ, túi đồ, cấp độ: vẫn chạy riêng trên máy từng người, chưa đồng bộ (giai đoạn 3).
+- **Không lưu** khi chơi online (giai đoạn 2 lưu trên máy chủ). Ngày/đêm mỗi máy một giờ. Chưa có đăng nhập.
+- Chưa có menu chính để chọn chơi online: dùng dòng lệnh, bảng lệnh hoặc shortcut.
+
+### Đã kiểm tra
+
+- Test EditMode `OnlineSessionTests`: chạy một host thật trong editor (máy chủ và người chơi cùng một máy), kiểm tra nhân vật được tạo qua mạng, camera đi theo, quái tắt, không lưu được; con rối đi theo vị trí và đổi hoạt ảnh; đọc `-host` / `-server` / `-client` / `-port`.
+- `Debug/NetSmoke.cs`: chạy bản build thành hai tiến trình trên một máy (`-host -netsmoke` và `-client 127.0.0.1 -netsmoke -batchmode -nographics`). Mỗi bên tự đi qua lại và phải thấy nhân vật bên kia đi (kể cả hoạt ảnh đi). Lần chạy 24/09: host thấy bên kia đi 18.0–18.2 đơn vị, client thấy 18.6–18.7 đơn vị, không lỗi.
+
+### Lỗi đã biết
+
+- **Hai cửa sổ game trên cùng một máy: cửa sổ đóng sau có thể crash lúc thoát.** Thấy 2/2 lần chạy hai cửa sổ; không gặp khi chỉ có một cửa sổ (offline, host không ai vào, hoặc client chạy nền `-batchmode -nographics`). Crash nằm trong phần Unity tắt cửa sổ (Windows UI Automation, lệnh `UiaDisconnectAllProviders`), sau khi mọi code của game và FishNet đã dừng; không ảnh hưởng lúc chơi và không mất gì (online chưa lưu). Thử hai máy khác nhau thì không có tình huống này. Nếu cần xử lý: thử bản vá Unity 6000.6 mới hơn, hoặc báo lỗi cho Unity kèm file `crash.dmp`.

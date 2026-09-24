@@ -52,7 +52,19 @@ jobs:
           path: Tools/CompileCheck/.cache
           key: compilecheck-${{ hashFiles('Tools/CompileCheck/setup.sh', 'Tools/CompileCheck/patch.spec', 'Tools/CompileCheck/RefPatch/**', 'Packages/manifest.json') }}
       - name: Compile Assembly-CSharp, player build and editor + tests
-        run: Tools/CompileCheck/check.sh
+        run: |
+          status=0
+          Tools/CompileCheck/check.sh > compile.txt 2>&1 || status=$?
+          cat compile.txt
+          # each error as an annotation too: it shows on the commit and the pull request
+          grep -E ': error ' compile.txt | sort -u | while IFS= read -r line; do
+            if [[ "$line" =~ ^(Assets/[^\(]+)\(([0-9]+),([0-9]+)\):\ error\ (.*)$ ]]; then
+              echo "::error file=${BASH_REMATCH[1]},line=${BASH_REMATCH[2]},col=${BASH_REMATCH[3]}::${BASH_REMATCH[4]}"
+            else
+              echo "::error::$line"
+            fi
+          done
+          exit $status
       - name: Is there a Unity license?
         id: license
         env:

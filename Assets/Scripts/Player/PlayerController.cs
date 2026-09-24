@@ -56,6 +56,13 @@ namespace RPG
         public bool IsDead => health != null && health.IsDead;
         /// <summary>The hero this machine shows and controls: HUD, camera, input and screen effects follow it.</summary>
         public bool IsLocal => Players.Local == this;
+        /// <summary>
+        /// Online, the copy of someone else's hero: it follows the positions the network sends,
+        /// animates from its motion and does nothing on its own (no input, intent or regeneration).
+        /// </summary>
+        public bool Puppet { get; private set; }
+        /// <summary>The local hero follows <see cref="SetIntent"/> instead of the keyboard and mouse (automated runs, bots).</summary>
+        public bool Autopilot { get; set; }
         public readonly List<Buff> buffs = new List<Buff>();
         public float PotionReadyIn => Mathf.Max(0, potionReadyAt - Time.time);
 
@@ -215,12 +222,57 @@ namespace RPG
 
         void Update()
         {
+            if (Puppet)
+            {
+                AnimateFromMotion();
+                return;
+            }
             UpdateBuffs();
             if (IsDead) return;
             Regen();
-            if (IsLocal) intent = ReadLocalInput();
+            if (IsLocal && !Autopilot) intent = ReadLocalInput();
             Act(intent);
             intent = intent.Held;
+        }
+
+        // ------------------------------------------------------------------ puppet (online)
+        Vector2 puppetLastPos;
+        float puppetWalkUntil, puppetDashUntil;
+
+        /// <summary>Turns this hero into a puppet of the network, or back into a hero that acts on its own.</summary>
+        public void SetPuppet(bool on)
+        {
+            Puppet = on;
+            intent = default;
+            hasMoveTarget = false;
+            attackTarget = null;
+            npcTarget = null;
+            if (motor != null)
+            {
+                motor.HardStop();
+                motor.enabled = !on;   // the network moves a puppet, not physics
+            }
+            puppetLastPos = transform.position;
+        }
+
+        /// <summary>Walk, dash or idle from how fast the puppet moved; updates arrive in steps, so a short pause keeps walking.</summary>
+        void AnimateFromMotion()
+        {
+            Vector2 pos = transform.position;
+            float dt = Time.deltaTime;
+            Vector2 v = dt > 0f ? (pos - puppetLastPos) / dt : Vector2.zero;
+            puppetLastPos = pos;
+            float speed = v.magnitude;
+            if (speed > 0.3f)
+            {
+                motor.Facing = v / speed;
+                puppetWalkUntil = Time.time + 0.15f;
+            }
+            if (speed > 9f) puppetDashUntil = Time.time + 0.12f;
+            if (anim == null || IsDead) return;
+            if (Time.time < puppetDashUntil) anim.PlayDir("dash", motor.Facing);
+            else if (Time.time < puppetWalkUntil) anim.PlayDir("walk", motor.Facing);
+            else anim.PlayDir("idle", motor.Facing);
         }
 
         /// <summary>Acts on an intent: potions, skills, talking, walking. The same for every hero.</summary>

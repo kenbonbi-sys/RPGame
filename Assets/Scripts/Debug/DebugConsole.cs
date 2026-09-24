@@ -261,6 +261,19 @@ namespace RPG
             });
             Register("save", "save <1-3> — lưu", a => Print(SaveManager.I.Save(Int(a, 0, 1)) ? "Đã lưu." : "Không lưu được."));
             Register("load", "load <0-3> — tải (0 = tự động lưu)", a => SaveManager.I.Load(Int(a, 0, 1)));
+            Register("host", "host [cổng] — mở thế giới online trên máy này (người khác vào bằng join)", a =>
+                OnlineSession.Reboot(SessionMode.Host, null, (ushort)Mathf.Clamp(Int(a, 0, 0), 0, 65535)));
+            Register("join", "join <địa chỉ> [cổng] — vào thế giới online của máy khác", a =>
+            {
+                if (a.Length == 0)
+                {
+                    Print("Cần địa chỉ máy mở thế giới, ví dụ: join 192.168.1.5");
+                    return;
+                }
+                OnlineSession.Reboot(SessionMode.Client, a[0], (ushort)Mathf.Clamp(Int(a, 1, 0), 0, 65535));
+            });
+            Register("leave", "leave — rời thế giới online, quay về chơi một mình", a => OnlineSession.Reboot(SessionMode.Offline));
+            Register("net", "trạng thái online", a => Print(OnlineSession.Status()));
             Register("hitbox", "bật/tắt hiện collider và vùng sát thương", a =>
             {
                 ShowHitboxes = !ShowHitboxes;
