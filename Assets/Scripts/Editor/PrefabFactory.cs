@@ -240,6 +240,7 @@ namespace RPG.EditorTools
             pc.afterImages = ghost;
             pc.body = body;
             pc.skills = skills;
+            pc.perfectDodge = root.AddComponent<PerfectDodge>();
             pc.energy = 50;
             pc.maxEnergy = 63;
             // a soft personal light so the hero is readable at night

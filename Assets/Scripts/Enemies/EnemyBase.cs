@@ -208,6 +208,7 @@ namespace RPG
                 nextContact = Time.time + 1f;
                 var d = DamageInfo.Make(contactDamage, Team.Enemy, gameObject, p.transform.position,
                                         (Vector2)p.transform.position - Pos, DamageType.Physical, 4f);
+                d.contact = true;
                 p.health.TakeDamage(d);
             }
         }

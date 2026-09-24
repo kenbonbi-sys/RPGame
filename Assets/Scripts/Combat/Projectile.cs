@@ -83,8 +83,8 @@ namespace RPG
             d.poise = poise;
             d.attackScaled = attackScaled;
             d.skillName = skillName;
-            h.TakeDamage(d);
-            Combat.OnHitFeedback(h, d);
+            // no knockback or flash on a target that dodged (invulnerable)
+            if (h.TakeDamage(d) > 0) Combat.OnHitFeedback(h, d);
         }
 
         void Explode(Vector2 point)

@@ -95,6 +95,7 @@ namespace RPG
                     burnTick = 0.5f;
                     var d = DamageInfo.Make(burnDps * 0.5f, burnTeam, null, transform.position, Vector2.up, DamageType.Fire);
                     d.attackScaled = burnScaled;
+                    d.dot = true;
                     health.TakeDamage(d);
                 }
             }

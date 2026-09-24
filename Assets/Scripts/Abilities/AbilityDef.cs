@@ -63,6 +63,8 @@ namespace RPG
         public float maxRange = 12f;
         [Tooltip("How long the caster is held in the attack / cast pose.")]
         public float lockTime = 0.3f;
+        [Tooltip("Seconds of the pose that not even a dash can cancel (plan §04: khung cam kết). A Tuyệt kỹ commits for its whole pose.")]
+        public float commitTime;
         [Tooltip("Animation base name: attack or cast (empty = none).")]
         public string animBase = "attack";
         [Tooltip("Movement speed multiplier while held in the pose.")]
@@ -82,6 +84,9 @@ namespace RPG
         public bool HasTag(AbilityTags t) => (tags & t) != 0;
 
         public float CooldownAt(int level) => cooldown * Mathf.Max(0.2f, 1f - cooldownPerLevel * (Mathf.Max(1, level) - 1));
+
+        /// <summary>Seconds after the cast before a dash may cut the pose short: commitTime (within the pose), the whole pose for a Tuyệt kỹ.</summary>
+        public float CommitTime => HasTag(AbilityTags.Ultimate) ? lockTime : Mathf.Clamp(commitTime, 0f, lockTime);
 
         public virtual string Tooltip()
         {

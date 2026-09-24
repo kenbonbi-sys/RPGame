@@ -44,6 +44,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d48074b1a0c20d445bfff56705c52470, type: 2}
   - {fileID: 11400000, guid: 7465bfb70b62e4449867a3836df88ea0, type: 2}
   progression: {fileID: 11400000, guid: a0659d7ce1a0e5e4e934c9016c761110, type: 2}
+  combat: {fileID: 11400000, guid: b3b37f6f76fe4f4ab54160f186cfe6c6, type: 2}
   quests:
   - {fileID: 11400000, guid: 85b47a02ce97a9a48a96201cf90adcb0, type: 2}
   - {fileID: 11400000, guid: 6fb51df590d44164fb1bff3d7cb9a655, type: 2}

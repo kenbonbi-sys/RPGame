@@ -22,6 +22,7 @@ MonoBehaviour:
   targeting: 2
   maxRange: 12
   lockTime: 0.2
+  commitTime: 0.1
   animBase: attack
   moveWhileCasting: 0.9
   castSfx: 

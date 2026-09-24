@@ -27,6 +27,8 @@ namespace RPG
         public event Action<DamageInfo, float> Damaged;
         public event Action<DamageInfo> Died;
         public event Action<float> Healed;
+        /// <summary>A hostile hit that invulnerability blocked (a dash's i-frames); Lướt Hoàn Hảo listens.</summary>
+        public event Action<DamageInfo> Evaded;
 
         /// <summary>Source of the random damage spread (0..1). Tests pin it to 0.5 for exact numbers.</summary>
         public static Func<float> SpreadRoll = () => UnityEngine.Random.value;
@@ -68,7 +70,12 @@ namespace RPG
         /// <summary>Applies damage (armor, resistance and the random spread of plan §04). Returns the amount actually dealt.</summary>
         public float TakeDamage(DamageInfo d)
         {
-            if (IsDead || invulnerable || !CanBeDamagedBy(d.sourceTeam)) return 0f;
+            if (IsDead || !CanBeDamagedBy(d.sourceTeam)) return 0f;
+            if (invulnerable)
+            {
+                Evaded?.Invoke(d);
+                return 0f;
+            }
             float raw = d.amount;
             if (!d.pure)
             {

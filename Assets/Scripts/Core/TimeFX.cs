@@ -9,6 +9,7 @@ namespace RPG
         float hitStopUntil;
         float slowUntil;
         float slowScale = 1f;
+        float slowEase = 0.4f;
         public static bool Paused;
 
         void Awake()
@@ -30,11 +31,13 @@ namespace RPG
             I.hitStopUntil = Mathf.Max(I.hitStopUntil, Time.unscaledTime + seconds);
         }
 
-        public static void SlowMo(float scale, float seconds)
+        /// <summary>Time runs at <paramref name="scale"/> for <paramref name="seconds"/> of real time, easing back to full speed over the last <paramref name="easeOut"/> of them.</summary>
+        public static void SlowMo(float scale, float seconds, float easeOut = 0.4f)
         {
             if (I == null) return;
             I.slowScale = scale;
             I.slowUntil = Time.unscaledTime + seconds;
+            I.slowEase = Mathf.Max(0.01f, easeOut);
         }
 
         void Update()
@@ -45,9 +48,9 @@ namespace RPG
             else if (now < hitStopUntil) s = 0.03f;
             else if (now < slowUntil)
             {
-                // ease back to normal speed during the last 30% of the slow-mo
+                // ease back to normal speed at the end
                 float remain = slowUntil - now;
-                s = remain < 0.4f ? Mathf.Lerp(1f, slowScale, remain / 0.4f) : slowScale;
+                s = remain < slowEase ? Mathf.Lerp(1f, slowScale, remain / slowEase) : slowScale;
             }
             Time.timeScale = s;
         }

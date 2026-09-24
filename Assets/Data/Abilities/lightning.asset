@@ -22,6 +22,7 @@ MonoBehaviour:
   targeting: 1
   maxRange: 12
   lockTime: 0.5
+  commitTime: 0.3
   animBase: cast
   moveWhileCasting: 0.25
   castSfx: 

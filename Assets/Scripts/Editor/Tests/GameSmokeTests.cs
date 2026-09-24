@@ -239,6 +239,114 @@ namespace RPG.EditorTools.Tests
         }
 
         [UnityTest]
+        public IEnumerator DashCancelsAPoseOnlyAfterItsCommitWindow()
+        {
+            var hero = GameManager.I.player;
+            var sk = hero.skills;
+            hero.energy = hero.maxEnergy;
+            Vector2 aim = (Vector2)hero.transform.position + Vector2.right * 3f;
+            var lightning = sk.slots[3];
+            Assert.AreEqual("lightning", lightning.id);
+            Assert.AreEqual("dash", sk.slots[7].id);
+
+            Assert.IsTrue(sk.TryCast(3, aim), "Lôi Phạt");
+            Assert.AreEqual(lightning.lockTime, hero.ActionRemaining, 0.02f, "held in the pose");
+            Assert.IsFalse(sk.TryCast(1, aim), "another skill waits for the pose to end");
+            Assert.AreEqual(lightning.lockTime, sk.ReadyIn(1), 0.02f);
+            Assert.IsFalse(sk.TryCast(7, aim), "a dash waits for the commit window");
+            Assert.AreEqual(lightning.CommitTime, sk.ReadyIn(7), 0.02f);
+
+            int dashes = 0;
+            sk.BufferedCast += slot => { if (slot == 7) dashes++; };
+            yield return GameSeconds(lightning.CommitTime - 0.14f);
+            Assert.IsFalse(sk.Request(7, aim), "pressed near the end of the commit window");
+            Assert.IsTrue(sk.HasBuffered, "kept by the input buffer");
+            yield return GameSeconds(0.15f);
+            Assert.AreEqual(1, dashes, "the dash fired as the window closed");
+            Assert.Less(hero.ActionRemaining, 0.06f, "and cut the rest of the pose");
+
+            // a Tuyệt kỹ commits for its whole pose
+            var ult = ScriptableObject.CreateInstance<AbilityDef>();
+            ult.id = "test_ultimate";
+            ult.displayName = "Tuyệt Kỹ Thử";
+            ult.tags = AbilityTags.Ultimate;
+            ult.targeting = AbilityTargeting.Self;
+            ult.lockTime = 0.4f;
+            ult.commitTime = 0.05f;
+            sk.slots[6] = ult;
+            yield return GameSeconds(0.12f);
+            Assert.IsTrue(sk.TryCast(6, aim));
+            Assert.AreEqual(0.4f, sk.PoseWait(7), 0.02f, "no dash out of a Tuyệt kỹ");
+            Object.Destroy(ult);
+        }
+
+        [UnityTest]
+        public IEnumerator PerfectDodgeSlowsTimeAndPowersTheNextSkill()
+        {
+            var hero = GameManager.I.player;
+            var sk = hero.skills;
+            var pd = hero.perfectDodge;
+            Assert.NotNull(pd, "PerfectDodge on the hero");
+            var c = CombatConfig.Current;
+            Vector2 aim = (Vector2)hero.transform.position + Vector2.right * 3f;
+            var attack = DamageInfo.Make(20, Team.Enemy, null, hero.transform.position, Vector2.left);
+            var bump = attack;
+            bump.contact = true;
+            var tick = attack;
+            tick.dot = true;
+            float hp = hero.health.hp;
+            hero.energy = 10f;
+
+            Assert.IsTrue(sk.TryCast(7, aim), "Lướt");
+            hero.health.TakeDamage(bump);
+            Assert.AreEqual(0, pd.Count, "bumping into a body is not an attack");
+            hero.health.TakeDamage(tick);
+            Assert.AreEqual(0, pd.Count, "nor is a burn tick");
+            hero.health.TakeDamage(attack);
+            Assert.AreEqual(1, pd.Count, "an attack dodged inside the window is perfect");
+            Assert.AreEqual(hp, hero.health.hp, "and does no damage");
+            Assert.AreEqual(10f + c.perfectEnergy, hero.energy, 0.01f, "+15 energy");
+            Assert.IsTrue(pd.BonusReady);
+            Assert.IsTrue(hero.HasBuff(PerfectDodge.BuffId), "the bonus shows in the buff bar");
+            hero.health.TakeDamage(attack);
+            Assert.AreEqual(1, pd.Count, "once per dash");
+            yield return Frames(2);
+            Assert.Less(Time.timeScale, 0.5f, "time slows down");
+            yield return RealSeconds(c.perfectSlowSeconds + 0.1f);
+            Assert.AreEqual(1f, Time.timeScale, 0.01f, "and comes back");
+
+            // a dash keeps the bonus for the skill after; that skill takes it
+            sk.ResetCooldowns();
+            yield return GameSeconds(0.1f);
+            Assert.IsTrue(sk.TryCast(7, aim), "second Lướt");
+            Assert.IsTrue(pd.BonusReady, "a dash does not use the bonus");
+            yield return GameSeconds(0.1f);
+            Assert.IsTrue(sk.TryCast(1, aim), "Cầu Lửa");
+            Assert.AreEqual(c.perfectDamageMultiplier, sk.LastCast.damageMultiplier, 1e-4f, "+30% on the next skill");
+            Assert.IsFalse(pd.BonusReady, "used up");
+            Assert.IsFalse(hero.HasBuff(PerfectDodge.BuffId));
+
+            // its first hit on a Thanh Trấn Áp is the counter: +25
+            var boss = Object.FindAnyObjectByType<BossBear>();
+            float before = boss.poise.Current;
+            var hit = DamageInfo.Make(1, Team.Player, hero.gameObject, boss.transform.position, Vector2.up);
+            hit.skillName = sk.slots[1].displayName;
+            boss.health.TakeDamage(hit);
+            Assert.AreEqual(before + c.perfectCounterPoise, boss.poise.Current, 0.01f, "counter poise");
+            boss.health.TakeDamage(hit);
+            Assert.AreEqual(before + c.perfectCounterPoise, boss.poise.Current, 0.01f, "only the first hit");
+
+            // the window decides, not the invulnerability
+            yield return GameSeconds(0.3f);   // the second dash's i-frames are over
+            pd.Open();
+            hero.health.invulnerable = true;
+            yield return GameSeconds(c.perfectWindow + 0.02f);
+            hero.health.TakeDamage(attack);
+            Assert.AreEqual(1, pd.Count, "dodged too late: not perfect");
+            hero.health.invulnerable = false;
+        }
+
+        [UnityTest]
         public IEnumerator ChiefIntroFinishesFirstQuestAndOpensTheForest()
         {
             var q = QuestSystem.I;
