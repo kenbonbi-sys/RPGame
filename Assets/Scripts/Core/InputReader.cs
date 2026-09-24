@@ -55,6 +55,8 @@ namespace RPG
         public static bool SkillPressed(int slot) => Kb != null && Kb[SkillKeys[slot]].wasPressedThisFrame;
         public static bool SkillHeld(int slot) => Kb != null && Kb[SkillKeys[slot]].isPressed;
         public static bool PotionPressed(int slot) => Kb != null && Kb[PotionKeys[slot]].wasPressedThisFrame;
+        /// <summary>Dialogue choice 1–3 (same keys as the potions; potions are off while talking).</summary>
+        public static bool OptionPressed(int index) => index >= 0 && index < PotionKeys.Length && PotionPressed(index);
 
         public static bool Pressed(Key k) => Kb != null && Kb[k].wasPressedThisFrame;
         public static bool Held(Key k) => Kb != null && Kb[k].isPressed;

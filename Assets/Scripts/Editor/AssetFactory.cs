@@ -35,7 +35,8 @@ namespace RPG.EditorTools
             var items = CreateItems();
             var skills = CreateSkills();
             var progression = CreateProgression();
-            CreateDatabase(items, skills, progression);
+            var quests = CreateQuests();
+            CreateDatabase(items, skills, progression, quests);
             CreateAudioLibrary();
             AssetDatabase.SaveAssets();
         }
@@ -403,8 +404,101 @@ namespace RPG.EditorTools
             return c;
         }
 
+        // ------------------------------------------------------------------ quests
+        public const string DialogueProject = "Assets/Dialogue/RungThiTham.yarnproject";
+
+        /// <summary>The prototype's quest line as QuestDef assets (Assets/Data/Quests). Dialogue lives in Assets/Dialogue.</summary>
+        static List<QuestDef> CreateQuests()
+        {
+            var written = new HashSet<QuestDef>();
+            QuestDef Quest(string id, string title, QuestKind kind, System.Action<QuestDef> fill)
+            {
+                string path = $"{DataFolder}/Quests/{id}.asset";
+                EditorUtil.EnsureFolder(DataFolder + "/Quests");
+                var q = AssetDatabase.LoadAssetAtPath<QuestDef>(path);
+                if (EditorUtil.Keep(q)) return q;
+                EditorUtil.Written++;
+                var fresh = ScriptableObject.CreateInstance<QuestDef>();
+                if (q == null)
+                {
+                    q = fresh;
+                    AssetDatabase.CreateAsset(q, path);
+                }
+                else
+                {
+                    EditorUtility.CopySerialized(fresh, q);
+                    Object.DestroyImmediate(fresh);
+                }
+                q.id = id;
+                q.title = title;
+                q.kind = kind;
+                fill(q);
+                written.Add(q);
+                EditorUtility.SetDirty(q);
+                return q;
+            }
+            QuestObjective Obj(ObjectiveKind kind, string target, int count, string text, string marker = null, bool countPrevious = false) =>
+                new QuestObjective { kind = kind, target = target, count = count, text = text, marker = marker, countPrevious = countPrevious };
+            ItemReward Reward(string item, int count) =>
+                new ItemReward { item = AssetDatabase.LoadAssetAtPath<ItemDef>($"{DataFolder}/Items/{item}.asset"), count = count };
+
+            var talk = Quest("talk_chief", "Lời Nhờ Của Trưởng Làng", QuestKind.Main, q =>
+            {
+                q.summary = "Trưởng Làng đang tìm bạn bên đống lửa giữa làng.";
+                q.giver = q.turnIn = "chief";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Talk, "chief", 1, "Nói chuyện với Trưởng Làng"));
+                q.xp = 20;
+                q.items.Add(Reward("potion_red", 2));
+                q.items.Add(Reward("potion_blue", 1));
+            });
+            var forest = Quest("clear_forest", "Dọn Dẹp Rừng Thì Thầm", QuestKind.Main, q =>
+            {
+                q.summary = "Lũ Slime Rêu và Nấm Độc tràn ra khắp Rừng Thì Thầm, phía đông làng.";
+                q.giver = "chief";
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "slime", 4, "Hạ Slime Rêu", "forest"));
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "shroom", 2, "Nấm Độc", "forest"));
+                q.xp = 120;
+            });
+            var bear = Quest("slay_bear", "Gấu Ma Rừng Già", QuestKind.Main, q =>
+            {
+                q.summary = "Gấu Ma Rừng Già ngự ở Rừng Già Cổ Thụ, phía đông bắc.";
+                q.giver = q.turnIn = "chief";
+                q.turnInText = "Báo tin cho Trưởng Làng";
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "bear", 1, "Đánh bại Gấu Ma Rừng Già", "boss", true));
+                q.xp = 400;
+                q.items.Add(Reward("gold", 1));
+                q.items.Add(Reward("ring", 1));
+                q.items.Add(Reward("potion_red", 3));
+                q.setFlags.Add("forest_saved");
+            });
+            var mushrooms = Quest("mushrooms", "Nấm Cho Bé Mai", QuestKind.Side, q =>
+            {
+                q.summary = "Mẹ Bé Mai bị ốm, cô bé cần 3 Mũ Nấm Đỏ để nấu thuốc.";
+                q.giver = q.turnIn = "girl";
+                q.availableText = "Nói chuyện với Bé Mai";
+                q.turnInText = "Mang nấm về cho Bé Mai";
+                q.objectives.Add(Obj(ObjectiveKind.Deliver, "shroom_cap", 3, "Nhặt Mũ Nấm Đỏ", "forest"));
+                q.xp = 80;
+                q.items.Add(Reward("potion_green", 3));
+            });
+
+            // links between quests (only on assets written in this run)
+            void Link(QuestDef q, QuestDef requires, QuestDef followUp)
+            {
+                if (!written.Contains(q)) return;
+                if (requires != null) q.requires.Add(requires);
+                if (followUp != null) q.followUps.Add(followUp);
+            }
+            Link(talk, null, forest);
+            Link(forest, talk, bear);
+            Link(bear, forest, null);
+            Link(mushrooms, talk, null);
+            return new List<QuestDef> { talk, forest, bear, mushrooms };
+        }
+
         // ------------------------------------------------------------------ database
-        static void CreateDatabase(List<ItemDef> items, List<SkillDef> skills, ProgressionConfig progression)
+        static void CreateDatabase(List<ItemDef> items, List<SkillDef> skills, ProgressionConfig progression, List<QuestDef> quests)
         {
             string path = DataFolder + "/GameDatabase.asset";
             var db = AssetDatabase.LoadAssetAtPath<GameDatabase>(path);
@@ -417,6 +511,8 @@ namespace RPG.EditorTools
             db.items = Merge(db.items, items);
             db.skills = Merge(db.skills, skills);
             EditorUtil.Assign(ref db.progression, progression);
+            db.quests = Merge(db.quests, quests);
+            EditorUtil.Assign(ref db.dialogue, AssetDatabase.LoadAssetAtPath<Yarn.Unity.YarnProject>(DialogueProject));
             EditorUtil.Assign(ref db.shadowSprite, ArtImporter.S("shadow"));
             EditorUtil.Assign(ref db.whiteSprite, ArtImporter.S("white"));
             EditorUtil.Assign(ref db.starIcon, ArtImporter.S("icon_star"));

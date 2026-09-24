@@ -32,7 +32,8 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 - **Input buffer 150 ms:** bấm chiêu sớm (trong 0.15 giây trước khi hồi xong) vẫn được ghi nhận và phát ngay khi sẵn sàng.
 - **Bách Khoa Trùm:** tự ghi lại quái và kỹ năng boss lần đầu gặp (hiện ở log bên trái, xem đầy đủ bằng phím J).
 - **Lưu game:** 3 ô + tự động lưu (sau boss, khi xong nhiệm vụ, 5 phút một lần khi ngoài chiến đấu). File JSON có số phiên bản trong `%USERPROFILE%\AppData\LocalLow\<công ty>\<game>\saves`, bản cũ giữ dạng `.bak`.
-- **Nhiệm vụ:** chuỗi chính với Trưởng Làng + nhiệm vụ phụ của Bé Mai (hiện "(+1 · Tab)" như bản tham khảo).
+- **Nhiệm vụ (QuestDef):** mỗi nhiệm vụ là một asset trong `Assets/Data/Quests` (người giao, điều kiện mở, 9 loại mục tiêu, phần thưởng, cờ, nhiệm vụ tiếp theo). Chuỗi chính với Trưởng Làng + nhiệm vụ phụ của Bé Mai; tracker "(+1 · Tab)", dấu ! / ? trên đầu NPC (vàng: chính, bạc: phụ).
+- **Hội thoại (Yarn Spinner 3):** mỗi NPC một file `.yarn` trong `Assets/Dialogue`, có lựa chọn (phím 1–3), điều kiện theo nhiệm vụ và khóa `#line:` cho bản địa hóa. Hàm/lệnh Yarn: `quest_status`, `quest_left`, `item_count`, `has_flag`, `<<quest_start>>`, `<<quest_complete>>`, `<<give_item>>`, `<<victory>>` (xem `Assets/Scripts/Dialogue/YarnBindings.cs`).
 - **HUD:** thanh máu boss khung trang trí, minimap + tên vùng + ngày/đêm, quest tracker, orb Máu/Năng lượng dạng chất lỏng, thanh bình thuốc, skill bar với cooldown/chi phí, log sự kiện, số damage bay, nameplate, hội thoại có portrait, túi đồ + tooltip, màn chết/hồi sinh, banner khu vực/chiến thắng.
 - **Âm thanh:** 42 SFX, nhạc rừng, nhạc boss, âm nền rừng (tự tổng hợp, `Tools/AudioGen`).
 
@@ -64,6 +65,7 @@ Tools/
 - **Chỉnh VFX:** mở `Assets/Prefabs/VFX/<tên>.prefab`. Mỗi hiệu ứng là Particle System + sprite flipbook + Light2D. Tăng `_Intensity` của material để glow (Bloom) mạnh hơn.
 - **Thêm skill:** tạo class kế thừa `SkillDef` và viết `Execute()`, tạo asset qua *Create → RPG → Skills*, rồi gán vào `PlayerSkills.slots` trên prefab Player.
 - **Thay art:** thay PNG trong `Assets/Art` (giữ kích thước frame), hoặc kéo sprite mới vào các `SpriteAnimSet` trong `Assets/Data/Anims`.
+- **Thêm nhiệm vụ / hội thoại:** tạo asset qua *Create → RPG → Quest*, thêm vào `GameDatabase.quests`; viết node trong một file `.yarn` ở `Assets/Dialogue` và đặt tên node vào `NPC.yarnNode`.
 - **Thêm quái:** kế thừa `EnemyBase` (xem `SlimeAI`, `ShroomAI`), boss tham khảo `BossBear`.
 - **Chạy test tự động:** `RungThiTham.exe -autoshot -autoshotDir "D:\shots"` sẽ tự chơi một vòng, chụp màn hình rồi thoát.
 

@@ -517,6 +517,20 @@ namespace RPG.EditorTools
             ui.nameText = Txt(box, "Name", "Trưởng Làng", 30, Gold, TextAlignmentOptions.TopLeft, new Vector2(0, 1), new Vector2(0, 1), new Vector2(206, -20), new Vector2(780, 40));
             ui.bodyText = Txt(box, "Body", "...", 26, Cream, TextAlignmentOptions.TopLeft, new Vector2(0, 1), new Vector2(0, 1), new Vector2(206, -64), new Vector2(800, 110), false);
             ui.hintText = Txt(box, "Hint", "► [F / Space / Click] tiếp tục", 18, Muted, TextAlignmentOptions.BottomRight, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-24, 16), new Vector2(500, 26), false);
+
+            // choices stack above the box's right side: 1 on top
+            var opts = Rect(box, "Options", new Vector2(1, 1), new Vector2(1, 0), new Vector2(-10, 10), new Vector2(600, 3 * 58));
+            ui.optionsRoot = opts;
+            for (int i = 0; i < 3; i++)
+            {
+                var b = Btn(opts, "Option_" + (i + 1), "", new Vector2(0.5f, 1f), new Vector2(0, -29 - i * 58), new Vector2(600, 52), 23);
+                var label = b.GetComponentInChildren<TextMeshProUGUI>();
+                label.alignment = TextAlignmentOptions.MidlineLeft;
+                label.margin = new Vector4(20, 0, 20, 0);
+                ui.optionButtons[i] = b;
+                ui.optionLabels[i] = label;
+            }
+            opts.gameObject.SetActive(false);
         }
 
         static Button Btn(Transform parent, string name, string label, Vector2 anchor, Vector2 pos, Vector2 size, float fontSize = 26)

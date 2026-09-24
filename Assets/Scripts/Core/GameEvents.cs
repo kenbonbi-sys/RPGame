@@ -25,6 +25,8 @@ namespace RPG
         public static event Action<ItemDef, int> ItemPicked;
         public static event Action QuestChanged;
         public static event Action<string> QuestCompleted;               // quest title
+        public static event Action<string> DialogueStarted;              // npc id
+        public static event Action<string> DialogueEnded;                // npc id
         public static event Action<string> ZoneEntered;                  // zone display name
         public static event Action<string, Vector3, Color> WorldText;    // free floating text
 
@@ -38,6 +40,8 @@ namespace RPG
         public static void RaiseItemPicked(ItemDef item, int n) => ItemPicked?.Invoke(item, n);
         public static void RaiseQuestChanged() => QuestChanged?.Invoke();
         public static void RaiseQuestCompleted(string title) => QuestCompleted?.Invoke(title);
+        public static void RaiseDialogueStarted(string npcId) => DialogueStarted?.Invoke(npcId);
+        public static void RaiseDialogueEnded(string npcId) => DialogueEnded?.Invoke(npcId);
         public static void RaiseZoneEntered(string zone) => ZoneEntered?.Invoke(zone);
         public static void RaiseWorldText(string text, Vector3 pos, Color c) => WorldText?.Invoke(text, pos, c);
 
@@ -45,7 +49,7 @@ namespace RPG
         public static void Reset()
         {
             Damaged = null; Healed = null; Died = null; Log = null; EnemyKilled = null; LevelUp = null;
-            ItemPicked = null; QuestChanged = null; QuestCompleted = null; ZoneEntered = null; WorldText = null;
+            ItemPicked = null; QuestChanged = null; QuestCompleted = null; DialogueStarted = null; DialogueEnded = null; ZoneEntered = null; WorldText = null;
         }
     }
 }

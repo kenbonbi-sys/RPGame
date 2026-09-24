@@ -511,4 +511,5 @@ MonoBehaviour:
   questMarker: {fileID: 2606827250937146567}
   idleClip: girl_idle
   talkClip: girl_idle
+  yarnNode: Mai
   fallbackLines: []

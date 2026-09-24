@@ -1423,7 +1423,7 @@ Tám việc để khởi động GĐ1. Đánh dấu khi xong.
 - [x] StatBlock + XP và lên cấp 1–40 · *Claude làm được*
 - [x] Save v1 với 3 slot và tự lưu · *Claude làm được*
 - [x] Thanh Trấn Áp + input buffer 150 ms · *Claude làm được*
-- [ ] Tích hợp Yarn Spinner, chuyển thoại hiện có sang file .yarn · *Claude làm được*
+- [x] Tích hợp Yarn Spinner, chuyển thoại hiện có sang file .yarn · *Claude làm được*
 
 ### Cần bạn chốt
 

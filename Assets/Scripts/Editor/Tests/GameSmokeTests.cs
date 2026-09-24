@@ -36,9 +36,52 @@ namespace RPG.EditorTools.Tests
             if (Directory.Exists(tempSaves)) Directory.Delete(tempSaves, true);
         }
 
+        /// <summary>Waits <paramref name="n"/> game frames (not editor updates; see TalkThrough).</summary>
         static IEnumerator Frames(int n)
         {
-            for (int i = 0; i < n; i++) yield return null;
+            int target = Time.frameCount + n;
+            float deadline = Time.realtimeSinceStartup + 10f;
+            while (Time.frameCount < target && Time.realtimeSinceStartup < deadline) yield return null;
+        }
+
+        /// <summary>
+        /// Talks to an NPC and clicks through the whole conversation, picking <paramref name="choice"/>.
+        /// The guard is real time: here each yield is one editor update, and many of those can pass
+        /// within a single (frame-rate capped) game frame.
+        /// </summary>
+        static IEnumerator TalkThrough(string npcId, int choice = 0)
+        {
+            var npc = NPC.All.Find(n => n.npcId == npcId);
+            Assert.NotNull(npc, "npc " + npcId);
+            Assert.IsTrue(DialogueDirector.I.Talk(npc), "conversation starts");
+            float deadline = Time.realtimeSinceStartup + 15f;
+            while (DialogueDirector.I.IsRunning)
+            {
+                if (Time.realtimeSinceStartup > deadline)
+                {
+                    var ui = DialogueUI.I;
+                    Assert.Fail($"conversation with {npcId} did not end: runner running={DialogueDirector.I.Runner.IsDialogueRunning}, " +
+                                $"ui open={ui.IsOpen}, options={ui.ShowingOptions}, advance={ui.AdvanceRequested}, chosen={ui.ChosenOption}, " +
+                                $"text='{ui.bodyText.text}'");
+                }
+                if (DialogueUI.I.ShowingOptions) DialogueUI.I.Choose(choice);
+                else DialogueUI.I.DebugAdvance();
+                yield return null;
+            }
+            yield return null;
+        }
+
+        /// <summary>Kills one live enemy with the given id (spawners keep the counts going).</summary>
+        static void KillEnemy(string id)
+        {
+            foreach (var e in Object.FindObjectsByType<EnemyBase>(FindObjectsInactive.Exclude))
+            {
+                if (e.IsDead || e.enemyId != id) continue;
+                e.health.Kill();
+                return;
+            }
+            // not enough live ones: report the kill the way an enemy would
+            GameEvents.RaiseEnemyKilled(new KillInfo { id = id, name = id, level = 2, rank = EnemyRank.Normal });
         }
 
         /// <summary>WaitForSeconds does not wait in EditMode-driven tests; count game time instead.</summary>
@@ -88,10 +131,11 @@ namespace RPG.EditorTools.Tests
         public IEnumerator SaveAndLoadRoundTrip()
         {
             var gm = GameManager.I;
+            yield return TalkThrough("chief");                      // talk_chief done, clear_forest active
+            KillEnemy("slime");                                      // 1/4 slimes
+            QuestSystem.I.SetFlag("test_flag");
             PlayerStats.I.SetState(3, 42, new[] { 1, 0, 2, 3 }, 0, 2, 2);
             Inventory.I.gold = 777;
-            QuestSystem.I.main = QuestSystem.Main.SlayBoss;
-            QuestSystem.I.slimes = 4;
             Vector2 spot = (Vector2)gm.respawnPoint.position + new Vector2(3f, 1f);
             gm.player.motor.Teleport(spot);
             DayNightCycle.I.time = 0.8f;
@@ -115,8 +159,10 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(42, PlayerStats.I.xp);
             Assert.AreEqual(3, PlayerStats.I.Allocated(CoreStat.Vitality));
             Assert.AreEqual(777, Inventory.I.gold);
-            Assert.AreEqual(QuestSystem.Main.SlayBoss, QuestSystem.I.main);
-            Assert.AreEqual(4, QuestSystem.I.slimes);
+            Assert.AreEqual(QuestStatus.Done, QuestSystem.I.Status("talk_chief"));
+            Assert.AreEqual(QuestStatus.Active, QuestSystem.I.Status("clear_forest"));
+            Assert.AreEqual(1, QuestSystem.I.Progress("clear_forest", 0));
+            Assert.IsTrue(QuestSystem.I.HasFlag("test_flag"));
             Assert.Less(Vector2.Distance(p.transform.position, spot), 0.05f);
             Assert.AreEqual(0.8f, DayNightCycle.I.time, 0.02f);
         }
@@ -177,6 +223,69 @@ namespace RPG.EditorTools.Tests
             yield return GameSeconds(0.2f);
             Assert.AreEqual(2, casts, "buffered press fired once");
             Assert.IsFalse(sk.HasBuffered);
+        }
+
+        [UnityTest]
+        public IEnumerator ChiefIntroFinishesFirstQuestAndOpensTheForest()
+        {
+            var q = QuestSystem.I;
+            Assert.AreEqual(QuestStatus.Active, q.Status("talk_chief"), "auto-started at boot");
+            Assert.AreEqual(QuestSystem.Marker.Exclaim, q.MarkerFor("chief"));
+            Assert.AreEqual(QuestStatus.Locked, q.Status("mushrooms"));
+            int red = Inventory.I.Count("potion_red");
+
+            yield return TalkThrough("chief");
+
+            Assert.AreEqual(QuestStatus.Done, q.Status("talk_chief"));
+            Assert.AreEqual(QuestStatus.Active, q.Status("clear_forest"), "follow-up started");
+            Assert.AreEqual(QuestStatus.Available, q.Status("mushrooms"), "side quest unlocked");
+            Assert.AreEqual(QuestSystem.Marker.Exclaim, q.MarkerFor("girl"));
+            Assert.AreEqual(red + 2, Inventory.I.Count("potion_red"), "reward");
+            Assert.AreEqual(20, PlayerStats.I.xp);
+            Assert.AreEqual("clear_forest", q.Tracked()[0].id);
+        }
+
+        [UnityTest]
+        public IEnumerator MaiChoiceAcceptsAndDeliveryTurnsIn()
+        {
+            var q = QuestSystem.I;
+            yield return TalkThrough("chief");
+            yield return TalkThrough("girl", 1);                     // "Để sau nhé"
+            Assert.AreEqual(QuestStatus.Available, q.Status("mushrooms"), "declining keeps it available");
+            yield return TalkThrough("girl", 0);                     // "Được"
+            Assert.AreEqual(QuestStatus.Active, q.Status("mushrooms"));
+
+            var cap = GameManager.I.db.Item("shroom_cap");
+            Inventory.I.Add(cap, 3);
+            yield return null;
+            Assert.AreEqual(QuestStatus.Ready, q.Status("mushrooms"));
+            Assert.AreEqual(QuestSystem.Marker.Question, q.MarkerFor("girl"));
+
+            int green = Inventory.I.Count("potion_green");
+            yield return TalkThrough("girl");
+            Assert.AreEqual(QuestStatus.Done, q.Status("mushrooms"));
+            Assert.AreEqual(0, Inventory.I.Count("shroom_cap"), "delivered");
+            Assert.AreEqual(green + 3, Inventory.I.Count("potion_green"));
+        }
+
+        [UnityTest]
+        public IEnumerator KillsDriveTheMainQuestChain()
+        {
+            var q = QuestSystem.I;
+            yield return TalkThrough("chief");
+            // the bear dies early: slay_bear counts earlier kills
+            GameEvents.RaiseEnemyKilled(new KillInfo { id = "bear", name = "Gấu Ma", level = 6, rank = EnemyRank.Boss });
+            for (int i = 0; i < 4; i++) KillEnemy("slime");
+            Assert.AreEqual(QuestStatus.Active, q.Status("clear_forest"));
+            for (int i = 0; i < 2; i++) KillEnemy("shroom");
+            yield return null;
+            Assert.AreEqual(QuestStatus.Done, q.Status("clear_forest"), "no turn-in: completes by itself");
+            Assert.AreEqual(QuestStatus.Ready, q.Status("slay_bear"), "bear already dead");
+            Assert.AreEqual(QuestSystem.Marker.Question, q.MarkerFor("chief"));
+
+            yield return TalkThrough("chief");
+            Assert.AreEqual(QuestStatus.Done, q.Status("slay_bear"));
+            Assert.IsTrue(q.HasFlag("forest_saved"));
         }
 
         [UnityTest]

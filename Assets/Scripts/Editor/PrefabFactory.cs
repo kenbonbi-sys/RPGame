@@ -51,6 +51,15 @@ namespace RPG.EditorTools
                 pc.stats = root.AddComponent<PlayerStats>();
                 return true;
             });
+            void YarnNode(string file, string node) => EditorUtil.UpgradePrefab($"{CharFolder}/{file}.prefab", root =>
+            {
+                var npc = root.GetComponent<NPC>();
+                if (npc == null || !string.IsNullOrEmpty(npc.yarnNode)) return false;
+                npc.yarnNode = node;
+                return true;
+            });
+            YarnNode("Chief", "Chief");
+            YarnNode("Girl", "Mai");
             EditorUtil.UpgradePrefab($"{CharFolder}/BossBear.prefab", root =>
             {
                 var boss = root.GetComponent<BossBear>();

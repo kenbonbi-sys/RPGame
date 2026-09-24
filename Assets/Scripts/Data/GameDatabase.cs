@@ -10,6 +10,9 @@ namespace RPG
         public List<ItemDef> items = new List<ItemDef>();
         public List<SkillDef> skills = new List<SkillDef>();
         public ProgressionConfig progression;
+        public List<QuestDef> quests = new List<QuestDef>();
+        [Tooltip("Compiled Yarn project with every NPC's dialogue (Assets/Dialogue).")]
+        public Yarn.Unity.YarnProject dialogue;
 
         [Header("Shared sprites")]
         public Sprite shadowSprite;

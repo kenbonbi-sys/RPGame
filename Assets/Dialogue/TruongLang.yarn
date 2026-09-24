@@ -1,0 +1,27 @@
+title: Chief
+tags: npc:chief
+---
+// Trưởng Làng — người dẫn truyện, giao chuỗi nhiệm vụ chính.
+// Markup: [k]phím[/k] tô vàng, [warn]chiêu nguy hiểm[/warn] tô đỏ.
+<<if quest_status("talk_chief") == "ready">>
+    Trưởng Làng: A, cháu đến rồi! Làng Lá Xanh đang gặp chuyện lớn... #line:chief_intro_1
+    Trưởng Làng: Từ khi trăng máu mọc, lũ Slime Rêu và Nấm Độc tràn ra khắp Rừng Thì Thầm. #line:chief_intro_2
+    Trưởng Làng: Cháu hãy dọn bớt chúng đi. Nhớ dùng [k]Q W E R[/k] để ra chiêu, [k]Space[/k] để lướt né đòn. #line:chief_intro_3
+    Trưởng Làng: Cầm lấy mấy bình thuốc này. Bấm [k]1 2 3[/k] khi cần nhé! #line:chief_intro_4
+    <<quest_complete "talk_chief">>
+<<elseif quest_status("clear_forest") == "active">>
+    Trưởng Làng: Rừng Thì Thầm ở phía đông. Còn {quest_left("clear_forest", 0)} Slime Rêu và {quest_left("clear_forest", 1)} Nấm Độc nữa. #line:chief_forest_1
+<<elseif quest_status("slay_bear") == "active">>
+    Trưởng Làng: Gấu Ma Rừng Già ngự ở Rừng Già Cổ Thụ, phía đông bắc. #line:chief_bear_1
+    Trưởng Làng: Nó biết [warn]Dậm Đất[/warn] làm choáng, [warn]Ném Đá Lớn[/warn] và [warn]Chụp Quăng[/warn]. Nhìn vòng cảnh báo đỏ mà né! #line:chief_bear_2
+    Trưởng Làng: Mẹo nhỏ: đứng sau Tảng Đá Lớn khi nó vồ tới... con gấu sẽ tự đâm đầu vào đá đấy. #line:chief_bear_3
+    Trưởng Làng: Cứ đánh dồn dập, nó sẽ [k]vỡ Trấn Áp[/k] và choáng một lúc. Lúc ấy tung hết chiêu mạnh vào! #line:chief_bear_4
+<<elseif quest_status("slay_bear") == "ready">>
+    Trưởng Làng: Cháu... cháu đã hạ được Gấu Ma Rừng Già thật sao?! #line:chief_win_1
+    Trưởng Làng: Cả làng nợ cháu một ân tình. Đây là phần thưởng xứng đáng! #line:chief_win_2
+    <<quest_complete "slay_bear">>
+    <<victory "NHIỆM VỤ HOÀN THÀNH" "Làng Lá Xanh đã được cứu!">>
+<<else>>
+    Trưởng Làng: Rừng đã yên bình trở lại. Cảm ơn cháu, người hùng của Làng Lá Xanh! #line:chief_done_1
+<<endif>>
+===

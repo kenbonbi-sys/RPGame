@@ -57,7 +57,9 @@ namespace RPG
             Pool.ClearAll();
             SetupPhysics();
             Application.targetFrameRate = 120;
-            if (GetComponent<SaveManager>() == null) gameObject.AddComponent<SaveManager>();   // scenes built before saves existed
+            // scenes built before these systems existed
+            if (GetComponent<SaveManager>() == null) gameObject.AddComponent<SaveManager>();
+            if (GetComponent<DialogueDirector>() == null) gameObject.AddComponent<DialogueDirector>();
         }
 
         static void SetupPhysics()
@@ -127,6 +129,22 @@ namespace RPG
         }
 
         public void SetDialogue(bool on) => dialogue = on;
+
+        /// <summary>Named places for quest markers: forest, boss, village.</summary>
+        public Transform Spot(string id)
+        {
+            switch (id)
+            {
+                case "forest": return forestSpot;
+                case "boss":
+                case "arena": return bossSpot;
+                case "village":
+                case "respawn": return respawnPoint;
+                case "chief": return chiefSpot;
+                case "girl": return girlSpot;
+                default: return null;
+            }
+        }
         public void SetCinematic(bool on) => cinematic = on;
 
         public void SetMenu(bool on, bool pauseTime)

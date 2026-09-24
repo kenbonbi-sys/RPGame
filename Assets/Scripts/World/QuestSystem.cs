@@ -1,12 +1,14 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPG
 {
     /// <summary>
-    /// The prototype's quest line (kept in code so it is easy to read and change):
-    ///   Main: talk to the chief → clear the forest → defeat Gấu Ma Rừng Già → report back.
-    ///   Side: Bé Mai wants 3 mushroom caps.
+    /// Runs the <see cref="QuestDef"/> assets (plan §09): unlocks, objective progress from game
+    /// events, rewards, flags and follow-up quests. Dialogue (Yarn) starts and turns quests in
+    /// through <see cref="StartQuest"/> / <see cref="CompleteQuest"/>; everything else is driven
+    /// by kills, items, conversations, zones and scripted reports.
     /// </summary>
     public class QuestSystem : MonoBehaviour, ISaveable
     {
@@ -14,70 +16,346 @@ namespace RPG
 
         public enum Marker { None, Exclaim, Question }
 
-        public enum Main { TalkToChief, ClearForest, SlayBoss, ReportBack, Done }
-        public enum Side { NotStarted, Collecting, Done }
-
-        public Main main = Main.TalkToChief;
-        public Side side = Side.NotStarted;
-        public int slimeGoal = 4, shroomGoal = 2, capGoal = 3;
-        public int slimes, shrooms;
-
-        [Header("XP rewards")]
-        public int xpTalkToChief = 20;
-        public int xpClearForest = 120;
-        public int xpSlayBoss = 400;
-        public int xpMushrooms = 80;
+        [Tooltip("Empty = every quest of the GameDatabase.")]
+        public List<QuestDef> quests = new List<QuestDef>();
 
         /// <summary>Which tracked quest is shown first in the HUD (Tab cycles).</summary>
         public int focus;
 
-        void Awake() => I = this;
+        class State
+        {
+            public QuestDef def;
+            public QuestStatus status;
+            public int[] progress;
+        }
+
+        readonly List<State> states = new List<State>();
+        readonly Dictionary<string, State> byId = new Dictionary<string, State>();
+        readonly HashSet<string> flags = new HashSet<string>();
+        readonly Dictionary<string, int> kills = new Dictionary<string, int>();
+        Inventory boundInventory;
+        string talkingTo;   // npc in conversation right now
+
+        void Awake()
+        {
+            I = this;
+            Build();
+        }
+
+        void OnDestroy()
+        {
+            if (I == this) I = null;
+            if (boundInventory != null) boundInventory.Changed -= OnInventoryChanged;
+        }
 
         void OnEnable()
         {
             GameEvents.EnemyKilled += OnKilled;
-            GameEvents.ItemPicked += OnItem;
+            GameEvents.DialogueStarted += OnDialogueStarted;
+            GameEvents.DialogueEnded += OnDialogueEnded;
+            GameEvents.ZoneEntered += OnZoneEntered;
+            GameEvents.LevelUp += OnLevelUp;
         }
 
         void OnDisable()
         {
             GameEvents.EnemyKilled -= OnKilled;
-            GameEvents.ItemPicked -= OnItem;
+            GameEvents.DialogueStarted -= OnDialogueStarted;
+            GameEvents.DialogueEnded -= OnDialogueEnded;
+            GameEvents.ZoneEntered -= OnZoneEntered;
+            GameEvents.LevelUp -= OnLevelUp;
         }
 
-        // ------------------------------------------------------------ tracker
+        void Start()
+        {
+            boundInventory = Inventory.I;
+            if (boundInventory != null) boundInventory.Changed += OnInventoryChanged;
+            RefreshUnlocks(false);
+        }
+
+        void Build()
+        {
+            states.Clear();
+            byId.Clear();
+            var list = quests;
+            if (list == null || list.Count == 0)
+            {
+                var db = GameManager.I != null ? GameManager.I.db : null;
+                list = db != null ? db.quests : new List<QuestDef>();
+            }
+            foreach (var def in list)
+            {
+                if (def == null || string.IsNullOrEmpty(def.id) || byId.ContainsKey(def.id)) continue;
+                var s = new State { def = def, status = QuestStatus.Locked, progress = new int[def.objectives.Count] };
+                states.Add(s);
+                byId[def.id] = s;
+            }
+        }
+
+        // ------------------------------------------------------------ queries
+        public QuestDef Def(string id) => byId.TryGetValue(id, out var s) ? s.def : null;
+
+        public QuestStatus Status(string id) => byId.TryGetValue(id, out var s) ? s.status : QuestStatus.Locked;
+
+        public bool HasFlag(string flag) => !string.IsNullOrEmpty(flag) && flags.Contains(flag);
+
+        public int KillCount(string enemyId) => kills.TryGetValue(enemyId, out int n) ? n : 0;
+
+        /// <summary>Current progress of one objective (Collect / Deliver read the bag).</summary>
+        public int Progress(string id, int objective)
+        {
+            if (!byId.TryGetValue(id, out var s) || objective < 0 || objective >= s.progress.Length) return 0;
+            return Progress(s, objective);
+        }
+
+        /// <summary>How many are still missing for one objective.</summary>
+        public int Remaining(string id, int objective)
+        {
+            if (!byId.TryGetValue(id, out var s) || objective < 0 || objective >= s.progress.Length) return 0;
+            return Mathf.Max(0, s.def.objectives[objective].count - Progress(s, objective));
+        }
+
+        int Progress(State s, int i)
+        {
+            var o = s.def.objectives[i];
+            if (s.status == QuestStatus.Done) return o.count;
+            if (o.kind == ObjectiveKind.Collect || o.kind == ObjectiveKind.Deliver)
+                return Mathf.Min(o.count, Inventory.I != null ? Inventory.I.Count(o.target) : 0);
+            return Mathf.Min(o.count, s.progress[i]);
+        }
+
+        bool ObjectiveDone(State s, int i) => Progress(s, i) >= s.def.objectives[i].count;
+
+        bool AllDone(State s)
+        {
+            for (int i = 0; i < s.progress.Length; i++)
+                if (!ObjectiveDone(s, i)) return false;
+            return true;
+        }
+
+        // ------------------------------------------------------------ lifecycle
+        bool Unlocked(QuestDef d)
+        {
+            int level = PlayerStats.I != null ? PlayerStats.I.level : 1;
+            if (level < d.minLevel) return false;
+            foreach (var r in d.requires)
+                if (r != null && Status(r.id) != QuestStatus.Done) return false;
+            foreach (var f in d.requiredFlags)
+                if (!HasFlag(f)) return false;
+            return true;
+        }
+
+        /// <summary>Locked quests whose conditions are met become available (or start, if autoStart).</summary>
+        void RefreshUnlocks(bool announce)
+        {
+            bool changed = false;
+            foreach (var s in states)
+            {
+                if (s.status != QuestStatus.Locked || !Unlocked(s.def)) continue;
+                s.status = QuestStatus.Available;
+                changed = true;
+                if (s.def.autoStart) Begin(s, announce);
+            }
+            if (changed) GameEvents.RaiseQuestChanged();
+        }
+
+        /// <summary>Accepts an available quest (Yarn: &lt;&lt;quest_start id&gt;&gt;).</summary>
+        public bool StartQuest(string id)
+        {
+            if (!byId.TryGetValue(id, out var s))
+            {
+                Debug.LogWarning("[Quest] Unknown quest: " + id);
+                return false;
+            }
+            if (s.status == QuestStatus.Locked && Unlocked(s.def)) s.status = QuestStatus.Available;
+            if (s.status != QuestStatus.Available) return false;
+            Begin(s, true);
+            return true;
+        }
+
+        void Begin(State s, bool announce)
+        {
+            s.status = QuestStatus.Active;
+            for (int i = 0; i < s.progress.Length; i++)
+            {
+                var o = s.def.objectives[i];
+                s.progress[i] = o.kind == ObjectiveKind.Kill && o.countPrevious ? KillCount(o.target) : 0;
+            }
+            if (announce)
+            {
+                GameEvents.RaiseLog($"Nhiệm vụ mới: {s.def.title}", Palette.LogQuest);
+                if (HUD.I != null) HUD.I.banner.ShowQuest("Nhiệm vụ mới", s.def.title);
+                AudioManager.Play("sfx_quest", 0.8f, 0f);
+            }
+            Evaluate(s);
+            GameEvents.RaiseQuestChanged();
+        }
+
+        /// <summary>Turns in a ready quest: hands over Deliver items, gives rewards, sets flags, starts follow-ups.</summary>
+        public bool CompleteQuest(string id)
+        {
+            if (!byId.TryGetValue(id, out var s)) return false;
+            if (s.status != QuestStatus.Active && s.status != QuestStatus.Ready) return false;
+            if (!AllDone(s)) return false;
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            var inv = Inventory.I;
+            foreach (var o in s.def.objectives)
+                if (o.kind == ObjectiveKind.Deliver && inv != null && db != null) inv.Remove(db.Item(o.target), o.count);
+            s.status = QuestStatus.Done;
+
+            GameEvents.RaiseLog(s.def.xp > 0 ? $"Hoàn thành: {s.def.title} (+{s.def.xp} XP)" : $"Hoàn thành: {s.def.title}", Palette.LogQuest);
+            AudioManager.Play("sfx_levelup", 0.7f, 0f);
+            var p = GameManager.I != null ? GameManager.I.player : null;
+            if (p != null) VFX.Spawn("quest_complete", p.transform.position, Quaternion.identity, 1f, p.transform);
+            if (inv != null)
+            {
+                if (s.def.gold > 0)
+                {
+                    inv.gold += s.def.gold;
+                    GameEvents.RaiseLog($"Nhận được {s.def.gold} vàng", Palette.Gold);
+                }
+                foreach (var r in s.def.items)
+                    if (r != null && r.item != null) inv.Add(r.item, r.count);
+            }
+            if (PlayerStats.I != null) PlayerStats.I.AddXp(s.def.xp);
+            foreach (var f in s.def.setFlags) SetFlag(f, false);
+            GameEvents.RaiseQuestCompleted(s.def.title);
+
+            RefreshUnlocks(true);
+            foreach (var next in s.def.followUps)
+                if (next != null && Status(next.id) == QuestStatus.Available) Begin(byId[next.id], true);
+            GameEvents.RaiseQuestChanged();
+            return true;
+        }
+
+        void Evaluate(State s)
+        {
+            if (s.status == QuestStatus.Active && AllDone(s))
+            {
+                if (string.IsNullOrEmpty(s.def.turnIn))
+                {
+                    CompleteQuest(s.def.id);
+                    return;
+                }
+                s.status = QuestStatus.Ready;
+                // no "report to the chief" while already talking to the chief
+                if (s.def.turnIn != talkingTo) GameEvents.RaiseLog($"{s.def.title}: {TurnInText(s)}", Palette.LogQuest);
+                GameEvents.RaiseQuestChanged();
+            }
+            else if (s.status == QuestStatus.Ready && !AllDone(s))
+            {
+                s.status = QuestStatus.Active;   // e.g. the collected items were used up
+                GameEvents.RaiseQuestChanged();
+            }
+        }
+
+        public void SetFlag(string flag, bool refresh = true)
+        {
+            if (string.IsNullOrEmpty(flag) || !flags.Add(flag)) return;
+            if (refresh) RefreshUnlocks(true);
+        }
+
+        // ------------------------------------------------------------ progress sources
+        /// <summary>Adds progress to every active objective of a kind whose target matches.</summary>
+        void Advance(ObjectiveKind kind, string target, int amount)
+        {
+            if (string.IsNullOrEmpty(target)) return;
+            bool changed = false;
+            foreach (var s in states.ToArray())
+            {
+                if (s.status != QuestStatus.Active) continue;
+                for (int i = 0; i < s.progress.Length; i++)
+                {
+                    var o = s.def.objectives[i];
+                    if (o.kind != kind || o.target != target || s.progress[i] >= o.count) continue;
+                    s.progress[i] = Mathf.Min(o.count, s.progress[i] + amount);
+                    changed = true;
+                }
+                Evaluate(s);
+            }
+            if (changed) GameEvents.RaiseQuestChanged();
+        }
+
+        void OnKilled(KillInfo k)
+        {
+            kills[k.id] = KillCount(k.id) + 1;
+            Advance(ObjectiveKind.Kill, k.id, 1);
+        }
+
+        void OnDialogueStarted(string npcId)
+        {
+            talkingTo = npcId;
+            Advance(ObjectiveKind.Talk, npcId, int.MaxValue / 2);
+        }
+
+        void OnDialogueEnded(string npcId) => talkingTo = null;
+
+        void OnZoneEntered(string zone) => Advance(ObjectiveKind.Reach, zone, int.MaxValue / 2);
+
+        void OnLevelUp(int level) => RefreshUnlocks(true);
+
+        void OnInventoryChanged()
+        {
+            foreach (var s in states.ToArray())
+                if (s.status == QuestStatus.Active || s.status == QuestStatus.Ready) Evaluate(s);
+            GameEvents.RaiseQuestChanged();
+        }
+
+        /// <summary>A trigger reached a place id (Reach objectives).</summary>
+        public void NotifyReached(string placeId) => Advance(ObjectiveKind.Reach, placeId, int.MaxValue / 2);
+
+        /// <summary>The player used a world object (Interact objectives).</summary>
+        public void NotifyInteract(string objectId) => Advance(ObjectiveKind.Interact, objectId, 1);
+
+        /// <summary>Escort / Defend / Survive encounter scripts report progress here.</summary>
+        public void Report(ObjectiveKind kind, string target, int amount = 1) => Advance(kind, target, amount);
+
+        // ------------------------------------------------------------ tracker & markers
         public struct Entry
         {
+            public string id;
             public string title;
             public string objective;
             public bool main;
         }
 
+        static string NpcName(string npcId)
+        {
+            var n = NPC.All.Find(x => x.npcId == npcId);
+            return n != null ? n.displayName : npcId;
+        }
+
+        string TurnInText(State s) =>
+            !string.IsNullOrEmpty(s.def.turnInText) ? s.def.turnInText : $"Báo lại cho {NpcName(s.def.turnIn)}";
+
+        string ObjectiveText(State s)
+        {
+            var parts = new List<string>();
+            for (int i = 0; i < s.progress.Length; i++)
+            {
+                var o = s.def.objectives[i];
+                string t = string.IsNullOrEmpty(o.text) ? o.target : o.text;
+                if (o.count > 1) t += $" ({Progress(s, i)}/{o.count})";
+                parts.Add(ObjectiveDone(s, i) ? $"<color=#9a93a8>{t}</color>" : t);
+            }
+            return string.Join(" · ", parts);
+        }
+
+        /// <summary>Quests shown in the HUD tracker: main first, then side; available ones with a hint.</summary>
         public List<Entry> Tracked()
         {
             var list = new List<Entry>();
-            switch (main)
+            foreach (bool mainPass in new[] { true, false })
             {
-                case Main.TalkToChief: list.Add(new Entry { title = "Lời Nhờ Của Trưởng Làng", objective = "Nói chuyện với Trưởng Làng", main = true }); break;
-                case Main.ClearForest:
-                    list.Add(new Entry
-                    {
-                        title = "Dọn Dẹp Rừng Thì Thầm",
-                        objective = $"Hạ Slime Rêu ({Mathf.Min(slimes, slimeGoal)}/{slimeGoal}) · Nấm Độc ({Mathf.Min(shrooms, shroomGoal)}/{shroomGoal})",
-                        main = true
-                    });
-                    break;
-                case Main.SlayBoss: list.Add(new Entry { title = "Gấu Ma Rừng Già", objective = "Đánh bại Gấu Ma Rừng Già", main = true }); break;
-                case Main.ReportBack: list.Add(new Entry { title = "Trở Về Làng", objective = "Báo tin cho Trưởng Làng", main = true }); break;
-            }
-            if (side == Side.Collecting)
-            {
-                int caps = Inventory.I != null ? Inventory.I.Count("shroom_cap") : 0;
-                list.Add(new Entry { title = "Nấm Cho Bé Mai", objective = caps >= capGoal ? "Mang nấm về cho Bé Mai" : $"Nhặt Mũ Nấm Đỏ ({caps}/{capGoal})" });
-            }
-            else if (side == Side.NotStarted && main != Main.TalkToChief)
-            {
-                list.Add(new Entry { title = "Cô Bé Bên Giếng", objective = "Nói chuyện với Bé Mai" });
+                foreach (var s in states)
+                {
+                    if ((s.def.kind == QuestKind.Main) != mainPass) continue;
+                    string objective = null;
+                    if (s.status == QuestStatus.Ready) objective = TurnInText(s);
+                    else if (s.status == QuestStatus.Active) objective = ObjectiveText(s);
+                    else if (s.status == QuestStatus.Available && !string.IsNullOrEmpty(s.def.availableText)) objective = s.def.availableText;
+                    if (objective != null) list.Add(new Entry { id = s.def.id, title = s.def.title, objective = objective, main = mainPass });
+                }
             }
             if (list.Count > 0) focus = Mathf.Clamp(focus, 0, list.Count - 1);
             return list;
@@ -94,215 +372,121 @@ namespace RPG
             }
         }
 
-        public Marker MarkerFor(string npc)
+        /// <summary>"?" over whoever takes a ready quest, "!" over givers of available quests and Talk targets.</summary>
+        public Marker MarkerFor(string npc, out QuestKind kind)
         {
-            if (npc == "chief")
+            kind = QuestKind.Main;
+            foreach (var s in states)
             {
-                if (main == Main.TalkToChief) return Marker.Exclaim;
-                if (main == Main.ReportBack) return Marker.Question;
+                if (s.status == QuestStatus.Ready && s.def.turnIn == npc)
+                {
+                    kind = s.def.kind;
+                    return Marker.Question;
+                }
             }
-            if (npc == "girl")
+            foreach (var s in states)
             {
-                if (side == Side.NotStarted && main != Main.TalkToChief) return Marker.Exclaim;
-                if (side == Side.Collecting && Inventory.I != null && Inventory.I.Count("shroom_cap") >= capGoal) return Marker.Question;
+                bool offer = s.status == QuestStatus.Available && !s.def.autoStart && s.def.giver == npc;
+                bool talk = false;
+                if (s.status == QuestStatus.Active)
+                    for (int i = 0; i < s.progress.Length; i++)
+                        if (s.def.objectives[i].kind == ObjectiveKind.Talk && s.def.objectives[i].target == npc && !ObjectiveDone(s, i))
+                            talk = true;
+                if (offer || talk)
+                {
+                    kind = s.def.kind;
+                    return Marker.Exclaim;
+                }
             }
             return Marker.None;
         }
 
-        /// <summary>Where the current focused objective is (for the minimap star).</summary>
+        public Marker MarkerFor(string npc) => MarkerFor(npc, out _);
+
+        /// <summary>Where the focused objective is (for the minimap star).</summary>
         public Vector3? ObjectivePosition()
         {
-            var gm = GameManager.I;
-            if (gm == null) return null;
             var list = Tracked();
-            if (list.Count == 0) return null;
-            var e = list[Mathf.Clamp(focus, 0, list.Count - 1)];
-            if (!e.main) return gm.girlSpot != null ? gm.girlSpot.position : (Vector3?)null;
-            switch (main)
+            if (list.Count == 0 || !byId.TryGetValue(list[Mathf.Clamp(focus, 0, list.Count - 1)].id, out var s)) return null;
+            if (s.status == QuestStatus.Ready) return Locate(s.def.turnIn);
+            if (s.status == QuestStatus.Available) return Locate(s.def.giver);
+            for (int i = 0; i < s.progress.Length; i++)
             {
-                case Main.TalkToChief:
-                case Main.ReportBack: return gm.chiefSpot != null ? gm.chiefSpot.position : (Vector3?)null;
-                case Main.ClearForest: return gm.forestSpot != null ? gm.forestSpot.position : (Vector3?)null;
-                case Main.SlayBoss: return gm.bossSpot != null ? gm.bossSpot.position : (Vector3?)null;
+                if (ObjectiveDone(s, i)) continue;
+                var o = s.def.objectives[i];
+                return Locate(string.IsNullOrEmpty(o.marker) ? o.target : o.marker);
             }
             return null;
         }
 
-        // ------------------------------------------------------------ dialogue
-        public List<DialogueLine> GetDialogue(string npc)
+        static Vector3? Locate(string id)
         {
-            const string chief = "Trưởng Làng";
-            const string mai = "Bé Mai";
-            var L = new List<DialogueLine>();
-            if (npc == "chief")
-            {
-                switch (main)
-                {
-                    case Main.TalkToChief:
-                        L.Add(new DialogueLine(chief, "A, cháu đến rồi! Làng Lá Xanh đang gặp chuyện lớn..."));
-                        L.Add(new DialogueLine(chief, "Từ khi trăng máu mọc, lũ Slime Rêu và Nấm Độc tràn ra khắp Rừng Thì Thầm."));
-                        L.Add(new DialogueLine(chief, "Cháu hãy dọn bớt chúng đi. Nhớ dùng <color=#ffe07a>Q W E R</color> để ra chiêu, <color=#ffe07a>Space</color> để lướt né đòn."));
-                        L.Add(new DialogueLine(chief, "Cầm lấy mấy bình thuốc này. Bấm <color=#ffe07a>1 2 3</color> khi cần nhé!"));
-                        break;
-                    case Main.ClearForest:
-                        L.Add(new DialogueLine(chief, $"Rừng Thì Thầm ở phía đông. Còn {Mathf.Max(0, slimeGoal - slimes)} Slime Rêu và {Mathf.Max(0, shroomGoal - shrooms)} Nấm Độc nữa."));
-                        break;
-                    case Main.SlayBoss:
-                        L.Add(new DialogueLine(chief, "Gấu Ma Rừng Già ngự ở Rừng Già Cổ Thụ, phía đông bắc."));
-                        L.Add(new DialogueLine(chief, "Nó biết <color=#ff9a7a>Dậm Đất</color> làm choáng, <color=#ff9a7a>Ném Đá Lớn</color> và <color=#ff9a7a>Chụp Quăng</color>. Nhìn vòng cảnh báo đỏ mà né!"));
-                        L.Add(new DialogueLine(chief, "Mẹo nhỏ: đứng sau Tảng Đá Lớn khi nó vồ tới... con gấu sẽ tự đâm đầu vào đá đấy."));
-                        break;
-                    case Main.ReportBack:
-                        L.Add(new DialogueLine(chief, "Cháu... cháu đã hạ được Gấu Ma Rừng Già thật sao?!"));
-                        L.Add(new DialogueLine(chief, "Cả làng nợ cháu một ân tình. Đây là phần thưởng xứng đáng!"));
-                        break;
-                    case Main.Done:
-                        L.Add(new DialogueLine(chief, "Rừng đã yên bình trở lại. Cảm ơn cháu, người hùng của Làng Lá Xanh!"));
-                        break;
-                }
-            }
-            else if (npc == "girl")
-            {
-                int caps = Inventory.I != null ? Inventory.I.Count("shroom_cap") : 0;
-                switch (side)
-                {
-                    case Side.NotStarted:
-                        if (main == Main.TalkToChief)
-                        {
-                            L.Add(new DialogueLine(mai, "Anh chị ơi, ông Trưởng Làng đang tìm anh chị đó! Ông đứng cạnh đống lửa."));
-                        }
-                        else
-                        {
-                            L.Add(new DialogueLine(mai, "Mẹ em ốm rồi... Em cần 3 cái Mũ Nấm Đỏ để nấu thuốc."));
-                            L.Add(new DialogueLine(mai, "Lũ Nấm Độc trong rừng hay rơi ra lắm. Anh chị giúp em nhé?"));
-                        }
-                        break;
-                    case Side.Collecting:
-                        if (caps >= capGoal)
-                        {
-                            L.Add(new DialogueLine(mai, "Oa, đủ nấm rồi! Em cảm ơn nhiều lắm!"));
-                            L.Add(new DialogueLine(mai, "Đây là thuốc xanh bà em làm, uống vào khỏe re luôn!"));
-                        }
-                        else L.Add(new DialogueLine(mai, $"Em cần {capGoal} Mũ Nấm Đỏ... mới có {caps} thôi."));
-                        break;
-                    case Side.Done:
-                        L.Add(new DialogueLine(mai, "Mẹ em đỡ nhiều rồi! Anh chị là nhất!"));
-                        break;
-                }
-            }
-            return L;
-        }
-
-        public void OnTalked(string npc)
-        {
-            var db = GameManager.I.db;
-            if (npc == "chief")
-            {
-                if (main == Main.TalkToChief)
-                {
-                    Complete("Lời Nhờ Của Trưởng Làng", xpTalkToChief);
-                    Inventory.I.Add(db.Item("potion_red"), 2);
-                    Inventory.I.Add(db.Item("potion_blue"), 1);
-                    main = Main.ClearForest;
-                    Begin("Dọn Dẹp Rừng Thì Thầm");
-                }
-                else if (main == Main.ReportBack)
-                {
-                    Complete("Gấu Ma Rừng Già", xpSlayBoss);
-                    Inventory.I.Add(db.Item("gold"), 1);
-                    Inventory.I.Add(db.Item("ring"), 1);
-                    Inventory.I.Add(db.Item("potion_red"), 3);
-                    main = Main.Done;
-                    if (HUD.I != null) HUD.I.banner.ShowVictory("NHIỆM VỤ HOÀN THÀNH", "Làng Lá Xanh đã được cứu!");
-                    AudioManager.Play("sfx_levelup", 1f, 0f);
-                }
-            }
-            else if (npc == "girl")
-            {
-                if (side == Side.NotStarted && main != Main.TalkToChief)
-                {
-                    side = Side.Collecting;
-                    Begin("Nấm Cho Bé Mai");
-                }
-                else if (side == Side.Collecting && Inventory.I.Count("shroom_cap") >= capGoal)
-                {
-                    Inventory.I.Remove(db.Item("shroom_cap"), capGoal);
-                    Inventory.I.Add(db.Item("potion_green"), 3);
-                    side = Side.Done;
-                    Complete("Nấm Cho Bé Mai", xpMushrooms);
-                }
-            }
-            GameEvents.RaiseQuestChanged();
-        }
-
-        void OnKilled(KillInfo k)
-        {
-            string id = k.id;
-            if (main == Main.ClearForest)
-            {
-                if (id == "slime") slimes++;
-                if (id == "shroom") shrooms++;
-                if (slimes >= slimeGoal && shrooms >= shroomGoal)
-                {
-                    Complete("Dọn Dẹp Rừng Thì Thầm", xpClearForest);
-                    main = Main.SlayBoss;
-                    Begin("Gấu Ma Rừng Già");
-                }
-                GameEvents.RaiseQuestChanged();
-            }
-            if (id == "bear" && (main == Main.SlayBoss || main == Main.ClearForest))
-            {
-                main = Main.ReportBack;
-                Begin("Trở Về Làng");
-                GameEvents.RaiseQuestChanged();
-            }
-        }
-
-        void OnItem(ItemDef item, int n)
-        {
-            if (item != null && item.id == "shroom_cap") GameEvents.RaiseQuestChanged();
+            if (string.IsNullOrEmpty(id)) return null;
+            var n = NPC.All.Find(x => x.npcId == id);
+            if (n != null) return n.transform.position;
+            var gm = GameManager.I;
+            var t = gm != null ? gm.Spot(id) : null;
+            return t != null ? t.position : (Vector3?)null;
         }
 
         // ------------------------------------------------------------ save
-        [System.Serializable]
+        [Serializable]
+        class QuestState
+        {
+            public string id;
+            public QuestStatus status;
+            public int[] progress;
+        }
+
+        [Serializable]
+        class KillCountState
+        {
+            public string id;
+            public int count;
+        }
+
+        [Serializable]
         class SaveState
         {
-            public Main main;
-            public Side side;
-            public int slimes, shrooms, focus;
+            public List<QuestState> quests = new List<QuestState>();
+            public List<string> flags = new List<string>();
+            public List<KillCountState> kills = new List<KillCountState>();
+            public int focus;
         }
 
         public string SaveKey => "quests";
 
-        public string CaptureState() =>
-            JsonUtility.ToJson(new SaveState { main = main, side = side, slimes = slimes, shrooms = shrooms, focus = focus });
+        public string CaptureState()
+        {
+            var st = new SaveState { focus = focus };
+            foreach (var s in states) st.quests.Add(new QuestState { id = s.def.id, status = s.status, progress = (int[])s.progress.Clone() });
+            st.flags.AddRange(flags);
+            foreach (var kv in kills) st.kills.Add(new KillCountState { id = kv.Key, count = kv.Value });
+            return JsonUtility.ToJson(st);
+        }
 
         public void RestoreState(string json)
         {
-            var s = JsonUtility.FromJson<SaveState>(json);
-            main = s.main;
-            side = s.side;
-            slimes = s.slimes;
-            shrooms = s.shrooms;
-            focus = s.focus;
+            var st = JsonUtility.FromJson<SaveState>(json);
+            flags.Clear();
+            flags.UnionWith(st.flags);
+            kills.Clear();
+            foreach (var k in st.kills) kills[k.id] = k.count;
+            foreach (var s in states)
+            {
+                s.status = QuestStatus.Locked;
+                Array.Clear(s.progress, 0, s.progress.Length);
+            }
+            foreach (var q in st.quests)
+            {
+                if (!byId.TryGetValue(q.id, out var s)) continue;   // quest removed since the save
+                s.status = q.status;
+                if (q.progress != null)
+                    for (int i = 0; i < s.progress.Length && i < q.progress.Length; i++) s.progress[i] = q.progress[i];
+            }
+            focus = st.focus;
+            RefreshUnlocks(false);   // quests added since the save
             GameEvents.RaiseQuestChanged();
-        }
-
-        void Begin(string title)
-        {
-            GameEvents.RaiseLog($"Nhiệm vụ mới: {title}", Palette.LogQuest);
-            if (HUD.I != null) HUD.I.banner.ShowQuest("Nhiệm vụ mới", title);
-            AudioManager.Play("sfx_quest", 0.8f, 0f);
-        }
-
-        void Complete(string title, int xp)
-        {
-            GameEvents.RaiseLog(xp > 0 ? $"Hoàn thành: {title} (+{xp} XP)" : $"Hoàn thành: {title}", Palette.LogQuest);
-            if (PlayerStats.I != null) PlayerStats.I.AddXp(xp);
-            GameEvents.RaiseQuestCompleted(title);
-            AudioManager.Play("sfx_levelup", 0.7f, 0f);
-            var p = GameManager.I.player;
-            if (p != null) VFX.Spawn("quest_complete", p.transform.position, Quaternion.identity, 1f, p.transform);
         }
     }
 }

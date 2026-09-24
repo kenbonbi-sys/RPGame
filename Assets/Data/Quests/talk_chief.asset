@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: talk_chief
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: talk_chief
+  title: "L\u1EDDi Nh\u1EDD C\u1EE7a Tr\u01B0\u1EDFng L\xE0ng"
+  kind: 0
+  summary: "Tr\u01B0\u1EDFng L\xE0ng \u0111ang t\xECm b\u1EA1n b\xEAn \u0111\u1ED1ng l\u1EEDa gi\u1EEFa l\xE0ng."
+  giver: chief
+  turnIn: chief
+  turnInText: 
+  minLevel: 1
+  requires: []
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 0
+    target: chief
+    count: 1
+    text: "N\xF3i chuy\u1EC7n v\u1EDBi Tr\u01B0\u1EDFng L\xE0ng"
+    countPrevious: 0
+    marker: 
+  xp: 20
+  gold: 0
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 2
+  - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
+    count: 1
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 6fb51df590d44164fb1bff3d7cb9a655, type: 2}

@@ -44,6 +44,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 10f7cd43ed1e051478eac3fe47e44317, type: 2}
   - {fileID: 11400000, guid: 3c6597995ce88534c931ff085631144a, type: 2}
   progression: {fileID: 11400000, guid: a0659d7ce1a0e5e4e934c9016c761110, type: 2}
+  quests:
+  - {fileID: 11400000, guid: 85b47a02ce97a9a48a96201cf90adcb0, type: 2}
+  - {fileID: 11400000, guid: 6fb51df590d44164fb1bff3d7cb9a655, type: 2}
+  - {fileID: 11400000, guid: 851a3537d31a1bb418f9aac2c4c8d799, type: 2}
+  - {fileID: 11400000, guid: 6b22d0c804ec8ae48ab51bece3e81c1a, type: 2}
+  dialogue: {fileID: 7545569452688597077, guid: 5a037b0a5345d6e4d99795716e43e5d5, type: 3}
   shadowSprite: {fileID: 21300000, guid: b83736aed3397fe43b51422ef41c87df, type: 3}
   whiteSprite: {fileID: -8108132, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
   starIcon: {fileID: 1035912729, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}

@@ -47,6 +47,17 @@ namespace RPG
             while (Time.realtimeSinceStartup < end) yield return null;
         }
 
+        /// <summary>Clicks through the current conversation, taking the first choice.</summary>
+        static IEnumerator FinishDialogue()
+        {
+            for (int guard = 0; guard < 400 && DialogueDirector.I != null && DialogueDirector.I.IsRunning; guard++)
+            {
+                if (DialogueUI.I.ShowingOptions) DialogueUI.I.Choose(0);
+                else DialogueUI.I.DebugAdvance();
+                yield return Wait(0.05f);
+            }
+        }
+
         void Prep(PlayerController p)
         {
             p.energy = p.maxEnergy;
@@ -104,9 +115,27 @@ namespace RPG
                 chief.Interact(p);
                 yield return Wait(2.2f);
                 yield return Shot("dialogue");
-                DialogueUI.I.SkipAll();
+                yield return FinishDialogue();
                 yield return Wait(0.8f);
                 yield return Shot("quest_started");
+            }
+
+            // --- Bé Mai offers the side quest with a choice
+            var girl = NPC.All.Find(x => x.npcId == "girl");
+            if (girl != null)
+            {
+                Place(p, girl.transform.position + new Vector3(-0.4f, -1.3f));
+                yield return Wait(0.5f);
+                girl.Interact(p);
+                for (int i = 0; i < 20 && !DialogueUI.I.ShowingOptions; i++)
+                {
+                    DialogueUI.I.DebugAdvance();
+                    yield return Wait(0.1f);
+                }
+                yield return Wait(0.4f);
+                yield return Shot("dialogue_choice");
+                yield return FinishDialogue();
+                yield return Wait(0.5f);
             }
 
             // --- forest fight
