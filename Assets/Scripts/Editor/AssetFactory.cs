@@ -25,7 +25,7 @@ namespace RPG.EditorTools
         public static Material FontOutline => AssetDatabase.LoadAssetAtPath<Material>("Assets/Fonts/Inter SDF - Outline.mat");
         public static Material FontShadow => AssetDatabase.LoadAssetAtPath<Material>("Assets/Fonts/Inter SDF - Shadow.mat");
 
-        [MenuItem("Tools/RPG/Steps/3. Rebuild Data (font, items, skills, volumes, audio)", priority = 103)]
+        [MenuItem("Tools/RPG/Steps/3. Data (font, items, skills, volumes, audio)", priority = 103)]
         public static void CreateAll()
         {
             CreateMaterials();
@@ -51,11 +51,13 @@ namespace RPG.EditorTools
                 return null;
             }
             var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (EditorUtil.Keep(m)) return m;
             if (m == null)
             {
                 m = new Material(sh);
                 AssetDatabase.CreateAsset(m, path);
             }
+            EditorUtil.Written++;
             m.shader = sh;
             setup?.Invoke(m);
             EditorUtility.SetDirty(m);
@@ -103,6 +105,8 @@ namespace RPG.EditorTools
             {
                 string p = $"Assets/Fonts/Inter SDF - {name}.mat";
                 var m = AssetDatabase.LoadAssetAtPath<Material>(p);
+                if (EditorUtil.Keep(m)) return m;
+                EditorUtil.Written++;
                 if (m == null)
                 {
                     m = new Material(fa.material);
@@ -144,7 +148,7 @@ namespace RPG.EditorTools
             {
                 var so = new SerializedObject(settings);
                 var p = so.FindProperty("m_defaultFontAsset");
-                if (p != null) p.objectReferenceValue = fa;
+                if (p != null && (p.objectReferenceValue == null || EditorUtil.Overwrite)) p.objectReferenceValue = fa;
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
         }
@@ -162,7 +166,10 @@ namespace RPG.EditorTools
         {
             EditorUtil.EnsureFolder(VolumeFolder);
             string path = $"{VolumeFolder}/{name}.asset";
-            if (AssetDatabase.LoadAssetAtPath<VolumeProfile>(path) != null) AssetDatabase.DeleteAsset(path);
+            var existing = AssetDatabase.LoadAssetAtPath<VolumeProfile>(path);
+            if (EditorUtil.Keep(existing)) return existing;
+            if (existing != null) AssetDatabase.DeleteAsset(path);
+            EditorUtil.Written++;
             var p = ScriptableObject.CreateInstance<VolumeProfile>();
             AssetDatabase.CreateAsset(p, path);
             fill(p);
@@ -222,6 +229,9 @@ namespace RPG.EditorTools
                 string p = AssetDatabase.GUIDToAssetPath(guid);
                 var ai = AssetImporter.GetAtPath(p) as AudioImporter;
                 if (ai == null) continue;
+                // hand-tuned clips keep their settings; only new clips get the defaults
+                if (ai.userData == ConfiguredMark && !EditorUtil.Overwrite) continue;
+                ai.userData = ConfiguredMark;
                 bool music = p.Contains("/Music/");
                 var s = ai.defaultSampleSettings;
                 s.loadType = music ? AudioClipLoadType.Streaming : AudioClipLoadType.DecompressOnLoad;
@@ -234,6 +244,8 @@ namespace RPG.EditorTools
             }
         }
 
+        const string ConfiguredMark = "rpg:configured";
+
         static void CreateAudioLibrary()
         {
             string path = DataFolder + "/AudioLibrary.asset";
@@ -244,9 +256,12 @@ namespace RPG.EditorTools
                 EditorUtil.EnsureFolder(DataFolder);
                 AssetDatabase.CreateAsset(lib, path);
             }
-            lib.clips = AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Audio" })
+            var found = AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Audio" })
                 .Select(g => AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(g)))
-                .Where(c => c != null).OrderBy(c => c.name).ToList();
+                .Where(c => c != null);
+            // authoring mode keeps clips added by hand (from other folders) and only appends new ones
+            var keep = EditorUtil.Overwrite || lib.clips == null ? new List<AudioClip>() : lib.clips.Where(c => c != null).ToList();
+            lib.clips = keep.Union(found).OrderBy(c => c.name).ToList();
             EditorUtility.SetDirty(lib);
             Debug.Log($"[RPG] Audio library: {lib.clips.Count} clips");
         }
@@ -258,6 +273,8 @@ namespace RPG.EditorTools
             string path = $"{DataFolder}/Items/{id}.asset";
             EditorUtil.EnsureFolder(DataFolder + "/Items");
             var it = AssetDatabase.LoadAssetAtPath<ItemDef>(path);
+            if (EditorUtil.Keep(it)) return it;
+            EditorUtil.Written++;
             if (it == null)
             {
                 it = ScriptableObject.CreateInstance<ItemDef>();
@@ -314,6 +331,8 @@ namespace RPG.EditorTools
             string path = $"{DataFolder}/Skills/{id}.asset";
             EditorUtil.EnsureFolder(DataFolder + "/Skills");
             var s = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (EditorUtil.Keep(s)) return s;
+            EditorUtil.Written++;
             if (s == null)
             {
                 s = ScriptableObject.CreateInstance<T>();
@@ -373,28 +392,39 @@ namespace RPG.EditorTools
                 db = ScriptableObject.CreateInstance<GameDatabase>();
                 AssetDatabase.CreateAsset(db, path);
             }
-            db.items = items;
-            db.skills = skills;
-            db.shadowSprite = ArtImporter.S("shadow");
-            db.whiteSprite = ArtImporter.S("white");
-            db.starIcon = ArtImporter.S("icon_star");
-            db.skullIcon = ArtImporter.S("icon_skull");
-            db.questExclaim = ArtImporter.S("quest_excl");
-            db.questQuestion = ArtImporter.S("quest_ques");
-            db.glowSprite = ArtImporter.S("glow");
-            db.beamSprite = ArtImporter.S("beam");
-            db.cursorDefault = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/UI/cursor.png");
-            db.cursorAttack = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/UI/cursor_attack.png");
-            db.stunIcon = ArtImporter.S("st_stun");
-            db.slowIcon = ArtImporter.S("st_slow");
-            db.burnIcon = ArtImporter.S("st_burn");
-            db.shieldIcon = ArtImporter.S("st_shield");
-            db.regenIcon = ArtImporter.S("st_regen");
-            db.spriteLit = SpriteLit;
-            db.spriteUnlit = SpriteUnlit;
-            db.additive = Additive;
-            db.silhouette = Silhouette;
+            // authoring mode appends missing entries and keeps whatever was added or re-pointed by hand
+            db.items = Merge(db.items, items);
+            db.skills = Merge(db.skills, skills);
+            EditorUtil.Assign(ref db.shadowSprite, ArtImporter.S("shadow"));
+            EditorUtil.Assign(ref db.whiteSprite, ArtImporter.S("white"));
+            EditorUtil.Assign(ref db.starIcon, ArtImporter.S("icon_star"));
+            EditorUtil.Assign(ref db.skullIcon, ArtImporter.S("icon_skull"));
+            EditorUtil.Assign(ref db.questExclaim, ArtImporter.S("quest_excl"));
+            EditorUtil.Assign(ref db.questQuestion, ArtImporter.S("quest_ques"));
+            EditorUtil.Assign(ref db.glowSprite, ArtImporter.S("glow"));
+            EditorUtil.Assign(ref db.beamSprite, ArtImporter.S("beam"));
+            EditorUtil.Assign(ref db.cursorDefault, AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/UI/cursor.png"));
+            EditorUtil.Assign(ref db.cursorAttack, AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/UI/cursor_attack.png"));
+            EditorUtil.Assign(ref db.stunIcon, ArtImporter.S("st_stun"));
+            EditorUtil.Assign(ref db.slowIcon, ArtImporter.S("st_slow"));
+            EditorUtil.Assign(ref db.burnIcon, ArtImporter.S("st_burn"));
+            EditorUtil.Assign(ref db.shieldIcon, ArtImporter.S("st_shield"));
+            EditorUtil.Assign(ref db.regenIcon, ArtImporter.S("st_regen"));
+            EditorUtil.Assign(ref db.spriteLit, SpriteLit);
+            EditorUtil.Assign(ref db.spriteUnlit, SpriteUnlit);
+            EditorUtil.Assign(ref db.additive, Additive);
+            EditorUtil.Assign(ref db.silhouette, Silhouette);
             EditorUtility.SetDirty(db);
+        }
+
+        /// <summary>Forced: the generated list. Authoring: the current list plus generated entries it lacks.</summary>
+        static List<T> Merge<T>(List<T> current, List<T> generated) where T : Object
+        {
+            if (EditorUtil.Overwrite || current == null) return generated;
+            var list = current.Where(x => x != null).ToList();
+            foreach (var g in generated)
+                if (g != null && !list.Contains(g)) list.Add(g);
+            return list;
         }
 
         public static GameDatabase Database => AssetDatabase.LoadAssetAtPath<GameDatabase>(DataFolder + "/GameDatabase.asset");

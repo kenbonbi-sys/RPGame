@@ -109,6 +109,8 @@ namespace RPG.EditorTools
             EditorUtil.EnsureFolder(TileFolder);
             string path = $"{TileFolder}/{sprite}.asset";
             var t = AssetDatabase.LoadAssetAtPath<Tile>(path);
+            if (EditorUtil.Keep(t)) return t;
+            EditorUtil.Written++;
             if (t == null)
             {
                 t = ScriptableObject.CreateInstance<Tile>();

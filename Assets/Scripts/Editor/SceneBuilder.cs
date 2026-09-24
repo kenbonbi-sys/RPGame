@@ -10,14 +10,47 @@ namespace RPG.EditorTools
     /// <summary>
     /// Tools/RPG/Build Everything — imports the art, creates data/VFX/prefabs and assembles
     /// Assets/Scenes/Game.unity (camera, lights, post-processing, managers, world, HUD).
-    /// Re-running regenerates the generated assets and the scene.
+    ///
+    /// Authoring mode (default): only assets that are missing get created; existing prefabs,
+    /// materials, data and the scene are left exactly as they are, so hand edits survive.
+    /// Tools/RPG/Force Rebuild Everything regenerates all of it (the old behaviour).
     /// </summary>
     public static class SceneBuilder
     {
         public const string ScenePath = "Assets/Scenes/Game.unity";
 
-        [MenuItem("Tools/RPG/Build Everything (art, prefabs, VFX, scene)", priority = 20)]
+        [MenuItem("Tools/RPG/Build Everything (create missing only)", priority = 20)]
         public static void BuildEverything()
+        {
+            EditorUtil.ResetStats();
+            RunSteps();
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null) BuildScene();
+            else
+            {
+                EditorUtil.Kept++;
+                Debug.Log("[RPG] Scene kept: " + ScenePath + " (Steps/6 or Force Rebuild regenerates it).");
+            }
+            Debug.Log($"[RPG] Build Everything done ({EditorUtil.Stats}) → " + ScenePath);
+        }
+
+        [MenuItem("Tools/RPG/Force Rebuild Everything (overwrite)", priority = 21)]
+        public static void ForceRebuildEverything()
+        {
+            if (!Application.isBatchMode && !EditorUtility.DisplayDialog("Force Rebuild Everything",
+                    "Regenerate every generated asset and the Game scene?\n\nHand edits to generated prefabs, VFX, " +
+                    "materials, items, skills and the scene will be lost.", "Overwrite", "Cancel"))
+                return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            EditorUtil.ResetStats();
+            EditorUtil.Forced(() =>
+            {
+                RunSteps();
+                BuildScene();
+            });
+            Debug.Log($"[RPG] Force Rebuild Everything done ({EditorUtil.Stats}) → " + ScenePath);
+        }
+
+        static void RunSteps()
         {
             ProjectSetup.EnsureSortingLayers();
             ProjectSetup.EnsureLayers();
@@ -26,8 +59,6 @@ namespace RPG.EditorTools
             AssetFactory.CreateAll();
             VFXFactory.BuildAll();
             PrefabFactory.BuildAll();
-            BuildScene();
-            Debug.Log("[RPG] Build Everything done → " + ScenePath);
         }
 
         [MenuItem("Tools/RPG/Steps/6. Rebuild Scene Only (keeps prefabs)", priority = 106)]

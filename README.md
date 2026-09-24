@@ -49,8 +49,10 @@ Tools/
 
 ## Menu Tools/RPG trong Unity
 
-- **Build Everything** — import art → tạo data → VFX → prefab → dựng lại scene. ⚠️ Ghi đè các prefab, data và scene được sinh ra.
-- **Steps/1–6** — chạy từng bước. Nếu bạn đã tự chỉnh prefab/VFX, chỉ dùng **Steps/6. Rebuild Scene Only** để dựng lại map mà giữ nguyên prefab.
+- **Build Everything (create missing only)** — chế độ authoring: import art → data → VFX → prefab → scene, nhưng **chỉ tạo những gì còn thiếu**. Prefab, material, item, skill, VFX library và scene đã có được giữ nguyên, nên chỉnh tay không bị mất. Texture chỉ được cắt lại khi `art_manifest.json` đổi mục của nó.
+- **Force Rebuild Everything (overwrite)** — hành vi cũ: sinh lại toàn bộ và ghi đè (có hộp thoại xác nhận).
+- **Steps/1–6** — chạy từng bước, cũng theo chế độ authoring. **Steps/6. Rebuild Scene Only** luôn dựng lại scene từ các prefab đang có.
+- Batchmode: `-executeMethod RPG.EditorTools.Batch.BuildAll` (authoring), `Batch.ForceBuildAll`, `Batch.RebuildScene`.
 - **Build Windows Player** — xuất `Builds/Windows/RungThiTham.exe`.
 
 ## Mở rộng

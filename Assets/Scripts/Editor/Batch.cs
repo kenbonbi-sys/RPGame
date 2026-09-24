@@ -7,6 +7,8 @@ namespace RPG.EditorTools
     /// <summary>
     /// Entry points for command-line (batchmode) builds:
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildAll
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.ForceBuildAll
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildScene
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildPlayer
     /// </summary>
     public static class Batch
@@ -18,10 +20,22 @@ namespace RPG.EditorTools
             Debug.Log("[RPG] Batch.Setup done");
         }
 
-        /// <summary>Art import, data, VFX, prefabs and the game scene.</summary>
+        /// <summary>Art import, data, VFX, prefabs and the game scene — creates missing assets only.</summary>
         public static void BuildAll()
         {
             SceneBuilder.BuildEverything();
+        }
+
+        /// <summary>Same as BuildAll but overwrites every generated asset and the scene.</summary>
+        public static void ForceBuildAll()
+        {
+            SceneBuilder.ForceRebuildEverything();
+        }
+
+        /// <summary>Regenerates only the Game scene from the prefabs on disk.</summary>
+        public static void RebuildScene()
+        {
+            SceneBuilder.RebuildSceneOnly();
         }
 
         [MenuItem("Tools/RPG/Build Windows Player", priority = 40)]

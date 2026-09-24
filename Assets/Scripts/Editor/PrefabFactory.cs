@@ -18,7 +18,7 @@ namespace RPG.EditorTools
 
         public static GameObject Player, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
 
-        [MenuItem("Tools/RPG/Steps/5. Rebuild Character + Prop Prefabs", priority = 105)]
+        [MenuItem("Tools/RPG/Steps/5. Character + Prop Prefabs", priority = 105)]
         public static void BuildAll()
         {
             EditorUtil.EnsureFolder(CharFolder);
@@ -34,8 +34,8 @@ namespace RPG.EditorTools
             Loot = BuildLoot();
             BuildProps();
             var db = AssetFactory.Database;
-            db.boulderPrefab = Boulder;
-            db.lootPrefab = Loot;
+            EditorUtil.Assign(ref db.boulderPrefab, Boulder);
+            EditorUtil.Assign(ref db.lootPrefab, Loot);
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
         }

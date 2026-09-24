@@ -35,7 +35,7 @@ namespace RPG.EditorTools
 
         public static VFXLibrary Library => AssetDatabase.LoadAssetAtPath<VFXLibrary>("Assets/Data/VFXLibrary.asset");
 
-        [MenuItem("Tools/RPG/Steps/4. Rebuild VFX Prefabs", priority = 104)]
+        [MenuItem("Tools/RPG/Steps/4. VFX Prefabs", priority = 104)]
         public static void BuildAll()
         {
             Mats.Clear();
@@ -48,7 +48,8 @@ namespace RPG.EditorTools
                 lib = ScriptableObject.CreateInstance<VFXLibrary>();
                 AssetDatabase.CreateAsset(lib, "Assets/Data/VFXLibrary.asset");
             }
-            lib.entries.Clear();
+            // authoring mode keeps the library as is (entries may be re-pointed or added by hand)
+            if (EditorUtil.Overwrite) lib.entries.Clear();
 
             // hits & statuses
             Build("hit_spark", HitSpark, 0.6f);
@@ -104,10 +105,10 @@ namespace RPG.EditorTools
 
             // gameplay prefabs built from VFX parts
             var db = AssetFactory.Database;
-            db.fireballPrefab = BuildFireball();
-            db.sporePrefab = BuildSpore();
-            db.rockProjectilePrefab = BuildRockProjectile();
-            db.telegraphPrefab = BuildTelegraph();
+            EditorUtil.Assign(ref db.fireballPrefab, BuildFireball());
+            EditorUtil.Assign(ref db.sporePrefab, BuildSpore());
+            EditorUtil.Assign(ref db.rockProjectilePrefab, BuildRockProjectile());
+            EditorUtil.Assign(ref db.telegraphPrefab, BuildTelegraph());
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
             Debug.Log($"[RPG] VFX library: {lib.entries.Count} effects");
@@ -120,7 +121,9 @@ namespace RPG.EditorTools
             fx.lifetime = lifetime;
             make(root);
             var prefab = EditorUtil.SavePrefab(root, $"{Folder}/{id}.prefab");
-            lib.entries.Add(new VFXLibrary.Entry { id = id, prefab = prefab });
+            var entry = lib.entries.Find(e => e.id == id);
+            if (entry == null) lib.entries.Add(new VFXLibrary.Entry { id = id, prefab = prefab });
+            else if (entry.prefab == null) entry.prefab = prefab;
         }
 
         // ================================================================== materials
@@ -137,6 +140,13 @@ namespace RPG.EditorTools
             if (Mats.TryGetValue(key, out var m) && m != null) return m;
             string path = $"{MatFolder}/{key}.mat";
             m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            // keep materials tuned by hand (e.g. a stronger _Intensity for more bloom)
+            if (EditorUtil.Keep(m))
+            {
+                Mats[key] = m;
+                return m;
+            }
+            EditorUtil.Written++;
             var shader = Shader.Find(additive ? "RPG/VFX Additive" : "RPG/VFX Alpha");
             if (m == null)
             {
