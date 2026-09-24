@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 558786641721394175}
   - component: {fileID: 5242430868067126387}
   - component: {fileID: 6650604467674990475}
+  - component: {fileID: 2353249011183914379}
   m_Layer: 13
   m_Name: Chief
   m_TagString: Untagged
@@ -108,6 +109,20 @@ MonoBehaviour:
   talkClip: chief_talk
   yarnNode: Chief
   fallbackLines: []
+--- !u!114 &2353249011183914379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664820509419875558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af91225ca9c323546b94c64f7a06dd7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteStyle
+  target: {fileID: 5917891472958023982}
+  dissolveEdge: {r: 2.2, g: 1.1, b: 0.35, a: 1}
 --- !u!1 &1523837869237629016
 GameObject:
   m_ObjectHideFlags: 0
@@ -461,7 +476,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 2dac890cd0589364296bbdd3dda5ebf8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

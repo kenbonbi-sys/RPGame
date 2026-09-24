@@ -19,6 +19,7 @@ namespace RPG.EditorTools
         public static Material SpriteLit => AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Lit-Default.mat");
         public static Material SpriteUnlit => AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat");
         public static Material Silhouette => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/Silhouette.mat");
+        public static Material SpriteLitFX => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/SpriteLitFX.mat");
         public static Material Additive => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/SpriteAdditive.mat");
         public static Material AlphaUnlit => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/SpriteAlphaUnlit.mat");
         public static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Fonts/Inter SDF.asset");
@@ -70,6 +71,7 @@ namespace RPG.EditorTools
         static void CreateMaterials()
         {
             MakeMat("Silhouette", "RPG/Sprite Silhouette", m => m.SetFloat("_Intensity", 1.35f));
+            MakeMat("SpriteLitFX", "RPG/Sprite Lit FX");
             MakeMat("SpriteAdditive", "RPG/VFX Additive", m => m.SetFloat("_Intensity", 1.6f));
             MakeMat("SpriteAlphaUnlit", "RPG/VFX Alpha", m => m.SetFloat("_Intensity", 1f));
         }
@@ -751,6 +753,7 @@ namespace RPG.EditorTools
             EditorUtil.Assign(ref db.spriteUnlit, SpriteUnlit);
             EditorUtil.Assign(ref db.additive, Additive);
             EditorUtil.Assign(ref db.silhouette, Silhouette);
+            EditorUtil.Assign(ref db.spriteLitFX, SpriteLitFX);
             EditorUtility.SetDirty(db);
         }
 

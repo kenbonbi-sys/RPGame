@@ -76,6 +76,25 @@ namespace RPG.EditorTools
             });
             YarnNode("Chief", "Chief");
             YarnNode("Girl", "Mai");
+            // characters get the dissolve / outline sprite (T22)
+            foreach (var file in new[] { "Slime", "Shroom", "BossBear", "Chief", "Girl" })
+            {
+                EditorUtil.UpgradePrefab($"{CharFolder}/{file}.prefab", root =>
+                {
+                    if (root.GetComponentInChildren<SpriteStyle>(true) != null) return false;
+                    var body = root.GetComponentsInChildren<SpriteRenderer>(true).FirstOrDefault(r => r.name == "Body");
+                    var fx = AssetFactory.SpriteLitFX;
+                    if (body == null || fx == null) return false;
+                    body.sharedMaterial = fx;
+                    var style = root.AddComponent<SpriteStyle>();
+                    style.target = body;
+                    var enemy = root.GetComponent<EnemyBase>();
+                    if (enemy != null) enemy.style = style;
+                    var boss = root.GetComponent<BossBear>();
+                    if (boss != null) boss.style = style;
+                    return true;
+                });
+            }
             EditorUtil.UpgradePrefab($"{CharFolder}/BossBear.prefab", root =>
             {
                 var boss = root.GetComponent<BossBear>();

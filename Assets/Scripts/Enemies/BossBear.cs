@@ -33,6 +33,7 @@ namespace RPG
         public Transform bodyRoot;
         public SpriteRenderer body;
         public AfterImageSpawner afterImages;
+        public SpriteStyle style;
         public Poise poise;
 
         [Header("Tuning")]
@@ -69,6 +70,7 @@ namespace RPG
             health.Damaged += OnDamaged;
             health.Died += OnDied;
             if (poise == null) poise = GetComponent<Poise>();
+            if (style == null) style = GetComponentInChildren<SpriteStyle>();
             if (poise != null) poise.Broken += OnPoiseBroken;
             All.Add(this);
             SaveRegistry.Register(this);
@@ -154,9 +156,12 @@ namespace RPG
             GameEvents.RaiseBossDisengaged();
             CameraRig.SetZoom(1f);
             CameraRig.SetFocus(null);
-            AudioManager.PlayMusic("music_forest", 2f);
+            AudioManager.PlayMusic(ZoneMusic, 2f);
             if (bodyRoot != null) bodyRoot.localPosition = Vector3.zero;
         }
+
+        /// <summary>Music of the zone the boss lives in (back to it after the fight).</summary>
+        static string ZoneMusic => ZoneRoot.Current != null && ZoneRoot.Current.def != null ? ZoneRoot.Current.def.music : "music_forest";
 
         void ChaseAndDecide(PlayerController p)
         {
@@ -548,13 +553,15 @@ namespace RPG
             CameraRig.SetZoom(1f);
             CameraRig.SetFocus(null);
             yield return new WaitForSeconds(4f);
-            AudioManager.PlayMusic("music_forest", 3f);
-            float t = 0;
-            while (t < 1.5f)
+            AudioManager.PlayMusic(ZoneMusic, 3f);
+            if (style != null && style.Supported) yield return style.Dissolve(1.8f);
+            else
             {
-                t += Time.deltaTime;
-                if (body != null) body.color = new Color(1, 1, 1, 1 - t / 1.5f);
-                yield return null;
+                for (float t = 0; t < 1.5f; t += Time.deltaTime)
+                {
+                    if (body != null) body.color = new Color(1, 1, 1, 1 - t / 1.5f);
+                    yield return null;
+                }
             }
             gameObject.SetActive(false);
         }

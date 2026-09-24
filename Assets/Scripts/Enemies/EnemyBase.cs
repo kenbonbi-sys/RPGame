@@ -30,6 +30,7 @@ namespace RPG
         public StatusEffects status;
         public HitFlash flash;
         public SpriteRenderer body;
+        public SpriteStyle style;
 
         [HideInInspector] public EnemySpawner spawner;
 
@@ -57,6 +58,7 @@ namespace RPG
             if (health == null) health = GetComponent<Health>();
             if (status == null) status = GetComponent<StatusEffects>();
             colliders = GetComponentsInChildren<Collider2D>(true);
+            if (style == null) style = GetComponentInChildren<SpriteStyle>();
             health.Damaged += OnDamaged;
             health.Died += OnDied;
         }
@@ -242,12 +244,14 @@ namespace RPG
         IEnumerator Despawn()
         {
             yield return new WaitForSeconds(1.2f);
-            float t = 0;
-            while (t < 0.5f)
+            if (style != null && style.Supported) yield return style.Dissolve(0.6f);
+            else
             {
-                t += Time.deltaTime;
-                if (body != null) body.color = new Color(1, 1, 1, 1 - t / 0.5f);
-                yield return null;
+                for (float t = 0; t < 0.5f; t += Time.deltaTime)
+                {
+                    if (body != null) body.color = new Color(1, 1, 1, 1 - t / 0.5f);
+                    yield return null;
+                }
             }
             if (spawner != null) spawner.NotifyDead(this);
             gameObject.SetActive(false);

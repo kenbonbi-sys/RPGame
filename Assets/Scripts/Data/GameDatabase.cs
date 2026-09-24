@@ -37,6 +37,8 @@ namespace RPG
 
         [Header("Materials")]
         public Material spriteLit;
+        [Tooltip("Lit sprite with dissolve + outline (characters).")]
+        public Material spriteLitFX;
         public Material spriteUnlit;
         public Material additive;
         public Material silhouette;

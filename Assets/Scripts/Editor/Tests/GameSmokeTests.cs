@@ -488,6 +488,22 @@ namespace RPG.EditorTools.Tests
         }
 
         [UnityTest]
+        public IEnumerator EnemiesDissolveAndOutline()
+        {
+            var enemy = EnemyBase.All.Find(e => !e.IsDead);
+            Assert.NotNull(enemy.style, "enemy prefab has a SpriteStyle");
+            Assert.IsTrue(enemy.style.Supported, "body uses RPG/Sprite Lit FX");
+            enemy.style.SetOutline(true, Color.red);
+            yield return GameSeconds(0.3f);
+            Assert.AreEqual(1f, enemy.style.OutlineAmount, 1e-3f);
+            enemy.style.SetOutline(false, Color.red);
+            enemy.health.Kill();
+            yield return GameSeconds(1.2f + 0.8f);
+            Assert.IsFalse(enemy.gameObject.activeSelf, "dissolved and despawned");
+            Assert.AreEqual(1f, enemy.style.DissolveAmount, 1e-3f);
+        }
+
+        [UnityTest]
         public IEnumerator DamagedSaveFallsBackToBackup()
         {
             Inventory.I.gold = 123;

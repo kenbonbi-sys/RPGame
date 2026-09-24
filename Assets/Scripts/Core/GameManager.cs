@@ -106,15 +106,34 @@ namespace RPG
             if (InputReader.ToggleQuest && QuestSystem.I != null) QuestSystem.I.CycleFocus();
         }
 
+        static readonly Color EnemyOutline = new Color(1.8f, 0.45f, 0.35f, 1f);
+        static readonly Color NpcOutline = new Color(1.6f, 1.35f, 0.55f, 1f);
+        SpriteStyle hovered;
+
+        /// <summary>Attack cursor over enemies; a 1 px outline on whatever enemy or NPC is under the mouse.</summary>
         void UpdateCursor()
         {
             bool overEnemy = false;
+            SpriteStyle style = null;
+            Color outline = NpcOutline;
             if (State == GameState.Playing && !InputReader.PointerOverUI)
             {
-                var c = Physics2D.OverlapCircle(InputReader.MouseWorld, 0.4f, Layers.EnemyMask);
-                overEnemy = c != null;
+                var c = Physics2D.OverlapCircle(InputReader.MouseWorld, 0.4f, Layers.EnemyMask | Layers.NPCMask);
+                if (c != null)
+                {
+                    var h = c.GetComponentInParent<Health>();
+                    overEnemy = h != null && h.team == Team.Enemy && !h.IsDead;
+                    if (overEnemy) outline = EnemyOutline;
+                    if (overEnemy || c.GetComponentInParent<NPC>() != null) style = c.GetComponentInParent<SpriteStyle>();
+                }
             }
             if (overEnemy != attackCursor) SetCursor(overEnemy);
+            if (style != hovered)
+            {
+                if (hovered != null) hovered.SetOutline(false, outline);
+                hovered = style;
+                if (hovered != null) hovered.SetOutline(true, outline);
+            }
         }
 
         void SetCursor(bool attack)

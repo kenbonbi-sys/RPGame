@@ -187,6 +187,22 @@ namespace RPG
                 yield return Wait(2.5f);
             }
 
+            // --- hover outline and death dissolve (Sprite Lit FX)
+            var victim = FindEnemy("slime", p.transform.position) ?? FindEnemy("shroom", p.transform.position);
+            if (victim != null && victim.style != null)
+            {
+                Place(p, (Vector2)victim.transform.position + new Vector2(-2.2f, -0.8f));
+                yield return Wait(0.4f);
+                victim.style.SetOutline(true, new Color(1.8f, 0.45f, 0.35f));
+                yield return Wait(0.4f);
+                yield return Shot("hover_outline");
+                victim.style.SetOutline(false, Color.white);
+                victim.health.Kill();
+                yield return Wait(1.2f + 0.3f);
+                yield return Shot("dissolve");
+                yield return Wait(0.6f);
+            }
+
             // --- UI panels
             HUD.I.inventory.Show();
             yield return Wait(0.6f);

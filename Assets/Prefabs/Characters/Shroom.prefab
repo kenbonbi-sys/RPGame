@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4308125122756278767}
   - component: {fileID: 7144777416413833185}
   - component: {fileID: 6335928378538994649}
+  - component: {fileID: 5376007870735712811}
   m_Layer: 9
   m_Name: Shroom
   m_TagString: Untagged
@@ -152,6 +153,8 @@ MonoBehaviour:
   hp: 48
   head: {fileID: 6840824806405599494}
   damageTakenMultiplier: 1
+  armor: 0
+  elementalResist: 0
   invulnerable: 0
   showDamageNumbers: 1
 --- !u!114 &7144777416413833185
@@ -183,6 +186,7 @@ MonoBehaviour:
   enemyId: shroom
   displayName: "N\u1EA5m \u0110\u1ED9c"
   level: 3
+  rank: 0
   maxHp: 48
   aggroRange: 7.5
   leashRange: 13
@@ -213,11 +217,26 @@ MonoBehaviour:
   status: {fileID: 7144777416413833185}
   flash: {fileID: 4499373793819379535}
   body: {fileID: 8671770949700518121}
+  style: {fileID: 5376007870735712811}
   spawner: {fileID: 0}
   preferredDistance: 4.2
   shootRange: 6.5
   sporeDamage: 9
   sporeSpeed: 5.5
+--- !u!114 &5376007870735712811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117208041766771330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af91225ca9c323546b94c64f7a06dd7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteStyle
+  target: {fileID: 8671770949700518121}
+  dissolveEdge: {r: 2.2, g: 1.1, b: 0.35, a: 1}
 --- !u!1 &3084154142549119273
 GameObject:
   m_ObjectHideFlags: 0
@@ -402,7 +421,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 2dac890cd0589364296bbdd3dda5ebf8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

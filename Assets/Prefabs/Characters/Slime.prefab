@@ -61,7 +61,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 2dac890cd0589364296bbdd3dda5ebf8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -175,6 +175,7 @@ GameObject:
   - component: {fileID: 2449181222028923396}
   - component: {fileID: 565988563722864460}
   - component: {fileID: 6880795571386909060}
+  - component: {fileID: 5168979495218567908}
   m_Layer: 9
   m_Name: Slime
   m_TagString: Untagged
@@ -311,6 +312,8 @@ MonoBehaviour:
   hp: 60
   head: {fileID: 5454656955679919569}
   damageTakenMultiplier: 1
+  armor: 0
+  elementalResist: 0
   invulnerable: 0
   showDamageNumbers: 1
 --- !u!114 &565988563722864460
@@ -342,6 +345,7 @@ MonoBehaviour:
   enemyId: slime
   displayName: "Slime R\xEAu"
   level: 2
+  rank: 0
   maxHp: 60
   aggroRange: 6
   leashRange: 13
@@ -368,11 +372,26 @@ MonoBehaviour:
   status: {fileID: 565988563722864460}
   flash: {fileID: 6705259486716061721}
   body: {fileID: 5399167515416287491}
+  style: {fileID: 5168979495218567908}
   spawner: {fileID: 0}
   hopTime: 0.45
   hopPause: 0.5
   lungeSpeed: 7
   lungeDamage: 10
+--- !u!114 &5168979495218567908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6024205986692668081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af91225ca9c323546b94c64f7a06dd7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteStyle
+  target: {fileID: 5399167515416287491}
+  dissolveEdge: {r: 2.2, g: 1.1, b: 0.35, a: 1}
 --- !u!1 &7912423833143206303
 GameObject:
   m_ObjectHideFlags: 0

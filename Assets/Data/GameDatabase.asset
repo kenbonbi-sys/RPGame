@@ -69,6 +69,7 @@ MonoBehaviour:
   shieldIcon: {fileID: -1526223856, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
   regenIcon: {fileID: -44040512, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
   spriteLit: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  spriteLitFX: {fileID: 2100000, guid: 2dac890cd0589364296bbdd3dda5ebf8, type: 2}
   spriteUnlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   additive: {fileID: 2100000, guid: a184b5641139f194985755424d990a2a, type: 2}
   silhouette: {fileID: 2100000, guid: 1f84dbfe08255ea4d9374c86abc7b260, type: 2}
