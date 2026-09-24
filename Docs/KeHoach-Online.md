@@ -1,6 +1,6 @@
 # Kế hoạch online — Rừng Thì Thầm (hướng C: thế giới online nhiều người)
 
-> Trạng thái: **giai đoạn 0 và 1 xong** (24/09/2026, nhánh `claude/online-phase0` rồi `claude/online-phase1`): nhiều người vào cùng một thế giới và thấy nhau đi lại. Tiếp theo là giai đoạn 2. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
+> Trạng thái: **giai đoạn 0 và 1 xong** (24/09/2026, trên `main`): nhiều người vào cùng một thế giới và thấy nhau đi lại. Tiếp theo là giai đoạn 2. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
 
 ## 1. Mục tiêu
 

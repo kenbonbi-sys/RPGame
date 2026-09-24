@@ -5,7 +5,7 @@ File `.github/workflows/ci.yml`, chạy bằng GitHub Actions và [GameCI](https
 | Job | Khi nào | Làm gì | Cần giấy phép Unity |
 |---|---|---|---|
 | **Compile check** | Mọi lần push, mọi PR | Biên dịch toàn bộ C# bằng `Tools/CompileCheck` (1–2 phút); mỗi lỗi hiện thành chú thích (annotation) ngay trên commit và PR | Không |
-| **EditMode tests** | PR, push lên `main`/`dev`, mỗi đêm, chạy tay | Chạy toàn bộ test trong Unity; kết quả hiện thành check “EditMode test results” trên commit | Có |
+| **EditMode tests** | PR, push lên `main`, mỗi đêm, chạy tay | Chạy toàn bộ test trong Unity; kết quả hiện thành check “EditMode test results” trên commit | Có |
 | **Windows player** | Mỗi đêm, chạy tay | Build `RungThiTham.exe`, lưu 3 ngày ở mục Artifacts của lần chạy | Có |
 | **AutoShot tour** | Sau bản build | Mở bản build trên máy Windows của GitHub, chạy `-autoshot`, lưu ảnh chụp và `player.log` | Có |
 
@@ -24,7 +24,7 @@ Cách lấy giấy phép có thể đổi theo phiên bản Unity; nếu các b�
 
 ## Build mỗi đêm
 
-- Chạy lúc 02:00 giờ Việt Nam và build nhánh `dev`.
+- Chạy lúc 02:00 giờ Việt Nam và build nhánh `main`.
 - GitHub chỉ chạy lịch hẹn giờ theo file workflow nằm trên nhánh mặc định (`main`), nên build đêm bắt đầu sau khi `ci.yml` được gộp vào `main`.
 - Chạy tay bất cứ lúc nào: tab **Actions → CI → Run workflow**, chọn nhánh.
 

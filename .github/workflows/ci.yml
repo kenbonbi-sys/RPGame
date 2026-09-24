@@ -1,6 +1,6 @@
 # CI for Rừng Thì Thầm (plan T14). What runs, and the secrets it needs: Docs/CI.md
 #   compile   every push and PR: C# compile check without Unity (Tools/CompileCheck)
-#   tests     Unity EditMode tests on PRs, pushes to main/dev, nightly and manual runs
+#   tests     Unity EditMode tests on PRs, pushes to main, nightly and manual runs
 #   build     Windows player, nightly and manual runs
 #   autoshot  plays the AutoShot tour in that player on Windows, uploads the screenshots
 # The Unity jobs are skipped until the repository has a Unity license secret.
@@ -13,7 +13,7 @@ on:
   pull_request:
     paths-ignore: ['**.md', 'Screenshots/**']
   schedule:
-    - cron: '0 19 * * *'   # 02:00 Vietnam time, builds the dev branch
+    - cron: '0 19 * * *'   # 02:00 Vietnam time, builds main
   workflow_dispatch:
     inputs:
       build:
@@ -30,8 +30,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # nightly runs build dev (schedules always start from the default branch)
-  CHECKOUT_REF: ${{ github.event_name == 'schedule' && 'dev' || '' }}
+  # every run checks out the commit that triggered it (nightly: main, the default branch)
+  CHECKOUT_REF: ''
 
 jobs:
   compile:
@@ -83,7 +83,7 @@ jobs:
     needs: compile
     if: >-
       needs.compile.outputs.unity == 'true' &&
-      (github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+      (github.event_name != 'push' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
