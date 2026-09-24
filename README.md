@@ -65,6 +65,7 @@ Tools/
 - **Chỉnh VFX:** mở `Assets/Prefabs/VFX/<tên>.prefab`. Mỗi hiệu ứng là Particle System + sprite flipbook + Light2D. Tăng `_Intensity` của material để glow (Bloom) mạnh hơn.
 - **Thêm skill:** tạo class kế thừa `SkillDef` và viết `Execute()`, tạo asset qua *Create → RPG → Skills*, rồi gán vào `PlayerSkills.slots` trên prefab Player.
 - **Thay art:** thay PNG trong `Assets/Art` (giữ kích thước frame), hoặc kéo sprite mới vào các `SpriteAnimSet` trong `Assets/Data/Anims`.
+- **Phím điều khiển:** mọi phím định nghĩa một chỗ trong `Assets/Scripts/Core/GameControls.cs` (Input System actions). Đổi phím lúc chạy: `InputReader.Asset` + `InputReader.SaveBindingOverrides()` (lưu trong PlayerPrefs); nhãn phím trên skill bar tự cập nhật.
 - **Thêm nhiệm vụ / hội thoại:** tạo asset qua *Create → RPG → Quest*, thêm vào `GameDatabase.quests`; viết node trong một file `.yarn` ở `Assets/Dialogue` và đặt tên node vào `NPC.yarnNode`.
 - **Thêm quái:** kế thừa `EnemyBase` (xem `SlimeAI`, `ShroomAI`), boss tham khảo `BossBear`.
 - **Chạy test tự động:** `RungThiTham.exe -autoshot -autoshotDir "D:\shots"` sẽ tự chơi một vòng, chụp màn hình rồi thoát.

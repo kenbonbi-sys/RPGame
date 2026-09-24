@@ -435,12 +435,13 @@ namespace RPG.EditorTools
                 Vector2 pos;
                 if (i < 6) pos = new Vector2(-(5 - i) * (size + gap) - size / 2, size / 2);
                 else pos = new Vector2(-(7 - i) * (size + gap) - size / 2, size + 14 + size / 2);
-                string key = InputReader.SkillKeyLabels[i];
+                string key = InputReader.SkillLabel(i);
                 var s = Slot(rt, "Skill_" + key, new Vector2(1, 0), pos, size, out var icon, out var cd, key);
                 var ui = s.gameObject.AddComponent<SkillSlotUI>();
                 ui.slot = i;
                 ui.icon = icon;
                 ui.cooldownMask = cd;
+                ui.keyLabel = s.Find("KeyBadge/Key").GetComponent<TextMeshProUGUI>();
                 ui.readyFlash = Img(s, "ReadyFlash", "white", new Color(1, 1, 1, 0), C, Vector2.zero, new Vector2(size - 14, size - 14));
                 ui.highlight = Img(s, "Highlight", "slot_highlight", Color.white, C, Vector2.zero, new Vector2(size, size), Image.Type.Sliced);
                 ui.highlight.enabled = false;

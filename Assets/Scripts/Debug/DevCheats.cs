@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace RPG
 {
@@ -18,7 +17,7 @@ namespace RPG
             var gm = GameManager.I;
             if (gm == null || gm.player == null) return;
             var p = gm.player;
-            if (InputReader.Pressed(Key.F5))
+            if (InputReader.Cheat(0))
             {
                 p.health.Heal(9999);
                 p.energy = p.maxEnergy;
@@ -27,22 +26,22 @@ namespace RPG
                 Inventory.I.Add(gm.db.Item("potion_blue"), 3, false);
                 GameEvents.RaiseLog("[Cheat] Hồi đầy máu, năng lượng và hồi chiêu.");
             }
-            if (InputReader.Pressed(Key.F6) && DayNightCycle.I != null)
+            if (InputReader.Cheat(1) && DayNightCycle.I != null)
             {
                 DayNightCycle.I.time = Mathf.Repeat(DayNightCycle.I.time + 0.25f, 1f);
                 GameEvents.RaiseLog("[Cheat] Tua thời gian +6 giờ.");
             }
-            if (InputReader.Pressed(Key.F7) && gm.bossSpot != null)
+            if (InputReader.Cheat(2) && gm.bossSpot != null)
             {
                 p.motor.Teleport((Vector2)gm.bossSpot.position + Vector2.down * 6.5f);
                 if (CameraRig.I != null) CameraRig.I.SnapToTarget();
             }
-            if (InputReader.Pressed(Key.F8) && gm.respawnPoint != null)
+            if (InputReader.Cheat(3) && gm.respawnPoint != null)
             {
                 p.motor.Teleport(gm.respawnPoint.position);
                 if (CameraRig.I != null) CameraRig.I.SnapToTarget();
             }
-            if (InputReader.Pressed(Key.F9))
+            if (InputReader.Cheat(4))
             {
                 foreach (var e in EnemyBase.All.ToArray())
                     if (!e.IsDead && Vector2.Distance(e.transform.position, p.transform.position) < 12f) e.health.Kill();

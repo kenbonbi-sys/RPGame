@@ -56,6 +56,7 @@ namespace RPG
             Bestiary.Reset();
             Pool.ClearAll();
             SetupPhysics();
+            InputReader.Enable();
             Application.targetFrameRate = 120;
             // scenes built before these systems existed
             if (GetComponent<SaveManager>() == null) gameObject.AddComponent<SaveManager>();

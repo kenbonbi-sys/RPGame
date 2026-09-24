@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using UnityEngine.InputSystem;
 using UnityEngine;
 
 namespace RPG.EditorTools.Tests
@@ -98,6 +99,31 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(1, b.RemoveFrom(ring));
             Assert.AreEqual(3f, b.Get(StatId.Armor));
             Assert.AreEqual(1, changes);
+        }
+    }
+
+    public class ControlsTests
+    {
+        [TearDown]
+        public void TearDown() => InputReader.ResetBindings();
+
+        [Test]
+        public void DefaultSkillKeysFollowTheReferenceLayout()
+        {
+            string[] expected = { "Q", "W", "E", "R", "A", "S", "D", "Space" };
+            for (int i = 0; i < expected.Length; i++) Assert.AreEqual(expected[i], InputReader.SkillLabel(i));
+        }
+
+        [Test]
+        public void RemappedKeysShowInLabelsAndSurviveAReload()
+        {
+            var fireball = InputReader.Asset.FindAction("Gameplay/Skill2", true);
+            fireball.ApplyBindingOverride("<Keyboard>/z");
+            InputReader.SaveBindingOverrides();
+            Assert.AreEqual("Z", InputReader.SkillLabel(1));
+            StringAssert.Contains("<Keyboard>/z", UnityEngine.PlayerPrefs.GetString("rtt.controls.overrides"));
+            InputReader.ResetBindings();
+            Assert.AreEqual("W", InputReader.SkillLabel(1));
         }
     }
 }

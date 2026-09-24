@@ -3,6 +3,8 @@ using System.IO;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
 
 namespace RPG.EditorTools.Tests
@@ -343,6 +345,37 @@ namespace RPG.EditorTools.Tests
             Object.Destroy(go);
             yield return Frames(2);
             Assert.IsTrue(WorldId.Find("lever_test") == null, "unregistered when destroyed");
+        }
+
+        [UnityTest]
+        public IEnumerator KeyPressCastsThroughTheInputActions()
+        {
+            // the editor only routes keyboards to Play Mode while the Game view has focus
+            // and drops keyboards while the (batchmode) application has no focus
+            var focus = InputSystem.settings.editorInputBehaviorInPlayMode;
+            var background = InputSystem.settings.backgroundBehavior;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            var kb = InputSystem.AddDevice<Keyboard>("TestKeyboard");
+            try
+            {
+                int casts = 0;
+                GameManager.I.player.skills.SkillCast += slot => { if (slot == 0) casts++; };
+                InputSystem.QueueStateEvent(kb, new KeyboardState(Key.Q));
+                yield return Frames(2);
+                var skill1 = InputReader.Asset.FindAction("Gameplay/Skill1", true);
+                string where = $"key down={kb.qKey.isPressed}, action pressed={skill1.IsPressed()}, enabled={skill1.enabled}, " +
+                               $"state={GameManager.I.State}, updates={InputSystem.settings.updateMode}";
+                InputSystem.QueueStateEvent(kb, new KeyboardState());
+                yield return Frames(2);
+                Assert.AreEqual(1, casts, "Q casts slot 0 once; " + where);
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(kb);
+                InputSystem.settings.editorInputBehaviorInPlayMode = focus;
+                InputSystem.settings.backgroundBehavior = background;
+            }
         }
 
         [UnityTest]
