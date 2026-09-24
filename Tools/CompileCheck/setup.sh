@@ -18,26 +18,32 @@ unzip_to() {   # unzip_to <zip> <dir>
   else python3 -c "import sys,zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])" "$1" "$2"; fi
 }
 
-nuget() {      # nuget <id> <version>  -> extracted into .cache/nuget/<id>
+pkg_dir() { echo "$cache/nuget/$(echo "$1" | tr '[:upper:]' '[:lower:]').$2"; }
+
+fetch() {      # fetch <id> <version>: extracts the NuGet package into $(pkg_dir id version)
   local id="$1" ver="$2" lower dir
   lower="$(echo "$id" | tr '[:upper:]' '[:lower:]')"
-  dir="$cache/nuget/$lower.$ver"
-  if [ ! -d "$dir" ]; then
-    echo "  nuget $id $ver" >&2
-    curl -fsSL --retry 3 -o "$dir.nupkg" "https://api.nuget.org/v3-flatcontainer/$lower/$ver/$lower.$ver.nupkg"
-    mkdir -p "$dir" && unzip_to "$dir.nupkg" "$dir" && rm "$dir.nupkg"
-  fi
-  echo "$dir"
+  dir="$(pkg_dir "$id" "$ver")"
+  [ -d "$dir" ] && return 0
+  echo "  nuget $id $ver"
+  rm -rf "$dir.tmp" && mkdir -p "$dir.tmp"
+  curl -fsSL --retry 3 -o "$dir.nupkg" "https://api.nuget.org/v3-flatcontainer/$lower/$ver/$lower.$ver.nupkg"
+  unzip_to "$dir.nupkg" "$dir.tmp"
+  chmod -R u+rwX "$dir.tmp"   # packages zipped on Windows extract without read permission
+  mv "$dir.tmp" "$dir"
+  rm -f "$dir.nupkg"
 }
 
 echo "[compile-check] reference assemblies"
-modules="$(nuget UnityEngine.Modules 2021.3.33 | tail -1)"
-sdk="$(nuget Unity3D.SDK 2021.1.14.1 | tail -1)"
-ui="$(nuget Unity3D.UnityEngine.UI 2020.3.21 | tail -1)"
-nunit="$(nuget NUnit 3.14.0 | tail -1)"
+fetch UnityEngine.Modules 2021.3.33
+fetch Unity3D.SDK 2021.1.14.1
+fetch Unity3D.UnityEngine.UI 2020.3.21
+fetch NUnit 3.14.0
 rm -f "$cache/refs/"*.dll
-cp "$modules"/lib/net45/*.dll "$cache/refs/"
-cp "$sdk/lib/UnityEditor.dll" "$ui/lib/UnityEngine.UI.dll" "$nunit/lib/netstandard2.0/nunit.framework.dll" "$cache/refs/"
+cp "$(pkg_dir UnityEngine.Modules 2021.3.33)"/lib/net45/*.dll "$cache/refs/"
+cp "$(pkg_dir Unity3D.SDK 2021.1.14.1)/lib/UnityEditor.dll" \
+   "$(pkg_dir Unity3D.UnityEngine.UI 2020.3.21)/lib/UnityEngine.UI.dll" \
+   "$(pkg_dir NUnit 3.14.0)/lib/netstandard2.0/nunit.framework.dll" "$cache/refs/"
 
 echo "[compile-check] Yarn Spinner source"
 yarn_url="$(grep -o '"dev.yarnspinner.unity": *"[^"]*"' "$root/Packages/manifest.json" | sed -E 's/.*: *"([^"]*)"/\1/')"
