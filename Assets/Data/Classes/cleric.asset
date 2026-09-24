@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8d73affa8ff6d24dba757b15a0caf2d, type: 3}
+  m_Name: cleric
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ClassDef
+  id: cleric
+  displayName: "Tu S\u0129"
+  englishName: Cleric
+  role: "TU S\u0128 TH\u1EA6N TH\xC1NH"
+  description: "M\u01B0\u1EE3n s\u1EE9c m\u1EA1nh c\u1EE7a th\u1EA7n linh: ch\u1EEFa l\xE0nh \u0111\u1ED3ng \u0111\u1ED9i, che ch\u1EDF h\u1ECD v\xE0 gi\xE1ng \xE1nh s\xE1ng l\xEAn k\u1EBB \xE1c."
+  complexity: 1
+  hitDie: 8
+  primary: 04000000i
+  arrayOrder: 040000000300000000000000050000000200000001000000i
+  savingThrows: 0400000005000000i
+  casting: 4
+  armor: 2
+  weapons:
+  - mace
+  - staff
+  kit:
+  - sacredflame
+  - guidingbolt
+  - spiritguard
+  - lightpillar
+  - heal
+  - shield
+  - radiance
+  outfit: cleric
+  cloth: {r: 0.84705883, g: 0.8627451, b: 0.9098039, a: 1}
+  color: {r: 0.8156863, g: 0.627451, b: 0.1882353, a: 1}
+  emblem: {fileID: 1324982768, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}

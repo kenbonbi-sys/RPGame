@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
   id: slay_toadking
   title: "C\xF3c T\xEDa Ao \u0110\u1ED9c"
-  kind: 2
-  summary: "C\xF3c T\xEDa ng\u1EF1 gi\u1EEFa Ao C\xF3c T\xEDa ph\xEDa b\u1EAFc \u0111\u1EA7m. L\u01B0\u1EE1i n\xF3 k\xE9o ng\u01B0\u1EDDi v\xE0o v\u0169ng \u0111\u1ED9c."
+  kind: 0
+  summary: "C\xF3c T\xEDa ng\u1EF1 gi\u1EEFa Ao C\xF3c T\xEDa ph\xEDa b\u1EAFc \u0111\u1EA7m. L\u01B0\u1EE1i n\xF3 k\xE9o ng\u01B0\u1EDDi v\xE0o v\u0169ng \u0111\u1ED9c. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 11."
   giver: 
   turnIn: 
   turnInText: 
   minLevel: 1
   requires:
-  - {fileID: 11400000, guid: dfa73432ad6a04d449568bd01590066f, type: 2}
+  - {fileID: 11400000, guid: 7e87a3d8e8243434d93ecfe4dcde8932, type: 2}
   requiredFlags: []
   autoStart: 1
   availableText: 
@@ -38,4 +38,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
     count: 3
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: b9b514017c7c8b34e8da788930f75a12, type: 2}

@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
   id: cave_spiders
   title: "Truy N\xE3: Nh\u1EC7n Hang"
-  kind: 2
-  summary: "Nh\u1EC7n Hang phun t\u01A1 tr\xF3i ch\xE2n ng\u01B0\u1EDDi r\u1ED3i m\u1EDBi lao t\u1EDBi c\u1EAFn. T\u1ED5 c\u1EE7a ch\xFAng \u1EDF s\xE2u trong hang, ph\xEDa b\u1EAFc R\u1EEBng Pha L\xEA."
+  kind: 0
+  summary: "Nh\u1EC7n Hang phun t\u01A1 tr\xF3i ch\xE2n ng\u01B0\u1EDDi r\u1ED3i m\u1EDBi lao t\u1EDBi c\u1EAFn. T\u1ED5 c\u1EE7a ch\xFAng \u1EDF s\xE2u trong hang, ph\xEDa b\u1EAFc R\u1EEBng Pha L\xEA. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 15."
   giver: 
   turnIn: 
   turnInText: 
   minLevel: 1
   requires:
-  - {fileID: 11400000, guid: 19c6a341f4d25f34ba564b0b7202c59a, type: 2}
+  - {fileID: 11400000, guid: ac7cfde1639336d44902a420de4e4445, type: 2}
   requiredFlags: []
   autoStart: 1
   availableText: 
@@ -38,4 +38,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
     count: 2
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: b6add70316dd3f54d84de3c2733f9fa4, type: 2}

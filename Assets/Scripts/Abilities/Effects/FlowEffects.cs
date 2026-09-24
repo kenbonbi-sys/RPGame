@@ -101,7 +101,11 @@ namespace RPG
 
         IEnumerator Pulse(AbilityContext ctx)
         {
-            var fx = string.IsNullOrEmpty(attachedVfx) || !ctx.visual ? null : VFX.Spawn(attachedVfx, ctx.CasterPosition, Quaternion.identity, 1f, ctx.CasterTransform, true);
+            // on the caster it follows them; at a point (a black hole) it stays there
+            bool onCaster = at.from == Anchor.From.Caster;
+            var fx = string.IsNullOrEmpty(attachedVfx) || !ctx.visual ? null
+                : onCaster ? VFX.Spawn(attachedVfx, ctx.CasterPosition, Quaternion.identity, 1f, ctx.CasterTransform, true)
+                : VFX.Spawn(attachedVfx, at.Resolve(ctx), Quaternion.identity, 1f, null, true);
             float end = Time.time + duration;
             float nextPulse = 0, nextSfx = 0;
             while (Time.time < end && ctx.Alive)

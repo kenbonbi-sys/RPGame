@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: flurryblows
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: flurryblows
+  displayName: "Li\xEAn Ho\xE0n C\u01B0\u1EDBc"
+  description: "Tung li\xEAn ho\xE0n c\u01B0\u1EDBc quanh m\xECnh trong 1.2 gi\xE2y."
+  icon: {fileID: -1990925594, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 8193
+  cooldown: 9
+  energyCost: 14
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.3
+  commitTime: 0.15
+  animBase: attack
+  moveWhileCasting: 0.8
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215947
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215947
+      type: {class: PulseEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        duration: 1.2
+        interval: 0.15
+        at:
+          from: 0
+          up: 0.45
+          forward: 0
+        attachedVfx: 
+        loopSfx: sfx_swing
+        loopSfxVolume: 0.5
+        loopSfxInterval: 0.15
+        each:
+        - rid: 8556425340525215948
+        - rid: 8556425340525215949
+    - rid: 8556425340525215948
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 0
+          up: 0.45
+          forward: 0
+        vfx: hit_spark
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.5
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0.03
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425340525215949
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        shape: 0
+        at:
+          from: 0
+          up: 0.45
+          forward: 0
+        radius: 1.8
+        angle: 120
+        hit:
+          power: 0.35
+          type: 0
+          critChance: 0.1
+          knockback: 1.5
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit: []

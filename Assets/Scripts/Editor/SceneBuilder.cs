@@ -84,6 +84,7 @@ namespace RPG.EditorTools
             AssetFactory.CreateAll();
             VFXFactory.BuildAll();
             PrefabFactory.BuildAll();
+            AssetFactory.LinkClassAbilities(ClassAbilityFactory.CreateAll());
             AssetFactory.LinkLateReferences();
         }
 

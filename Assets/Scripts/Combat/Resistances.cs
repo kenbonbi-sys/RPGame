@@ -16,6 +16,7 @@ namespace RPG
         [Range(-0.5f, 0.75f)] public float lightning;
         [Range(-0.5f, 0.75f)] public float poison;
         [Range(-0.5f, 0.75f)] public float holy;
+        [Range(-0.5f, 0.75f)] public float dark;
 
         public float this[DamageType type]
         {
@@ -28,6 +29,7 @@ namespace RPG
                     case DamageType.Lightning: return lightning;
                     case DamageType.Poison: return poison;
                     case DamageType.Holy: return holy;
+                    case DamageType.Dark: return dark;
                     default: return physical;
                 }
             }
@@ -40,6 +42,7 @@ namespace RPG
                     case DamageType.Lightning: lightning = value; break;
                     case DamageType.Poison: poison = value; break;
                     case DamageType.Holy: holy = value; break;
+                    case DamageType.Dark: dark = value; break;
                     default: physical = value; break;
                 }
             }

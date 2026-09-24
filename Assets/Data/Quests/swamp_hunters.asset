@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
   id: swamp_hunters
   title: "Truy N\xE3: R\u1EAFn N\u01B0\u1EDBc V\xE0 Chu\u1ED3n Chu\u1ED3n Kim"
-  kind: 2
-  summary: "R\u1EAFn N\u01B0\u1EDBc r\xECnh d\u01B0\u1EDBi c\xE1c v\u0169ng n\u01B0\u1EDBc, ban ng\xE0y Chu\u1ED3n Chu\u1ED3n Kim l\u01B0\u1EE3n tr\xEAn m\u1EB7t \u0111\u1EA7m. Ng\u01B0 d\xE2n kh\xF4ng d\xE1m ra l\u01B0\u1EDBi."
+  kind: 0
+  summary: "R\u1EAFn N\u01B0\u1EDBc r\xECnh d\u01B0\u1EDBi c\xE1c v\u0169ng n\u01B0\u1EDBc, ban ng\xE0y Chu\u1ED3n Chu\u1ED3n Kim l\u01B0\u1EE3n tr\xEAn m\u1EB7t \u0111\u1EA7m. Ng\u01B0 d\xE2n kh\xF4ng d\xE1m ra l\u01B0\u1EDBi. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 9."
   giver: 
   turnIn: 
   turnInText: 
   minLevel: 1
   requires:
-  - {fileID: 11400000, guid: f60cbc3b5692ec248abf695b3649174d, type: 2}
+  - {fileID: 11400000, guid: dfa73432ad6a04d449568bd01590066f, type: 2}
   requiredFlags: []
   autoStart: 1
   availableText: 
@@ -44,4 +44,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
     count: 2
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: 7e87a3d8e8243434d93ecfe4dcde8932, type: 2}

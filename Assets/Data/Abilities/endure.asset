@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: endure
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: endure
+  displayName: "B\u1EA5t Khu\u1EA5t"
+  description: "Nghi\u1EBFn r\u0103ng ch\u1ECBu \u0111\xF2n: h\u1ED3i 12% m\xE1u, nh\u1EADn \xEDt h\u01A1n 50% v\xE0 kh\xF4ng b\u1ECB cho\xE1ng trong 4 gi\xE2y."
+  icon: {fileID: 516091394, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 65537
+  cooldown: 18
+  energyCost: 10
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.25
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_shield
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215767
+  - rid: 8556425340525215768
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215767
+      type: {class: HealEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        instant: 0
+        instantPercentOfMaxHp: 0.12
+        perSecond: 0
+        perSecondPercentOfMaxHp: 0
+        duration: 0
+        auraVfx: 
+        allies: 0
+    - rid: 8556425340525215768
+      type: {class: BuffEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        buff:
+          id: endure
+          displayName: "B\u1EA5t Khu\u1EA5t"
+          icon: {fileID: 516091394, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+          duration: 4
+          speedMultiplier: 1
+          damageTakenMultiplier: 0.5
+          stunImmune: 1
+          clearStun: 1
+          attachedVfx: enrage_aura
+          endVfx: 
+          damageDealtMultiplier: 1
+          attackSpeedBonus: 0
+        allies: 0

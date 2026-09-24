@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 
@@ -18,12 +19,15 @@ namespace RPG
         public float endVfxScale = 1.5f;
         [Tooltip("An attack dodged right after the start is a Lướt Hoàn Hảo (casters with a PerfectDodge: the hero).")]
         public bool perfectDodge = true;
+        [Tooltip("Leaps away from the aim instead of toward it (Nhảy Lùi).")]
+        public bool away;
 
         public override void Run(AbilityContext ctx)
         {
             var motor = ctx.caster.Motor;
             if (motor == null) return;
             Vector2 dir = preferMoveDirection && motor.Velocity.sqrMagnitude > 0.5f ? motor.Velocity.normalized : ctx.dir;
+            if (away) dir = -ctx.dir;
             // the machine that moves the caster dashes it (online, a hero's own player); the others see it move
             if (motor.enabled) motor.Dash(dir * (distance / Mathf.Max(0.01f, time)), time);
             if (ctx.visual)
@@ -62,28 +66,57 @@ namespace RPG
         public float duration;
         [Tooltip("VFX that follows the caster while healing over time.")]
         public string auraVfx;
+        [Tooltip("Heroes within this distance of the caster are healed too (0: the caster alone).")]
+        public float allies;
+
+        static readonly List<Health> Buffer = new List<Health>(8);
+
+        /// <summary>The caster's healing power (Thông Thái).</summary>
+        static float Power(AbilityContext ctx)
+        {
+            var pc = ctx.caster as PlayerController;
+            return pc != null && pc.stats != null ? pc.stats.HealingPower : 1f;
+        }
+
+        List<Health> Targets(AbilityContext ctx, List<Health> into)
+        {
+            into.Clear();
+            var me = ctx.caster.Health;
+            if (me != null) into.Add(me);
+            if (allies <= 0f) return into;
+            foreach (var p in Players.All)
+                if (p != null && p.health != null && p.health != me && !p.IsDead &&
+                    Vector2.Distance(p.transform.position, ctx.CasterPosition) <= allies)
+                    into.Add(p.health);
+            return into;
+        }
 
         public override void Run(AbilityContext ctx)
         {
-            var h = ctx.caster.Health;
-            float now = instant + instantPercentOfMaxHp * h.maxHp;
-            if (now > 0 && ctx.live) h.Heal(now);
-            if (duration > 0 && (perSecond > 0 || perSecondPercentOfMaxHp > 0)) ctx.Start(OverTime(ctx));
+            float power = Power(ctx);
+            foreach (var h in Targets(ctx, Buffer))
+            {
+                float now = (instant + instantPercentOfMaxHp * h.maxHp) * power;
+                if (now > 0 && ctx.live) h.Heal(now);
+                if (ctx.visual && h != ctx.caster.Health) VFX.Spawn("heal_burst", h.transform.position, Quaternion.identity, 0.7f);
+            }
+            if (duration > 0 && (perSecond > 0 || perSecondPercentOfMaxHp > 0)) ctx.Start(OverTime(ctx, power));
         }
 
-        IEnumerator OverTime(AbilityContext ctx)
+        IEnumerator OverTime(AbilityContext ctx, float power)
         {
-            var h = ctx.caster.Health;
+            var targets = new List<Health>(Targets(ctx, new List<Health>(8)));
             var aura = string.IsNullOrEmpty(auraVfx) || !ctx.visual ? null : VFX.Spawn(auraVfx, ctx.CasterPosition, Quaternion.identity, 1f, ctx.CasterTransform, true);
-            float rate = perSecond + perSecondPercentOfMaxHp * h.maxHp;
             float t = 0, acc = 0;
             while (t < duration && ctx.Alive)
             {
                 t += Time.deltaTime;
-                acc += rate * Time.deltaTime;
-                if (acc >= rate * 0.5f)
+                acc += Time.deltaTime;
+                if (acc >= 0.5f)
                 {
-                    if (ctx.live) h.Heal(acc);
+                    if (ctx.live)
+                        foreach (var h in targets)
+                            if (h != null && !h.IsDead) h.Heal((perSecond + perSecondPercentOfMaxHp * h.maxHp) * power * acc);
                     acc = 0;
                 }
                 yield return null;
@@ -111,12 +144,18 @@ namespace RPG
         public string attachedVfx;
         [Tooltip("VFX when the buff ends (not on death).")]
         public string endVfx;
+        [Tooltip("1 = unchanged, 1.3 = deals 30% more damage (Cuồng Nộ).")]
+        public float damageDealtMultiplier = 1f;
+        [Tooltip("Attack speed added to the basic attack, 0.5 = half again as fast (Bùng Nổ Hành Động).")]
+        public float attackSpeedBonus;
     }
 
     [System.Serializable]
     public class BuffEffect : AbilityEffect
     {
         public BuffSpec buff = new BuffSpec();
+        [Tooltip("Heroes within this distance of the caster get it too (a bard's song, a paladin's aura; 0: the caster alone).")]
+        public float allies;
 
         public override void Run(AbilityContext ctx)
         {
@@ -124,6 +163,10 @@ namespace RPG
             if (!ctx.live && !ctx.predicted) return;
             if (buff.clearStun && ctx.caster.Status != null) ctx.caster.Status.ClearStun();
             ctx.caster.AddBuff(buff);
+            if (allies <= 0f || !ctx.live) return;
+            foreach (var p in Players.All)
+                if (p != null && !p.IsDead && (object)p != ctx.caster.Runner && Vector2.Distance(p.transform.position, ctx.CasterPosition) <= allies)
+                    p.AddBuff(buff);
         }
     }
 }

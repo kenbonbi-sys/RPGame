@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: hex
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: hex
+  displayName: "L\u1EDDi Nguy\u1EC1n Hex"
+  description: "Nguy\u1EC1n r\u1EE7a k\u1EBB \u0111\u1ECBch 6 gi\xE2y: n\xF3 g\xE2y \xEDt s\xE1t th\u01B0\u01A1ng h\u01A1n (Nguy\u1EC1n) v\xE0 ch\u1ECBu th\xEAm s\xE1t th\u01B0\u01A1ng (Ph\xE1n X\xE9t)."
+  icon: {fileID: -249987195, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 2080
+  cooldown: 6
+  energyCost: 10
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.28
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215928
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215928
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 4825836252435640867, guid: 4146ce02b12428f40b19b597d1331e10, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 14
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 0.8
+          type: 6
+          critChance: 0.1
+          knockback: 1
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 6
+            judgment: 6
+        hitVfx: dark_hit
+        hitSfx: sfx_hit
+        hitShake: 0.08
+        angle: 0

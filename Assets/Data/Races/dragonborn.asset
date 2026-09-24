@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1fbe5c18e020d489ccd68a86985663, type: 3}
+  m_Name: dragonborn
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.RaceDef
+  id: dragonborn
+  displayName: "Long Du\u1EC7"
+  englishName: Dragonborn
+  description: "H\u1EADu du\u1EC7 c\u1EE7a r\u1ED3ng: v\u1EA3y c\u1EE9ng, d\xE1ng cao, m\xE1u r\u1ED3ng ch\u1EA3y trong ng\u01B0\u1EDDi."
+  bonus: 020000000000000000000000000000000000000001000000i
+  traits: "Huy\u1EBFt Th\u1ED1ng R\u1ED3ng: m\xE0u v\u1EA3y l\xE0 t\u1ED5 ti\xEAn r\u1ED3ng, kh\xE1ng 50% h\u1EC7 c\u1EE7a n\xF3 (\u0110\u1ECF, V\xE0ng Kim: L\u1EEDa; Lam, \u0110\u1ED3ng Thi\u1EBFc: L\xF4i; Tr\u1EAFng, B\u1EA1c: B\u0103ng; L\u1EE5c, \u0110en: \u0110\u1ED9c)."
+  speedMultiplier: 1
+  darkvision: 0
+  resist:
+    physical: 0
+    fire: 0
+    ice: 0
+    lightning: 0
+    poison: 0
+    holy: 0
+    dark: 0
+  poisonShorter: 0
+  controlShorter: 0
+  luckyDodge: 0
+  relentlessCooldown: 0
+  savageCrit: 0
+  rebukeChance: 0
+  xpBonus: 0
+  hpPerLevel: 0
+  draconic: 1
+  build: 0
+  skins:
+  - {r: 0.72156864, g: 0.19607843, b: 0.17254902, a: 1}
+  - {r: 0.84705883, g: 0.65882355, b: 0.1882353, a: 1}
+  - {r: 0.22745098, g: 0.42352942, b: 0.78431374, a: 1}
+  - {r: 0.627451, g: 0.47843137, b: 0.2509804, a: 1}
+  - {r: 0.8784314, g: 0.89411765, b: 0.9254902, a: 1}
+  - {r: 0.65882355, g: 0.6901961, b: 0.7529412, a: 1}
+  - {r: 0.22745098, g: 0.5411765, b: 0.2901961, a: 1}
+  - {r: 0.22745098, g: 0.20392157, b: 0.28235295, a: 1}
+  pointedEars: 0
+  horns: 0
+  tail: 1
+  tusks: 0
+  dragonHead: 1
+  hairStyles: 
+  beards: 0

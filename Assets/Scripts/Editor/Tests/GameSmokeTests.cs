@@ -107,7 +107,7 @@ namespace RPG.EditorTools.Tests
             var p = Players.Local;
             Assert.NotNull(s, "PlayerStats on the hero");
             Assert.AreEqual(1, s.level);
-            Assert.AreEqual(104f, p.health.maxHp, "55 + 9×1 + 10×4");
+            Assert.AreEqual(104f, p.health.maxHp, "no class yet: the prototype's 104 (56 + 1.8×4.5 + 10×4)");
             Assert.AreEqual(p.health.maxHp, p.health.hp);
 
             s.AddXp(60);
@@ -116,9 +116,9 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(3, s.statPoints);
             Assert.AreEqual(p.health.maxHp, p.health.hp, "level up refills HP");
 
-            Assert.IsTrue(s.Spend(CoreStat.Vitality));
-            Assert.AreEqual(55f + 18f + 50f, p.health.maxHp);
-            Assert.AreEqual(5f, p.health.armor, 1e-4f, "1 armor per Vitality");
+            Assert.IsTrue(s.Spend(CoreStat.Constitution));
+            Assert.AreEqual(Mathf.Round(56f + 1.8f * 4.5f * 2f + 10f * 5f), p.health.maxHp, "a point of Thể Chất: +10 health");
+            Assert.AreEqual(4.5f, p.health.armor, 1e-4f, "half an armor point per Thể Chất");
             yield return null;
         }
 
@@ -170,7 +170,7 @@ namespace RPG.EditorTools.Tests
             var p = Players.Local;
             Assert.AreEqual(3, Players.Local.stats.level);
             Assert.AreEqual(42, Players.Local.stats.xp);
-            Assert.AreEqual(3, Players.Local.stats.Allocated(CoreStat.Vitality));
+            Assert.AreEqual(3, Players.Local.stats.Allocated(CoreStat.Constitution));
             Assert.AreEqual(777, Players.Local.inventory.gold);
             Assert.AreEqual(QuestStatus.Done, Players.Local.quests.Status("talk_chief"));
             Assert.AreEqual(QuestStatus.Active, Players.Local.quests.Status("clear_forest"));
@@ -505,7 +505,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator UiIsPooled()
         {
-            var enemy = EnemyBase.All.Find(e => !e.IsDead);
+            var enemy = EnemyBase.All.Find(e => !e.IsDead && e.enemyId == "slime");   // a plain one (a mud man splits, a bat flies)
             Assert.NotNull(enemy);
             var hero = Players.Local.gameObject;
             enemy.health.TakeDamage(DamageInfo.Make(1, Team.Player, hero, enemy.transform.position, Vector2.up));
@@ -677,7 +677,7 @@ namespace RPG.EditorTools.Tests
             nova.effects.Add(new DamageEffect { at = new Anchor(Anchor.From.Caster), radius = 3f, hit = new HitSpec { power = 2f, type = DamageType.Fire } });
 
             var hero = Players.Local;
-            var enemy = EnemyBase.All.Find(e => !e.IsDead);
+            var enemy = EnemyBase.All.Find(e => !e.IsDead && e.enemyId == "slime");   // a plain one (a mud man splits, a bat flies)
             Assert.NotNull(enemy);
             hero.motor.Teleport((Vector2)enemy.transform.position + Vector2.left);
             yield return Frames(2);
@@ -744,7 +744,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator EnemiesDissolveAndOutline()
         {
-            var enemy = EnemyBase.All.Find(e => !e.IsDead);
+            var enemy = EnemyBase.All.Find(e => !e.IsDead && e.enemyId == "slime");   // a plain one (a mud man splits, a bat flies)
             Assert.NotNull(enemy.style, "enemy prefab has a SpriteStyle");
             Assert.IsTrue(enemy.style.Supported, "body uses RPG/Sprite Lit FX");
             enemy.style.SetOutline(true, Color.red);
@@ -774,7 +774,7 @@ namespace RPG.EditorTools.Tests
             c.Execute("no_such_command");
 
             c.Execute("ttk");
-            var enemy = EnemyBase.All.Find(e => !e.IsDead);
+            var enemy = EnemyBase.All.Find(e => !e.IsDead && e.enemyId == "slime");   // a plain one (a mud man splits, a bat flies)
             var hero = Players.Local.gameObject;
             enemy.health.TakeDamage(DamageInfo.Make(1, Team.Player, hero, enemy.transform.position, Vector2.up));
             yield return GameSeconds(0.2f);

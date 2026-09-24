@@ -1,0 +1,321 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: stab
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: stab
+  displayName: "\u0110\xE2m Nhanh"
+  description: "\u0110\xE2m dao th\u1EADt nhanh, d\u1EC5 ch\xED m\u1EA1ng. \u0110\xF2n th\u1EE9 3 \u0111\xE2m hai nh\xE1t."
+  icon: {fileID: 413889043, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 1025
+  cooldown: 0.28
+  energyCost: 0
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.18
+  commitTime: 0.15
+  animBase: attack
+  moveWhileCasting: 0.5
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215856
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215856
+      type: {class: ComboEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        window: 0.7
+        stages:
+        - name: "\u0110\xF2n 1"
+          effects:
+          - rid: 8556425340525215857
+          - rid: 8556425340525215858
+        - name: "\u0110\xF2n 2"
+          effects:
+          - rid: 8556425340525215859
+          - rid: 8556425340525215860
+        - name: "\u0110\xF2n cu\u1ED1i"
+          effects:
+          - rid: 8556425340525215861
+          - rid: 8556425340525215862
+          - rid: 8556425340525215863
+    - rid: 8556425340525215857
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.05
+        at:
+          from: 0
+          up: 0.45
+          forward: 0.55
+        vfx: slash
+        vfxScale: 0.75
+        rotateToDirection: 1
+        flipOnOddCombo: 1
+        attachToCaster: 0
+        sfx: sfx_swing
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.1
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425340525215858
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.05
+        shape: 1
+        at:
+          from: 0
+          up: 0.45
+          forward: 0
+        radius: 1.6
+        angle: 90
+        hit:
+          power: 0.62
+          type: 0
+          critChance: 0.3
+          knockback: 1.5
+          poise: 2
+          hitStop: 0.02
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit:
+        - rid: 8556425340525215864
+    - rid: 8556425340525215859
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.05
+        at:
+          from: 0
+          up: 0.45
+          forward: 0.55
+        vfx: slash
+        vfxScale: 0.75
+        rotateToDirection: 1
+        flipOnOddCombo: 1
+        attachToCaster: 0
+        sfx: sfx_swing
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.1
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425340525215860
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.05
+        shape: 1
+        at:
+          from: 0
+          up: 0.45
+          forward: 0
+        radius: 1.6
+        angle: 90
+        hit:
+          power: 0.62
+          type: 0
+          critChance: 0.3
+          knockback: 1.5
+          poise: 2
+          hitStop: 0.02
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit:
+        - rid: 8556425340525215865
+    - rid: 8556425340525215861
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.05
+        at:
+          from: 0
+          up: 0.45
+          forward: 0.55
+        vfx: slash
+        vfxScale: 0.85
+        rotateToDirection: 1
+        flipOnOddCombo: 1
+        attachToCaster: 0
+        sfx: sfx_swing
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.1
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425340525215862
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.05
+        shape: 1
+        at:
+          from: 0
+          up: 0.45
+          forward: 0
+        radius: 1.7
+        angle: 100
+        hit:
+          power: 0.75
+          type: 0
+          critChance: 0.4
+          knockback: 2
+          poise: 3
+          hitStop: 0.03
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit:
+        - rid: 8556425340525215866
+    - rid: 8556425340525215863
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.12
+        shape: 1
+        at:
+          from: 0
+          up: 0.45
+          forward: 0
+        radius: 1.7
+        angle: 100
+        hit:
+          power: 0.75
+          type: 0
+          critChance: 0.4
+          knockback: 3
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit: []
+    - rid: 8556425340525215864
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: 
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_hit
+        sfxVolume: 0.9
+        sfxPitchVariance: 0.1
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0.05
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425340525215865
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: 
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_hit
+        sfxVolume: 0.9
+        sfxPitchVariance: 0.1
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0.05
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425340525215866
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: 
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_hit
+        sfxVolume: 0.9
+        sfxPitchVariance: 0.1
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0.08
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3

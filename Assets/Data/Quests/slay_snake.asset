@@ -15,13 +15,12 @@ MonoBehaviour:
   id: slay_snake
   title: "X\xE0 M\u1EABu \u0110\u1EA7m L\u1EA7y"
   kind: 0
-  summary: "S\xE2u trong \u0111\u1EA7m, X\xE0 M\u1EABu cu\u1ED9n m\xECnh gi\u1EEFa h\u1ED3 n\u01B0\u1EDBc c\xF3 b\u1ED1n g\xF2 \u0111\u1EA5t. D\u1EE5 n\xF3 lao v\xE0o g\xF2 \u0111\u1EA5t \u0111\u1EC3 n\xF3 cho\xE1ng v\xE1ng."
+  summary: "S\xE2u trong \u0111\u1EA7m, X\xE0 M\u1EABu cu\u1ED9n m\xECnh gi\u1EEFa h\u1ED3 n\u01B0\u1EDBc c\xF3 b\u1ED1n g\xF2 \u0111\u1EA5t. D\u1EE5 n\xF3 lao v\xE0o g\xF2 \u0111\u1EA5t \u0111\u1EC3 n\xF3 cho\xE1ng v\xE1ng. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 14."
   giver: 
   turnIn: 
   turnInText: 
   minLevel: 1
   requires:
-  - {fileID: 11400000, guid: 7e87a3d8e8243434d93ecfe4dcde8932, type: 2}
   - {fileID: 11400000, guid: 89eec7b663e4108418968ec6fe31009f, type: 2}
   requiredFlags: []
   autoStart: 1
@@ -42,4 +41,5 @@ MonoBehaviour:
     count: 4
   setFlags:
   - swamp_saved
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: 19c6a341f4d25f34ba564b0b7202c59a, type: 2}

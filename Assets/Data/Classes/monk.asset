@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8d73affa8ff6d24dba757b15a0caf2d, type: 3}
+  m_Name: monk
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ClassDef
+  id: monk
+  displayName: "V\xF5 T\u0103ng"
+  englishName: Monk
+  role: "V\xD5 S\u01AF"
+  description: "R\xE8n th\xE2n v\xE0 t\xE2m t\u1EDBi m\u1EE9c n\u1EAFm \u0111\u1EA5m nhanh nh\u01B0 gi\xF3, c\xFA \u0111\xE1 l\xE0m cho\xE1ng, b\u01B0\u1EDBc ch\xE2n nh\u1EB9 nh\u01B0 m\xE2y."
+  complexity: 2
+  hitDie: 8
+  primary: 0200000004000000i
+  arrayOrder: 020000000400000003000000000000000100000005000000i
+  savingThrows: 0000000002000000i
+  casting: 4
+  armor: 4
+  weapons:
+  - fist
+  - quarterstaff
+  kit:
+  - 
+  - flyingkick
+  - stunstrike
+  - flurryblows
+  - patience
+  - windstep
+  - palm
+  outfit: monk
+  cloth: {r: 0.8235294, g: 0.39215687, b: 0.11764706, a: 1}
+  color: {r: 0.1254902, g: 0.627451, b: 0.627451, a: 1}
+  emblem: {fileID: 191394676, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}

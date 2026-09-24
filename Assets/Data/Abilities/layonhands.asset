@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: layonhands
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: layonhands
+  displayName: "\u0110\u1EB7t Tay"
+  description: "\u0110\u1EB7t tay ch\u1EEFa l\xE0nh: h\u1ED3i 35% m\xE1u cho b\u1EA3n th\xE2n v\xE0 \u0111\u1ED3ng \u0111\u1ED9i quanh 4 \xF4."
+  icon: {fileID: 274756728, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 65600
+  cooldown: 24
+  energyCost: 16
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.35
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_heal
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215923
+  - rid: 8556425340525215924
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215923
+      type: {class: HealEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        instant: 0
+        instantPercentOfMaxHp: 0.35
+        perSecond: 0
+        perSecondPercentOfMaxHp: 0
+        duration: 0
+        auraVfx: 
+        allies: 4
+    - rid: 8556425340525215924
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 0
+          up: 0
+          forward: 0
+        vfx: heal_burst
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3

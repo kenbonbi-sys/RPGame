@@ -133,6 +133,26 @@ MonoBehaviour:
     prefab: {fileID: 8586377041363177420, guid: 3193bf407cb96b542b6de5ff7a5089e1, type: 3}
   - id: chest_open
     prefab: {fileID: 2668686716383869309, guid: 70a94228415d772438e04a26d29bd21e, type: 3}
+  - id: holy_strike
+    prefab: {fileID: 8005467038560019575, guid: 6e9bea6cbffb77542b1c86a03f49a362, type: 3}
+  - id: dark_strike
+    prefab: {fileID: 5355752398333050404, guid: d6470e40017c0a34883077c1d763a446, type: 3}
+  - id: holy_hit
+    prefab: {fileID: 698662202519366701, guid: 06fb5bb995fb35d4b97881da5251c0e9, type: 3}
+  - id: dark_hit
+    prefab: {fileID: 4778117643728469219, guid: 18d4c856fb04c214dae826b3d6ecca2f, type: 3}
+  - id: arcane_hit
+    prefab: {fileID: 3967212745941622401, guid: 0fcc0a3c4898d5d48a2d13b3565dd157, type: 3}
+  - id: note_hit
+    prefab: {fileID: 774208265622286119, guid: be9e542883668c8458510482c64265e7, type: 3}
+  - id: nature_burst
+    prefab: {fileID: 556444255816432132, guid: 7b7694e045855f14890d60e41c301b64, type: 3}
+  - id: smoke_cloud
+    prefab: {fileID: 7149954595962175801, guid: fca3945f25354134aae706672a894b07, type: 3}
+  - id: holy_aura
+    prefab: {fileID: 5913236527216023997, guid: 1eeac219a68bf8c4c90d549f9adfecf2, type: 3}
+  - id: dark_aura
+    prefab: {fileID: 7591929325566856652, guid: d9f4a8bdf49db8d40a6949536654156b, type: 3}
   particleBudget: 150
   lightBudget: 1
   ultimateIds:

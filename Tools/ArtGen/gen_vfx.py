@@ -524,6 +524,57 @@ def debris(seed):
     return cv
 
 
+def proj_arrow():
+    """An arrow flying right: shaft, steel head, fletching."""
+    cv = Canvas(16, 5)
+    wood = hx("#a56f45")
+    for x in range(3, 13):
+        cv.px(x, 2, wood)
+    for (x, y) in ((13, 1), (13, 2), (13, 3), (14, 2), (15, 2)):
+        cv.px(x, y, hx("#d6dcee") if y == 2 else hx("#8e94ab"))
+    for (x, y) in ((0, 0), (1, 1), (2, 1), (0, 4), (1, 3), (2, 3), (1, 2), (2, 2)):
+        cv.px(x, y, hx("#e8e2d0") if y != 2 else hx("#b04a3a"))
+    return cv
+
+
+def proj_knife():
+    """A thrown knife pointing right."""
+    cv = Canvas(10, 4)
+    for x in range(0, 3):
+        cv.px(x, 1, hx("#48291c"))
+        cv.px(x, 2, hx("#643c26"))
+    cv.px(3, 0, hx("#e8b634"))
+    cv.px(3, 3, hx("#b8821e"))
+    for x in range(3, 10):
+        cv.px(x, 1, hx("#ffffff") if x < 9 else hx("#d6dcee"))
+        cv.px(x, 2, hx("#a4acc6") if x < 9 else None)
+    return cv
+
+
+def proj_axe():
+    """A throwing axe (it spins in flight)."""
+    cv = Canvas(12, 12)
+    for k in range(0, 10):
+        cv.px(2 + k, 10 - k, hx("#855433"))
+    for (x, y) in ((7, 1), (8, 1), (9, 1), (6, 2), (7, 2), (8, 2), (9, 2), (10, 2), (7, 3), (8, 3), (9, 3), (10, 3), (11, 3), (8, 4), (9, 4), (10, 4), (11, 4)):
+        cv.px(x, y, hx("#d6dcee") if x + y > 12 else hx("#a4acc6"))
+    cv.outline(hx("#1c1420"))
+    return cv
+
+
+def proj_note():
+    """A musical note (a bard's attack)."""
+    cv = Canvas(8, 10)
+    for y in range(0, 7):
+        cv.px(5, y, hx("#ffffff"))
+    cv.px(6, 0, hx("#ffffff"))
+    cv.px(7, 1, hx("#ffffff"))
+    cv.px(6, 1, hx("#ffffff"))
+    for (x, y) in ((2, 6), (3, 6), (4, 6), (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (2, 8), (3, 8), (4, 8)):
+        cv.px(x, y, hx("#ffffff"))
+    return cv
+
+
 def build():
     smooth = {
         "glow": glow(), "glow_hard": glow_hard(), "ring": ring(), "ring_thick": ring_thick(),
@@ -536,6 +587,7 @@ def build():
         ("leaf_green", leaf(P["leaf"])), ("leaf_autumn", leaf(P["autumn"])),
         ("ice_shard", ice_shard()), ("magic_circle", magic_circle()), ("crack", crack_decal()),
         ("debris_0", debris(1)), ("debris_1", debris(2)),
+        ("proj_arrow", proj_arrow()), ("proj_knife", proj_knife()), ("proj_axe", proj_axe()), ("proj_note", proj_note()),
     ]
     flipbooks = {
         "slash": slash_frames(), "claw": claw_frames(), "fire": fire_frames(),

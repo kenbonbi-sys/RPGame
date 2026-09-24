@@ -167,6 +167,8 @@ namespace RPG.EditorTools
             hud.pause = BuildPause(root);
             hud.saves = BuildSaves(root);
             hud.death = BuildDeath(root);
+            hud.creator = BuildCreator(root);
+            BuildForge(root);
             hud.tooltip = BuildTooltip(root);
             BuildHint(root);
             BuildLoading(root, refs);
@@ -649,29 +651,75 @@ namespace RPG.EditorTools
 
         static CharacterUI BuildCharacter(Transform root)
         {
-            var w = Window(root, "Character", new Vector2(640, 720), new Vector2(-360, 20), out var g, "Nhân Vật");
+            var w = Window(root, "Character", new Vector2(660, 900), new Vector2(-360, 10), out var g, "Nhân Vật");
             var ui = w.parent.gameObject.AddComponent<CharacterUI>();
             ui.group = g;
             ui.window = w;
             var top = new Vector2(0.5f, 1f);
-            ui.header = Txt(w, "Header", "Cấp 1  ·  0 / 50 XP", 24, new Color(0.86f, 0.8f, 1f), TextAlignmentOptions.Center, top, top, new Vector2(0, -96), new Vector2(560, 32));
-            string[] names = { "Sức Mạnh", "Trí Tuệ", "Nhanh Nhẹn", "Thể Chất" };
-            string[] hints = { "+1.5 Công vật lý · +1% Trấn Áp", "+1.5 Công phép · +3 năng lượng", "+0.25% chí mạng · +0.5% tốc đánh", "+10 máu · +1 giáp · +0.3% kháng" };
-            for (int i = 0; i < 4; i++)
+            ui.header = Txt(w, "Header", "Cấp 1  ·  0 / 50 XP", 24, new Color(0.86f, 0.8f, 1f), TextAlignmentOptions.Center, top, top, new Vector2(0, -92), new Vector2(580, 32));
+            ui.identity = Txt(w, "Identity", "", 21, Gold, TextAlignmentOptions.Center, top, top, new Vector2(0, -124), new Vector2(600, 30), false);
+            // D&D's sheet order: STR DEX CON INT WIS CHA
+            string[] hints =
             {
-                float y = -150 - i * 62;
-                var row = Rect(w, "Attr_" + i, top, top, new Vector2(0, y), new Vector2(560, 56));
+                "Vũ khí nặng · Trấn Áp",
+                "Vũ khí khéo, cung · chí mạng · tốc đánh · Lướt",
+                "+10 máu · giáp",
+                "Phép của Pháp Sư · giảm hồi chiêu",
+                "Phép Tu Sĩ, Tế Sư, Du Hiệp, Võ Tăng · hồi máu · kháng",
+                "Phép Thi Sĩ, Thuật Sĩ, Khế Ước Sư, Hiệp Sĩ Thánh · vàng",
+            };
+            for (int i = 0; i < CoreStats.Count; i++)
+            {
+                var a = CoreStats.SheetOrder[i];
+                float y = -172 - i * 56;
+                var row = Rect(w, "Attr_" + i, top, top, new Vector2(0, y), new Vector2(580, 52));
                 Img(row, "white", new Color(0.05f, 0.03f, 0.07f, 0.35f));
-                Txt(row, "Name", names[i], 25, Gold, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, 7), new Vector2(220, 30));
-                Txt(row, "Hint", hints[i], 16, Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, -15), new Vector2(360, 22), false);
-                ui.values[i] = Txt(row, "Value", "3", 27, Cream, TextAlignmentOptions.MidlineRight, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-76, 0), new Vector2(160, 40));
-                ui.plusButtons[i] = Btn(row, "Plus", "+", new Vector2(1, 0.5f), new Vector2(-32, 0), new Vector2(44, 44), 30);
+                ui.names[i] = Txt(row, "Name", CoreStats.Name(a) + " <size=16><color=#9a93a8>" + CoreStats.Short(a) + "</color></size>", 23, Gold,
+                    TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, 8), new Vector2(300, 28));
+                Txt(row, "Hint", hints[i], 15, Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, -14), new Vector2(420, 20), false);
+                ui.values[i] = Txt(row, "Value", "10", 25, Cream, TextAlignmentOptions.MidlineRight, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-72, 0), new Vector2(180, 40));
+                ui.plusButtons[i] = Btn(row, "Plus", "+", new Vector2(1, 0.5f), new Vector2(-30, 0), new Vector2(42, 42), 28);
             }
-            ui.pointsText = Txt(w, "Points", "Điểm chỉ số: 0", 21, Cream, TextAlignmentOptions.Center, top, top, new Vector2(0, -400), new Vector2(560, 30), false);
-            Img(w, "Divider2", "divider", Color.white, top, new Vector2(0, -432), new Vector2(360, 12));
-            ui.derivedText = Txt(w, "Derived", "", 19, Cream, TextAlignmentOptions.TopLeft, top, top, new Vector2(0, -446), new Vector2(560, 170), false);
-            Txt(w, "Hint", "[C] Đóng  ·  Thiên phú và điểm kỹ năng dùng được khi có cây thiên phú", 16, Muted, TextAlignmentOptions.Center,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(600, 24), false);
+            ui.pointsText = Txt(w, "Points", "Điểm chỉ số: 0", 21, Cream, TextAlignmentOptions.Center, top, top, new Vector2(-80, -508), new Vector2(420, 30), false);
+            ui.looksButton = Btn(w, "Looks", "Ngoại hình", top, new Vector2(210, -508), new Vector2(170, 40), 19);
+            Img(w, "Divider2", "divider", Color.white, top, new Vector2(0, -538), new Vector2(360, 12));
+            ui.derivedText = Txt(w, "Derived", "", 18, Cream, TextAlignmentOptions.TopLeft, top, top, new Vector2(0, -552), new Vector2(580, 270), false);
+            Txt(w, "Hint", "[C] Đóng  ·  ★ kháng theo lớp nhân vật (D&D: saving throw)", 16, Muted, TextAlignmentOptions.Center,
+                new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(620, 24), false);
+            return ui;
+        }
+
+        /// <summary>The character creator: a full-screen panel that builds its own widgets (<see cref="CharacterCreatorUI"/>).</summary>
+        static CharacterCreatorUI BuildCreator(Transform root)
+        {
+            var rt = Stretch(root, "CharacterCreator");
+            var g = Group(rt.gameObject, true);
+            var ui = rt.gameObject.AddComponent<CharacterCreatorUI>();
+            ui.group = g;
+            ui.window = rt;
+            ui.font = font;
+            ui.fontOutline = outline;
+            ui.windowSprite = ArtImporter.S("frame_wood");
+            ui.buttonSprite = ArtImporter.S("frame_panel");
+            ui.dividerSprite = ArtImporter.S("divider");
+            ui.whiteSprite = ArtImporter.S("white");
+            ui.slotSprite = ArtImporter.S("slot");
+            return ui;
+        }
+
+        /// <summary>Lò Rèn: a full-screen panel that builds its own widgets (<see cref="ForgeUI"/>).</summary>
+        static ForgeUI BuildForge(Transform root)
+        {
+            var rt = Stretch(root, "Forge");
+            var g = Group(rt.gameObject, true);
+            var ui = rt.gameObject.AddComponent<ForgeUI>();
+            ui.group = g;
+            ui.window = rt;
+            ui.font = font;
+            ui.fontOutline = outline;
+            ui.windowSprite = ArtImporter.S("frame_wood");
+            ui.buttonSprite = ArtImporter.S("frame_panel");
+            ui.whiteSprite = ArtImporter.S("white");
             return ui;
         }
 
@@ -686,7 +734,7 @@ namespace RPG.EditorTools
             string left =
                 $"{K}Di chuyển{E}\n  Chuột phải (bấm hoặc giữ), hoặc phím mũi tên\n\n" +
                 $"{K}Tấn công{E}\n  Chuột trái: bấm vào quái để tới đánh,\n  giữ để chém về phía chuột · Q: Chém Gió\n\n" +
-                $"{K}Kỹ năng{E}\n  W Cầu Lửa · E Mũi Băng · R Lôi Phạt\n  A Hồi Phục · S Khiên Thánh · D Bão Kiếm\n  Space: Lướt (bất tử trong chốc lát)\n\n" +
+                $"{K}Kỹ năng{E}\n  Q W E R A S D: kỹ năng của lớp nhân vật\n  (di chuột lên ô kỹ năng để xem)\n  Space: Lướt (bất tử trong chốc lát)\n\n" +
                 $"{K}Bình thuốc{E}\n  1 Máu · 2 Năng lượng · 3 Thảo mộc";
             string right =
                 $"{K}Tương tác{E}\n  F: Nói chuyện · B: Túi đồ · C: Nhân vật\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  T: Tự động đánh quái · M: Bản đồ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +

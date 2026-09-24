@@ -12,7 +12,7 @@ namespace RPG
     /// </summary>
     public static class NetProtocol
     {
-        public const int Version = 7;
+        public const int Version = 8;
 
         /// <summary>First id of the replicated objects of a zone (enemies, boss, rocks); heroes use their NetworkObject id, below it.</summary>
         public const int SceneIdBase = 1000000;
@@ -234,6 +234,8 @@ namespace RPG
     {
         public int hero;
         public string name;
+        /// <summary>Their people, class, weapon and looks (<see cref="HeroLook"/> as JSON): every screen draws them.</summary>
+        public string look;
     }
 
     // ================================================================== one player's own things
@@ -337,7 +339,14 @@ namespace RPG
         /// <summary>This player's friends and who of them is playing, as an <see cref="ControlKind.Info"/> line.</summary>
         FriendList = 18,
         /// <summary>Travel from the Đá Truyền Tống the hero stands at to the woken one <see cref="ActRequest.text"/>.</summary>
-        Travel = 19
+        Travel = 19,
+        /// <summary>
+        /// The character creator's choice (<see cref="ActRequest.text"/>: a <see cref="HeroLook"/> as JSON): people and
+        /// class once, looks and the weapon (among the class's) any time.
+        /// </summary>
+        ChooseLook = 20,
+        /// <summary>The smith's forge: <see cref="ActRequest.id"/> a <see cref="Forge.Action"/>, its metal in value or its weapon in text.</summary>
+        Forge = 21
     }
 
     /// <summary>Client → server: everything else a player wants (potions, talking, dialogue commands, stat points, chat).</summary>

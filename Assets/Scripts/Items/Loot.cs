@@ -42,7 +42,10 @@ namespace RPG
         public static void DropCoins(Vector2 at, int coins, IReadOnlyList<PlayerController> credited = null)
         {
             foreach (var owner in Owners(credited))
-                for (int i = 0; i < coins; i++) Drop("coin", 1, at, owner);   // one pickup per coin looks nicer than a single stack
+            {
+                int n = Coins(coins, owner);
+                for (int i = 0; i < n; i++) Drop("coin", 1, at, owner);   // one pickup per coin looks nicer than a single stack
+            }
         }
 
         /// <summary>Rolls a loot table at <paramref name="at"/>; online once for each hero in <paramref name="credited"/>.</summary>
@@ -56,14 +59,14 @@ namespace RPG
                     if (UnityEngine.Random.value > e.chance) continue;
                     int n = UnityEngine.Random.Range(e.min, e.max + 1);
                     if (e.itemId == "coin")
-                        for (int i = 0; i < n; i++) Drop("coin", 1, at, owner);
+                        for (int i = Coins(n, owner); i > 0; i--) Drop("coin", 1, at, owner);
                     else Drop(e.itemId, n, at, owner);
                 }
             }
         }
 
         /// <summary>One roll of a loot table, kept instead of dropped (a boss's <see cref="TreasureChest"/> holds it).</summary>
-        public static List<(ItemDef item, int count)> RollList(List<LootEntry> table)
+        public static List<(ItemDef item, int count)> RollList(List<LootEntry> table, PlayerController owner = null)
         {
             var result = new List<(ItemDef, int)>();
             var db = GameManager.I != null ? GameManager.I.db : null;
@@ -73,9 +76,18 @@ namespace RPG
                 if (UnityEngine.Random.value > e.chance) continue;
                 var item = db.Item(e.itemId);
                 int n = UnityEngine.Random.Range(e.min, e.max + 1);
+                if (e.itemId == "coin") n = Coins(n, owner);
                 if (item != null && n > 0) result.Add((item, n));
             }
             return result;
+        }
+
+        /// <summary>A hero's share of <paramref name="n"/> coins with their Sức Hút (offline: the hero playing).</summary>
+        public static int Coins(int n, PlayerController owner)
+        {
+            var hero = owner != null ? owner : Players.Local;
+            float find = hero != null && hero.stats != null ? hero.stats.GoldFind : 0f;
+            return Mathf.Max(0, Mathf.RoundToInt(n * (1f + find)));
         }
 
         static readonly PlayerController[] Anyone = { null };

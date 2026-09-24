@@ -105,7 +105,24 @@ namespace RPG
             health.Died += OnDied;
             if (anim != null) anim.FrameChanged += OnFrame;
             skills.BufferedCast += OnKeySkillCast;
+            stats.LookChanged += OnLookChanged;
             SaveRegistry.Register(this);
+        }
+
+        void Start() => OnLookChanged();
+
+        /// <summary>
+        /// Their people, class, weapon or looks changed: the skill bar takes the class's skills
+        /// (Q from the weapon), the sprite is drawn again, and a people with darkvision carries
+        /// a wider light.
+        /// </summary>
+        void OnLookChanged()
+        {
+            if (stats == null) return;
+            if (stats.HasClass) skills.ApplyKit(stats.Class, stats.Weapon);
+            HeroArt.ApplyTo(this);
+            var lamp = GetComponentInChildren<NightLight>(true);
+            if (lamp != null) lamp.rangeScale = stats.Darkvision ? 1.6f : 1f;
         }
 
         void OnEnable() => Players.Register(this);
@@ -126,7 +143,7 @@ namespace RPG
         /// <summary>Physical skills use Công vật lý, every element Công phép (plan §04).</summary>
         public float Attack(DamageType type)
         {
-            if (stats == null) return ProgressionConfig.Current.PhysicalAttack(ProgressionConfig.Current.startStrength);
+            if (stats == null) return ProgressionConfig.Current.PhysicalAttack(ProgressionConfig.Current.referenceScore);
             return stats.Stats.Get(type == DamageType.Physical ? StatId.PhysicalAttack : StatId.MagicAttack);
         }
 
@@ -196,18 +213,29 @@ namespace RPG
             }
         }
 
+        /// <summary>The source of the stat modifiers buffs give (Cuồng Nộ's damage, Bùng Nổ Hành Động's speed).</summary>
+        readonly object buffMods = new object();
+
         void ApplyBuffs()
         {
-            float taken = 1f;
+            float taken = 1f, dealt = 1f, speed = 0f;
             bool immune = false;
             foreach (var b in buffs)
             {
                 if (b.spec == null) continue;
                 taken *= b.spec.damageTakenMultiplier;
+                dealt *= b.spec.damageDealtMultiplier > 0f ? b.spec.damageDealtMultiplier : 1f;
+                speed += b.spec.attackSpeedBonus;
                 immune |= b.spec.stunImmune;
             }
             health.damageTakenMultiplier = taken;
             if (status != null) status.stunImmune = immune;
+            if (stats != null)
+            {
+                stats.Stats.RemoveFrom(buffMods);
+                if (!Mathf.Approximately(dealt, 1f)) stats.Stats.Add(new StatModifier(StatId.DamageDealt, ModKind.PercentMult, dealt - 1f, buffMods));
+                if (speed != 0f) stats.Stats.Add(new StatModifier(StatId.AttackSpeed, ModKind.Flat, speed, buffMods));
+            }
         }
 
         void ClearBuffs()
@@ -318,7 +346,7 @@ namespace RPG
             if (i.talkTo != null && Vector2.Distance(transform.position, i.talkTo.transform.position) <= interactRadius)
                 i.talkTo.Interact(this);
             float speedMul = (status != null ? status.SpeedMultiplier : 1f) * (IsActing ? actionMoveMul : 1f);
-            speedMul *= BuffSpeed;
+            speedMul *= BuffSpeed * (stats != null ? stats.SpeedMultiplier : 1f);
             if (i.face.sqrMagnitude > 0.01f) motor.Facing = i.face;
             motor.Move(i.move, speedMul);
             if (IsActing) motor.Facing = actionDir;
@@ -694,6 +722,21 @@ namespace RPG
             }
             // the machine that moves the hero pushes it (a server's copy of someone else's hero does not)
             if (motor != null && motor.enabled && d.knockback > 0) motor.AddKnockback(d.direction * d.knockback);
+            if (GameSession.IsAuthority) Rebuke(d);
+        }
+
+        /// <summary>Quỷ Duệ: Trả Đòn Địa Ngục — now and then an attacker is set alight.</summary>
+        void Rebuke(DamageInfo d)
+        {
+            var race = stats != null ? stats.Race : null;
+            if (race == null || race.rebukeChance <= 0f || d.source == null || Random.value >= race.rebukeChance) return;
+            var foe = d.source.GetComponentInParent<Health>();
+            if (foe == null || foe.IsDead || foe == health || !foe.CanBeDamagedBy(Team.Player)) return;
+            var hit = DamageInfo.Make(6f, Team.Player, gameObject, foe.transform.position, Vector2.up, DamageType.Fire);
+            hit.status.burn = 2;
+            hit.skillName = "Trả Đòn Địa Ngục";
+            foe.TakeDamage(hit);
+            NetCues.Vfx("hit_fire", foe.transform.position + Vector3.up * 0.5f);
         }
 
         void OnDied(DamageInfo d)
@@ -771,6 +814,8 @@ namespace RPG
             public float x, y, hp, energy;
             public int level, xp, statPoints, talentPoints, skillPoints;
             public int[] allocated;
+            /// <summary>Their people, class, weapon and looks (<see cref="HeroLook"/> as JSON); empty in saves made before classes.</summary>
+            public string look;
         }
 
         public string SaveKey => "player";
@@ -799,6 +844,7 @@ namespace RPG
                 s.statPoints = stats.statPoints;
                 s.talentPoints = stats.talentPoints;
                 s.skillPoints = stats.skillPoints;
+                s.look = stats.look.ToJson();
             }
             return JsonUtility.ToJson(s);
         }
@@ -806,7 +852,8 @@ namespace RPG
         public void RestoreState(string json)
         {
             var s = JsonUtility.FromJson<SaveState>(json);
-            // stats first: they set max HP / energy
+            // who they are, then the stats: they set max HP / energy
+            if (stats != null) stats.LoadLook(HeroLook.FromJson(s.look));
             if (stats != null && s.level > 0) stats.SetState(s.level, s.xp, s.allocated, s.statPoints, s.talentPoints, s.skillPoints);
             motor.Teleport(new Vector2(s.x, s.y));
             puppetLastPos = transform.position;
@@ -823,6 +870,11 @@ namespace RPG
         public void RestoreProgress(string json)
         {
             var s = JsonUtility.FromJson<SaveState>(json);
+            if (stats != null && s.look != null)
+            {
+                var look = HeroLook.FromJson(s.look);
+                if (!look.SameAs(stats.look)) stats.LoadLook(look);
+            }
             if (stats != null && s.level > 0) stats.SetState(s.level, s.xp, s.allocated, s.statPoints, s.talentPoints, s.skillPoints);
         }
 

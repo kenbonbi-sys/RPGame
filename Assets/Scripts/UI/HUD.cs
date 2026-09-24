@@ -26,6 +26,7 @@ namespace RPG
         public DeathScreenUI death;
         public JournalUI journal;
         public CharacterUI character;
+        public CharacterCreatorUI creator;
         public XpBarUI xpBar;
         public SaveSlotsUI saves;
 

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
   id: swamp_toads
   title: "Truy N\xE3: C\xF3c \u0110\u1ED9c V\xE0 \u0110\u1EC9a B\xF9n"
-  kind: 2
-  summary: "Ng\u01B0 d\xE2n \u1EDF tr\u1EA1m nh\xE0 s\xE0n treo th\u01B0\u1EDFng: C\xF3c \u0110\u1ED9c v\xE0 \u0110\u1EC9a B\xF9n kh\xF4ng cho ai th\u1EA3 l\u01B0\u1EDBi."
+  kind: 0
+  summary: "Ng\u01B0 d\xE2n \u1EDF tr\u1EA1m nh\xE0 s\xE0n treo th\u01B0\u1EDFng: C\xF3c \u0110\u1ED9c v\xE0 \u0110\u1EC9a B\xF9n kh\xF4ng cho ai th\u1EA3 l\u01B0\u1EDBi. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 8."
   giver: 
   turnIn: 
   turnInText: 
@@ -44,4 +44,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 077b8cecceb086245b7bf5d3eb9c1910, type: 2}
     count: 3
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: 53cbc7b013e50c44988302eb6c9f4654, type: 2}

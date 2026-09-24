@@ -121,6 +121,36 @@ namespace RPG
             return best;
         }
 
+        /// <summary>
+        /// The twelve classes (-autoshotOnly classes): each one in a different people, casting a
+        /// skill of its bar (E) and its last one (D) at the slimes of the forest.
+        /// </summary>
+        IEnumerator Classes(PlayerController p, DayNightCycle dn)
+        {
+            var db = GameManager.I.db;
+            if (dn != null) dn.time = 0.45f;
+            var slime = FindEnemy("slime", p.transform.position);
+            for (int k = 0; k < db.classes.Count; k++)
+            {
+                var cls = db.classes[k];
+                var race = db.races[k % db.races.Count];
+                p.stats.look = new HeroLook();
+                CharacterChoice.Apply(p, new HeroLook { cls = cls.id, race = race.id, weapon = cls.DefaultWeapon, hair = k % 6, hairColor = (k * 5) % 12, beard = race.beards ? 2 : 0 });
+                slime = slime != null && !slime.IsDead ? slime : FindEnemy("slime", p.transform.position);
+                Vector2 target = slime != null ? (Vector2)slime.transform.position : (Vector2)p.transform.position + Vector2.right * 3f;
+                foreach (int slot in new[] { 2, 6 })
+                {
+                    Place(p, target + new Vector2(-3f, 0.3f));
+                    Prep(p);
+                    yield return Wait(0.3f);
+                    p.skills.TryCast(slot, target);
+                    yield return Wait(slot == 6 ? 0.55f : 0.3f);
+                    yield return Shot($"{cls.id}_{p.skills.slots[slot].id}");
+                    yield return Wait(1.2f);
+                }
+            }
+        }
+
         /// <summary>The part of the tour asked for with -autoshotOnly (null: all of it).</summary>
         static string Only
         {
@@ -463,6 +493,12 @@ namespace RPG
             if (Only == "cave")
             {
                 yield return Cave(p, dn);
+                Finish();
+                yield break;
+            }
+            if (Only == "classes")
+            {
+                yield return Classes(p, dn);
                 Finish();
                 yield break;
             }

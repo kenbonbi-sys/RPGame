@@ -166,8 +166,8 @@ namespace RPG
             at = DryLand(at);
             foreach (var owner in Loot.Owners(credited))
             {
-                var items = Loot.RollList(table);
-                if (coins > 0) items.Add((db.Item("coin"), coins));
+                var items = Loot.RollList(table, owner);
+                if (coins > 0) items.Add((db.Item("coin"), Loot.Coins(coins, owner)));
                 if (db.chestPrefab == null)
                 {
                     // no chest in this build: the loot drops as it always did

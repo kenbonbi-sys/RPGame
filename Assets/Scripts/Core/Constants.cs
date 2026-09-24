@@ -47,7 +47,9 @@ namespace RPG
         Ice,
         Lightning,
         Poison,
-        Holy
+        Holy,
+        /// <summary>Ám: the pacts of a Khế Ước Sư (plan: the eldritch powers of D&D's warlock).</summary>
+        Dark
     }
 
     /// <summary>Colours shared by UI and VFX so everything stays in one palette.</summary>
@@ -82,6 +84,7 @@ namespace RPG
                 case DamageType.Lightning: return Lightning;
                 case DamageType.Poison: return Poison;
                 case DamageType.Holy: return Holy;
+                case DamageType.Dark: return Dark;
                 default: return Damage;
             }
         }

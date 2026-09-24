@@ -314,7 +314,7 @@ namespace RPG.EditorTools.Tests
             yield return GameSmokeTests.Frames(2);
             Assert.AreEqual(1f, Time.timeScale, 1e-4f, "but no slow motion for everyone");
 
-            var slime = EnemyBase.All.Find(e => !e.IsDead);
+            var slime = EnemyBase.All.Find(e => !e.IsDead && e.enemyId == "slime");
             var hit = Hit(me, slime.health, 1f);
             hit.hitStop = 0.3f;
             Combat.OnHitFeedback(slime.health, hit);

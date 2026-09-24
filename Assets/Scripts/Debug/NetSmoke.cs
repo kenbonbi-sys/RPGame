@@ -194,6 +194,26 @@ namespace RPG
             me.SetIntent(new PlayerIntent());
             Debug.Log($"[NetSmoke] {role}: saw the other hero walk {seen:0.0} units");
 
+            // ---------------------------------------------------------------- a class, through the server
+            // SmokeA becomes an elf ranger (the server checks it, saves it and shows it to everyone);
+            // SmokeB must see A drawn so; coming back, A must still be one
+            bool classOk = true;
+            if (LoginInfo.Name != null && LoginInfo.Name.EndsWith("A"))
+            {
+                if (expect == null && !me.stats.HasClass)
+                    CharacterChoice.Choose(new HeroLook { race = "elf", cls = "ranger", weapon = "bow", hair = 2, hairColor = 5 });
+                yield return Until(() => me.stats.look.cls == "ranger", 8f);
+                classOk = me.stats.look.cls == "ranger" && me.stats.look.race == "elf" && me.skills.slots[0] != null && me.skills.slots[0].id == "arrow";
+                Debug.Log($"[NetSmoke] {role}: class {me.stats.look.race} {me.stats.look.cls}, Q {(me.skills.slots[0] != null ? me.skills.slots[0].id : "-")} → {(classOk ? "ok" : "NOT")}");
+            }
+            else
+            {
+                yield return Until(() => other != null && other.stats.look.cls == "ranger", 10f);
+                // (drawn only where there is a screen: SmokeB may run without one)
+                classOk = other != null && other.stats.look.cls == "ranger" && other.skills.slots[0] != null && other.skills.slots[0].id == "arrow";
+                Debug.Log($"[NetSmoke] {role}: sees the other as {(other != null ? other.stats.look.race + " " + other.stats.look.cls : "-")} → {(classOk ? "ok" : "NOT")}");
+            }
+
             // ---------------------------------------------------------------- playing together
             bool together = false;
             bool again = expect != null || Array.IndexOf(Environment.GetCommandLineArgs(), "-netsmokeAgain") >= 0;
@@ -248,7 +268,7 @@ namespace RPG
             yield return Shot(again ? "_again" : "");
             // the other player keeps fighting a little longer: stay so they still see this hero
             yield return Wait(GameSession.HasScreen ? 3f : 1f);
-            Finish(seen >= MinSeenWalk && killed && gotXp && together, $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}");
+            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk, $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}");
         }
 
         /// <summary>

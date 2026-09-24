@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: meteor
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: meteor
+  displayName: "M\u01B0a Thi\xEAn Th\u1EA1ch"
+  description: "S\xE1u thi\xEAn th\u1EA1ch l\u1EEDa r\u01A1i xu\u1ED1ng quanh v\u1ECB tr\xED chu\u1ED9t, g\xE2y B\u1ECFng."
+  icon: {fileID: 303295833, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 135170
+  cooldown: 22
+  energyCost: 32
+  targeting: 1
+  maxRange: 11
+  lockTime: 0.6
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215886
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215886
+      type: {class: BurstEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        center:
+          from: 2
+          up: 0
+          forward: 0
+        radius: 3.5
+        count: 6
+        chargeTime: 0.8
+        interval: 0.25
+        intervalJitter: 0.3
+        preferTargets: 0.7
+        firstAtCenter: 1
+        areaVfx: storm_circle
+        areaVfxScale: 1.6
+        each:
+        - rid: 8556425340525215887
+        - rid: 8556425340525215888
+    - rid: 8556425340525215887
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: fire_explosion
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_fireball_explode
+        sfxVolume: 0.7
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 1
+        sfxMinInterval: 0.03
+        shake: 0.3
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425340525215888
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        shape: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        radius: 1.6
+        angle: 120
+        hit:
+          power: 2.4
+          type: 1
+          critChance: 0.15
+          knockback: 6
+          poise: 12
+          hitStop: 0
+          status:
+            burn: 1
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit: []

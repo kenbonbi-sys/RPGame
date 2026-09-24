@@ -84,6 +84,8 @@ namespace RPG
         public string hitVfx = "hit_spark";
         public string hitSfx = "sfx_hit";
         public float hitShake = 0.1f;
+        [Tooltip("Degrees turned from the aim (a fan of arrows or knives: one block per angle).")]
+        public float angle;
 
         public override void Run(AbilityContext ctx)
         {
@@ -116,7 +118,8 @@ namespace RPG
             p.shake = hitShake;
             p.lifetime = lifetime > 0 ? lifetime : ctx.ability.maxRange / Mathf.Max(0.1f, speed);
             // online: the server's copy deals the damage, every screen flies its own that only bursts
-            p.Launch(ctx.dir, ctx.caster.Runner.gameObject, ctx.live, ctx.visual);
+            Vector2 dir = angle == 0f ? ctx.dir : (Vector2)(Quaternion.Euler(0f, 0f, angle) * ctx.dir);
+            p.Launch(dir, ctx.caster.Runner.gameObject, ctx.live, ctx.visual);
         }
     }
 }

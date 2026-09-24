@@ -45,6 +45,10 @@ namespace RPG
         public bool stunImmune;
         [Tooltip("Multiplier applied to stun durations (bosses resist).")]
         public float stunResist = 1f;
+        [Tooltip("Share taken off Choáng, Trói and Nguyền (a hero's people and saving throws).")]
+        [Range(0, 1)] public float controlShorter;
+        [Tooltip("Share taken off Độc (Người Lùn, a Thể Chất saving throw).")]
+        [Range(0, 1)] public float poisonShorter;
         /// <summary>A frozen character holds its pose here. Off on a client's copy of an enemy: the server's animation speed arrives with it.</summary>
         [System.NonSerialized] public bool drivesAnimation = true;
 
@@ -291,7 +295,7 @@ namespace RPG
                 NetCues.Vfx("spore_puff", transform.position + Vector3.up * 0.6f, 0f, 0.8f);
             }
             poisonStacks = Mathf.Min(c.poisonMaxStacks, poisonStacks + stacks);
-            poisonUntil = Now + c.poisonSeconds;
+            poisonUntil = Now + c.poisonSeconds * (1f - poisonShorter);
             poisonTeam = team;
         }
 
@@ -300,7 +304,7 @@ namespace RPG
         {
             Ready();
             if (stunImmune || seconds <= 0f) return;
-            seconds = CrowdControl(seconds * stunResist);
+            seconds = CrowdControl(seconds * stunResist * (1f - controlShorter));
             if (seconds > 0f) ApplyStun(seconds);
         }
 
@@ -331,7 +335,7 @@ namespace RPG
         {
             Ready();
             if (stunImmune || seconds <= 0f) return;
-            seconds = CrowdControl(seconds);
+            seconds = CrowdControl(seconds * (1f - controlShorter));
             if (seconds <= 0f) return;
             bool was = IsRooted;
             rootUntil = Mathf.Max(rootUntil, Now + seconds);
@@ -352,6 +356,7 @@ namespace RPG
         public void Curse(float seconds)
         {
             Ready();
+            seconds *= 1f - controlShorter;
             if (seconds <= 0f) return;
             bool was = IsCursed;
             curseUntil = Mathf.Max(curseUntil, Now + seconds);

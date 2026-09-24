@@ -16,7 +16,7 @@ namespace RPG.EditorTools
 
         public static readonly Dictionary<string, GameObject> Props = new Dictionary<string, GameObject>();
 
-        public static GameObject Player, NetHero, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
+        public static GameObject Player, NetHero, Chief, Girl, Smith, Slime, Shroom, Bear, Boulder, Loot;
         // Đầm Lầy Sương Mù
         public static GameObject Toad, Leech, MudMan, Mudling, ToadKing, Snake, WaterSnake, Dragonfly, Wisp;
         // Hang Pha Lê
@@ -34,6 +34,7 @@ namespace RPG.EditorTools
             Player = BuildPlayer();
             Chief = BuildNPC("Chief", "chief", "Trưởng Làng", "chief_idle", "chief_talk", "npc_chief_idle_0");
             Girl = BuildNPC("Girl", "girl", "Bé Mai", "girl_idle", "girl_idle", "npc_girl_idle_0");
+            Smith = BuildSmith();
             Slime = BuildSlime();
             Shroom = BuildShroom();
             Bear = BuildBear();
@@ -217,6 +218,7 @@ namespace RPG.EditorTools
             Player = L($"{CharFolder}/Player");
             NetHero = L($"{CharFolder}/NetHero");
             Chief = L($"{CharFolder}/Chief");
+            Smith = L($"{CharFolder}/Smith");
             Girl = L($"{CharFolder}/Girl");
             Slime = L($"{CharFolder}/Slime");
             Shroom = L($"{CharFolder}/Shroom");
@@ -389,7 +391,17 @@ namespace RPG.EditorTools
             bag.stacks.Add(new Inventory.Stack { item = db.Item("apple"), count = 3 });
         }
 
-        static GameObject BuildNPC(string file, string id, string display, string idle, string talk, string portraitSprite)
+        /// <summary>Thợ Rèn, the village smith: a dwarf drawn by HeroArt; talking opens the forge (Lò Rèn).</summary>
+        static GameObject BuildSmith()
+        {
+            var go = BuildNPC("Smith", "smith", "Thợ Rèn", "chief_idle", "chief_talk", "npc_chief_idle_0", false);
+            go.GetComponent<NPC>().forge = true;
+            var look = go.AddComponent<HeroNpcLook>();
+            look.look = new HeroLook { race = "dwarf", cls = "fighter", weapon = "mace", hair = HeroLook.Bald, hairColor = 3, beard = 2, cloth = 8, metal = 1, skin = 1, bareHead = true };
+            return EditorUtil.SavePrefab(go, $"{CharFolder}/Smith.prefab");
+        }
+
+        static GameObject BuildNPC(string file, string id, string display, string idle, string talk, string portraitSprite, bool save = true)
         {
             var root = new GameObject(file);
             root.layer = Layers.NPC;
@@ -418,7 +430,7 @@ namespace RPG.EditorTools
             npc.idleClip = idle;
             npc.talkClip = talk;
             npc.portrait = ArtImporter.S(portraitSprite);
-            return EditorUtil.SavePrefab(root, $"{CharFolder}/{file}.prefab");
+            return save ? EditorUtil.SavePrefab(root, $"{CharFolder}/{file}.prefab") : root;
         }
 
         static void EnemyCommon(GameObject root, EnemyBase e, SpriteRenderer body, string set, float headY, float hp)

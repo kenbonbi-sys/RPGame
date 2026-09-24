@@ -30,10 +30,12 @@ namespace RPG.EditorTools.Tests
         public void NoXpNeededAtMaxLevel() => Assert.AreEqual(0, c.XpToNext(40));
 
         [Test]
-        public void PrototypeHeroAtLevel6MatchesPrototypeNumbers()
+        public void HealthFollowsTheHitDieAndConstitution()
         {
-            Assert.AreEqual(149f, c.MaxHp(6, 4));
-            Assert.AreEqual(63f, c.MaxEnergy(6, 3));
+            Assert.AreEqual(104f, Mathf.Round(c.MaxHp(1, 4.5f, 14)), "a d8 hero with Thể Chất 14: the prototype's 104");
+            Assert.AreEqual(175f, Mathf.Round(c.MaxHp(6, 5.5f, 16)), "a d10 hero of level 6 with Thể Chất 16");
+            Assert.Greater(c.MaxHp(5, 6.5f, 14), c.MaxHp(5, 3.5f, 14), "a d12 barbarian outlasts a d6 wizard");
+            Assert.AreEqual(55.5f, c.MaxEnergy(1, 16), 1e-4f, "the prototype's energy");
         }
 
         [Test]
@@ -56,9 +58,12 @@ namespace RPG.EditorTools.Tests
         [Test]
         public void StartingStatsKeepPrototypeDamage()
         {
-            Assert.AreEqual(1f, c.DamageScale(c.PhysicalAttack(c.startStrength), false), 1e-5f);
-            Assert.AreEqual(1f, c.DamageScale(c.MagicAttack(c.startIntelligence), true), 1e-5f);
-            Assert.Greater(c.DamageScale(c.PhysicalAttack(c.startStrength + 1), false), 1f);
+            Assert.AreEqual(1f, c.DamageScale(c.PhysicalAttack(c.referenceScore), false), 1e-5f);
+            Assert.AreEqual(1f, c.DamageScale(c.MagicAttack(c.referenceScore), true), 1e-5f);
+            Assert.Greater(c.DamageScale(c.PhysicalAttack(c.referenceScore + 1), false), 1f);
+            Assert.AreEqual(3, CoreStats.Modifier(16), "D&D: 16 is +3");
+            Assert.AreEqual(-1, CoreStats.Modifier(8), "8 is −1");
+            Assert.AreEqual(0, CoreStats.Modifier(11));
         }
     }
 

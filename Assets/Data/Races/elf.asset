@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1fbe5c18e020d489ccd68a86985663, type: 3}
+  m_Name: elf
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.RaceDef
+  id: elf
+  displayName: "Ti\xEAn T\u1ED9c"
+  englishName: High Elf
+  description: "D\xE2n r\u1EEBng gi\xE0 s\u1ED1ng h\xE0ng tr\u0103m n\u0103m, m\u1EAFt tinh, tay kh\xE9o, thu\u1ED9c ph\xE9p t\u1EEB b\xE9."
+  bonus: 000000000100000002000000000000000000000000000000i
+  traits: "Nh\xECn Trong T\u1ED1i: \xE1nh s\xE1ng c\u1EE7a m\xECnh r\u1ECDi xa h\u01A1n trong hang.\nD\xF2ng M\xE1u Ti\xEAn: Cho\xE1ng, Tr\xF3i v\xE0 Nguy\u1EC1n ng\u1EAFn h\u01A1n 30%."
+  speedMultiplier: 1
+  darkvision: 1
+  resist:
+    physical: 0
+    fire: 0
+    ice: 0
+    lightning: 0
+    poison: 0
+    holy: 0
+    dark: 0
+  poisonShorter: 0
+  controlShorter: 0.3
+  luckyDodge: 0
+  relentlessCooldown: 0
+  savageCrit: 0
+  rebukeChance: 0
+  xpBonus: 0
+  hpPerLevel: 0
+  draconic: 0
+  build: 0
+  skins:
+  - {r: 1, g: 0.9490196, b: 0.8862745, a: 1}
+  - {r: 0.9647059, g: 0.8627451, b: 0.76862746, a: 1}
+  - {r: 0.9019608, g: 0.76862746, b: 0.63529414, a: 1}
+  - {r: 0.78431374, g: 0.627451, b: 0.5019608, a: 1}
+  - {r: 0.6117647, g: 0.47843137, b: 0.39215687, a: 1}
+  - {r: 0.8627451, g: 0.8627451, b: 0.9411765, a: 1}
+  pointedEars: 1
+  horns: 0
+  tail: 0
+  tusks: 0
+  dragonHead: 0
+  hairStyles: 
+  beards: 0

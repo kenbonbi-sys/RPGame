@@ -109,6 +109,17 @@ namespace RPG.EditorTools
             // a fallen boss's treasure chest
             Build("chest_appear", ChestAppear, 1.4f);
             Build("chest_open", ChestOpen, 2f);
+            // the classes' skills
+            Build("holy_strike", r => Pillar(r, Holy), 1.4f);
+            Build("dark_strike", r => Pillar(r, DarkC), 1.4f);
+            Build("holy_hit", r => SmallBurst(r, Holy), 0.9f);
+            Build("dark_hit", r => SmallBurst(r, DarkC), 0.9f);
+            Build("arcane_hit", r => SmallBurst(r, ArcaneC), 0.9f);
+            Build("note_hit", r => SmallBurst(r, PinkC), 0.9f);
+            Build("nature_burst", NatureBurst, 1.6f);
+            Build("smoke_cloud", SmokeCloud, 3f);
+            Build("holy_aura", r => Aura(r, Holy), 0f);
+            Build("dark_aura", r => Aura(r, DarkC), 0f);
             // boss
             Build("boss_roar", BossRoar, 1.6f);
             Build("enrage_burst", EnrageBurst, 1.8f);
@@ -128,6 +139,16 @@ namespace RPG.EditorTools
             EditorUtil.Assign(ref db.venomPrefab, BuildVenom());
             EditorUtil.Assign(ref db.venomArcPrefab, BuildVenomGlob());
             EditorUtil.Assign(ref db.webPrefab, BuildWebShot());
+            // the classes' projectiles (the abilities find them by path)
+            BuildBolt("Arrow", "proj_arrow", false, Color.white, new Color(1f, 0.9f, 0.7f), 1f, true, 0f, 0f);
+            BuildBolt("ThrownKnife", "proj_knife", false, Color.white, new Color(0.85f, 0.9f, 1f), 1f, true, 0f, 0f);
+            BuildBolt("ThrownAxe", "proj_axe", false, Color.white, new Color(1f, 0.8f, 0.6f), 1.1f, false, -900f, 0f);
+            BuildBolt("NoteBolt", "proj_note", false, PinkC, PinkC, 0.9f, false, 0f, 1.1f);
+            BuildBolt("HolyBolt", "glow_hard", true, Holy, Holy, 0.5f, false, 0f, 1.5f);
+            BuildBolt("DarkBolt", "glow_hard", true, DarkC, DarkC, 0.5f, false, 0f, 1.5f);
+            BuildBolt("ArcaneBolt", "spark4", true, ArcaneC, ArcaneC, 0.45f, false, 540f, 1.1f);
+            BuildBolt("FireBolt", "glow_hard", true, new Color(1f, 0.55f, 0.2f), new Color(1f, 0.45f, 0.15f), 0.45f, false, 0f, 1.3f);
+            BuildBolt("ChaosBolt", "spark4", true, new Color(1f, 0.6f, 1f), new Color(0.9f, 0.4f, 1f), 0.6f, false, -720f, 1.6f);
             EditorUtil.Assign(ref db.mistMaterial, Mat("smoke", false, 1f));
             EditorUtil.Assign(ref db.rockProjectilePrefab, BuildRockProjectile());
             EditorUtil.Assign(ref db.telegraphPrefab, BuildTelegraph());
@@ -931,6 +952,83 @@ namespace RPG.EditorTools
             PS(r, "Glints", Mat("spark4", true, 2.2f)).Burst(8).Life(0.3f, 0.6f).Speed(0.5f, 1.5f).Size(0.14f, 0.26f)
                 .Col(Color.white, CrystalCyan).Circle(0.3f).Fade();
             Light(r, CrystalCyan, 3f, 1.4f, 0.5f);
+        }
+
+        static readonly Color DarkC = new Color(0.62f, 0.35f, 1f);
+        static readonly Color ArcaneC = new Color(0.55f, 0.62f, 1f);
+        static readonly Color PinkC = new Color(1f, 0.5f, 0.85f);
+        static readonly Color NatureC = new Color(0.45f, 0.85f, 0.35f);
+
+        /// <summary>A pillar of light striking down (Cột Sáng, Phán Quyết Trời Cao; in purple, the dark storms).</summary>
+        static void Pillar(GameObject r, Color c)
+        {
+            var beam = Spr(r, "Beam", "beam", Mat("beam", true, 2f), A(c, 0.9f), scale: 1f, y: 1.6f);
+            beam.transform.localScale = new Vector3(0.9f, 3.2f, 1f);
+            SFX(beam, 0.6f, C(0, 1.2f, 0.3f, 1f, 1, 0.4f), C(0, 1, 0.5f, 0.8f, 1, 0));
+            Ring(r, "Ring", c, 0.2f, 1.6f, 0.5f, "ring", SortingLayerNames.Decal, 0.5f);
+            PS(r, "Motes", Mat("spark4", true, 2.2f)).Burst(16).Life(0.4f, 0.9f).Speed(0.5f, 2.2f).Size(0.12f, 0.24f)
+                .Col(Color.white, c).Circle(0.5f).Vel(0, 0, 1f, 2.5f).Fade();
+            Light(r, c, 4f, 2.2f, 0.6f);
+        }
+
+        /// <summary>A small burst where a bolt lands (holy, dark, arcane, a bard's note).</summary>
+        static void SmallBurst(GameObject r, Color c)
+        {
+            var g = Spr(r, "Glow", "glow", Mat("glow", true, 1.8f), A(c, 0.8f), scale: 1.3f);
+            SFX(g, 0.35f, C(0, 0.4f, 0.3f, 1.1f, 1, 0.9f), C(0, 1, 1, 0));
+            PS(r, "Sparks", Mat("spark4", true, 2.2f)).Burst(12).Life(0.25f, 0.55f).Speed(1.5f, 4f).Size(0.1f, 0.2f)
+                .Col(Color.white, c).Circle(0.2f).Drag(2f).Fade();
+            Light(r, c, 2.5f, 1.4f, 0.35f);
+        }
+
+        /// <summary>Roots and leaves bursting from the ground (Rễ Trói, Bão Gai, Bẫy Gai).</summary>
+        static void NatureBurst(GameObject r)
+        {
+            Ring(r, "Ring", NatureC, 0.3f, 2f, 0.6f, "ring", SortingLayerNames.Decal, 0.5f);
+            PS(r, "Leaves", Mat("leaf_green", false, 1f)).Burst(14).Life(0.6f, 1.2f).Speed(1f, 3f).Size(0.2f, 0.35f)
+                .ConeUp(70f, 0.4f).Grav(1.5f).Rot().Fade();
+            PS(r, "Chips", Mat("debris_0", false, 1f)).Burst(8).Life(0.4f, 0.8f).Speed(1.5f, 3.5f).Size(0.15f, 0.25f)
+                .Col(new Color(0.45f, 0.32f, 0.2f)).ConeUp(60f, 0.3f).Grav(3f).Fade();
+            Light(r, NatureC, 2.5f, 1f, 0.5f);
+        }
+
+        /// <summary>A bomb of thick smoke (Bom Khói).</summary>
+        static void SmokeCloud(GameObject r)
+        {
+            PS(r, "Smoke", Mat("smoke", false, 1f)).Burst(24).Life(1.6f, 2.6f).Speed(0.4f, 1.6f).Size(1.2f, 2.2f)
+                .Col(new Color(0.45f, 0.45f, 0.52f, 0.85f), new Color(0.25f, 0.25f, 0.3f, 0.7f)).Circle(0.8f).Drag(1.5f)
+                .SizeLife(0, 0.6f, 1, 1.4f).Rot().Fade(0.2f);
+            Ring(r, "Ring", new Color(0.8f, 0.8f, 0.85f), 0.3f, 2.8f, 0.4f, "ring", SortingLayerNames.Decal, 0.5f);
+        }
+
+        /// <summary>A ring of light turning on the ground while a power lasts (Tinh Linh Hộ Vệ, Hố Đen).</summary>
+        static void Aura(GameObject r, Color c)
+        {
+            var ring = Spr(r, "Ring", "magic_circle", Mat("magic_circle", true, 1.4f), A(c, 0.7f), SortingLayerNames.Decal, 1, 1f);
+            ring.transform.localScale = new Vector3(1.4f, 0.7f, 1);
+            ring.gameObject.AddComponent<Spinner>().degreesPerSecond = 45f;
+            PS(r, "Motes", Mat("spark4", true, 2f)).Loop().Rate(14).Life(0.6f, 1.1f).Size(0.1f, 0.2f).Col(Color.white, c)
+                .Circle(1.2f, 360f, 0f).Vel(0, 0, 0.6f, 1.4f).Fade(0.2f).Local();
+            Light(r, c, 3f, 1f, pulse: false, flicker: 0.1f);
+        }
+
+        /// <summary>A class skill's projectile: its sprite (turned to its flight, or spinning), a glow, a trail and a light.</summary>
+        static GameObject BuildBolt(string name, string sprite, bool additive, Color tint, Color glowColor, float scale, bool rotate, float spin, float glowScale)
+        {
+            var root = new GameObject(name);
+            root.layer = Layers.Projectile;
+            var fx = root.AddComponent<PooledFX>();
+            fx.lifetime = 0f;
+            fx.stopLinger = 0.4f;
+            var p = root.AddComponent<Projectile>();
+            p.rotateToDirection = rotate;
+            var core = Spr(root, "Core", sprite, Mat(sprite, additive, additive ? 2.2f : 1f), tint, scale: scale, order: 1);
+            if (spin != 0f) core.gameObject.AddComponent<Spinner>().degreesPerSecond = spin;
+            if (glowScale > 0f) Spr(root, "Glow", "glow", Mat("glow", true, 1.6f), A(glowColor, 0.65f), scale: glowScale, order: -1);
+            PS(root, "Trail", Mat("glow", true, 1.4f), SortingLayerNames.VFX, -2).Loop().Rate(26).Life(0.18f, 0.35f).Size(0.08f, 0.2f)
+                .Col(A(glowColor, 0.75f), A(Color.white, 0.35f)).Circle(0.05f).Fade();
+            if (glowScale > 0f) Light(root, glowColor, 1.8f, 0.9f, pulse: false);
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/{name}.prefab");
         }
 
         /// <summary>A boss's chest appearing in the middle of its arena: a golden ring and a puff of glints.</summary>

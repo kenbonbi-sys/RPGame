@@ -15,7 +15,7 @@ MonoBehaviour:
   id: slay_bear
   title: "G\u1EA5u Ma R\u1EEBng Gi\xE0"
   kind: 0
-  summary: "G\u1EA5u Ma R\u1EEBng Gi\xE0 ng\u1EF1 \u1EDF R\u1EEBng Gi\xE0 C\u1ED5 Th\u1EE5, ph\xEDa \u0111\xF4ng b\u1EAFc."
+  summary: "G\u1EA5u Ma R\u1EEBng Gi\xE0 ng\u1EF1 \u1EDF R\u1EEBng Gi\xE0 C\u1ED5 Th\u1EE5, ph\xEDa \u0111\xF4ng b\u1EAFc. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 5."
   giver: chief
   turnIn: chief
   turnInText: "B\xE1o tin cho Tr\u01B0\u1EDFng L\xE0ng"
@@ -43,4 +43,5 @@ MonoBehaviour:
     count: 3
   setFlags:
   - forest_saved
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: f60cbc3b5692ec248abf695b3649174d, type: 2}

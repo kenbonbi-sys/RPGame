@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8d73affa8ff6d24dba757b15a0caf2d, type: 3}
+  m_Name: warlock
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ClassDef
+  id: warlock
+  displayName: "Kh\u1EBF \u01AF\u1EDBc S\u01B0"
+  englishName: Warlock
+  role: "PH\xD9 TH\u1EE6Y D\u1ECA GI\u1EDAI"
+  description: "\u0110\u1ED5i l\u1EA5y s\u1EE9c m\u1EA1nh b\u1EB1ng kh\u1EBF \u01B0\u1EDBc v\u1EDBi th\u1EF1c th\u1EC3 b\xEAn kia b\u1EE9c m\xE0n: tia h\u1EAFc \xE1m, l\u1EDDi nguy\u1EC1n, x\xFAc tu b\xF3ng t\u1ED1i."
+  complexity: 2
+  hitDie: 8
+  primary: 05000000i
+  arrayOrder: 050000000300000002000000040000000100000000000000i
+  savingThrows: 0400000005000000i
+  casting: 5
+  armor: 1
+  weapons:
+  - tome
+  - wand
+  - orb
+  kit:
+  - eldritch
+  - hex
+  - tentacles
+  - drain
+  - darkarmor
+  - misty
+  - voidstorm
+  outfit: warlock
+  cloth: {r: 0.38431373, g: 0.19607843, b: 0.627451, a: 1}
+  color: {r: 0.6039216, g: 0.16470589, b: 0.2901961, a: 1}
+  emblem: {fileID: -1714793375, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}

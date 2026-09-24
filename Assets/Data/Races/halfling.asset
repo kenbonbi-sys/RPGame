@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1fbe5c18e020d489ccd68a86985663, type: 3}
+  m_Name: halfling
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.RaceDef
+  id: halfling
+  displayName: "Ng\u01B0\u1EDDi T\xED Hon"
+  englishName: Lightfoot Halfling
+  description: "Nh\u1ECF b\xE9, vui v\u1EBB v\xE0 may m\u1EAFn \u0111\u1EBFn kh\xF3 tin. L\u1EBBn qua \u0111\xE2u c\u0169ng kh\xF4ng ai \u0111\u1EC3 \xFD."
+  bonus: 000000000000000002000000000000000000000001000000i
+  traits: "May M\u1EAFn: 10% \u0111\xF2n \u0111\xE1nh tr\xFAng m\xECnh b\u1ECB h\u1EE5t.\nGan D\u1EA1: Cho\xE1ng, Tr\xF3i v\xE0 Nguy\u1EC1n ng\u1EAFn h\u01A1n 30%.\nCh\xE2n ng\u1EAFn: \u0111i ch\u1EADm h\u01A1n m\u1ED9t ch\xFAt."
+  speedMultiplier: 0.93
+  darkvision: 0
+  resist:
+    physical: 0
+    fire: 0
+    ice: 0
+    lightning: 0
+    poison: 0
+    holy: 0
+    dark: 0
+  poisonShorter: 0
+  controlShorter: 0.3
+  luckyDodge: 0.1
+  relentlessCooldown: 0
+  savageCrit: 0
+  rebukeChance: 0
+  xpBonus: 0
+  hpPerLevel: 0
+  draconic: 0
+  build: 2
+  skins:
+  - {r: 1, g: 0.8862745, b: 0.7764706, a: 1}
+  - {r: 0.9490196, g: 0.76862746, b: 0.6117647, a: 1}
+  - {r: 0.87058824, g: 0.6509804, b: 0.4627451, a: 1}
+  - {r: 0.7607843, g: 0.5137255, b: 0.3372549, a: 1}
+  - {r: 0.59607846, g: 0.3764706, b: 0.24313726, a: 1}
+  - {r: 0.41568628, g: 0.2627451, b: 0.18039216, a: 1}
+  pointedEars: 0
+  horns: 0
+  tail: 0
+  tusks: 0
+  dragonHead: 0
+  hairStyles: 
+  beards: 0

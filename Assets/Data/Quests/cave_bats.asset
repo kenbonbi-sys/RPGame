@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
   id: cave_bats
   title: "Truy N\xE3: D\u01A1i Pha L\xEA"
-  kind: 2
-  summary: "B\u1EA7y d\u01A1i trong Hang D\u01A1i h\xFAt m\xE1u b\u1EA5t c\u1EE9 ai mang \u0111\xE8n \u0111i qua. Ch\xFAng s\u1EE3 l\u1EEDa v\xE0 \xE1nh s\xE1ng."
+  kind: 0
+  summary: "B\u1EA7y d\u01A1i trong Hang D\u01A1i h\xFAt m\xE1u b\u1EA5t c\u1EE9 ai mang \u0111\xE8n \u0111i qua. Ch\xFAng s\u1EE3 l\u1EEDa v\xE0 \xE1nh s\xE1ng. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 14."
   giver: 
   turnIn: 
   turnInText: 
@@ -38,4 +38,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
     count: 2
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: a1492c28afb8653499fc69b293449f9b, type: 2}

@@ -61,7 +61,8 @@ namespace RPG
         {
             // started for a server, a host, a direct join or an automated run: no title
             OnlineSession.ReadCommandLine();
-            if (GameSession.Mode != SessionMode.Offline || AutoShot.Active || NetSmoke.Active || LoadBot.Active || BackdropShot.Active)
+            if (GameSession.Mode != SessionMode.Offline || AutoShot.Active || NetSmoke.Active || LoadBot.Active || BackdropShot.Active ||
+                Array.IndexOf(Environment.GetCommandLineArgs(), "-creatorshot") >= 0)
             {
                 SceneManager.LoadScene(ZoneRoot.CoreScene);
                 enabled = false;

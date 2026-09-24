@@ -36,6 +36,8 @@ namespace RPG
             {
                 hero.SetPuppet(true);
                 SetDisplayName(NetWorld.HeroName(ObjectId + 1) ?? ServerPlayers.NameOf(hero) ?? "…");
+                string look = NetWorld.HeroLookOf(ObjectId + 1);
+                if (!string.IsNullOrEmpty(look) && hero.stats != null) hero.stats.LoadLook(HeroLook.FromJson(look));
                 return;
             }
             hero.SetPuppet(false);

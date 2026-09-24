@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: windstep
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: windstep
+  displayName: "B\u01B0\u1EDBc Gi\xF3"
+  description: "Ch\xE2n nh\u1EB9 nh\u01B0 gi\xF3: \u0111i nhanh h\u01A1n 40% trong 5 gi\xE2y."
+  icon: {fileID: 1159838845, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 65537
+  cooldown: 12
+  energyCost: 6
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.15
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_dash
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215765
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215765
+      type: {class: BuffEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        buff:
+          id: windstep
+          displayName: "B\u01B0\u1EDBc Gi\xF3"
+          icon: {fileID: 1159838845, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+          duration: 5
+          speedMultiplier: 1.4
+          damageTakenMultiplier: 1
+          stunImmune: 0
+          clearStun: 0
+          attachedVfx: shield_bubble
+          endVfx: 
+          damageDealtMultiplier: 1
+          attackSpeedBonus: 0
+        allies: 0

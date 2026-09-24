@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1fbe5c18e020d489ccd68a86985663, type: 3}
+  m_Name: halforc
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.RaceDef
+  id: halforc
+  displayName: "B\xE1n Orc"
+  englishName: Half-Orc
+  description: "Mang s\u1EE9c v\xF3c c\u1EE7a t\u1ED9c orc: to kh\u1ECFe, d\u1EEF d\u1EB1n, g\u1EE5c r\u1ED3i v\u1EABn \u0111\u1EE9ng d\u1EADy."
+  bonus: 020000000000000000000000010000000000000000000000i
+  traits: "Nh\xECn Trong T\u1ED1i.\nKi\xEAn Tr\xEC B\u1EA5t Khu\u1EA5t: \u0111\xF2n ch\xED t\u1EED ch\u1EC9 \u0111\u1EC3 l\u1EA1i 1 m\xE1u, m\u1ED7i 90 gi\xE2y m\u1ED9t l\u1EA7n.\n\u0110\xF2n T\xE0n B\u1EA1o: ch\xED m\u1EA1ng m\u1EA1nh h\u01A1n."
+  speedMultiplier: 1
+  darkvision: 1
+  resist:
+    physical: 0
+    fire: 0
+    ice: 0
+    lightning: 0
+    poison: 0
+    holy: 0
+    dark: 0
+  poisonShorter: 0
+  controlShorter: 0
+  luckyDodge: 0
+  relentlessCooldown: 90
+  savageCrit: 0.3
+  rebukeChance: 0
+  xpBonus: 0
+  hpPerLevel: 0
+  draconic: 0
+  build: 0
+  skins:
+  - {r: 0.63529414, g: 0.7058824, b: 0.50980395, a: 1}
+  - {r: 0.5411765, g: 0.627451, b: 0.4392157, a: 1}
+  - {r: 0.47058824, g: 0.5568628, b: 0.38431373, a: 1}
+  - {r: 0.5568628, g: 0.59607846, b: 0.53333336, a: 1}
+  - {r: 0.6901961, g: 0.65882355, b: 0.5019608, a: 1}
+  - {r: 0.41568628, g: 0.47843137, b: 0.34509805, a: 1}
+  pointedEars: 0
+  horns: 0
+  tail: 0
+  tusks: 1
+  dragonHead: 0
+  hairStyles: 
+  beards: 0

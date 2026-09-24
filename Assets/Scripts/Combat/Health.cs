@@ -31,6 +31,11 @@ namespace RPG
         /// <summary>A hostile hit that invulnerability blocked (a dash's i-frames); Lướt Hoàn Hảo listens.</summary>
         public event Action<DamageInfo> Evaded;
 
+        /// <summary>A blow about to land may be turned aside (Người Tí Hon: May Mắn); true: it misses.</summary>
+        public Func<DamageInfo, bool> Evade;
+        /// <summary>A blow about to fell this may leave it at 1 health instead (Bán Orc: Kiên Trì Bất Khuất); true: it endures.</summary>
+        public Func<bool> Endure;
+
         /// <summary>Source of the random damage spread (0..1). Tests pin it to 0.5 for exact numbers.</summary>
         public static Func<float> SpreadRoll = () => UnityEngine.Random.value;
 
@@ -109,6 +114,11 @@ namespace RPG
                 Evaded?.Invoke(d);
                 return 0f;
             }
+            if (Evade != null && !d.dot && !d.pure && Evade(d))
+            {
+                NetCues.WorldText("May mắn!", HeadPosition + Vector3.up * 0.3f, Palette.Xp);
+                return 0f;
+            }
             var st = Status;
             float dealt = d.amount;   // the attacker's side: Bỏng and Tích Điện scale with it
             float raw = dealt;
@@ -125,6 +135,11 @@ namespace RPG
                 raw = ProgressionConfig.Current.Mitigate(raw, armor, armor > 0 ? AttackerLevel(d) : 1, Resistance(d.type), SpreadRoll());
             }
             float amount = Mathf.Max(1f, Mathf.Round(raw));
+            if (amount >= hp && hp > 1f && Endure != null && Endure())
+            {
+                amount = hp - 1f;
+                NetCues.WorldText("Kiên Trì Bất Khuất!", HeadPosition + Vector3.up * 0.4f, Palette.Crit);
+            }
             hp = Mathf.Max(0f, hp - amount);
             LastDamageTime = Time.time;
             var by = d.SourcePlayer;

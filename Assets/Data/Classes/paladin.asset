@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8d73affa8ff6d24dba757b15a0caf2d, type: 3}
+  m_Name: paladin
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ClassDef
+  id: paladin
+  displayName: "Hi\u1EC7p S\u0129 Th\xE1nh"
+  englishName: Paladin
+  role: "CHI\u1EBEN BINH M\u1ED8 \u0110\u1EA0O"
+  description: "Chi\u1EBFn binh \u0111\xE3 th\u1EC1 nguy\u1EC7n: gi\xE1p n\u1EB7ng, \u0111\xF2n tr\u1EEBng ph\u1EA1t th\u1EA7n th\xE1nh, b\xE0n tay ch\u1EEFa l\xE0nh."
+  complexity: 1
+  hitDie: 10
+  primary: 0000000005000000i
+  arrayOrder: 000000000500000003000000040000000200000001000000i
+  savingThrows: 0400000005000000i
+  casting: 5
+  armor: 3
+  weapons:
+  - sword
+  - mace
+  - axe
+  - spear
+  kit:
+  - 
+  - smite
+  - layonhands
+  - auraprotect
+  - shield
+  - holycharge
+  - heavenfall
+  outfit: paladin
+  cloth: {r: 0.17254902, g: 0.34509805, b: 0.6901961, a: 1}
+  color: {r: 0.72156864, g: 0.76862746, b: 0.84705883, a: 1}
+  emblem: {fileID: -1687255182, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}

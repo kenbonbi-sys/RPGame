@@ -4,10 +4,13 @@ using UnityEngine;
 namespace RPG
 {
     /// <summary>
-    /// Level, XP and the four attributes of the hero (plan §05). Owns the StatBlock that
-    /// equipment, talents and buffs will add modifiers to, and pushes the derived numbers
-    /// (max HP, max energy, armor, resist) into Health and PlayerController. Each hero has
-    /// their own; the HUD shows <see cref="Players.Local"/>'s.
+    /// Level, XP and the six D&D ability scores of the hero (plan §05). Who the hero is (their
+    /// people, class and weapon: <see cref="look"/>) sets the starting scores — the standard
+    /// array placed by the class plus the people's increases — and the rules around them: the
+    /// class's hit die, armor and casting ability, the weapon's attack, the people's traits.
+    /// Owns the StatBlock that equipment, talents and buffs add modifiers to, and pushes the
+    /// derived numbers into Health, StatusEffects and PlayerController. Each hero has their own;
+    /// the HUD shows <see cref="Players.Local"/>'s.
     /// </summary>
     [DefaultExecutionOrder(-50)]
     public class PlayerStats : MonoBehaviour
@@ -17,11 +20,13 @@ namespace RPG
 
         public int level = 1;
         public int xp;
-        [Tooltip("Points spent per attribute: Strength, Intelligence, Agility, Vitality.")]
-        public int[] allocated = new int[4];
+        [Tooltip("Points spent per ability score, by CoreStat: STR, INT, DEX, CON, WIS, CHA.")]
+        public int[] allocated = new int[CoreStats.Count];
         public int statPoints;
         public int talentPoints;
         public int skillPoints;
+        [Tooltip("Their people, class, weapon and looks. An empty class: an older character who has not chosen one yet.")]
+        public HeroLook look = new HeroLook();
 
         public readonly StatBlock Stats = new StatBlock();
 
@@ -29,20 +34,50 @@ namespace RPG
         public event Action Changed;
         /// <summary>This hero reached a new level (their quests unlock).</summary>
         public event Action<int> LevelledUp;
+        /// <summary>Their people, class, weapon or looks changed (the skill bar and the sprite follow).</summary>
+        public event Action LookChanged;
 
         public ProgressionConfig Config => config != null ? config : ProgressionConfig.Current;
         public int XpToNext => Config.XpToNext(level);
         public bool IsMaxLevel => level >= Config.maxLevel;
 
+        static GameDatabase Db => GameManager.I != null ? GameManager.I.db : null;
+        public RaceDef Race => Db != null ? Db.Race(look.race) : null;
+        public ClassDef Class => Db != null ? Db.Class(look.cls) : null;
+        public bool HasClass => Class != null;
+        /// <summary>The weapon in hand: the chosen one if the class may carry it, else the class's first.</summary>
+        public WeaponKind Weapon
+        {
+            get
+            {
+                var cls = Class;
+                var w = WeaponKinds.Get(look.weapon);
+                if (w != null && (cls == null || cls.Allows(w.id))) return w;
+                return WeaponKinds.Get(cls != null ? cls.DefaultWeapon : "sword");
+            }
+        }
+
         PlayerController pc;
+        Resistances baseResist;
+        float endureReadyAt;
 
         void Awake()
         {
             pc = GetComponent<PlayerController>();
-            if (allocated == null || allocated.Length != 4) allocated = new int[4];
+            FixAllocated();
+            var h = pc != null ? pc.health : GetComponent<Health>();
+            if (h != null) baseResist = h.resistances;
             Stats.Changed += OnStatsChanged;
             Recalculate();
             FillUp();
+        }
+
+        void FixAllocated()
+        {
+            if (allocated != null && allocated.Length == CoreStats.Count) return;
+            var grown = new int[CoreStats.Count];
+            if (allocated != null) Array.Copy(allocated, grown, Mathf.Min(allocated.Length, grown.Length));
+            allocated = grown;
         }
 
         bool IsLocal => pc == null || pc.IsLocal;
@@ -57,12 +92,48 @@ namespace RPG
             GameEvents.EnemyKilled -= OnEnemyKilled;
         }
 
-        // ------------------------------------------------------------------ attributes
-        public int Attribute(CoreStat a) => Mathf.RoundToInt(Stats.Get((StatId)(int)a));
+        // ------------------------------------------------------------------ ability scores
+        /// <summary>An ability score as it stands (base, points spent, items and buffs).</summary>
+        public float Score(CoreStat a) => Stats.Get(CoreStats.Stat(a));
+
+        public int Attribute(CoreStat a) => Mathf.RoundToInt(Score(a));
 
         public int Allocated(CoreStat a) => allocated[(int)a];
 
-        /// <summary>Puts a stat point into an attribute. Online a player's machine asks the server, which sends the new sheet back.</summary>
+        /// <summary>The score before points: the class's place in the standard array plus the people's increase.</summary>
+        public int BaseScore(CoreStat a)
+        {
+            var cls = Class;
+            if (cls == null) return CoreStats.Unclassed[(int)a];
+            var race = Race;
+            return cls.ArrayScore(a) + (race != null ? race.Bonus(a) : 0);
+        }
+
+        /// <summary>The ability the weapon in hand strikes with (D&D: Sức Mạnh; finesse the better of it and Khéo Léo; a bow Khéo Léo; a focus the casting ability).</summary>
+        public float AttackScore
+        {
+            get
+            {
+                var w = Weapon;
+                if (w != null && w.focus) return CastingScore;
+                if (w != null && w.ranged) return Score(CoreStat.Dexterity);
+                if (w != null && w.finesse) return Mathf.Max(Score(CoreStat.Strength), Score(CoreStat.Dexterity));
+                return Score(CoreStat.Strength);
+            }
+        }
+
+        /// <summary>The ability the class casts with (a martial class: the one it fights with).</summary>
+        public float CastingScore
+        {
+            get
+            {
+                var cls = Class;
+                if (cls == null) return Mathf.Max(Score(CoreStat.Intelligence), Score(CoreStat.Strength));
+                return Score(cls.casting);
+            }
+        }
+
+        /// <summary>Puts a stat point into an ability. Online a player's machine asks the server, which sends the new sheet back.</summary>
         public bool Spend(CoreStat a)
         {
             if (statPoints <= 0) return false;
@@ -78,37 +149,106 @@ namespace RPG
             return true;
         }
 
-        /// <summary>Rebuilds every derived stat from level + attributes (+ modifiers).</summary>
+        // ------------------------------------------------------------------ who they are
+        /// <summary>
+        /// Takes a people, class, weapon and looks (the character creator, a save, the server).
+        /// Choosing a class for the first time — or another one — gives back every point spent,
+        /// to be spent again on the new sheet.
+        /// </summary>
+        public void SetLook(HeroLook newLook)
+        {
+            if (newLook == null) return;
+            bool classChanged = newLook.cls != look.cls || newLook.race != look.race;
+            look = newLook.Clone();
+            if (classChanged) Refund();
+            Recalculate();
+            LookChanged?.Invoke();
+        }
+
+        /// <summary>Takes who the hero is from a save or the server, points untouched (they come with it).</summary>
+        public void LoadLook(HeroLook saved)
+        {
+            look = saved != null ? saved.Clone() : new HeroLook();
+            Recalculate();
+            LookChanged?.Invoke();
+        }
+
+        void Refund()
+        {
+            FixAllocated();
+            for (int i = 0; i < allocated.Length; i++)
+            {
+                statPoints += allocated[i];
+                allocated[i] = 0;
+            }
+        }
+
+        /// <summary>Walking speed from the hero's people (D&D: 25 ft against 30).</summary>
+        public float SpeedMultiplier
+        {
+            get
+            {
+                var r = Race;
+                return r != null ? Mathf.Max(0.5f, r.speedMultiplier) : 1f;
+            }
+        }
+
+        public bool Darkvision
+        {
+            get
+            {
+                var r = Race;
+                return r != null && r.darkvision;
+            }
+        }
+
+        // ------------------------------------------------------------------ derived numbers
+        /// <summary>Rebuilds every derived stat from level, scores, class, people and weapon (+ modifiers).</summary>
         public void Recalculate()
         {
+            FixAllocated();
             var c = Config;
             foreach (CoreStat a in Enum.GetValues(typeof(CoreStat)))
-                Stats.SetBase((StatId)(int)a, c.StartValue(a) + allocated[(int)a], false);
-            float str = Stats.Get(StatId.Strength);
-            float intel = Stats.Get(StatId.Intelligence);
-            float agi = Stats.Get(StatId.Agility);
-            float vit = Stats.Get(StatId.Vitality);
-            Stats.SetBase(StatId.MaxHp, c.MaxHp(level, vit), false);
-            Stats.SetBase(StatId.MaxEnergy, c.MaxEnergy(level, intel), false);
-            Stats.SetBase(StatId.PhysicalAttack, c.PhysicalAttack(str), false);
-            Stats.SetBase(StatId.MagicAttack, c.MagicAttack(intel), false);
-            Stats.SetBase(StatId.CritChance, c.critPerAgility * agi, false);
-            Stats.SetBase(StatId.CritDamage, c.critMultiplier, false);
-            Stats.SetBase(StatId.AttackSpeed, c.attackSpeedPerAgility * agi, false);
-            Stats.SetBase(StatId.DashCooldownReduction, c.dashCooldownPerAgility * agi, false);
-            Stats.SetBase(StatId.Armor, c.armorPerVitality * vit, false);
-            Stats.SetBase(StatId.ElementalResist, c.resistPerVitality * vit, false);
-            Stats.SetBase(StatId.PoiseDamage, 1f + c.poisePerStrength * str, false);
+                Stats.SetBase(CoreStats.Stat(a), BaseScore(a) + allocated[(int)a], false);
+            var cls = Class;
+            var race = Race;
+            var weapon = Weapon;
+            float str = Score(CoreStat.Strength);
+            float dex = Score(CoreStat.Dexterity);
+            float con = Score(CoreStat.Constitution);
+            float intel = Score(CoreStat.Intelligence);
+            float wis = Score(CoreStat.Wisdom);
+            float cha = Score(CoreStat.Charisma);
+            float hitDie = cls != null ? cls.HitDieAverage : 4.5f;
+            float weaponAtk = WeaponKinds.AttackOf(weapon, look.upgrade);
+            float hp = c.MaxHp(level, hitDie, con) + (race != null ? race.hpPerLevel * level : 0f);
+            Stats.SetBase(StatId.MaxHp, hp, false);
+            Stats.SetBase(StatId.MaxEnergy, c.MaxEnergy(level, CastingScore), false);
+            Stats.SetBase(StatId.PhysicalAttack, c.Attack(AttackScore, weaponAtk), false);
+            Stats.SetBase(StatId.MagicAttack, c.Attack(CastingScore, weaponAtk), false);
+            Stats.SetBase(StatId.CritChance, c.critPerDexterity * (dex - 10f), false);
+            Stats.SetBase(StatId.CritDamage, c.critMultiplier + (race != null ? race.savageCrit : 0f), false);
+            Stats.SetBase(StatId.AttackSpeed, c.attackSpeedPerDexterity * (dex - 10f), false);
+            Stats.SetBase(StatId.DashCooldownReduction, c.dashCooldownPerDexterity * (dex - 10f), false);
+            float baseArmor = cls != null ? cls.BaseArmor(this) : 2f;
+            Stats.SetBase(StatId.Armor, Mathf.Max(0f, baseArmor + c.armorPerConstitution * (con - 10f)), false);
+            Stats.SetBase(StatId.ElementalResist, Mathf.Max(0f, c.resistPerWisdom * (wis - 10f)), false);
+            Stats.SetBase(StatId.PoiseDamage, 1f + c.poisePerStrength * (str - 10f), false);
             Stats.SetBase(StatId.DamageDealt, 1f, false);
+            Stats.SetBase(StatId.CooldownReduction, Mathf.Clamp(c.cooldownPerIntelligence * (intel - 10f), 0f, c.cooldownReductionMax), false);
+            Stats.SetBase(StatId.HealingPower, Mathf.Max(0.5f, 1f + c.healingPerWisdom * (wis - 10f)), false);
+            Stats.SetBase(StatId.GoldFind, Mathf.Max(0f, c.goldPerCharisma * (cha - 10f)), false);
             Apply();
             Changed?.Invoke();
         }
 
         void OnStatsChanged() => Recalculate();
 
-        /// <summary>Pushes the derived values into the components that use them.</summary>
+        /// <summary>Pushes the derived values and the people's traits into the components that use them.</summary>
         void Apply()
         {
+            var race = Race;
+            var cls = Class;
             var h = pc != null ? pc.health : GetComponent<Health>();
             if (h != null)
             {
@@ -119,6 +259,33 @@ namespace RPG
                 h.level = level;
                 h.armor = Stats.Get(StatId.Armor);
                 h.elementalResist = Mathf.Min(Config.resistMax, Stats.Get(StatId.ElementalResist));
+                var res = baseResist;
+                if (race != null)
+                {
+                    foreach (DamageType t in Enum.GetValues(typeof(DamageType))) res[t] = res[t] + race.resist[t];
+                    if (race.draconic) res[look.DraconicElement] = res[look.DraconicElement] + 0.5f;
+                }
+                h.resistances = res;
+                float lucky = race != null ? race.luckyDodge : 0f;
+                h.Evade = lucky > 0f ? (Func<DamageInfo, bool>)(d => UnityEngine.Random.value < lucky) : null;
+                float relentless = race != null ? race.relentlessCooldown : 0f;
+                h.Endure = relentless > 0f ? (Func<bool>)(() =>
+                {
+                    if (Time.time < endureReadyAt) return false;
+                    endureReadyAt = Time.time + relentless;
+                    return true;
+                }) : null;
+            }
+            var st = pc != null ? pc.status : GetComponent<StatusEffects>();
+            if (st != null)
+            {
+                // the people's traits, and D&D's saving throws: Thông Thái stands firm, Thể Chất shrugs off poison
+                float control = race != null ? race.controlShorter : 0f;
+                float poison = race != null ? race.poisonShorter : 0f;
+                if (cls != null && cls.Saves(CoreStat.Wisdom)) control += 0.2f;
+                if (cls != null && cls.Saves(CoreStat.Constitution)) poison += 0.25f;
+                st.controlShorter = Mathf.Min(0.6f, control);
+                st.poisonShorter = Mathf.Min(0.75f, poison);
             }
             if (pc != null)
             {
@@ -135,7 +302,7 @@ namespace RPG
         }
 
         // ------------------------------------------------------------------ combat numbers
-        /// <summary>Multiplier for the hero's outgoing damage of a type (physical uses Strength, the rest Intelligence).</summary>
+        /// <summary>Multiplier for the hero's outgoing damage of a type (physical: the weapon's ability; the rest: the casting ability).</summary>
         public float DamageScale(DamageType type)
         {
             bool magic = type != DamageType.Physical;
@@ -145,27 +312,35 @@ namespace RPG
         /// <summary>Outgoing damage multiplier for an ability: untagged bonuses plus those for its tags (#Lửa, #Đạn…).</summary>
         public float DamageDealt(AbilityDef ability) => Stats.Get(StatId.DamageDealt, ability != null ? ability.TagList : null);
 
-        /// <summary>A skill's crit chance plus the Agility bonus, capped.</summary>
+        /// <summary>A skill's crit chance plus the Khéo Léo bonus, capped.</summary>
         public float CritChance(float skillChance) => Mathf.Min(Config.critMax, skillChance + Stats.Get(StatId.CritChance));
 
         public float CritMultiplier => Stats.Get(StatId.CritDamage);
 
-        /// <summary>Cooldown multiplier for a slot: the basic attack (Q) speeds up with Agility, and so does Lướt.</summary>
+        /// <summary>Healing done multiplier (Thông Thái).</summary>
+        public float HealingPower => Stats.Get(StatId.HealingPower);
+
+        /// <summary>Extra share of gold found (Sức Hút).</summary>
+        public float GoldFind => Stats.Get(StatId.GoldFind);
+
+        /// <summary>Cooldown multiplier for a slot: the basic attack (Q) speeds up with Khéo Léo, and so does Lướt; the rest shortens with Trí Tuệ.</summary>
         public float CooldownMultiplier(int slot, AbilityDef ability)
         {
             if (ability != null && ability.HasTag(AbilityTags.Movement)) return Mathf.Max(0.5f, 1f - Stats.Get(StatId.DashCooldownReduction));
-            if (slot == 0) return 1f / (1f + Stats.Get(StatId.AttackSpeed));
-            return 1f;
+            if (slot == 0) return 1f / Mathf.Max(0.5f, 1f + Stats.Get(StatId.AttackSpeed));
+            return 1f - Stats.Get(StatId.CooldownReduction);
         }
 
         public float PoiseMultiplier => Stats.Get(StatId.PoiseDamage);
 
         // ------------------------------------------------------------------ XP
-        /// <summary>Every hero who shares a kill gets its full XP (PvE: helping never costs XP).</summary>
+        /// <summary>Every hero who shares a kill gets its full XP (PvE: helping never costs XP); Con Người learn a little faster.</summary>
         void OnEnemyKilled(KillInfo k)
         {
             if (!GameSession.IsAuthority || !k.Credits(pc)) return;
-            AddXp(Config.KillXp(k.level, k.rank, level), k.position);
+            var race = Race;
+            float bonus = race != null ? race.xpBonus : 0f;
+            AddXp(Mathf.RoundToInt(Config.KillXp(k.level, k.rank, level) * (1f + bonus)), k.position);
         }
 
         /// <summary>Adds XP, levelling up as many times as it covers. Shows "+N XP" at <paramref name="at"/> when given.</summary>
@@ -210,7 +385,8 @@ namespace RPG
         {
             level = Mathf.Clamp(newLevel, 1, Config.maxLevel);
             xp = Mathf.Max(0, newXp);
-            allocated = newAllocated != null && newAllocated.Length == 4 ? (int[])newAllocated.Clone() : new int[4];
+            allocated = newAllocated != null ? (int[])newAllocated.Clone() : new int[CoreStats.Count];
+            FixAllocated();
             statPoints = stat;
             talentPoints = talent;
             skillPoints = skill;

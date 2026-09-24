@@ -18,30 +18,31 @@ MonoBehaviour:
   statPointsPerLevel: 3
   talentPointsPerLevel: 1
   skillPointsPerLevel: 1
-  startStrength: 3
-  startIntelligence: 3
-  startAgility: 3
-  startVitality: 4
-  hpBase: 55
-  hpPerLevel: 9
-  hpPerVitality: 10
+  referenceScore: 16
+  hpBase: 56
+  hpPerHitDie: 1.8
+  hpPerConstitution: 10
   energyBase: 45
   energyPerLevel: 1.5
-  energyPerIntelligence: 3
+  energyPerCastingPoint: 1.5
   weaponAttack: 20
-  attackPerStrength: 1.5
-  attackPerIntelligence: 1.5
-  critPerAgility: 0.0025
+  attackPerPoint: 1.5
+  attackFromScore: 13
+  critPerDexterity: 0.0025
   critMax: 0.6
   critMultiplier: 1.8
-  armorPerVitality: 1
-  resistPerVitality: 0.003
+  armorPerConstitution: 0.5
+  resistPerWisdom: 0.003
   resistMax: 0.75
   armorConstant: 50
   armorPerAttackerLevel: 5
-  attackSpeedPerAgility: 0.005
-  dashCooldownPerAgility: 0.005
+  attackSpeedPerDexterity: 0.005
+  dashCooldownPerDexterity: 0.005
   poisePerStrength: 0.01
+  cooldownPerIntelligence: 0.004
+  cooldownReductionMax: 0.3
+  healingPerWisdom: 0.02
+  goldPerCharisma: 0.02
   killXpBase: 8
   killXpPerLevel: 4
   rankMultiplier:

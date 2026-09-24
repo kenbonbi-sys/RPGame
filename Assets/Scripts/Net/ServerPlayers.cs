@@ -252,6 +252,13 @@ namespace RPG
             {
                 h.stats.Changed += () => Changed(s, "player");
                 h.stats.LevelledUp += level => SaveSoon(s);
+                // a new look: saved soon, and every screen draws it
+                h.stats.LookChanged += () =>
+                {
+                    Changed(s, "player");
+                    SaveSoon(s);
+                    NetWorld.AnnounceHero(h, s.Name);
+                };
             }
             if (h.quests != null) h.quests.Changed += () => Changed(s, "quests");
             if (h.bestiary != null) h.bestiary.Changed += () => Changed(s, "bestiary");
@@ -449,7 +456,13 @@ namespace RPG
                     if (!hero.IsDead) hero.UsePotion(r.value);
                     return;
                 case ActKind.SpendStat:
-                    if (r.value >= 0 && r.value < 4 && hero.stats != null) hero.stats.Spend((CoreStat)r.value);
+                    if (r.value >= 0 && r.value < CoreStats.Count && hero.stats != null) hero.stats.Spend((CoreStat)r.value);
+                    return;
+                case ActKind.Forge:
+                    Forge.Apply(hero, (Forge.Action)r.id, r.value, r.text);
+                    return;
+                case ActKind.ChooseLook:
+                    if (hero.stats != null) CharacterChoice.Apply(hero, HeroLook.FromJson(r.text));
                     return;
                 case ActKind.TalkStart:
                 {

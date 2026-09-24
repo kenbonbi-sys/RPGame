@@ -15,7 +15,7 @@ MonoBehaviour:
   id: cave_enter
   title: "Hang Pha L\xEA"
   kind: 0
-  summary: "Ng\u01B0 d\xE2n k\u1EC3 ph\xEDa b\u1EAFc \u0111\u1EA7m c\xF3 m\u1ED9t c\u1EEDa hang t\u1ECFa \xE1nh s\xE1ng xanh. Th\u1EE3 m\u1ECF b\u1ECF \u0111i \u0111\xE3 l\xE2u, nghe n\xF3i trong \u0111\xF3 d\u01A1i, nh\u1EC7n v\xE0 \u0111\xE1 bi\u1EBFt \u0111i."
+  summary: "Ng\u01B0 d\xE2n k\u1EC3 ph\xEDa b\u1EAFc \u0111\u1EA7m c\xF3 m\u1ED9t c\u1EEDa hang t\u1ECFa \xE1nh s\xE1ng xanh. Th\u1EE3 m\u1ECF b\u1ECF \u0111i \u0111\xE3 l\xE2u, nghe n\xF3i trong \u0111\xF3 d\u01A1i, nh\u1EC7n v\xE0 \u0111\xE1 bi\u1EBFt \u0111i. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 14."
   giver: 
   turnIn: 
   turnInText: 
@@ -38,4 +38,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
     count: 3
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: ac7cfde1639336d44902a420de4e4445, type: 2}

@@ -15,13 +15,13 @@ MonoBehaviour:
   id: swamp_wisps
   title: "\xC1nh L\u1EEDa Ma Tr\u01A1i"
   kind: 2
-  summary: "\u0110\xEAm xu\u1ED1ng, Ma Tr\u01A1i d\u1EE5 ng\u01B0\u1EDDi \u0111i l\u1EA1c v\xE0o gi\u1EEFa \u0111\u1EA7m r\u1ED3i n\u1ED5 tung. H\u1EA1 ch\xFAng tr\u01B0\u1EDBc khi ch\xFAng k\u1ECBp n\u1ED5: con n\xE0o t\u1EF1 n\u1ED5 th\xEC kh\xF4ng t\xEDnh."
+  summary: "\u0110\xEAm xu\u1ED1ng, Ma Tr\u01A1i d\u1EE5 ng\u01B0\u1EDDi \u0111i l\u1EA1c v\xE0o gi\u1EEFa \u0111\u1EA7m r\u1ED3i n\u1ED5 tung. H\u1EA1 ch\xFAng tr\u01B0\u1EDBc khi ch\xFAng k\u1ECBp n\u1ED5: con n\xE0o t\u1EF1 n\u1ED5 th\xEC kh\xF4ng t\xEDnh. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 11."
   giver: 
   turnIn: 
   turnInText: 
   minLevel: 1
   requires:
-  - {fileID: 11400000, guid: f60cbc3b5692ec248abf695b3649174d, type: 2}
+  - {fileID: 11400000, guid: 7e87a3d8e8243434d93ecfe4dcde8932, type: 2}
   requiredFlags: []
   autoStart: 1
   availableText: 

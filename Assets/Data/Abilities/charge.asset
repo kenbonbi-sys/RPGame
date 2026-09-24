@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: charge
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: charge
+  displayName: Xung Phong
+  description: "Lao t\u1EDBi 5 \xF4 v\u1EC1 ph\xEDa chu\u1ED9t, h\xFAc bay v\xE0 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch \u1EDF ch\u1ED7 d\u1EEBng."
+  icon: {fileID: 764402957, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 32769
+  cooldown: 7
+  energyCost: 10
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.3
+  commitTime: 0.15
+  animBase: attack
+  moveWhileCasting: 1
+  castSfx: sfx_dash
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215900
+  - rid: 8556425340525215901
+  - rid: 8556425340525215902
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215900
+      type: {class: DashEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        distance: 5
+        time: 0.2
+        invulnerableTime: 0.3
+        preferMoveDirection: 0
+        afterImages: 1
+        startVfx: dash_burst
+        endVfx: step_dust
+        endVfxScale: 1.5
+        perfectDodge: 0
+        away: 0
+    - rid: 8556425340525215901
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.2
+        at:
+          from: 0
+          up: 0
+          forward: 0
+        vfx: stomp_shockwave
+        vfxScale: 0.6
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_hit_heavy
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0.2
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425340525215902
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.2
+        shape: 0
+        at:
+          from: 0
+          up: 0
+          forward: 0
+        radius: 1.8
+        angle: 120
+        hit:
+          power: 1.3
+          type: 0
+          critChance: 0.1
+          knockback: 8
+          poise: 12
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0.4
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit: []

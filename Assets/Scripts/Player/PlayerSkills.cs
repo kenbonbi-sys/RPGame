@@ -112,6 +112,27 @@ namespace RPG
 
         public int LevelOf(int i) => levels != null && i >= 0 && i < levels.Length ? Mathf.Clamp(levels[i], 1, 5) : 1;
 
+        /// <summary>
+        /// Puts a class's skills on the bar: Q is the weapon's basic attack (a spellcaster's focus
+        /// leaves Q to the class's cantrip), W E R A S D the class's own, Space Lướt for everyone.
+        /// Slots whose skill is missing keep what they had.
+        /// </summary>
+        public void ApplyKit(ClassDef cls, WeaponKind weapon)
+        {
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            if (cls == null || db == null) return;
+            for (int i = 0; i < 7; i++)
+            {
+                string id = cls.kit != null && i < cls.kit.Length ? cls.kit[i] : null;
+                if (i == 0 && weapon != null && !weapon.focus && !string.IsNullOrEmpty(weapon.basic)) id = weapon.basic;
+                var a = string.IsNullOrEmpty(id) ? null : db.Ability(id);
+                if (a != null) slots[i] = a;
+            }
+            var dash = db.Ability("dash");
+            if (dash != null) slots[7] = dash;
+            ResetCooldowns();
+        }
+
         public void ResetCooldowns()
         {
             for (int i = 0; i < readyAt.Length; i++) readyAt[i] = 0;

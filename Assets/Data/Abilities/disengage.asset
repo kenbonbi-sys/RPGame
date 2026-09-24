@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: disengage
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: disengage
+  displayName: "Nh\u1EA3y L\xF9i"
+  description: "Nh\u1EA3y l\xF9i 4.5 \xF4 kh\u1ECFi h\u01B0\u1EDBng chu\u1ED9t, l\xE0m ch\u1EADm k\u1EBB \u0111\u1ECBch v\u1EEBa \u1EDF c\u1EA1nh."
+  icon: {fileID: -1029601599, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 32769
+  cooldown: 8
+  energyCost: 6
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.1
+  commitTime: 0.1
+  animBase: 
+  moveWhileCasting: 1
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215835
+  - rid: 8556425340525215836
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215835
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        shape: 0
+        at:
+          from: 0
+          up: 0
+          forward: 0
+        radius: 2
+        angle: 120
+        hit:
+          power: 0.4
+          type: 0
+          critChance: 0
+          knockback: 3
+          poise: 2
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0.4
+            slowDuration: 3
+            curse: 0
+            judgment: 0
+        onAnyHit: []
+    - rid: 8556425340525215836
+      type: {class: DashEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        distance: 4.5
+        time: 0.18
+        invulnerableTime: 0.28
+        preferMoveDirection: 0
+        afterImages: 1
+        startVfx: dash_burst
+        endVfx: step_dust
+        endVfxScale: 1.5
+        perfectDodge: 0
+        away: 1

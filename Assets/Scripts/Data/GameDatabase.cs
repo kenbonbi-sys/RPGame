@@ -13,6 +13,10 @@ namespace RPG
         public CombatConfig combat;
         public List<QuestDef> quests = new List<QuestDef>();
         public List<ZoneDef> zones = new List<ZoneDef>();
+        [Tooltip("The peoples a hero can be born to (D&D 5e).")]
+        public List<RaceDef> races = new List<RaceDef>();
+        [Tooltip("The twelve classes of D&D 5e, in the order the creator shows them.")]
+        public List<ClassDef> classes = new List<ClassDef>();
         public ZoneDef startZone;
         [Tooltip("Compiled Yarn project with every NPC's dialogue (Assets/Dialogue).")]
         public Yarn.Unity.YarnProject dialogue;
@@ -94,6 +98,22 @@ namespace RPG
         {
             foreach (var a in abilities)
                 if (a != null && a.id == id) return a;
+            return null;
+        }
+
+        public RaceDef Race(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var r in races)
+                if (r != null && r.id == id) return r;
+            return null;
+        }
+
+        public ClassDef Class(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var c in classes)
+                if (c != null && c.id == id) return c;
             return null;
         }
     }

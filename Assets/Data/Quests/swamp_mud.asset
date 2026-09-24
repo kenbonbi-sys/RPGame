@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
   id: swamp_mud
   title: "Truy N\xE3: Ng\u01B0\u1EDDi B\xF9n"
-  kind: 2
-  summary: "Ng\u01B0\u1EDDi B\xF9n l\u1EEB \u0111\u1EEB quanh c\xE1c v\u0169ng l\u1EA7y s\xE2u. M\u1ED7i l\u1EA7n g\u1EE5c ch\xFAng l\u1EA1i t\xE1ch ra th\xE0nh B\xF9n Con."
+  kind: 0
+  summary: "Ng\u01B0\u1EDDi B\xF9n l\u1EEB \u0111\u1EEB quanh c\xE1c v\u0169ng l\u1EA7y s\xE2u. M\u1ED7i l\u1EA7n g\u1EE5c ch\xFAng l\u1EA1i t\xE1ch ra th\xE0nh B\xF9n Con. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 11."
   giver: 
   turnIn: 
   turnInText: 
   minLevel: 1
   requires:
-  - {fileID: 11400000, guid: f60cbc3b5692ec248abf695b3649174d, type: 2}
+  - {fileID: 11400000, guid: 53cbc7b013e50c44988302eb6c9f4654, type: 2}
   requiredFlags: []
   autoStart: 1
   availableText: 
@@ -38,4 +38,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
     count: 3
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: 89eec7b663e4108418968ec6fe31009f, type: 2}

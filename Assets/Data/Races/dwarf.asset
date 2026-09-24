@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc1fbe5c18e020d489ccd68a86985663, type: 3}
+  m_Name: dwarf
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.RaceDef
+  id: dwarf
+  displayName: "Ng\u01B0\u1EDDi L\xF9n"
+  englishName: Hill Dwarf
+  description: "Th\u1EA5p, ch\u1EAFc nh\u01B0 \u0111\xE1 n\xFAi, b\u1EC1n b\u1EC9 v\xE0 c\u1EE9ng \u0111\u1EA7u. U\u1ED1ng r\u01B0\u1EE3u m\u1EA1nh nh\u01B0 u\u1ED1ng n\u01B0\u1EDBc."
+  bonus: 000000000000000000000000020000000100000000000000i
+  traits: "Nh\xECn Trong T\u1ED1i.\nKi\xEAn C\u01B0\u1EDDng: kh\xE1ng \u0110\u1ED9c 30%, \u0110\u1ED9c ng\u1EAFn h\u01A1n m\u1ED9t n\u1EEDa.\nD\u1EBBo Dai: th\xEAm m\xE1u m\u1ED7i c\u1EA5p.\nCh\xE2n ng\u1EAFn: \u0111i ch\u1EADm h\u01A1n m\u1ED9t ch\xFAt."
+  speedMultiplier: 0.93
+  darkvision: 1
+  resist:
+    physical: 0
+    fire: 0
+    ice: 0
+    lightning: 0
+    poison: 0.3
+    holy: 0
+    dark: 0
+  poisonShorter: 0.5
+  controlShorter: 0
+  luckyDodge: 0
+  relentlessCooldown: 0
+  savageCrit: 0
+  rebukeChance: 0
+  xpBonus: 0
+  hpPerLevel: 1.8
+  draconic: 0
+  build: 1
+  skins:
+  - {r: 0.9647059, g: 0.7921569, b: 0.65882355, a: 1}
+  - {r: 0.8862745, g: 0.6666667, b: 0.53333336, a: 1}
+  - {r: 0.7921569, g: 0.5411765, b: 0.40784314, a: 1}
+  - {r: 0.63529414, g: 0.41568628, b: 0.2901961, a: 1}
+  - {r: 0.4862745, g: 0.30588236, b: 0.21176471, a: 1}
+  pointedEars: 0
+  horns: 0
+  tail: 0
+  tusks: 0
+  dragonHead: 0
+  hairStyles: 
+  beards: 1

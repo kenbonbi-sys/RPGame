@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: spiritguard
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: spiritguard
+  displayName: "Tinh Linh H\u1ED9 V\u1EC7"
+  description: "Tinh linh th\xE1nh xoay quanh b\u1EA3n th\xE2n 5 gi\xE2y, \u0111\u1ED1t v\xE0 l\xE0m ch\u1EADm k\u1EBB \u0111\u1ECBch l\u1EA1i g\u1EA7n."
+  icon: {fileID: 542606450, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 4160
+  cooldown: 16
+  energyCost: 18
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.35
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_shield
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215945
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215945
+      type: {class: PulseEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        duration: 5
+        interval: 0.5
+        at:
+          from: 0
+          up: 0
+          forward: 0
+        attachedVfx: holy_aura
+        loopSfx: 
+        loopSfxVolume: 0.6
+        loopSfxInterval: 0.8
+        each:
+        - rid: 8556425340525215946
+    - rid: 8556425340525215946
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        shape: 0
+        at:
+          from: 0
+          up: 0
+          forward: 0
+        radius: 2.6
+        angle: 120
+        hit:
+          power: 0.35
+          type: 5
+          critChance: 0.05
+          knockback: 0.5
+          poise: 1
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0.25
+            slowDuration: 1
+            curse: 0
+            judgment: 0
+        onAnyHit: []

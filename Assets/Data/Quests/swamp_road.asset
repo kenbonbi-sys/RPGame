@@ -15,7 +15,7 @@ MonoBehaviour:
   id: swamp_road
   title: "\u0110\u01B0\u1EDDng T\u1EDBi \u0110\u1EA7m L\u1EA7y"
   kind: 0
-  summary: "Tr\u01B0\u1EDFng L\xE0ng k\u1EC3: qua R\u1EEBng Gi\xE0 v\u1EC1 ph\xEDa \u0111\xF4ng l\xE0 \u0110\u1EA7m L\u1EA7y S\u01B0\u01A1ng M\xF9. Ng\u01B0 d\xE2n d\u1EF1ng m\u1ED9t tr\u1EA1m nh\xE0 s\xE0n \u1EDF b\xECa \u0111\u1EA7m."
+  summary: "Tr\u01B0\u1EDFng L\xE0ng k\u1EC3: qua R\u1EEBng Gi\xE0 v\u1EC1 ph\xEDa \u0111\xF4ng l\xE0 \u0110\u1EA7m L\u1EA7y S\u01B0\u01A1ng M\xF9. Ng\u01B0 d\xE2n d\u1EF1ng m\u1ED9t tr\u1EA1m nh\xE0 s\xE0n \u1EDF b\xECa \u0111\u1EA7m. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 7."
   giver: 
   turnIn: 
   turnInText: 
@@ -38,4 +38,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
     count: 2
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: dfa73432ad6a04d449568bd01590066f, type: 2}

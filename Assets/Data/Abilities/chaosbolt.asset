@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: chaosbolt
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: chaosbolt
+  displayName: "Tia H\u1ED7n Lo\u1EA1n"
+  description: "Tia ma l\u1EF1c h\u1ED7n lo\u1EA1n: v\u1EEBa B\u1ECFng, v\u1EEBa L\u1EA1nh, v\u1EEBa T\xEDch \u0110i\u1EC7n."
+  icon: {fileID: -1290205939, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 2050
+  cooldown: 5
+  energyCost: 12
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.3
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215792
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215792
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 3421817593570943343, guid: cc4de96161ee9b54ab01cba0b7713631, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 13
+        lifetime: 0
+        explodeRadius: 1.2
+        pierce: 0
+        hit:
+          power: 1.7
+          type: 1
+          critChance: 0.15
+          knockback: 3
+          poise: 6
+          hitStop: 0
+          status:
+            burn: 1
+            chill: 1
+            charge: 1
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        hitVfx: crystal_burst
+        hitSfx: sfx_fireball_explode
+        hitShake: 0.08
+        angle: 0

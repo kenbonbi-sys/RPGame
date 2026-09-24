@@ -18,6 +18,7 @@ namespace RPG
         Wind = 1 << 4,
         Dark = 1 << 5,
         Holy = 1 << 6,
+        Poison = 1 << 7,
         // form
         Melee = 1 << 10,
         Projectile = 1 << 11,
@@ -101,7 +102,7 @@ namespace RPG
         static readonly (AbilityTags tag, string name)[] TagNames =
         {
             (AbilityTags.Physical, "#Vật lý"), (AbilityTags.Fire, "#Lửa"), (AbilityTags.Ice, "#Băng"), (AbilityTags.Lightning, "#Lôi"),
-            (AbilityTags.Wind, "#Phong"), (AbilityTags.Dark, "#Ám"), (AbilityTags.Holy, "#Thánh Mộc"),
+            (AbilityTags.Wind, "#Phong"), (AbilityTags.Dark, "#Ám"), (AbilityTags.Holy, "#Thánh Mộc"), (AbilityTags.Poison, "#Độc"),
             (AbilityTags.Melee, "#Cận"), (AbilityTags.Projectile, "#Đạn"), (AbilityTags.Area, "#Vùng"), (AbilityTags.Channel, "#Kênh"),
             (AbilityTags.Summon, "#Triệu hồi"), (AbilityTags.Movement, "#Dịch chuyển"), (AbilityTags.Support, "#Hỗ trợ"),
             (AbilityTags.Ultimate, "#Tuyệt kỹ"),

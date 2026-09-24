@@ -6,11 +6,11 @@ namespace RPG
 {
     public enum StatId
     {
-        // the four attributes the player spends points on
+        // the six ability scores of D&D (the first four keep the numbers of the old attributes)
         Strength,
         Intelligence,
-        Agility,
-        Vitality,
+        Dexterity,
+        Constitution,
         // derived
         MaxHp,
         MaxEnergy,
@@ -24,7 +24,15 @@ namespace RPG
         ElementalResist,
         PoiseDamage,
         /// <summary>Outgoing damage multiplier, base 1: the "(1 + Tăng%)" of plan §04. "+20% #Đạn" = PercentAdd 0.2 tagged #Đạn.</summary>
-        DamageDealt
+        DamageDealt,
+        Wisdom,
+        Charisma,
+        /// <summary>Share taken off every skill's cooldown but the basic attack's (Trí Tuệ).</summary>
+        CooldownReduction,
+        /// <summary>Healing done multiplier, base 1 (Thông Thái).</summary>
+        HealingPower,
+        /// <summary>Extra share of gold found (Sức Hút).</summary>
+        GoldFind
     }
 
     public enum ModKind

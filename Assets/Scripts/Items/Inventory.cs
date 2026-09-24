@@ -20,6 +20,9 @@ namespace RPG
 
         public event Action Changed;
 
+        /// <summary>Tells the bag's watchers it changed (gold spent outside Add/Remove: the forge).</summary>
+        public void NotifyChanged() => Changed?.Invoke();
+
         /// <summary>The hero carrying the bag.</summary>
         public PlayerController Owner { get; private set; }
 

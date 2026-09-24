@@ -63,6 +63,7 @@ namespace RPG
         bool clockKnown;
         double lastSnapshotTime;
         readonly Dictionary<int, string> heroNames = new Dictionary<int, string>();
+        readonly Dictionary<int, string> heroLooks = new Dictionary<int, string>();
 
         /// <summary>The server's clock as this machine estimates it (the server's own clock on the server).</summary>
         public static double ServerNow => I != null && I.client && I.clockKnown
@@ -217,6 +218,9 @@ namespace RPG
 
         /// <summary>The name of a hero (its player's character).</summary>
         public static string HeroName(int id) => I != null && I.heroNames.TryGetValue(id, out var n) ? n : null;
+
+        /// <summary>The look of a hero as the server last told (null: not known yet).</summary>
+        public static string HeroLookOf(int id) => I != null && I.heroLooks.TryGetValue(id, out var l) ? l : null;
 
         // ================================================================== server: sending
         void Update()
@@ -375,7 +379,8 @@ namespace RPG
             {
                 string name = ServerPlayers.NameOf(p);
                 int id = IdOf(p);
-                if (name != null && id > 0) nm.ServerManager.Broadcast(to, new HeroInfoMsg { hero = id, name = name }, true);
+                if (name != null && id > 0)
+                    nm.ServerManager.Broadcast(to, new HeroInfoMsg { hero = id, name = name, look = p.stats != null ? p.stats.look.ToJson() : null }, true);
             }
             SendSnapshot(to, true);
         }
@@ -506,8 +511,13 @@ namespace RPG
         {
             int id = IdOf(hero);
             if (id <= 0) return;
-            if (I != null) I.heroNames[id] = name;
-            ServerPlayers.SendToAll(new HeroInfoMsg { hero = id, name = name });
+            string look = hero.stats != null ? hero.stats.look.ToJson() : null;
+            if (I != null)
+            {
+                I.heroNames[id] = name;
+                if (look != null) I.heroLooks[id] = look;
+            }
+            ServerPlayers.SendToAll(new HeroInfoMsg { hero = id, name = name, look = look });
         }
 
         // ================================================================== client: applying
@@ -654,9 +664,16 @@ namespace RPG
         void OnHeroInfo(HeroInfoMsg m, Channel channel)
         {
             heroNames[m.hero] = m.name;
+            if (!string.IsNullOrEmpty(m.look)) heroLooks[m.hero] = m.look;
             var hero = FindHero(m.hero);
             var net = hero != null ? hero.GetComponent<NetworkHero>() : null;
             if (net != null) net.SetDisplayName(m.name);
+            // another player's hero is drawn (and given its skill bar) from its look; ours comes with our sheet
+            if (hero != null && !hero.IsLocal && hero.stats != null && !string.IsNullOrEmpty(m.look))
+            {
+                var look = HeroLook.FromJson(m.look);
+                if (!look.SameAs(hero.stats.look)) hero.stats.LoadLook(look);
+            }
         }
 
         void OnChat(ChatMsg m, Channel channel) => ShowChat(m);

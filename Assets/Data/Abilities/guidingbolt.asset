@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: guidingbolt
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: guidingbolt
+  displayName: "Tia D\u1EABn L\u1ED1i"
+  description: "Tia s\xE1ng th\u1EA7n th\xE1nh \u0111\xE1nh d\u1EA5u k\u1EBB \u0111\u1ECBch: n\xF3 ch\u1ECBu th\xEAm s\xE1t th\u01B0\u01A1ng (Ph\xE1n X\xE9t) trong 5 gi\xE2y."
+  icon: {fileID: -1379174444, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 2112
+  cooldown: 4
+  energyCost: 12
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.3
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215806
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215806
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 4003624427186223162, guid: 6bd218a61b0922b4a9a85153cf87e39f, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 14
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 1.9
+          type: 5
+          critChance: 0.12
+          knockback: 3
+          poise: 6
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 5
+        hitVfx: holy_hit
+        hitSfx: sfx_hit
+        hitShake: 0.08
+        angle: 0

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8d73affa8ff6d24dba757b15a0caf2d, type: 3}
+  m_Name: wizard
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ClassDef
+  id: wizard
+  displayName: "Ph\xE1p S\u01B0"
+  englishName: Wizard
+  role: "H\u1ECCC GI\u1EA2 PH\xC9P THU\u1EACT"
+  description: "H\u1ECDc ph\xE9p t\u1EEB s\xE1ch v\u1EDF su\u1ED1t \u0111\u1EDDi: c\u1EA7u l\u1EEDa, m\u0169i b\u0103ng, s\u1EA5m s\xE9t, l\xE1 ch\u1EAFn v\xE0 c\u1EA3 h\u1ED1 \u0111en."
+  complexity: 1
+  hitDie: 6
+  primary: 01000000i
+  arrayOrder: 010000000300000002000000040000000500000000000000i
+  savingThrows: 0100000004000000i
+  casting: 1
+  armor: 0
+  weapons:
+  - staff
+  - wand
+  - tome
+  kit:
+  - missile
+  - fireball
+  - ice
+  - lightning
+  - arcaneshield
+  - misty
+  - blackhole
+  outfit: wizard
+  cloth: {r: 0.17254902, g: 0.34509805, b: 0.6901961, a: 1}
+  color: {r: 0.47843137, g: 0.2901961, b: 0.8156863, a: 1}
+  emblem: {fileID: 976067937, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}

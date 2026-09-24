@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8d73affa8ff6d24dba757b15a0caf2d, type: 3}
+  m_Name: rogue
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ClassDef
+  id: rogue
+  displayName: "\u0110\u1EA1o T\u1EB7c"
+  englishName: Rogue
+  role: "CAO TH\u1EE6 KH\xC9O L\xC9O"
+  description: "Nhanh tay, l\u1EB9 m\u1EAFt, \u0111\xE1nh v\xE0o ch\u1ED7 y\u1EBFu: dao n\xE9m, nh\xE1t ch\xED m\u1EA1ng, bom kh\xF3i v\xE0 b\xF3ng t\u1ED1i."
+  complexity: 0
+  hitDie: 8
+  primary: 02000000i
+  arrayOrder: 020000000300000001000000040000000500000000000000i
+  savingThrows: 0200000001000000i
+  casting: 2
+  armor: 1
+  weapons:
+  - dagger
+  - rapier
+  - scimitar
+  - bow
+  kit:
+  - 
+  - throwknife
+  - deathstrike
+  - smokebomb
+  - evasion
+  - shadowstep
+  - bladefan
+  outfit: rogue
+  cloth: {r: 0.41568628, g: 0.11764706, b: 0.18039216, a: 1}
+  color: {r: 0.22745098, g: 0.2901961, b: 0.5411765, a: 1}
+  emblem: {fileID: -174512778, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}

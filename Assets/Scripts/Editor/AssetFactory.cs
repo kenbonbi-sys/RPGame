@@ -40,6 +40,14 @@ namespace RPG.EditorTools
             var quests = CreateQuests();
             var zones = CreateZones();
             CreateDatabase(items, abilities, progression, combat, quests, zones);
+            var db = Database;
+            if (db != null)
+            {
+                // the character creator's peoples and classes (after the abilities their skill bars name)
+                db.races = Merge(db.races, HeroDataFactory.CreateRaces());
+                db.classes = Merge(db.classes, HeroDataFactory.CreateClasses());
+                EditorUtility.SetDirty(db);
+            }
             CreateAudioLibrary();
             AssetDatabase.SaveAssets();
         }
@@ -573,6 +581,16 @@ namespace RPG.EditorTools
             };
         }
 
+        /// <summary>The classes' skills (made after the VFX step, whose projectiles they use) join the database.</summary>
+        public static void LinkClassAbilities(List<AbilityDef> abilities)
+        {
+            var db = Database;
+            if (db == null) return;
+            db.abilities = Merge(db.abilities, abilities);
+            EditorUtility.SetDirty(db);
+            AssetDatabase.SaveAssets();
+        }
+
         /// <summary>
         /// References to assets made by later steps (the Fireball projectile comes from the VFX
         /// step): filled in once those exist, only where still empty.
@@ -732,7 +750,7 @@ namespace RPG.EditorTools
                 q.xp = 150;
                 q.items.Add(Reward("potion_green", 2));
             });
-            var swampToads = Quest("swamp_toads", "Truy Nã: Cóc Độc Và Đỉa Bùn", QuestKind.Bounty, q =>
+            var swampToads = Quest("swamp_toads", "Truy Nã: Cóc Độc Và Đỉa Bùn", QuestKind.Main, q =>
             {
                 q.summary = "Ngư dân ở trạm nhà sàn treo thưởng: Cóc Độc và Đỉa Bùn không cho ai thả lưới.";
                 q.autoStart = true;
@@ -742,7 +760,7 @@ namespace RPG.EditorTools
                 q.gold = 40;
                 q.items.Add(Reward("lotus", 3));
             });
-            var swampMud = Quest("swamp_mud", "Truy Nã: Người Bùn", QuestKind.Bounty, q =>
+            var swampMud = Quest("swamp_mud", "Truy Nã: Người Bùn", QuestKind.Main, q =>
             {
                 q.summary = "Người Bùn lừ đừ quanh các vũng lầy sâu. Mỗi lần gục chúng lại tách ra thành Bùn Con.";
                 q.autoStart = true;
@@ -751,7 +769,7 @@ namespace RPG.EditorTools
                 q.gold = 50;
                 q.items.Add(Reward("potion_red", 3));
             });
-            var swampHunters = Quest("swamp_hunters", "Truy Nã: Rắn Nước Và Chuồn Chuồn Kim", QuestKind.Bounty, q =>
+            var swampHunters = Quest("swamp_hunters", "Truy Nã: Rắn Nước Và Chuồn Chuồn Kim", QuestKind.Main, q =>
             {
                 q.summary = "Rắn Nước rình dưới các vũng nước, ban ngày Chuồn Chuồn Kim lượn trên mặt đầm. Ngư dân không dám ra lưới.";
                 q.autoStart = true;
@@ -779,7 +797,7 @@ namespace RPG.EditorTools
                 q.xp = 500;
                 q.items.Add(Reward("potion_red", 3));
             });
-            var caveBats = Quest("cave_bats", "Truy Nã: Dơi Pha Lê", QuestKind.Bounty, q =>
+            var caveBats = Quest("cave_bats", "Truy Nã: Dơi Pha Lê", QuestKind.Main, q =>
             {
                 q.summary = "Bầy dơi trong Hang Dơi hút máu bất cứ ai mang đèn đi qua. Chúng sợ lửa và ánh sáng.";
                 q.autoStart = true;
@@ -788,7 +806,7 @@ namespace RPG.EditorTools
                 q.gold = 70;
                 q.items.Add(Reward("potion_red", 2));
             });
-            var caveSpiders = Quest("cave_spiders", "Truy Nã: Nhện Hang", QuestKind.Bounty, q =>
+            var caveSpiders = Quest("cave_spiders", "Truy Nã: Nhện Hang", QuestKind.Main, q =>
             {
                 q.summary = "Nhện Hang phun tơ trói chân người rồi mới lao tới cắn. Tổ của chúng ở sâu trong hang, phía bắc Rừng Pha Lê.";
                 q.autoStart = true;
@@ -797,7 +815,7 @@ namespace RPG.EditorTools
                 q.gold = 80;
                 q.items.Add(Reward("potion_green", 2));
             });
-            var caveGolems = Quest("cave_golems", "Truy Nã: Golem Đá", QuestKind.Bounty, q =>
+            var caveGolems = Quest("cave_golems", "Truy Nã: Golem Đá", QuestKind.Main, q =>
             {
                 q.summary = "Đá trong mỏ bỏ hoang tự đứng dậy thành Golem. Kiếm chém vào chúng chỉ tóe lửa: lôi điện đánh chúng đau hơn.";
                 q.autoStart = true;
@@ -806,7 +824,7 @@ namespace RPG.EditorTools
                 q.gold = 90;
                 q.items.Add(Reward("potion_blue", 2));
             });
-            var toadKing = Quest("slay_toadking", "Cóc Tía Ao Độc", QuestKind.Bounty, q =>
+            var toadKing = Quest("slay_toadking", "Cóc Tía Ao Độc", QuestKind.Main, q =>
             {
                 q.summary = "Cóc Tía ngự giữa Ao Cóc Tía phía bắc đầm. Lưỡi nó kéo người vào vũng độc.";
                 q.autoStart = true;
@@ -845,22 +863,41 @@ namespace RPG.EditorTools
                 if (requires != null) q.requires.Add(requires);
                 if (followUp != null) q.followUps.Add(followUp);
             }
+            // one road, harder at every step (players' feedback, 25/09/2026): each region's last step
+            // leads on to the next region (the forest's bear → the swamp, the snake mother → the cave)
             Link(talk, null, forest);
             Link(forest, talk, bear);
-            Link(bear, forest, null);
+            Link(bear, forest, swampRoad);
             Link(mushrooms, talk, null);
-            Link(swampRoad, bear, null);
-            Link(swampToads, swampRoad, null);
-            Link(swampMud, swampRoad, null);
-            Link(toadKing, swampToads, null);
-            Link(snake, swampMud, null);
-            Link(snake, toadKing, null);
-            Link(swampHunters, swampRoad, null);
-            Link(swampWisps, swampRoad, null);
-            Link(caveEnter, snake, null);
-            Link(caveBats, caveEnter, null);
-            Link(caveSpiders, caveEnter, null);
-            Link(caveGolems, caveEnter, null);
+            Link(swampRoad, bear, swampToads);
+            Link(swampToads, swampRoad, swampHunters);
+            Link(swampHunters, swampToads, swampMud);
+            Link(swampMud, swampHunters, toadKing);
+            Link(toadKing, swampMud, snake);
+            Link(snake, toadKing, caveEnter);
+            Link(swampWisps, swampMud, null);   // a side bounty: wisps only come out at night
+            Link(caveEnter, snake, caveBats);
+            Link(caveBats, caveEnter, caveSpiders);
+            Link(caveSpiders, caveBats, caveGolems);
+            Link(caveGolems, caveSpiders, null);
+            // the level each step is for, in its summary
+            void Rec(QuestDef q, int level)
+            {
+                if (written.Contains(q) && !q.summary.Contains("Cấp đề nghị")) q.summary += $" Cấp đề nghị: {level}.";
+            }
+            Rec(forest, 1);
+            Rec(bear, 5);
+            Rec(swampRoad, 7);
+            Rec(swampToads, 8);
+            Rec(swampHunters, 9);
+            Rec(swampMud, 11);
+            Rec(toadKing, 11);
+            Rec(snake, 14);
+            Rec(swampWisps, 11);
+            Rec(caveEnter, 14);
+            Rec(caveBats, 14);
+            Rec(caveSpiders, 15);
+            Rec(caveGolems, 16);
             return new List<QuestDef>
             {
                 talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake, swampHunters, swampWisps,

@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
   id: cave_golems
   title: "Truy N\xE3: Golem \u0110\xE1"
-  kind: 2
-  summary: "\u0110\xE1 trong m\u1ECF b\u1ECF hoang t\u1EF1 \u0111\u1EE9ng d\u1EADy th\xE0nh Golem. Ki\u1EBFm ch\xE9m v\xE0o ch\xFAng ch\u1EC9 t\xF3e l\u1EEDa: l\xF4i \u0111i\u1EC7n \u0111\xE1nh ch\xFAng \u0111au h\u01A1n."
+  kind: 0
+  summary: "\u0110\xE1 trong m\u1ECF b\u1ECF hoang t\u1EF1 \u0111\u1EE9ng d\u1EADy th\xE0nh Golem. Ki\u1EBFm ch\xE9m v\xE0o ch\xFAng ch\u1EC9 t\xF3e l\u1EEDa: l\xF4i \u0111i\u1EC7n \u0111\xE1nh ch\xFAng \u0111au h\u01A1n. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 16."
   giver: 
   turnIn: 
   turnInText: 
   minLevel: 1
   requires:
-  - {fileID: 11400000, guid: 19c6a341f4d25f34ba564b0b7202c59a, type: 2}
+  - {fileID: 11400000, guid: a1492c28afb8653499fc69b293449f9b, type: 2}
   requiredFlags: []
   autoStart: 1
   availableText: 

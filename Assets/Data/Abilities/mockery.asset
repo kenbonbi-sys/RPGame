@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: mockery
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: mockery
+  displayName: "L\u1EDDi Ch\u1EBF Nh\u1EA1o"
+  description: "L\u1EDDi ch\u1EBF nh\u1EA1o cay \u0111\u1ED9c l\xE0m k\u1EBB tr\xFAng \u0111\xF2n b\u1ECB Nguy\u1EC1n 4 gi\xE2y: g\xE2y \xEDt s\xE1t th\u01B0\u01A1ng h\u01A1n."
+  icon: {fileID: -1623214308, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 2080
+  cooldown: 4
+  energyCost: 8
+  targeting: 0
+  maxRange: 11
+  lockTime: 0.25
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425340525215794
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425340525215794
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 4152057407641458066, guid: d8af1cca016ed2a438c279820e5e33e8, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 13
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 1.1
+          type: 6
+          critChance: 0.1
+          knockback: 2
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 4
+            judgment: 0
+        hitVfx: note_hit
+        hitSfx: sfx_hit
+        hitShake: 0.08
+        angle: 0

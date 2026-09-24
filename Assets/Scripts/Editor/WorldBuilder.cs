@@ -645,6 +645,9 @@ namespace RPG.EditorTools
             P("barrel", 21f, 24.3f);
             P("log", 20.3f, 18.4f);
             P("stump", 16.4f, 18.8f);
+            // the smithy: the smith's fire and his stock
+            P("campfire", 25.9f, 15.1f);
+            P("barrel", 26.4f, 16.5f);
             // fences around the northern gardens
             for (float x = 8.5f; x <= 15.5f; x += 1f) P("fence_h", x, 27.4f);
             P("fence_post", 16.2f, 27.4f);
@@ -1030,6 +1033,7 @@ namespace RPG.EditorTools
 
             res.chief = Spawn(PrefabFactory.Chief, new Vector2(20.4f, 21.1f), actors, "Truong Lang").transform;
             res.girl = Spawn(PrefabFactory.Girl, new Vector2(12.6f, 15.4f), actors, "Be Mai").transform;
+            if (PrefabFactory.Smith != null) Spawn(PrefabFactory.Smith, new Vector2(24.3f, 15.6f), actors, "Tho Ren");
 
             var camps = new GameObject("EnemyCamps").transform;
             camps.SetParent(root, false);

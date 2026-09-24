@@ -32,6 +32,8 @@ namespace RPG
         public string talkClip = "chief_talk";
         [Tooltip("Yarn node started when the player talks to this NPC (Assets/Dialogue/*.yarn).")]
         public string yarnNode = "";
+        [Tooltip("The smith: talking opens the forge (Lò Rèn) instead of a conversation.")]
+        public bool forge;
         [Tooltip("Used when there is no Yarn node.")]
         public List<DialogueLine> fallbackLines = new List<DialogueLine>();
 
@@ -65,6 +67,11 @@ namespace RPG
         /// <summary>Hero <paramref name="p"/> talks to this NPC (the conversation runs on that hero's screen).</summary>
         public void Interact(PlayerController p)
         {
+            if (forge)
+            {
+                if (p != null && p.IsLocal && ForgeUI.I != null) ForgeUI.I.Open();
+                return;
+            }
             if (talking || DialogueDirector.I == null) return;
             bool started = DialogueDirector.I.Talk(this, p, () =>
             {
@@ -99,7 +106,7 @@ namespace RPG
             if (plate != null && me != null)
             {
                 float d = Vector2.Distance(me.transform.position, transform.position);
-                plate.SetPrompt(d < me.interactRadius && !talking ? "[F] Nói chuyện" : null);
+                plate.SetPrompt(d < me.interactRadius && !talking ? (forge ? "[F] Lò Rèn" : "[F] Nói chuyện") : null);
             }
         }
     }
