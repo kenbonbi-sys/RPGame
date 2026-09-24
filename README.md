@@ -21,6 +21,7 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 | **B / I** · **C** · **J** · **Tab** | Túi đồ · Nhân vật (phân bổ điểm) · Bách Khoa Trùm · Đổi nhiệm vụ đang theo dõi |
 | **F1** · **Esc** | Hướng dẫn · Tạm dừng (Lưu game / Tải game) |
 | **F5–F9** (cheat) | Hồi đầy · Tua giờ · Tới boss · Về làng · Hạ quái gần |
+| **`** (cheat) | Bảng lệnh: `help`, `level 10`, `give potion_red 5`, `tp boss`, `zone <id>`, `quest <id> start`, `hitbox`, `ttk`, `save 1`… |
 
 ## Nội dung đã có
 

@@ -55,6 +55,7 @@ namespace RPG
 
             var debug = asset.AddActionMap(Debug);
             for (int i = 0; i < CheatActions.Length; i++) Button(debug, CheatActions[i], $"<Keyboard>/f{i + 5}");
+            Button(debug, "Console", "<Keyboard>/backquote");
             return asset;
         }
 

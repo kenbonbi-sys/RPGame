@@ -5,7 +5,8 @@ namespace RPG
     /// <summary>
     /// Handy keys while prototyping:
     /// F5 full heal/energy + potions · F6 skip time (day/night) · F7 teleport to boss arena
-    /// F8 teleport to village · F9 kill enemies nearby
+    /// F8 teleport to village · F9 kill enemies nearby · ` opens the DebugConsole.
+    /// Turning enableCheats off also disables the console.
     /// </summary>
     public class DevCheats : MonoBehaviour
     {

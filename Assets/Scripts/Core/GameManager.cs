@@ -59,6 +59,7 @@ namespace RPG
             if (GetComponent<SaveManager>() == null) gameObject.AddComponent<SaveManager>();
             if (GetComponent<DialogueDirector>() == null) gameObject.AddComponent<DialogueDirector>();
             if (GetComponent<SceneLoader>() == null) gameObject.AddComponent<SceneLoader>();
+            if (GetComponent<DebugConsole>() == null) gameObject.AddComponent<DebugConsole>();
         }
 
         static void SetupPhysics()
@@ -89,6 +90,11 @@ namespace RPG
         {
             var hud = HUD.I;
             if (hud == null || dead) return;
+            if (DebugConsole.I != null && DebugConsole.I.IsOpen)
+            {
+                if (InputReader.Cancel) DebugConsole.I.Toggle();
+                return;   // typing in the console is not gameplay
+            }
             if (InputReader.Cancel)
             {
                 if (hud.inventory != null && hud.inventory.IsOpen) hud.inventory.Close();

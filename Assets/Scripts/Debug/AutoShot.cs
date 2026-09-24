@@ -246,11 +246,13 @@ namespace RPG
                 yield return Wait(1.5f);
                 yield return Shot("boss_intro");
                 yield return Wait(2.5f);
+                if (DebugConsole.I != null) DebugConsole.I.Execute("hitbox");
                 boss.DebugForce("stomp");
                 yield return Wait(0.65f);
                 yield return Shot("stomp_warning");
                 yield return Wait(0.45f);
                 yield return Shot("stomp_impact");
+                if (DebugConsole.I != null) DebugConsole.I.Execute("hitbox");
                 yield return Wait(1.6f);
                 boss.DebugForce("rock");
                 yield return Wait(1.3f);
@@ -292,6 +294,15 @@ namespace RPG
             yield return Wait(0.5f);
             yield return Shot("pause");
             HUD.I.pause.Close();
+            if (DebugConsole.I != null)
+            {
+                DebugConsole.I.Toggle();
+                DebugConsole.I.Execute("stats");
+                DebugConsole.I.Execute("help");
+                yield return Wait(0.3f);
+                yield return Shot("console");
+                DebugConsole.I.Toggle();
+            }
             yield return Wait(0.3f);
             p.health.invulnerable = false;
             p.health.Kill();

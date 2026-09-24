@@ -16,7 +16,7 @@ namespace RPG
         static InputActionAsset asset;
         static InputAction[] skills, potions, choices, cheats;
         static InputAction move, point, primary, secondary, interact;
-        static InputAction cancel, help, bag, character, journal, questCycle, advance;
+        static InputAction cancel, help, bag, character, journal, questCycle, advance, console;
 
         static InputReader() => Build();
 
@@ -62,6 +62,7 @@ namespace RPG
             journal = A(GameControls.Menus, "Journal");
             questCycle = A(GameControls.Menus, "QuestCycle");
             advance = A(GameControls.Menus, "Advance");
+            console = A(GameControls.Debug, "Console");
         }
 
         /// <summary>Switches every action on (the game manager calls this at start-up).</summary>
@@ -170,6 +171,7 @@ namespace RPG
         public static bool ToggleCharacter => Down(character);
         public static bool Cancel => Down(cancel);
         public static bool Advance => Down(advance);
+        public static bool ToggleConsole => Down(console);
 
         /// <summary>"Press any key" screens: any key or mouse button, whatever the bindings are.</summary>
         public static bool AnyKeyOrClick

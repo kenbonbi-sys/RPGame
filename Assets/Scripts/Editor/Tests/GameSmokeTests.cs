@@ -504,6 +504,36 @@ namespace RPG.EditorTools.Tests
         }
 
         [UnityTest]
+        public IEnumerator DebugConsoleCommands()
+        {
+            var c = DebugConsole.I;
+            Assert.NotNull(c, "console on the game manager");
+            c.Execute("level 4");
+            Assert.AreEqual(4, PlayerStats.I.level);
+            int red = Inventory.I.Count("potion_red");
+            c.Execute("give potion_red 2");
+            Assert.AreEqual(red + 2, Inventory.I.Count("potion_red"));
+            c.Execute("tp boss");
+            Assert.Less(Vector2.Distance(GameManager.I.player.transform.position, GameManager.I.bossSpot.position), 0.1f);
+            c.Execute("tp spawn");
+            c.Execute("quest talk_chief status");
+            c.Execute("no_such_command");
+
+            c.Execute("ttk");
+            var enemy = EnemyBase.All.Find(e => !e.IsDead);
+            var hero = GameManager.I.player.gameObject;
+            enemy.health.TakeDamage(DamageInfo.Make(1, Team.Player, hero, enemy.transform.position, Vector2.up));
+            yield return GameSeconds(0.2f);
+            enemy.health.Kill();
+            yield return null;
+            c.Execute("ttk");   // prints the result
+            c.Execute("hitbox");
+            Assert.IsTrue(c.ShowHitboxes);
+            c.Execute("hitbox");
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator DamagedSaveFallsBackToBackup()
         {
             Inventory.I.gold = 123;
