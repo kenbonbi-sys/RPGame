@@ -9,6 +9,8 @@ namespace RPG
     /// heroes around it chases the one it has the most threat on (<see cref="ThreatTable"/>).
     /// Online the server thinks for it; a player's copy only shows it (<see cref="NetEntity"/>):
     /// hurt flashes, its name plate and its fall still play on every screen.
+    /// With no hero within <see cref="SleepRadius"/> it sleeps where it is (a big world only
+    /// thinks where someone plays).
     /// </summary>
     public class EnemyBase : MonoBehaviour
     {
@@ -55,6 +57,11 @@ namespace RPG
         protected readonly ThreatTable threat = new ThreatTable();
         float nextContact;
         Collider2D[] colliders;
+        float nextWakeCheck;
+        bool asleep;
+
+        /// <summary>Beyond every hero's view (<see cref="ServerPlayers.ViewRadius"/>): nobody sees it stand still.</summary>
+        public const float SleepRadius = 40f;
 
         /// <summary>Threat a hero gets for walking into the aggro range (damage adds what it dealt).</summary>
         const float NoticeThreat = 1f;
@@ -111,6 +118,14 @@ namespace RPG
         protected virtual void Update()
         {
             if (state == State.Dead || !GameSession.IsAuthority) return;
+            if (Time.time >= nextWakeCheck)
+            {
+                nextWakeCheck = Time.time + 0.5f + Random.value * 0.25f;
+                bool sleep = !Players.AnyWithin(Pos, SleepRadius);
+                if (sleep && !asleep) motor.Stop();
+                asleep = sleep;
+            }
+            if (asleep) return;
             stateTime += Time.deltaTime;
             if (status != null && status.IsStunned)
             {

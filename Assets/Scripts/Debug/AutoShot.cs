@@ -273,7 +273,7 @@ namespace RPG
             }
 
             // --- boss
-            var boss = BossBear.All.Count > 0 ? BossBear.All[0] : null;
+            var boss = BossBase.Find("bear");
             if (boss != null)
             {
                 Place(p, (Vector2)gm.bossSpot.position + new Vector2(0.5f, -5.5f));

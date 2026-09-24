@@ -14,6 +14,9 @@ namespace RPG
     /// 15 times a second (positions, animations, health, statuses), every hit, heal, skill and
     /// buff as it happens, and the cues of <see cref="NetCues"/>. A player's machine applies all
     /// of it to its own copy of the zone: its copies never think, they only show.
+    /// Each player only gets what is within <see cref="ServerPlayers.ViewRadius"/> of their hero
+    /// (an object coming into view is sent whole at once), so a bigger world costs no more per
+    /// player; every hero's numbers go to everyone (party panels).
     /// Ids: a hero is its NetworkObject id + 1; the zone's objects are numbered in scene order
     /// from <see cref="NetProtocol.SceneIdBase"/> (the same on every machine); what the server
     /// makes while playing counts from <see cref="NetProtocol.DynamicIdBase"/>.
@@ -47,6 +50,13 @@ namespace RPG
         readonly Dictionary<int, float> lastHeroSentAt = new Dictionary<int, float>();
         readonly List<EntityState> entityBuffer = new List<EntityState>();
         readonly List<HeroState> heroBuffer = new List<HeroState>();
+        // this tick's state of every object, and whether it changed since the last tick
+        readonly List<(int id, EntityState state, bool changed)> tickStates = new List<(int, EntityState, bool)>();
+        readonly List<(NetworkConnection conn, Vector2 at)> viewers = new List<(NetworkConnection, Vector2)>();
+        // per player: the objects in their view at the last snapshot (one coming into view is sent whole)
+        readonly Dictionary<int, HashSet<int>> seenBy = new Dictionary<int, HashSet<int>>();
+        readonly HashSet<int> liveViewers = new HashSet<int>();
+        readonly List<int> goneViewers = new List<int>();
 
         // client
         double clockOffset;
@@ -140,7 +150,7 @@ namespace RPG
                 foreach (var t in root.GetComponentsInChildren<Transform>(true))
                 {
                     NetEntityKind kind;
-                    if (t.GetComponent<BossBear>() != null) kind = NetEntityKind.Boss;
+                    if (t.GetComponent<BossBase>() != null) kind = NetEntityKind.Boss;
                     else if (t.GetComponent<EnemyBase>() != null) kind = NetEntityKind.Enemy;
                     else if (t.GetComponent<Boulder>() != null) kind = NetEntityKind.Boulder;
                     else continue;
@@ -219,27 +229,29 @@ namespace RPG
         void LateUpdate()
         {
             if (!serving || pendingHits.Count == 0) return;
-            foreach (var h in pendingHits) ServerPlayers.SendToAll(h);
+            foreach (var h in pendingHits) ServerPlayers.SendNear(h, h.point, ServerPlayers.ViewRadius);
             pendingHits.Clear();
             pendingHitIndex.Clear();
         }
 
         /// <summary>
-        /// Sends what changed (or, for <paramref name="to"/>, everything: a player who just
-        /// arrived). Unreliable: a lost one is covered by the next.
+        /// Sends what changed to every player, each only the objects in their view (one that just
+        /// came into view whole); or, for <paramref name="to"/>, everything: a player who just
+        /// arrived. Unreliable: a lost one is covered by the next, and everything is sent again
+        /// every <see cref="RefreshSeconds"/>.
         /// </summary>
         void SendSnapshot(NetworkConnection to, bool full)
         {
             float now = Time.unscaledTime;
-            entityBuffer.Clear();
+            tickStates.Clear();
             heroBuffer.Clear();
             foreach (var e in order)
             {
                 if (e == null || e.Kind == NetEntityKind.Loot) continue;
                 var s = e.Capture();
-                if (!full && e.everSent && !NetEntity.Differs(s, e.lastSent) && now - e.lastSentAt < RefreshSeconds) continue;
-                entityBuffer.Add(s);
-                if (to != null) continue;
+                bool changed = full || !e.everSent || NetEntity.Differs(s, e.lastSent) || now - e.lastSentAt >= RefreshSeconds;
+                tickStates.Add((e.Id, s, changed));
+                if (to != null || !changed) continue;
                 e.lastSent = s;
                 e.everSent = true;
                 e.lastSentAt = now;
@@ -256,10 +268,48 @@ namespace RPG
                 lastHeroSent[id] = s;
                 lastHeroSentAt[id] = now;
             }
-            if (entityBuffer.Count == 0 && heroBuffer.Count == 0 && !full) return;
             double time = Time.realtimeSinceStartupAsDouble;
             float day = DayNightCycle.I != null ? DayNightCycle.I.time : -1f;
-            var channel = full ? Channel.Reliable : Channel.Unreliable;
+            if (to != null)
+            {
+                // a player who just arrived: the whole world once (then only what they see)
+                entityBuffer.Clear();
+                foreach (var t in tickStates) entityBuffer.Add(t.state);
+                Send(to, time, day, Channel.Reliable, true);
+                seenBy.Remove(to.ClientId);
+                return;
+            }
+            ServerPlayers.Viewers(viewers);
+            liveViewers.Clear();
+            float sq = ServerPlayers.ViewRadius * ServerPlayers.ViewRadius;
+            foreach (var v in viewers)
+            {
+                liveViewers.Add(v.conn.ClientId);
+                if (!seenBy.TryGetValue(v.conn.ClientId, out var seen)) seenBy[v.conn.ClientId] = seen = new HashSet<int>();
+                entityBuffer.Clear();
+                foreach (var t in tickStates)
+                {
+                    if ((t.state.pos - v.at).sqrMagnitude > sq)
+                    {
+                        seen.Remove(t.id);   // out of view: sent whole when it comes back
+                        continue;
+                    }
+                    bool entering = seen.Add(t.id);
+                    if (t.changed || entering) entityBuffer.Add(t.state);
+                }
+                Send(v.conn, time, day, Channel.Unreliable, false);
+            }
+            // players who left
+            goneViewers.Clear();
+            foreach (var id in seenBy.Keys)
+                if (!liveViewers.Contains(id)) goneViewers.Add(id);
+            foreach (var id in goneViewers) seenBy.Remove(id);
+        }
+
+        /// <summary>The objects in <see cref="entityBuffer"/> and the heroes in <see cref="heroBuffer"/>, in packet-sized parts.</summary>
+        void Send(NetworkConnection to, double time, float day, Channel channel, bool evenEmpty)
+        {
+            if (entityBuffer.Count == 0 && heroBuffer.Count == 0 && !evenEmpty) return;
             int chunks = Mathf.Max(1, Mathf.CeilToInt(entityBuffer.Count / (float)ChunkSize));
             for (int c = 0; c < chunks; c++)
             {
@@ -272,8 +322,7 @@ namespace RPG
                     entities = entityBuffer.GetRange(from, count).ToArray(),
                     heroes = c == 0 ? heroBuffer.ToArray() : new HeroState[0]
                 };
-                if (to != null) nm.ServerManager.Broadcast(to, msg, true, channel);
-                else ServerPlayers.SendToAll(msg, channel);
+                nm.ServerManager.Broadcast(to, msg, true, channel);
             }
         }
 
@@ -373,17 +422,37 @@ namespace RPG
         void OnHealed(Health h, float amount)
         {
             int target = IdOf(h);
-            if (target != 0) ServerPlayers.SendToAll(new HealMsg { target = target, amount = amount, show = true });
+            if (target != 0) ServerPlayers.SendNear(new HealMsg { target = target, amount = amount, show = true }, h.transform.position, ServerPlayers.ViewRadius);
         }
 
-        public static void SendCue(CueMsg m) => ServerPlayers.SendToAll(m);
+        /// <summary>
+        /// A cue for the players who could see or feel it: near where it happens (a projectile as
+        /// far as it flies, a shake or a log line as far as its own reach); a boss's moments,
+        /// cancelled warnings and sounds heard everywhere go to everyone.
+        /// </summary>
+        public static void SendCue(CueMsg m)
+        {
+            var kind = (NetCues.Kind)m.kind;
+            if (kind == NetCues.Kind.Boss || kind == NetCues.Kind.TelegraphCancel || m.d >= float.MaxValue)
+            {
+                ServerPlayers.SendToAll(m);
+                return;
+            }
+            float reach = ServerPlayers.ViewRadius;
+            if (kind == NetCues.Kind.Projectile) reach += m.a * m.b;   // speed × lifetime
+            else if (kind == NetCues.Kind.Arc) reach += Vector2.Distance(m.pos, m.pos2);
+            else if (kind == NetCues.Kind.Shake || kind == NetCues.Kind.Flash || kind == NetCues.Kind.Impact ||
+                     kind == NetCues.Kind.Log || kind == NetCues.Kind.Banner || kind == NetCues.Kind.FlatSound) reach = Mathf.Max(reach, m.d);
+            ServerPlayers.SendNear(m, m.pos, reach);
+        }
 
-        /// <summary>A hero used a skill: everyone but its own player (who already showed it) shows it.</summary>
+        /// <summary>A hero used a skill: everyone near but its own player (who already showed it) shows it.</summary>
         public static void CastShown(PlayerController hero, int slot, Vector2 aim, Vector2 origin, int level, int seed)
         {
             int id = IdOf(hero);
             if (id <= 0) return;
-            ServerPlayers.SendToAllBut(hero, new CastMsg { hero = id, slot = (byte)slot, aim = aim, origin = origin, level = (byte)level, seed = seed });
+            ServerPlayers.SendNear(new CastMsg { hero = id, slot = (byte)slot, aim = aim, origin = origin, level = (byte)level, seed = seed },
+                                   origin, ServerPlayers.ViewRadius, Channel.Reliable, hero);
         }
 
         /// <summary>A buff started or ended on a hero: every screen shows it (its player's buff bar too).</summary>

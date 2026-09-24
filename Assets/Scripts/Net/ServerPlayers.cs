@@ -541,6 +541,42 @@ namespace RPG
         }
 
         // ================================================================== sending
+        /// <summary>
+        /// How far from their hero a player is sent the world (enemies, hits, effects): past their
+        /// screen (about 30 × 17 units) and the minimap's view, so what they see is always fresh,
+        /// while a big world does not cost every player the whole map (Docs/KeHoach-Online.md §12).
+        /// </summary>
+        public const float ViewRadius = 32f;
+
+        /// <summary>The players in the world and where their heroes are (who sees what).</summary>
+        public static void Viewers(List<(NetworkConnection conn, Vector2 at)> into)
+        {
+            into.Clear();
+            var sp = I;
+            if (sp == null) return;
+            foreach (var c in Ready)
+            {
+                if (c == null || !c.IsActive || !sp.sessions.TryGetValue(c.ClientId, out var s) || s.hero == null) continue;
+                into.Add((c, s.hero.transform.position));
+            }
+        }
+
+        /// <summary>Every player whose hero is within <paramref name="radius"/> of <paramref name="at"/>.</summary>
+        public static void SendNear<T>(T msg, Vector2 at, float radius, Channel channel = Channel.Reliable, PlayerController except = null)
+            where T : struct, IBroadcast
+        {
+            var sp = I;
+            var nm = sp != null ? sp.nm : null;
+            if (nm == null) return;
+            float sq = radius * radius;
+            foreach (var c in Ready)
+            {
+                if (c == null || !c.IsActive || !sp.sessions.TryGetValue(c.ClientId, out var s) || s.hero == null) continue;
+                if (s.hero == except || ((Vector2)s.hero.transform.position - at).sqrMagnitude > sq) continue;
+                nm.ServerManager.Broadcast(c, msg, true, channel);
+            }
+        }
+
         /// <summary>Every player who is in the world (not the host's own screen: it already shows everything).</summary>
         public static void SendToAll<T>(T msg, Channel channel = Channel.Reliable) where T : struct, IBroadcast
         {
@@ -548,16 +584,6 @@ namespace RPG
             if (nm == null) return;
             foreach (var c in Ready)
                 if (c != null && c.IsActive) nm.ServerManager.Broadcast(c, msg, true, channel);
-        }
-
-        /// <summary>Every player but the one who plays <paramref name="hero"/>.</summary>
-        public static void SendToAllBut<T>(PlayerController hero, T msg) where T : struct, IBroadcast
-        {
-            var nm = I != null ? I.nm : null;
-            if (nm == null) return;
-            var skip = ConnectionOf(hero);
-            foreach (var c in Ready)
-                if (c != null && c.IsActive && c != skip) nm.ServerManager.Broadcast(c, msg, true);
         }
 
         /// <summary>The player of <paramref name="hero"/> (nothing when that is the host's own hero).</summary>

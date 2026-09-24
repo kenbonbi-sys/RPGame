@@ -25,7 +25,7 @@ namespace RPG
 
         public Health Health { get; private set; }
         public EnemyBase Enemy { get; private set; }
-        public BossBear Boss { get; private set; }
+        public BossBase Boss { get; private set; }
         public Boulder Boulder { get; private set; }
         public LootPickup Loot { get; private set; }
 
@@ -74,7 +74,7 @@ namespace RPG
             Kind = kind;
             Health = GetComponent<Health>();
             Enemy = GetComponent<EnemyBase>();
-            Boss = GetComponent<BossBear>();
+            Boss = GetComponent<BossBase>();
             Boulder = GetComponent<Boulder>();
             Loot = GetComponent<LootPickup>();
             status = GetComponent<StatusEffects>();

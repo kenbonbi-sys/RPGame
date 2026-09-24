@@ -134,7 +134,7 @@ namespace RPG
         }
 
         /// <summary>A boss's moment (intro, rage, fall, reset): screens near it run the boss's own presentation.</summary>
-        public static void Boss(BossBear boss, BossBear.Moment moment)
+        public static void Boss(BossBase boss, BossBase.Moment moment)
         {
             if (boss == null) return;
             Send(new CueMsg { kind = (byte)Kind.Boss, target = NetWorld.IdOf(boss), flag = (byte)moment, pos = boss.transform.position });
@@ -250,8 +250,8 @@ namespace RPG
                 case Kind.Boss:
                 {
                     var who = NetWorld.Find(m.target);
-                    var boss = who != null ? who.GetComponent<BossBear>() : null;
-                    if (boss != null) boss.Present((BossBear.Moment)m.flag);
+                    var boss = who != null ? who.GetComponent<BossBase>() : null;
+                    if (boss != null) boss.Present((BossBase.Moment)m.flag);
                     break;
                 }
             }

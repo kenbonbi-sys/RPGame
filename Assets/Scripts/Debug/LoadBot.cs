@@ -21,7 +21,7 @@ namespace RPG
 
         /// <summary>Enemies further than this from the bot are left alone.</summary>
         const float Sight = 14f;
-        /// <summary>Bots keep away from the bear's arena (a crowd of bots there would only fall).</summary>
+        /// <summary>Bots keep away from the bosses' arenas (a crowd of bots there would only fall).</summary>
         const float BossBerth = 20f;
 
         int casts, dashes, deaths, potions;
@@ -127,17 +127,16 @@ namespace RPG
             Application.Quit(0);
         }
 
-        /// <summary>The nearest living enemy in sight, away from the bear's arena.</summary>
+        /// <summary>The nearest living enemy in sight, away from the bosses' arenas.</summary>
         static EnemyBase Pick(Vector2 from)
         {
             EnemyBase best = null;
             float bd = Sight * Sight;
-            var boss = BossBear.All.Count > 0 && BossBear.All[0] != null ? (Vector2?)BossBear.All[0].transform.position : null;
             foreach (var e in EnemyBase.All)
             {
                 if (e == null || e.IsDead || !e.gameObject.activeInHierarchy) continue;
                 Vector2 p = e.transform.position;
-                if (boss.HasValue && Vector2.Distance(p, boss.Value) < BossBerth) continue;
+                if (BossBase.All.Exists(b => b != null && Vector2.Distance(p, b.Home) < BossBerth)) continue;
                 float d = (p - from).sqrMagnitude;
                 if (d < bd)
                 {

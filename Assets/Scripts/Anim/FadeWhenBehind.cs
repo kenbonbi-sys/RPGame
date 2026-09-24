@@ -14,6 +14,7 @@ namespace RPG
         void Awake()
         {
             if (sr == null) sr = GetComponent<SpriteRenderer>();
+            if (!GameSession.HasScreen) enabled = false;   // a server draws nothing
         }
 
         void Update()
@@ -23,6 +24,7 @@ namespace RPG
             Vector2 c = (Vector2)transform.position + areaOffset;
             bool behind = Mathf.Abs(p.x - c.x) < areaSize.x * 0.5f && Mathf.Abs(p.y - c.y) < areaSize.y * 0.5f && p.y > transform.position.y;
             float goal = behind ? fadedAlpha : 1f;
+            if (alpha == goal) return;   // most props, most of the time: nothing to redraw
             alpha = Mathf.MoveTowards(alpha, goal, Time.deltaTime * 4f);
             if (sr != null)
             {

@@ -199,7 +199,7 @@ namespace RPG
                 }
             }
             foreach (var e in EnemyBase.All) Consider(e.health);
-            foreach (var b in BossBear.All) Consider(b.health);
+            foreach (var b in BossBase.All) Consider(b.health);
             return best;
         }
 
@@ -260,7 +260,7 @@ namespace RPG
                 foreach (var e in EnemyBase.All.ToArray())
                     if (!e.IsDead && Vector2.Distance(e.transform.position, Hero.transform.position) <= r) { e.health.Kill(); n++; }
                 // the boss only for a wide sweep (kill 20)
-                foreach (var b in BossBear.All)
+                foreach (var b in BossBase.All)
                     if (b != null && b.gameObject.activeInHierarchy && !b.health.IsDead && r >= 20f &&
                         Vector2.Distance(b.transform.position, Hero.transform.position) <= r) { b.health.Kill(); n++; }
                 Print($"Đã hạ {n} quái.");
@@ -450,7 +450,7 @@ namespace RPG
                 foreach (var c in hero.GetComponentsInChildren<Collider2D>()) yield return c;
             foreach (var e in EnemyBase.All)
                 foreach (var c in e.GetComponentsInChildren<Collider2D>()) yield return c;
-            foreach (var b in BossBear.All)
+            foreach (var b in BossBase.All)
                 if (b != null && b.gameObject.activeInHierarchy)
                     foreach (var c in b.GetComponentsInChildren<Collider2D>()) yield return c;
         }
