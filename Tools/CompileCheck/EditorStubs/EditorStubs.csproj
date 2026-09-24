@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Signatures of editor-only package APIs (Test Framework, 2D Sprite editor). -->
+  <PropertyGroup>
+    <AssemblyName>EditorStubs</AssemblyName>
+    <DefineConstants>$(UnityDefines);UNITY_EDITOR</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Reference Include="$(RefsDir)UnityEditor.dll" Private="false" />
+    <Reference Include="$(RefsDir)nunit.framework.dll" Private="false" />
+    <ProjectReference Include="../Stubs/RuntimeStubs.csproj" Private="false" />
+  </ItemGroup>
+</Project>

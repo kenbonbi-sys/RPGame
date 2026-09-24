@@ -96,6 +96,8 @@ namespace RPG
             return stats.Stats.Get(type == DamageType.Physical ? StatId.PhysicalAttack : StatId.MagicAttack);
         }
 
+        public float DamageDealt(AbilityDef ability) => stats != null ? stats.DamageDealt(ability) : 1f;
+
         // ------------------------------------------------------------------ buffs
         /// <summary>Adds or refreshes a buff; its speed, damage-taken and stun-immunity apply while it lasts.</summary>
         public void AddBuff(BuffSpec spec)

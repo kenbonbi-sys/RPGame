@@ -23,6 +23,7 @@ namespace RPG.EditorTools.Tests
             tempSaves = Path.Combine(Path.GetTempPath(), "rtt_test_saves");
             if (Directory.Exists(tempSaves)) Directory.Delete(tempSaves, true);
             SaveManager.FolderOverride = tempSaves;
+            Health.SpreadRoll = () => 0.5f;   // no random damage spread: exact numbers
             EditorSceneManager.OpenScene(SceneBuilder.ScenePath);
             yield return new EnterPlayMode();
             yield return Frames(3);
@@ -40,6 +41,7 @@ namespace RPG.EditorTools.Tests
         {
             yield return new ExitPlayMode();
             SaveManager.FolderOverride = null;
+            Health.SpreadRoll = () => Random.value;
             if (Directory.Exists(tempSaves)) Directory.Delete(tempSaves, true);
         }
 
@@ -408,6 +410,66 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(11f, Hit("bladestorm", a => ((DamageEffect)((PulseEffect)a.effects[1]).each[0]).hit), 0.1f);
             Assert.NotNull(((ProjectileEffect)db.Ability("fireball").effects[1]).prefab, "fireball has its projectile");
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator DamageBonusAndWeaknessReachRealHits()
+        {
+            var hero = GameManager.I.player;
+            var fireball = GameManager.I.db.Ability("fireball");
+            var ctx = new AbilityContext { ability = fireball, caster = hero, level = 1, origin = hero.transform.position };
+            var hit = ((ProjectileEffect)fireball.effects[1]).hit;
+            float plain = hit.Make(ctx, Vector2.zero, Vector2.right).amount;
+
+            var ring = new object();
+            hero.stats.Stats.Add(new StatModifier(StatId.DamageDealt, ModKind.PercentAdd, 0.5f, ring, "#Lửa"));
+            Assert.AreEqual(plain * 1.5f, hit.Make(ctx, Vector2.zero, Vector2.right).amount, 0.01f, "+50% #Lửa reaches Cầu Lửa");
+            hero.stats.Stats.Add(new StatModifier(StatId.DamageDealt, ModKind.PercentAdd, 0.5f, ring, "#Băng"));
+            Assert.AreEqual(plain * 1.5f, hit.Make(ctx, Vector2.zero, Vector2.right).amount, 0.01f, "#Băng does not");
+            hero.stats.Stats.RemoveFrom(ring);
+            Assert.AreEqual(plain, hit.Make(ctx, Vector2.zero, Vector2.right).amount, 0.01f);
+
+            var shroom = EnemyBase.All.Find(e => !e.IsDead && e.enemyId == "shroom");
+            Assert.NotNull(shroom, "a Nấm Độc in the zone");
+            Assert.AreEqual(DamageType.Fire, shroom.health.resistances.Weakness, "Nấm Độc yếu Lửa (plan §04)");
+            var d = hit.Make(ctx, shroom.transform.position, Vector2.right);
+            Assert.AreEqual(Mathf.Round(d.amount * 1.3f), shroom.health.TakeDamage(d), 1f, "+30% fire damage");
+            yield return null;
+        }
+
+        static IEnumerator RealSeconds(float seconds)
+        {
+            float end = Time.realtimeSinceStartup + seconds;
+            while (Time.realtimeSinceStartup < end) yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator MusicDucksForDialogueAndBossSkills()
+        {
+            var audio = AudioManager.I;
+            Assert.NotNull(audio, "AudioManager in Core");
+            Assert.AreEqual(1f, audio.Duck, 0.01f);
+
+            var chief = NPC.All.Find(n => n.npcId == "chief");
+            Assert.IsTrue(DialogueDirector.I.Talk(chief), "conversation starts");
+            yield return RealSeconds(0.6f);
+            Assert.AreEqual(audio.dialogueDuck, audio.Duck, 0.01f, "music lowered while talking");
+            float deadline = Time.realtimeSinceStartup + 15f;
+            while (DialogueDirector.I.IsRunning && Time.realtimeSinceStartup < deadline)
+            {
+                if (DialogueUI.I.ShowingOptions) DialogueUI.I.Choose(0);
+                else DialogueUI.I.DebugAdvance();
+                yield return null;
+            }
+            Assert.IsFalse(DialogueDirector.I.IsRunning, "conversation ended");
+            yield return RealSeconds(0.6f);
+            Assert.AreEqual(1f, audio.Duck, 0.01f, "back to full after the conversation");
+
+            GameEvents.RaiseSkillAnnounced(BossBear.All[0].health, "Kỹ năng: thử");
+            yield return RealSeconds(0.3f);
+            Assert.Less(audio.Duck, 0.95f, "a boss skill call ducks the music");
+            yield return RealSeconds(audio.skillDuckSeconds + 0.6f);
+            Assert.AreEqual(1f, audio.Duck, 0.01f, "and it comes back");
         }
 
         [UnityTest]

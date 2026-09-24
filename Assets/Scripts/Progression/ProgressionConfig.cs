@@ -64,9 +64,15 @@ namespace RPG
         public float armorPerVitality = 1f;
         public float resistPerVitality = 0.003f;
         public float resistMax = 0.75f;
+        [Tooltip("Lowest resistance: a weakness makes a type deal up to this much more (−0.5 = +50%).")]
+        public float resistMin = -0.5f;
         [Tooltip("Reduction = armor / (armor + armorConstant + armorPerAttackerLevel × attacker level)")]
         public float armorConstant = 50f;
         public float armorPerAttackerLevel = 5f;
+
+        [Header("Damage")]
+        [Tooltip("Final damage × a random factor in 1 ± spread (plan §04: 0.95–1.05). 0 = no randomness.")]
+        public float damageSpread = 0.05f;
 
         [Header("Other attribute effects")]
         public float attackSpeedPerAgility = 0.005f;
@@ -143,6 +149,21 @@ namespace RPG
             if (armor <= 0) return 0f;
             return armor / (armor + armorConstant + armorPerAttackerLevel * Mathf.Max(1, attackerLevel));
         }
+
+        /// <summary>Damage multiplier for a resistance: 0.75 → ×0.25, a −0.3 weakness → ×1.3.</summary>
+        public float ResistMultiplier(float resist) => 1f - Mathf.Clamp(resist, resistMin, resistMax);
+
+        /// <summary>The random spread for a roll in 0..1: 0 → 1 − spread, 0.5 → 1, 1 → 1 + spread.</summary>
+        public float Spread(float roll01) => 1f + (Mathf.Clamp01(roll01) * 2f - 1f) * damageSpread;
+
+        /// <summary>
+        /// The defender's side of plan §04: armor, then resistance, then the random spread.
+        /// The attacker's side (Attack × skill power × bonuses × crit) is already in <paramref name="amount"/>.
+        /// Example of the plan: Cầu Lửa 140% of Attack 40 = 56, on a −30% fire weakness with 10 armor
+        /// against a level 5 attacker, rolled 0.5: 56 × 0.882 × 1.3 × 1 ≈ 64.
+        /// </summary>
+        public float Mitigate(float amount, float armor, int attackerLevel, float resist, float roll01) =>
+            amount * (1f - ArmorReduction(armor, attackerLevel)) * ResistMultiplier(resist) * Spread(roll01);
 
         static ProgressionConfig fallback;
 

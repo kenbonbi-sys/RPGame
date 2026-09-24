@@ -1,0 +1,25 @@
+<Project>
+  <!-- Shared settings for the compile check: C# 9 on .NET Standard 2.1, like Unity 6. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Unity reports these as warnings too; keep the output about real problems. -->
+    <NoWarn>$(NoWarn);CS0649;CS0169;CS0414;CS0067;CS1591;CS0618;CS0612;CS0162;CS0168;CS0219;CS8632;CS0436;CS1701;CS1702;MSB3277</NoWarn>
+    <ProjectRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../'))</ProjectRoot>
+    <CacheDir>$(MSBuildThisFileDirectory).cache/</CacheDir>
+    <RefsDir>$(CacheDir)refs/</RefsDir>
+    <OutputPath>$(CacheDir)out/$(MSBuildProjectName)/</OutputPath>
+    <BaseIntermediateOutputPath>$(CacheDir)obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <!-- What Unity 6000.x defines for a Windows project with the Input System and URP. -->
+    <UnityDefines>UNITY_6000_0_OR_NEWER;UNITY_2023_1_OR_NEWER;UNITY_2022_3_OR_NEWER;UNITY_2021_3_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_STANDALONE_WIN;UNITY_STANDALONE;ENABLE_INPUT_SYSTEM;ENABLE_LEGACY_INPUT_MANAGER;ENABLE_MONO;NET_STANDARD_2_1;NET_STANDARD;CSHARP_7_3_OR_NEWER</UnityDefines>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="$(RefsDir)UnityEngine*.dll" Private="false" />
+  </ItemGroup>
+</Project>

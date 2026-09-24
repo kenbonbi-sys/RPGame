@@ -1,0 +1,204 @@
+# CI for Rừng Thì Thầm (plan T14). What runs, and the secrets it needs: Docs/CI.md
+#   compile   every push and PR: C# compile check without Unity (Tools/CompileCheck)
+#   tests     Unity EditMode tests on PRs, pushes to main/dev, nightly and manual runs
+#   build     Windows player, nightly and manual runs
+#   autoshot  plays the AutoShot tour in that player on Windows, uploads the screenshots
+# The Unity jobs are skipped until the repository has a Unity license secret.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    paths-ignore: ['**.md', 'Screenshots/**']
+  pull_request:
+    paths-ignore: ['**.md', 'Screenshots/**']
+  schedule:
+    - cron: '0 19 * * *'   # 02:00 Vietnam time, builds the dev branch
+  workflow_dispatch:
+    inputs:
+      build:
+        description: 'Also build the Windows player and run AutoShot'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # nightly runs build dev (schedules always start from the default branch)
+  CHECKOUT_REF: ${{ github.event_name == 'schedule' && 'dev' || '' }}
+
+jobs:
+  compile:
+    name: Compile check (no Unity)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      unity: ${{ steps.license.outputs.unity }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/cache@v4
+        with:
+          path: Tools/CompileCheck/.cache
+          key: compilecheck-${{ hashFiles('Tools/CompileCheck/setup.sh', 'Tools/CompileCheck/patch.spec', 'Tools/CompileCheck/RefPatch/**', 'Packages/manifest.json') }}
+      - name: Compile Assembly-CSharp, player build and editor + tests
+        run: Tools/CompileCheck/check.sh
+      - name: Is there a Unity license?
+        id: license
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        run: |
+          if [ -n "$UNITY_LICENSE" ] || [ -n "$UNITY_SERIAL" ]; then
+            echo "unity=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "unity=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No UNITY_LICENSE / UNITY_SERIAL secret: Unity tests and builds are skipped (Docs/CI.md)."
+          fi
+
+  tests:
+    name: EditMode tests (Unity)
+    needs: compile
+    if: >-
+      needs.compile.outputs.unity == 'true' &&
+      (github.event_name != 'push' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          large-packages: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+      - name: List LFS files
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+      - name: Restore LFS cache
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+      - name: Pull LFS files
+        run: |
+          git lfs pull
+          git add .
+          git reset --hard
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-tests-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-tests-
+      - uses: game-ci/unity-test-runner@v4
+        id: tests
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          testMode: editmode
+          artifactsPath: test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: EditMode test results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ${{ steps.tests.outputs.artifactsPath || 'test-results' }}
+          retention-days: 7
+
+  build:
+    name: Windows player (Unity)
+    needs: [compile, tests]
+    if: >-
+      needs.compile.outputs.unity == 'true' &&
+      (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.build))
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          large-packages: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKOUT_REF }}
+      - name: List LFS files
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+      - name: Restore LFS cache
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+      - name: Pull LFS files
+        run: |
+          git lfs pull
+          git add .
+          git reset --hard
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-StandaloneWindows64-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-StandaloneWindows64-
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          targetPlatform: StandaloneWindows64
+          buildName: RungThiTham
+          buildsPath: build
+          versioning: None
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RungThiTham-Windows
+          path: build/StandaloneWindows64
+          retention-days: 3
+
+  autoshot:
+    name: AutoShot tour (Windows)
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 20
+    # a GPU-less runner may not render like a real PC: report, don't block, until it has proven reliable
+    continue-on-error: true
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: RungThiTham-Windows
+          path: player
+      - name: Play the tour
+        shell: pwsh
+        run: |
+          $argList = @('-autoshot', '-autoshotDir', "$PWD\shots", '-autoshotTimeout', '420',
+                       '-screen-fullscreen', '0', '-screen-width', '1280', '-screen-height', '720',
+                       '-logFile', "$PWD\player.log")
+          $p = Start-Process -FilePath 'player\RungThiTham.exe' -ArgumentList $argList -PassThru
+          $null = $p.Handle   # keeps ExitCode readable after the process ends
+          if (-not $p.WaitForExit(540000)) { $p.Kill(); Write-Error 'The player did not quit within 9 minutes.'; exit 1 }
+          $shots = @(Get-ChildItem shots -Filter *.png -ErrorAction SilentlyContinue).Count
+          Write-Host "Exit code $($p.ExitCode), $shots screenshots"
+          Select-String -Path player.log -Pattern '\[AutoShot\] (done|tour did not finish)' | ForEach-Object { Write-Host $_.Line }
+          if ($p.ExitCode -ne 0) { Write-Error "AutoShot exit code $($p.ExitCode) (1 = errors logged, 2 = timeout); see player.log"; exit 1 }
+          if ($shots -eq 0) { Write-Error 'No screenshots were written.'; exit 1 }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: AutoShot
+          path: |
+            shots
+            player.log
+          retention-days: 7

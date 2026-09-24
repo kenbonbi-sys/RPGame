@@ -28,7 +28,9 @@ Mỗi chiêu là một asset `AbilityDef` gồm chi phí, hồi chiêu, nhãn v�
 
 ## Con số
 
-- **Lực chiêu (`power`)** là tỉ lệ của Công: `1.4` = 140%. Sát thương = lực chiêu × Công (vật lý dùng Công vật lý, mọi hệ khác dùng Công phép) × chí mạng × giảm do giáp và kháng.
+- **Lực chiêu (`power`)** là tỉ lệ của Công: `1.4` = 140%. Sát thương = lực chiêu × Công (vật lý dùng Công vật lý, mọi hệ khác dùng Công phép) × thưởng sát thương × chí mạng × giảm do giáp × (1 − kháng hệ) × ngẫu nhiên 0.95–1.05 (mục 04 của kế hoạch).
+- **Thưởng sát thương** là chỉ số `DamageDealt` (gốc 1) của nhân vật. Trang bị và thiên phú thêm modifier `PercentAdd` có nhãn, ví dụ `+0.2` với nhãn `#Đạn`; modifier chỉ tính cho chiêu có nhãn đó.
+- **Kháng hệ** của mục tiêu nằm ở `Health.resistances`, mỗi hệ một số: `-0.5` là điểm yếu (nhận thêm 50%), tối đa `0.75`. Nấm Độc yếu Lửa (`-0.3`).
 - Anh hùng cấp 1 có Công 24.5, nên `power 1` ≈ 24 sát thương. 8 chiêu cũ được chuyển sang với lực chiêu cho đúng số sát thương của bản prototype (Chém Gió 90%, Cầu Lửa 188%, Mũi Băng 122%, Lôi Phạt 212%, Bão Kiếm 45% mỗi nhịp).
 - **Cấp chiêu 1–5:** mỗi cấp +`powerPerLevel` lực (mặc định 12%) và −`cooldownPerLevel` hồi chiêu (4%). Cấp của từng ô nằm ở `PlayerSkills.levels`.
 - **Vị trí (`Anchor`)**: tính từ người dùng (Caster), điểm hiện tại (Point: nơi viên đạn nổ, gai băng mọc…) hoặc điểm nhắm (Aim), cộng thêm `up` (lên trên) và `forward` (theo hướng chiêu).

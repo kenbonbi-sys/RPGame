@@ -103,12 +103,26 @@ namespace RPG
         };
 
         /// <summary>"#Lửa #Đạn" — the tag names talents and gear refer to.</summary>
-        public string TagText()
+        public string TagText() => string.Join(" ", TagList);
+
+        List<string> tagList;
+        AbilityTags tagListFor;
+
+        /// <summary>The tag names of this ability, cached (read on every hit by damage bonuses).</summary>
+        public IReadOnlyList<string> TagList
         {
-            var parts = new List<string>();
-            foreach (var (tag, name) in TagNames)
-                if (HasTag(tag)) parts.Add(name);
-            return string.Join(" ", parts);
+            get
+            {
+                if (tagList == null || tagListFor != tags)
+                {
+                    tagList = tagList ?? new List<string>();
+                    tagList.Clear();
+                    foreach (var (tag, name) in TagNames)
+                        if (HasTag(tag)) tagList.Add(name);
+                    tagListFor = tags;
+                }
+                return tagList;
+            }
         }
     }
 
