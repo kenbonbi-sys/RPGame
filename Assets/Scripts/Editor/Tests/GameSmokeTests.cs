@@ -379,6 +379,74 @@ namespace RPG.EditorTools.Tests
         }
 
         [UnityTest]
+        public IEnumerator PortedAbilitiesHitLikeThePrototype()
+        {
+            var hero = GameManager.I.player;
+            var db = GameManager.I.db;
+            float Hit(string ability, System.Func<AbilityDef, HitSpec> pick)
+            {
+                var a = db.Ability(ability);
+                var ctx = new AbilityContext { ability = a, caster = hero, level = 1, origin = hero.transform.position };
+                return pick(a).Make(ctx, Vector2.zero, Vector2.right).amount;
+            }
+            // prototype numbers: Chém Gió 22, Cầu Lửa 46, Mũi Băng 30, Lôi Phạt 52, Bão Kiếm 11 per tick
+            var slash = (ComboEffect)db.Ability("slash").effects[0];
+            Assert.AreEqual(22f, Hit("slash", a => ((DamageEffect)slash.stages[0].effects[1]).hit), 0.2f);
+            Assert.AreEqual(22f * 1.7f, Hit("slash", a => ((DamageEffect)slash.stages[2].effects[1]).hit), 0.3f);
+            Assert.AreEqual(46f, Hit("fireball", a => ((ProjectileEffect)a.effects[1]).hit), 0.2f);
+            Assert.AreEqual(30f, Hit("ice", a => ((DamageEffect)((LineEffect)a.effects[1]).each[1]).hit), 0.2f);
+            Assert.AreEqual(52f, Hit("lightning", a => ((DamageEffect)((BurstEffect)a.effects[1]).each[1]).hit), 0.2f);
+            Assert.AreEqual(11f, Hit("bladestorm", a => ((DamageEffect)((PulseEffect)a.effects[1]).each[0]).hit), 0.1f);
+            Assert.NotNull(((ProjectileEffect)db.Ability("fireball").effects[1]).prefab, "fireball has its projectile");
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator ANewAbilityMadeOnlyFromData()
+        {
+            // what a designer does in the Inspector: a new AbilityDef with one Damage block
+            var nova = ScriptableObject.CreateInstance<AbilityDef>();
+            nova.id = "test_nova";
+            nova.displayName = "Tân Tinh";
+            nova.targeting = AbilityTargeting.Self;
+            nova.cooldown = 1f;
+            nova.effects.Add(new CueEffect { at = new Anchor(Anchor.From.Caster), vfx = "fire_explosion" });
+            nova.effects.Add(new DamageEffect { at = new Anchor(Anchor.From.Caster), radius = 3f, hit = new HitSpec { power = 2f, type = DamageType.Fire } });
+
+            var hero = GameManager.I.player;
+            var enemy = EnemyBase.All.Find(e => !e.IsDead);
+            Assert.NotNull(enemy);
+            hero.motor.Teleport((Vector2)enemy.transform.position + Vector2.left);
+            yield return Frames(2);
+            float before = enemy.health.hp;
+            hero.skills.slots[6] = nova;
+            Assert.IsTrue(hero.skills.TryCast(6, enemy.transform.position));
+            yield return Frames(1);
+            Assert.Less(enemy.health.hp, before, "the data-only ability dealt damage");
+            Assert.GreaterOrEqual(before - enemy.health.hp, 40f, "about 2 × Attack 24.5");
+            Object.Destroy(nova);
+        }
+
+        [UnityTest]
+        public IEnumerator ShieldBuffCutsDamageThenExpires()
+        {
+            var hero = GameManager.I.player;
+            Assert.IsTrue(hero.skills.TryCast(5, hero.transform.position), "Khiên Thánh");
+            yield return Frames(1);
+            Assert.IsTrue(hero.HasBuff("shield"));
+            Assert.AreEqual(0.4f, hero.health.damageTakenMultiplier, 1e-4f);
+            Assert.IsTrue(hero.status.stunImmune);
+            float hp = hero.health.hp;
+            hero.health.TakeDamage(DamageInfo.Make(50, Team.Enemy, null, hero.transform.position, Vector2.up));
+            Assert.Less(hp - hero.health.hp, 21f, "60% less damage");
+
+            yield return GameSeconds(5.3f);
+            Assert.IsFalse(hero.HasBuff("shield"));
+            Assert.AreEqual(1f, hero.health.damageTakenMultiplier, 1e-4f);
+            Assert.IsFalse(hero.status.stunImmune);
+        }
+
+        [UnityTest]
         public IEnumerator DamagedSaveFallsBackToBackup()
         {
             Inventory.I.gold = 123;

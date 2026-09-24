@@ -1,0 +1,127 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: lightning
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: lightning
+  displayName: "L\xF4i Ph\u1EA1t"
+  description: "Tri\u1EC7u h\u1ED3i b\xE3o s\xE9t t\u1EA1i v\u1ECB tr\xED chu\u1ED9t. M\u1ED7i tia s\xE9t g\xE2y cho\xE1ng ng\u1EAFn."
+  icon: {fileID: 2117337303, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 4104
+  cooldown: 16
+  energyCost: 28
+  targeting: 1
+  maxRange: 12
+  lockTime: 0.5
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425323349540891
+  - rid: 8556425323349540892
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425323349540891
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 0
+          up: 0.6
+          forward: 0
+        vfx: cast_lightning
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_lightning_charge
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425323349540892
+      type: {class: BurstEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        center:
+          from: 2
+          up: 0
+          forward: 0
+        radius: 3
+        count: 8
+        chargeTime: 0.4
+        interval: 0.14
+        intervalJitter: 0.3
+        preferTargets: 0.75
+        firstAtCenter: 1
+        areaVfx: storm_circle
+        areaVfxScale: 1.2
+        each:
+        - rid: 8556425323349540893
+        - rid: 8556425323349540894
+    - rid: 8556425323349540893
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: lightning_strike
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_thunder
+        sfxVolume: 0.7
+        sfxPitchVariance: 0.12
+        sfxAtPoint: 1
+        sfxMinInterval: 0.05
+        shake: 0.22
+        flashColor: {r: 0.85, g: 0.85, b: 1, a: 1}
+        flashStrength: 0.12
+        flashDuration: 0.12
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425323349540894
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        shape: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        radius: 1.1
+        angle: 120
+        hit:
+          power: 2.12
+          type: 3
+          critChance: 0.15
+          knockback: 2
+          poise: 8
+          hitStop: 0
+          stun: 0.8
+          slow: 0
+          slowDuration: 2
+          burnPower: 0
+          burnDuration: 3
+        onAnyHit: []

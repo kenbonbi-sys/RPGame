@@ -17,6 +17,9 @@ namespace RPG
         public float stun, slow, slowDuration, burnDps, burnDuration;
         public float critChance = 0.1f;
         public float poise;
+        [Tooltip("Damage already includes the shooter's Attack (set by ability projectiles).")]
+        public bool attackScaled;
+        public string skillName;
         public string hitVfx = "hit_spark";
         public string hitSfx = "sfx_hit";
         public float shake = 0.1f;
@@ -78,6 +81,8 @@ namespace RPG
             var d = DamageInfo.Make(damage, team, owner, point, (Vector2)h.transform.position - point, damageType, knockback).RollCrit(critChance);
             d.stun = stun; d.slow = slow; d.slowDuration = slowDuration; d.burnDps = burnDps; d.burnDuration = burnDuration;
             d.poise = poise;
+            d.attackScaled = attackScaled;
+            d.skillName = skillName;
             h.TakeDamage(d);
             Combat.OnHitFeedback(h, d);
         }

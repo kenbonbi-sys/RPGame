@@ -25,7 +25,7 @@ namespace RPG.EditorTools
         public static Material FontOutline => AssetDatabase.LoadAssetAtPath<Material>("Assets/Fonts/Inter SDF - Outline.mat");
         public static Material FontShadow => AssetDatabase.LoadAssetAtPath<Material>("Assets/Fonts/Inter SDF - Shadow.mat");
 
-        [MenuItem("Tools/RPG/Steps/3. Data (font, items, skills, volumes, audio)", priority = 103)]
+        [MenuItem("Tools/RPG/Steps/3. Data (font, items, abilities, quests, volumes, audio)", priority = 103)]
         public static void CreateAll()
         {
             CreateMaterials();
@@ -33,10 +33,10 @@ namespace RPG.EditorTools
             CreateVolumes();
             ConfigureAudio();
             var items = CreateItems();
-            var skills = CreateSkills();
+            var abilities = CreateAbilities();
             var progression = CreateProgression();
             var quests = CreateQuests();
-            CreateDatabase(items, skills, progression, quests);
+            CreateDatabase(items, abilities, progression, quests);
             CreateAudioLibrary();
             AssetDatabase.SaveAssets();
         }
@@ -327,61 +327,243 @@ namespace RPG.EditorTools
             };
         }
 
-        // ------------------------------------------------------------------ skills
-        static T Skill<T>(string id, string name, string icon, float cd, float cost, string anim, float lockTime, string desc, System.Action<T> tune = null) where T : SkillDef
+        // ------------------------------------------------------------------ abilities
+        /// <summary>
+        /// The 8 prototype skills as AbilityDef data (Assets/Data/Abilities). Power is a share of
+        /// Attack; the values reproduce the prototype's damage for a level-1 hero (Attack 24.5).
+        /// </summary>
+        static List<AbilityDef> CreateAbilities()
         {
-            string path = $"{DataFolder}/Skills/{id}.asset";
-            EditorUtil.EnsureFolder(DataFolder + "/Skills");
-            var s = AssetDatabase.LoadAssetAtPath<T>(path);
-            if (EditorUtil.Keep(s)) return s;
-            EditorUtil.Written++;
-            if (s == null)
+            AbilityDef Ability(string id, string name, string icon, AbilityTags tags, float cd, float cost, string anim, float lockTime,
+                               string desc, System.Action<AbilityDef> fill)
             {
-                s = ScriptableObject.CreateInstance<T>();
-                AssetDatabase.CreateAsset(s, path);
+                string path = $"{DataFolder}/Abilities/{id}.asset";
+                EditorUtil.EnsureFolder(DataFolder + "/Abilities");
+                var a = AssetDatabase.LoadAssetAtPath<AbilityDef>(path);
+                if (EditorUtil.Keep(a)) return a;
+                EditorUtil.Written++;
+                var fresh = ScriptableObject.CreateInstance<AbilityDef>();
+                if (a == null)
+                {
+                    a = fresh;
+                    AssetDatabase.CreateAsset(a, path);
+                }
+                else
+                {
+                    EditorUtility.CopySerialized(fresh, a);
+                    Object.DestroyImmediate(fresh);
+                }
+                a.id = id;
+                a.displayName = name;
+                a.icon = ArtImporter.S(icon);
+                a.tags = tags;
+                a.cooldown = cd;
+                a.energyCost = cost;
+                a.animBase = anim;
+                a.lockTime = lockTime;
+                a.description = desc;
+                fill(a);
+                EditorUtility.SetDirty(a);
+                return a;
             }
-            s.id = id;
-            s.displayName = name;
-            s.icon = ArtImporter.S(icon);
-            s.cooldown = cd;
-            s.energyCost = cost;
-            s.animBase = anim;
-            s.lockTime = lockTime;
-            s.description = desc;
-            tune?.Invoke(s);
-            EditorUtility.SetDirty(s);
-            return s;
+            CueEffect Cue(Anchor at, string vfx = null, string sfx = null, float vol = 0.8f, float shake = 0f) =>
+                new CueEffect { at = at, vfx = vfx, sfx = sfx, sfxVolume = vol, shake = shake };
+            var caster = new Anchor(Anchor.From.Caster);
+            var point = new Anchor(Anchor.From.Point);
+            var db = Database;
+            var fireball = db != null && db.fireballPrefab != null ? db.fireballPrefab
+                : AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Gameplay/Fireball.prefab");
+
+            List<AbilityEffect> Swing(bool finisher)
+            {
+                var chest = new Anchor(Anchor.From.Caster, 0.45f);
+                return new List<AbilityEffect>
+                {
+                    new CueEffect
+                    {
+                        delay = 0.05f, at = new Anchor(Anchor.From.Caster, 0.45f, 0.55f), vfx = finisher ? "slash_big" : "slash",
+                        vfxScale = finisher ? 1.35f : 1f, rotateToDirection = true, flipOnOddCombo = true,
+                        sfx = "sfx_swing", sfxVolume = 0.8f, sfxPitchVariance = 0.1f
+                    },
+                    new DamageEffect
+                    {
+                        delay = 0.05f, shape = DamageEffect.Shape.Cone, at = chest, radius = finisher ? 2.28f : 1.9f, angle = 150f,
+                        hit = new HitSpec
+                        {
+                            power = finisher ? 1.53f : 0.9f, type = DamageType.Physical, critChance = 0.15f,
+                            knockback = finisher ? 8f : 4f, poise = finisher ? 9f : 3f, hitStop = finisher ? 0.07f : 0.035f
+                        },
+                        onAnyHit = new List<AbilityEffect>
+                        {
+                            new CueEffect
+                            {
+                                sfx = finisher ? "sfx_hit_heavy" : "sfx_hit", sfxVolume = 0.9f, sfxPitchVariance = 0.1f,
+                                shake = finisher ? 0.22f : 0.08f, impact = finisher ? 0.35f : 0f, impactDuration = 0.2f
+                            }
+                        }
+                    }
+                };
+            }
+
+            return new List<AbilityDef>
+            {
+                Ability("slash", "Chém Gió", "sk_slash", AbilityTags.Physical | AbilityTags.Wind | AbilityTags.Melee, 0.42f, 0f, "attack", 0.26f,
+                    "Vung kiếm tạo luồng gió chém hình vòng cung. Đòn thứ 3 liên tiếp gây sát thương cực mạnh.", a =>
+                    {
+                        a.moveWhileCasting = 0.35f;
+                        a.maxRange = 12f;
+                        a.effects.Add(new ComboEffect
+                        {
+                            window = 0.9f,
+                            stages =
+                            {
+                                new ComboEffect.Stage { name = "Đòn 1", effects = Swing(false) },
+                                new ComboEffect.Stage { name = "Đòn 2", effects = Swing(false) },
+                                new ComboEffect.Stage { name = "Đòn cuối", effects = Swing(true) },
+                            }
+                        });
+                    }),
+                Ability("fireball", "Cầu Lửa", "sk_fireball", AbilityTags.Fire | AbilityTags.Projectile, 3f, 12f, "cast", 0.3f,
+                    "Phóng cầu lửa nổ tung khi trúng mục tiêu, thiêu đốt kẻ địch trong 3 giây.", a =>
+                    {
+                        a.castSfx = "sfx_fireball_cast";
+                        a.effects.Add(Cue(new Anchor(Anchor.From.Caster, 0.55f, 0.5f), "cast_fire"));
+                        a.effects.Add(new ProjectileEffect
+                        {
+                            prefab = fireball, spawn = new Anchor(Anchor.From.Caster, 0.55f, 0.5f), speed = 11f, explodeRadius = 1.7f,
+                            hit = new HitSpec { power = 1.88f, type = DamageType.Fire, critChance = 0.12f, knockback = 3f, poise = 12f, burnPower = 0.33f, burnDuration = 3f },
+                            hitVfx = "fire_explosion", hitSfx = "sfx_fireball_explode", hitShake = 0.28f
+                        });
+                    }),
+                Ability("ice", "Mũi Băng", "sk_ice", AbilityTags.Ice | AbilityTags.Area, 6f, 15f, "cast", 0.35f,
+                    "Gọi hàng gai băng trồi lên theo hướng chuột, làm chậm kẻ địch 50%.", a =>
+                    {
+                        a.castSfx = "sfx_ice_cast";
+                        a.effects.Add(Cue(new Anchor(Anchor.From.Caster, 0.5f), "cast_ice"));
+                        a.effects.Add(new LineEffect
+                        {
+                            count = 7, startOffset = 1.1f, spacing = 1.05f, interval = 0.06f, jitter = 0.18f, stopAtWalls = true,
+                            startScale = 0.9f, scaleStep = 0.04f,
+                            each =
+                            {
+                                new CueEffect { at = point, vfx = "ice_spike", sfx = "sfx_ice_shatter", sfxVolume = 0.35f, sfxPitchVariance = 0.15f, sfxAtPoint = true, sfxMinInterval = 0.02f },
+                                new DamageEffect
+                                {
+                                    at = point, radius = 0.95f,
+                                    hit = new HitSpec { power = 1.22f, type = DamageType.Ice, critChance = 0.1f, knockback = 1.5f, slow = 0.5f, slowDuration = 2.5f, poise = 5f },
+                                    onAnyHit = { new CueEffect { shake = 0.05f } }
+                                }
+                            }
+                        });
+                    }),
+                Ability("lightning", "Lôi Phạt", "sk_lightning", AbilityTags.Lightning | AbilityTags.Area, 16f, 28f, "cast", 0.5f,
+                    "Triệu hồi bão sét tại vị trí chuột. Mỗi tia sét gây choáng ngắn.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Point;
+                        a.effects.Add(Cue(new Anchor(Anchor.From.Caster, 0.6f), "cast_lightning", "sfx_lightning_charge"));
+                        a.effects.Add(new BurstEffect
+                        {
+                            center = new Anchor(Anchor.From.Aim), radius = 3f, count = 8, chargeTime = 0.4f, interval = 0.14f, intervalJitter = 0.3f,
+                            preferTargets = 0.75f, firstAtCenter = true, areaVfx = "storm_circle", areaVfxScale = 3f / 2.5f,
+                            each =
+                            {
+                                new CueEffect
+                                {
+                                    at = point, vfx = "lightning_strike", sfx = "sfx_thunder", sfxVolume = 0.7f, sfxPitchVariance = 0.12f,
+                                    sfxAtPoint = true, sfxMinInterval = 0.05f, shake = 0.22f,
+                                    flashColor = new Color(0.85f, 0.85f, 1f), flashStrength = 0.12f, flashDuration = 0.12f
+                                },
+                                new DamageEffect
+                                {
+                                    at = point, radius = 1.1f,
+                                    hit = new HitSpec { power = 2.12f, type = DamageType.Lightning, critChance = 0.15f, knockback = 2f, stun = 0.8f, poise = 8f }
+                                }
+                            }
+                        });
+                    }),
+                Ability("heal", "Hồi Phục", "sk_heal", AbilityTags.Holy | AbilityTags.Support, 14f, 18f, "cast", 0.35f,
+                    "Hồi ngay 40 Máu và hồi thêm máu liên tục trong 4 giây.", a =>
+                    {
+                        a.castSfx = "sfx_heal";
+                        a.targeting = AbilityTargeting.Self;
+                        a.effects.Add(new HealEffect { instant = 40f, perSecond = 6f, duration = 4f, auraVfx = "heal_aura" });
+                        a.effects.Add(new CueEffect
+                        {
+                            at = caster, vfx = "heal_burst", attachToCaster = true,
+                            flashColor = new Color(0.4f, 1f, 0.5f), flashStrength = 0.08f, flashDuration = 0.3f
+                        });
+                        a.effects.Add(new BuffEffect { buff = new BuffSpec { id = "regen", displayName = "Hồi Phục", icon = ArtImporter.S("st_regen"), duration = 4f } });
+                    }),
+                Ability("shield", "Khiên Thánh", "sk_shield", AbilityTags.Holy | AbilityTags.Support, 16f, 16f, "cast", 0.3f,
+                    "Tạo lá chắn thánh giảm 60% sát thương nhận vào và miễn choáng trong 5 giây.", a =>
+                    {
+                        a.castSfx = "sfx_shield";
+                        a.targeting = AbilityTargeting.Self;
+                        a.effects.Add(new BuffEffect
+                        {
+                            buff = new BuffSpec
+                            {
+                                id = "shield", displayName = "Khiên Thánh", icon = ArtImporter.S("st_shield"), duration = 5f,
+                                damageTakenMultiplier = 0.4f, stunImmune = true, clearStun = true,
+                                attachedVfx = "shield_bubble", endVfx = "shield_break"
+                            }
+                        });
+                        a.effects.Add(Cue(caster, "shield_cast"));
+                    }),
+                Ability("bladestorm", "Bão Kiếm", "sk_bladestorm", AbilityTags.Physical | AbilityTags.Wind | AbilityTags.Channel, 10f, 20f, "attack", 0.2f,
+                    "Kiếm ảnh xoay quanh bản thân trong 3 giây, chém mọi kẻ địch lại gần.", a =>
+                    {
+                        a.moveWhileCasting = 0.9f;
+                        a.targeting = AbilityTargeting.Self;
+                        a.effects.Add(new BuffEffect { buff = new BuffSpec { id = "bladestorm", displayName = "Bão Kiếm", icon = ArtImporter.S("sk_bladestorm"), duration = 3f, speedMultiplier = 0.85f } });
+                        a.effects.Add(new PulseEffect
+                        {
+                            duration = 3f, interval = 0.25f, at = new Anchor(Anchor.From.Caster, 0.4f), attachedVfx = "blade_storm",
+                            loopSfx = "sfx_bladestorm", loopSfxVolume = 0.6f, loopSfxInterval = 0.8f,
+                            each =
+                            {
+                                new DamageEffect
+                                {
+                                    at = point, radius = 2.2f,
+                                    hit = new HitSpec { power = 0.45f, type = DamageType.Physical, critChance = 0.1f, knockback = 1.2f, poise = 2f },
+                                    onAnyHit = { new CueEffect { sfx = "sfx_hit", sfxVolume = 0.35f, sfxPitchVariance = 0.2f, sfxMinInterval = 0.05f } }
+                                }
+                            }
+                        });
+                    }),
+                Ability("dash", "Lướt", "sk_dash", AbilityTags.Movement, 2.2f, 0f, "", 0.05f,
+                    "Lướt nhanh về phía trước và bất tử trong khoảnh khắc. Dùng để né vòng cảnh báo đỏ!", a =>
+                    {
+                        a.moveWhileCasting = 1f;
+                        a.castSfx = "sfx_dash";
+                        a.effects.Add(new DashEffect { distance = 4.2f, time = 0.16f, invulnerableTime = 0.28f });
+                    }),
+            };
         }
 
-        static List<SkillDef> CreateSkills()
+        /// <summary>
+        /// References to assets made by later steps (the Fireball projectile comes from the VFX
+        /// step): filled in once those exist, only where still empty.
+        /// </summary>
+        public static void LinkLateReferences()
         {
-            return new List<SkillDef>
+            var db = Database;
+            if (db == null) return;
+            foreach (var a in db.abilities)
             {
-                Skill<SlashSkill>("slash", "Chém Gió", "sk_slash", 0.42f, 0f, "attack", 0.26f,
-                    "Vung kiếm tạo luồng gió chém hình vòng cung. Đòn thứ 3 liên tiếp gây sát thương cực mạnh.",
-                    s => { s.moveWhileCasting = 0.35f; s.castSfx = ""; }),
-                Skill<FireballSkill>("fireball", "Cầu Lửa", "sk_fireball", 3f, 12f, "cast", 0.3f,
-                    "Phóng cầu lửa nổ tung khi trúng mục tiêu, thiêu đốt kẻ địch trong 3 giây.",
-                    s => s.castSfx = "sfx_fireball_cast"),
-                Skill<IceSpikeSkill>("ice", "Mũi Băng", "sk_ice", 6f, 15f, "cast", 0.35f,
-                    "Gọi hàng gai băng trồi lên theo hướng chuột, làm chậm kẻ địch 50%.",
-                    s => s.castSfx = "sfx_ice_cast"),
-                Skill<LightningSkill>("lightning", "Lôi Phạt", "sk_lightning", 16f, 28f, "cast", 0.5f,
-                    "Triệu hồi bão sét tại vị trí chuột. Mỗi tia sét gây choáng ngắn.",
-                    s => s.castSfx = ""),
-                Skill<HealSkill>("heal", "Hồi Phục", "sk_heal", 14f, 18f, "cast", 0.35f,
-                    "Hồi ngay 40 Máu và hồi thêm máu liên tục trong 4 giây.",
-                    s => s.castSfx = "sfx_heal"),
-                Skill<ShieldSkill>("shield", "Khiên Thánh", "sk_shield", 16f, 16f, "cast", 0.3f,
-                    "Tạo lá chắn thánh giảm 60% sát thương nhận vào và miễn choáng trong 5 giây.",
-                    s => s.castSfx = "sfx_shield"),
-                Skill<BladeStormSkill>("bladestorm", "Bão Kiếm", "sk_bladestorm", 10f, 20f, "attack", 0.2f,
-                    "Kiếm ảnh xoay quanh bản thân trong 3 giây, chém mọi kẻ địch lại gần.",
-                    s => { s.moveWhileCasting = 0.9f; }),
-                Skill<DashSkill>("dash", "Lướt", "sk_dash", 2.2f, 0f, "", 0.05f,
-                    "Lướt nhanh về phía trước và bất tử trong khoảnh khắc. Dùng để né vòng cảnh báo đỏ!",
-                    s => { s.moveWhileCasting = 1f; s.castSfx = "sfx_dash"; }),
-            };
+                if (a == null) continue;
+                bool changed = false;
+                foreach (var e in a.effects)
+                {
+                    if (e is ProjectileEffect p && p.prefab == null && a.id == "fireball" && db.fireballPrefab != null)
+                    {
+                        p.prefab = db.fireballPrefab;
+                        changed = true;
+                    }
+                }
+                if (changed) EditorUtility.SetDirty(a);
+            }
+            AssetDatabase.SaveAssets();
         }
 
         // ------------------------------------------------------------------ progression
@@ -498,7 +680,7 @@ namespace RPG.EditorTools
         }
 
         // ------------------------------------------------------------------ database
-        static void CreateDatabase(List<ItemDef> items, List<SkillDef> skills, ProgressionConfig progression, List<QuestDef> quests)
+        static void CreateDatabase(List<ItemDef> items, List<AbilityDef> abilities, ProgressionConfig progression, List<QuestDef> quests)
         {
             string path = DataFolder + "/GameDatabase.asset";
             var db = AssetDatabase.LoadAssetAtPath<GameDatabase>(path);
@@ -509,7 +691,7 @@ namespace RPG.EditorTools
             }
             // authoring mode appends missing entries and keeps whatever was added or re-pointed by hand
             db.items = Merge(db.items, items);
-            db.skills = Merge(db.skills, skills);
+            db.abilities = Merge(db.abilities, abilities);
             EditorUtil.Assign(ref db.progression, progression);
             db.quests = Merge(db.quests, quests);
             EditorUtil.Assign(ref db.dialogue, AssetDatabase.LoadAssetAtPath<Yarn.Unity.YarnProject>(DialogueProject));

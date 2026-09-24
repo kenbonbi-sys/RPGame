@@ -41,10 +41,10 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 
 ```
 Assets/
-  Scripts/  Core · Combat · Player · Skills · Enemies · World · Items · UI · VFX · Anim · Data · Debug · Editor
+  Scripts/  Core · Combat · Player · Abilities · Progression · Quests · Dialogue · Save · Enemies · World · Items · UI · VFX · Anim · Data · Debug · Editor
   Art/      ảnh sinh từ Tools/ArtGen (+ art_manifest.json: cắt sprite, pivot, 9-slice, animation)
   Prefabs/  Characters · Props · Gameplay · VFX (45 hiệu ứng)
-  Data/     Items, Skills (ScriptableObject — chỉnh chỉ số trong Inspector), Anims, VFX/Audio library
+  Data/     Items, Abilities, Quests, Progression (ScriptableObject — chỉnh chỉ số trong Inspector), Anims, VFX/Audio library
   Shaders/  RPG/VFX Additive (HDR → Bloom), RPG/VFX Alpha, RPG/Sprite Silhouette (hit flash)
   Settings/ URP 2D Renderer, Volumes (Bloom, Vignette, Impact, Danger)
 Tools/
@@ -63,7 +63,7 @@ Tools/
 ## Mở rộng
 
 - **Chỉnh VFX:** mở `Assets/Prefabs/VFX/<tên>.prefab`. Mỗi hiệu ứng là Particle System + sprite flipbook + Light2D. Tăng `_Intensity` của material để glow (Bloom) mạnh hơn.
-- **Thêm skill:** tạo class kế thừa `SkillDef` và viết `Execute()`, tạo asset qua *Create → RPG → Skills*, rồi gán vào `PlayerSkills.slots` trên prefab Player.
+- **Thêm chiêu:** chỉ cần dữ liệu. Tạo asset *Create → RPG → Ability*, ghép các khối (Damage, Projectile, Dash, Heal, Buff, Cue, Line, Burst, Pulse, Combo) trong Inspector, rồi gán vào `PlayerSkills.slots` trên prefab Player. Hướng dẫn: `Docs/ThemChieu.md`.
 - **Thay art:** thay PNG trong `Assets/Art` (giữ kích thước frame), hoặc kéo sprite mới vào các `SpriteAnimSet` trong `Assets/Data/Anims`.
 - **Phím điều khiển:** mọi phím định nghĩa một chỗ trong `Assets/Scripts/Core/GameControls.cs` (Input System actions). Đổi phím lúc chạy: `InputReader.Asset` + `InputReader.SaveBindingOverrides()` (lưu trong PlayerPrefs); nhãn phím trên skill bar tự cập nhật.
 - **Thêm nhiệm vụ / hội thoại:** tạo asset qua *Create → RPG → Quest*, thêm vào `GameDatabase.quests`; viết node trong một file `.yarn` ở `Assets/Dialogue` và đặt tên node vào `NPC.yarnNode`.

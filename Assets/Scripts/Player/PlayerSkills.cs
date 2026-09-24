@@ -3,10 +3,12 @@ using UnityEngine;
 
 namespace RPG
 {
-    /// <summary>8 skill slots (Q W E R A S D Space) with cooldowns and energy costs.</summary>
+    /// <summary>8 ability slots (Q W E R A S D Space) with cooldowns, energy costs and levels 1–5.</summary>
     public class PlayerSkills : MonoBehaviour
     {
-        public SkillDef[] slots = new SkillDef[8];
+        public AbilityDef[] slots = new AbilityDef[8];
+        [Tooltip("Level 1–5 of each slot's ability (plan §05: +12% power, −4% cooldown per level).")]
+        public int[] levels = { 1, 1, 1, 1, 1, 1, 1, 1 };
         public float globalCooldown = 0.08f;
         [Tooltip("A key pressed up to this many seconds before its skill is ready still fires the moment it can (plan §04: 150 ms).")]
         public float inputBuffer = 0.15f;
@@ -75,12 +77,14 @@ namespace RPG
         public float Fraction(int i)
         {
             var s = slots[i];
-            float cd = cooldownOf[i] > 0 ? cooldownOf[i] : s != null ? s.cooldown : 0;
+            float cd = cooldownOf[i] > 0 ? cooldownOf[i] : s != null ? s.CooldownAt(LevelOf(i)) : 0;
             if (cd <= 0) return 0;
             return Mathf.Clamp01(Remaining(i) / cd);
         }
 
         public bool CanAfford(int i) => slots[i] != null && pc.energy >= slots[i].energyCost;
+
+        public int LevelOf(int i) => levels != null && i >= 0 && i < levels.Length ? Mathf.Clamp(levels[i], 1, 5) : 1;
 
         public void ResetCooldowns()
         {
@@ -106,23 +110,14 @@ namespace RPG
             }
             Vector2 origin = pc.transform.position;
             Vector2 to = aim - origin;
-            if (to.sqrMagnitude < 0.01f) to = pc.motor.Facing;
-            if (to.magnitude > s.maxRange) aim = origin + to.normalized * s.maxRange;
-            var ctx = new SkillContext
-            {
-                caster = pc,
-                origin = origin,
-                aim = aim,
-                dir = to.normalized,
-                team = Team.Player
-            };
+            if (to.sqrMagnitude < 0.01f) aim = origin + pc.motor.Facing * 0.1f;
+            else if (to.magnitude > s.maxRange) aim = origin + to.normalized * s.maxRange;
+            int level = LevelOf(i);
             pc.energy -= s.energyCost;
-            cooldownOf[i] = s.cooldown * (PlayerStats.I != null ? PlayerStats.I.CooldownMultiplier(i, s) : 1f);
+            cooldownOf[i] = s.CooldownAt(level) * (PlayerStats.I != null ? PlayerStats.I.CooldownMultiplier(i, s) : 1f);
             readyAt[i] = Time.time + cooldownOf[i];
             gcdUntil = Time.time + globalCooldown;
-            pc.BeginAction(s.animBase, ctx.dir, s.lockTime, s.moveWhileCasting);
-            if (!string.IsNullOrEmpty(s.castSfx)) AudioManager.Play(s.castSfx, 0.9f, 0.06f);
-            s.Execute(ctx);
+            AbilityRunner.Cast(s, pc, aim, level);
             SkillCast?.Invoke(i);
             return true;
         }

@@ -21,6 +21,7 @@ namespace RPG
         public float poise;        // Thanh Trấn Áp damage (bosses, elites)
         public string skillName;   // shown in logs
         public int sourceLevel;    // attacker level for armor; 0 = read it from the source's Health
+        public bool attackScaled;  // amount already includes the attacker's Attack (abilities)
 
         public static DamageInfo Make(float amount, Team team, GameObject source, Vector2 point, Vector2 dir,
                                       DamageType type = DamageType.Physical, float knockback = 0f)

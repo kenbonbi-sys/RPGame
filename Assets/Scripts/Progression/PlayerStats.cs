@@ -144,9 +144,9 @@ namespace RPG
         public float CritMultiplier => Stats.Get(StatId.CritDamage);
 
         /// <summary>Cooldown multiplier for a slot: the basic attack (Q) speeds up with Agility, and so does Lướt.</summary>
-        public float CooldownMultiplier(int slot, SkillDef skill)
+        public float CooldownMultiplier(int slot, AbilityDef ability)
         {
-            if (skill is DashSkill) return Mathf.Max(0.5f, 1f - Stats.Get(StatId.DashCooldownReduction));
+            if (ability != null && ability.HasTag(AbilityTags.Movement)) return Mathf.Max(0.5f, 1f - Stats.Get(StatId.DashCooldownReduction));
             if (slot == 0) return 1f / (1f + Stats.Get(StatId.AttackSpeed));
             return 1f;
         }

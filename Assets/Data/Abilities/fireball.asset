@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: fireball
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: fireball
+  displayName: "C\u1EA7u L\u1EEDa"
+  description: "Ph\xF3ng c\u1EA7u l\u1EEDa n\u1ED5 tung khi tr\xFAng m\u1EE5c ti\xEAu, thi\xEAu \u0111\u1ED1t k\u1EBB \u0111\u1ECBch trong 3 gi\xE2y."
+  icon: {fileID: -675067362, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 2050
+  cooldown: 3
+  energyCost: 12
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.3
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_fireball_cast
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425323349540889
+  - rid: 8556425323349540890
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425323349540889
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        vfx: cast_fire
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425323349540890
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 1260040946324525447, guid: f1d1754b37fb14245927ca86a84d88c4, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 11
+        lifetime: 0
+        explodeRadius: 1.7
+        pierce: 0
+        hit:
+          power: 1.88
+          type: 1
+          critChance: 0.12
+          knockback: 3
+          poise: 12
+          hitStop: 0
+          stun: 0
+          slow: 0
+          slowDuration: 2
+          burnPower: 0.33
+          burnDuration: 3
+        hitVfx: fire_explosion
+        hitSfx: sfx_fireball_explode
+        hitShake: 0.28

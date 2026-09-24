@@ -57,8 +57,8 @@ namespace RPG
         {
             if (IsDead || invulnerable || !CanBeDamagedBy(d.sourceTeam)) return 0f;
             float raw = d.amount * damageTakenMultiplier;
-            // the hero's attributes scale every damage instance it deals exactly once, here
-            if (d.sourceTeam == Team.Player && PlayerStats.I != null) raw *= PlayerStats.I.DamageScale(d.type);
+            // older damage sources carry flat numbers: scale them by the hero's Attack here, once
+            if (d.sourceTeam == Team.Player && !d.attackScaled && PlayerStats.I != null) raw *= PlayerStats.I.DamageScale(d.type);
             if (armor > 0) raw *= 1f - ProgressionConfig.Current.ArmorReduction(armor, AttackerLevel(d));
             if (elementalResist > 0 && d.type != DamageType.Physical) raw *= 1f - elementalResist;
             float amount = Mathf.Max(1f, Mathf.Round(raw));
@@ -69,7 +69,7 @@ namespace RPG
             {
                 if (d.stun > 0) status.Stun(d.stun);
                 if (d.slow > 0) status.Slow(d.slow, d.slowDuration > 0 ? d.slowDuration : 2f);
-                if (d.burnDps > 0) status.Burn(d.burnDps, d.burnDuration > 0 ? d.burnDuration : 3f, d.sourceTeam);
+                if (d.burnDps > 0) status.Burn(d.burnDps, d.burnDuration > 0 ? d.burnDuration : 3f, d.sourceTeam, d.attackScaled);
             }
 
             Damaged?.Invoke(d, amount);

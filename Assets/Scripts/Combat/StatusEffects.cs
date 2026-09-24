@@ -21,6 +21,7 @@ namespace RPG
         float burnDps;
         float burnTick;
         Team burnTeam;
+        bool burnScaled;
         Health health;
         HitFlash flash;
         GameObject stunFx, burnFx;
@@ -64,8 +65,9 @@ namespace RPG
             slowUntil = Mathf.Max(slowUntil, Time.time + seconds);
         }
 
-        public void Burn(float dps, float seconds, Team team)
+        public void Burn(float dps, float seconds, Team team, bool attackScaled = false)
         {
+            burnScaled = attackScaled;
             burnDps = Mathf.Max(IsBurning ? burnDps : 0f, dps);
             burnUntil = Mathf.Max(burnUntil, Time.time + seconds);
             burnTeam = team;
@@ -92,6 +94,7 @@ namespace RPG
                 {
                     burnTick = 0.5f;
                     var d = DamageInfo.Make(burnDps * 0.5f, burnTeam, null, transform.position, Vector2.up, DamageType.Fire);
+                    d.attackScaled = burnScaled;
                     health.TakeDamage(d);
                 }
             }

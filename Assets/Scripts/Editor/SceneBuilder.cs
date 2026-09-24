@@ -59,6 +59,7 @@ namespace RPG.EditorTools
             AssetFactory.CreateAll();
             VFXFactory.BuildAll();
             PrefabFactory.BuildAll();
+            AssetFactory.LinkLateReferences();
         }
 
         [MenuItem("Tools/RPG/Steps/6. Rebuild Scene Only (keeps prefabs)", priority = 106)]

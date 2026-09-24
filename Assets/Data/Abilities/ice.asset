@@ -1,0 +1,147 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: ice
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: ice
+  displayName: "M\u0169i B\u0103ng"
+  description: "G\u1ECDi h\xE0ng gai b\u0103ng tr\u1ED3i l\xEAn theo h\u01B0\u1EDBng chu\u1ED9t, l\xE0m ch\u1EADm k\u1EBB \u0111\u1ECBch 50%."
+  icon: {fileID: 62970466, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 4100
+  cooldown: 6
+  energyCost: 15
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.35
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_ice_cast
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425323349540864
+  - rid: 8556425323349540865
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425323349540864
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 0
+          up: 0.5
+          forward: 0
+        vfx: cast_ice
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425323349540865
+      type: {class: LineEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        count: 7
+        startOffset: 1.1
+        spacing: 1.05
+        interval: 0.06
+        jitter: 0.18
+        stopAtWalls: 1
+        startScale: 0.9
+        scaleStep: 0.04
+        each:
+        - rid: 8556425323349540866
+        - rid: 8556425323349540867
+    - rid: 8556425323349540866
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: ice_spike
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_ice_shatter
+        sfxVolume: 0.35
+        sfxPitchVariance: 0.15
+        sfxAtPoint: 1
+        sfxMinInterval: 0.02
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425323349540867
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        shape: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        radius: 0.95
+        angle: 120
+        hit:
+          power: 1.22
+          type: 2
+          critChance: 0.1
+          knockback: 1.5
+          poise: 5
+          hitStop: 0
+          stun: 0
+          slow: 0.5
+          slowDuration: 2.5
+          burnPower: 0
+          burnDuration: 3
+        onAnyHit:
+        - rid: 8556425323349540868
+    - rid: 8556425323349540868
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: 
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0.05
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3

@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: bladestorm
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: bladestorm
+  displayName: "B\xE3o Ki\u1EBFm"
+  description: "Ki\u1EBFm \u1EA3nh xoay quanh b\u1EA3n th\xE2n trong 3 gi\xE2y, ch\xE9m m\u1ECDi k\u1EBB \u0111\u1ECBch l\u1EA1i g\u1EA7n."
+  icon: {fileID: -1599137300, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 8209
+  cooldown: 10
+  energyCost: 20
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.2
+  animBase: attack
+  moveWhileCasting: 0.9
+  castSfx: 
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425323349540884
+  - rid: 8556425323349540885
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425323349540884
+      type: {class: BuffEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        buff:
+          id: bladestorm
+          displayName: "B\xE3o Ki\u1EBFm"
+          icon: {fileID: -1599137300, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+          duration: 3
+          speedMultiplier: 0.85
+          damageTakenMultiplier: 1
+          stunImmune: 0
+          clearStun: 0
+          attachedVfx: 
+          endVfx: 
+    - rid: 8556425323349540885
+      type: {class: PulseEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        duration: 3
+        interval: 0.25
+        at:
+          from: 0
+          up: 0.4
+          forward: 0
+        attachedVfx: blade_storm
+        loopSfx: sfx_bladestorm
+        loopSfxVolume: 0.6
+        loopSfxInterval: 0.8
+        each:
+        - rid: 8556425323349540886
+    - rid: 8556425323349540886
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        shape: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        radius: 2.2
+        angle: 120
+        hit:
+          power: 0.45
+          type: 0
+          critChance: 0.1
+          knockback: 1.2
+          poise: 2
+          hitStop: 0
+          stun: 0
+          slow: 0
+          slowDuration: 2
+          burnPower: 0
+          burnDuration: 3
+        onAnyHit:
+        - rid: 8556425323349540887
+    - rid: 8556425323349540887
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: 
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_hit
+        sfxVolume: 0.35
+        sfxPitchVariance: 0.2
+        sfxAtPoint: 0
+        sfxMinInterval: 0.05
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3

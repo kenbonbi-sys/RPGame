@@ -515,15 +515,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RPG.PlayerSkills
   slots:
-  - {fileID: 11400000, guid: 65402b2295e328441bfde437665d4516, type: 2}
-  - {fileID: 11400000, guid: ee7a7175b4dbe3c488fb72bd5cee42c5, type: 2}
-  - {fileID: 11400000, guid: 857671e8dc3655642a47890aff497711, type: 2}
-  - {fileID: 11400000, guid: 04c74a943f8f308409de1f0210e93986, type: 2}
-  - {fileID: 11400000, guid: 337752403b8b9124185adcaf95f3be28, type: 2}
-  - {fileID: 11400000, guid: eeb6709ee72519e4391c139d08419404, type: 2}
-  - {fileID: 11400000, guid: 10f7cd43ed1e051478eac3fe47e44317, type: 2}
-  - {fileID: 11400000, guid: 3c6597995ce88534c931ff085631144a, type: 2}
+  - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
+  - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}
+  - {fileID: 11400000, guid: cbc06fff899ca6849895123a4d09cfc3, type: 2}
+  - {fileID: 11400000, guid: 89705c0a208bfed40b346724a59f1f8f, type: 2}
+  - {fileID: 11400000, guid: 9adb5279c8b85af488b39cdac561ca07, type: 2}
+  - {fileID: 11400000, guid: 054d9d38b3ea87f449331f2d4b7eddb3, type: 2}
+  - {fileID: 11400000, guid: d48074b1a0c20d445bfff56705c52470, type: 2}
+  - {fileID: 11400000, guid: 7465bfb70b62e4449867a3836df88ea0, type: 2}
+  levels: 0100000001000000010000000100000001000000010000000100000001000000i
   globalCooldown: 0.08
+  inputBuffer: 0.15
 --- !u!114 &5092187769054046583
 MonoBehaviour:
   m_ObjectHideFlags: 0

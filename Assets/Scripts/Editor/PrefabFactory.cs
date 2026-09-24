@@ -18,6 +18,9 @@ namespace RPG.EditorTools
 
         public static GameObject Player, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
 
+        /// <summary>Abilities on Q W E R A S D Space.</summary>
+        static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
+
         [MenuItem("Tools/RPG/Steps/5. Character + Prop Prefabs", priority = 105)]
         public static void BuildAll()
         {
@@ -47,9 +50,22 @@ namespace RPG.EditorTools
             EditorUtil.UpgradePrefab($"{CharFolder}/Player.prefab", root =>
             {
                 var pc = root.GetComponent<PlayerController>();
-                if (pc == null || root.GetComponent<PlayerStats>() != null) return false;
-                pc.stats = root.AddComponent<PlayerStats>();
-                return true;
+                if (pc == null) return false;
+                bool changed = false;
+                if (root.GetComponent<PlayerStats>() == null)
+                {
+                    pc.stats = root.AddComponent<PlayerStats>();
+                    changed = true;
+                }
+                // prefabs from before Ability System v2 lost their (SkillDef) slots: fill them with the ported abilities
+                var skills = root.GetComponent<PlayerSkills>();
+                if (skills != null && System.Array.TrueForAll(skills.slots, s => s == null))
+                {
+                    var db = AssetFactory.Database;
+                    for (int i = 0; i < skills.slots.Length && i < DefaultSlots.Length; i++) skills.slots[i] = db.Ability(DefaultSlots[i]);
+                    changed = true;
+                }
+                return changed;
             });
             void YarnNode(string file, string node) => EditorUtil.UpgradePrefab($"{CharFolder}/{file}.prefab", root =>
             {
@@ -195,8 +211,7 @@ namespace RPG.EditorTools
             ghost.source = body;
             var skills = root.AddComponent<PlayerSkills>();
             var db = AssetFactory.Database;
-            string[] order = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
-            for (int i = 0; i < 8; i++) skills.slots[i] = db.Skill(order[i]);
+            for (int i = 0; i < 8; i++) skills.slots[i] = db.Ability(DefaultSlots[i]);
             var pc = root.AddComponent<PlayerController>();
             pc.motor = motor;
             pc.anim = anim;
