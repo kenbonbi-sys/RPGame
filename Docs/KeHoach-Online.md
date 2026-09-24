@@ -1,6 +1,6 @@
 # Kế hoạch online — Rừng Thì Thầm (hướng C: thế giới online nhiều người)
 
-> Trạng thái: **giai đoạn 0 và 1 xong** (24/09/2026, trên `main`): nhiều người vào cùng một thế giới và thấy nhau đi lại. Tiếp theo là giai đoạn 2. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
+> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0, 1, 2 và 3 xong**: thế giới online chạy trên một máy chủ luôn bật, người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss Gấu Ma do máy chủ điều khiển, mỗi người rơi đồ riêng; có chat (một phần giai đoạn 4). Tiếp theo: phần còn lại của giai đoạn 4 (nhiều vùng, kênh, party) và giai đoạn 5 (VPS, chống gian lận). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
 
 ## 1. Mục tiêu
 
@@ -39,12 +39,12 @@
 |---|---|---|
 | ✓ `GameManager.I.player` — 1 nhân vật duy nhất, dùng ở 16 file | Server có nhiều người chơi | Xong ở giai đoạn 0: `Players.All` / `Players.Local`; quái chọn mục tiêu theo bảng thù hận. |
 | ✓ `TimeFX` / `Time.timeScale` cho hit-stop và Lướt Hoàn Hảo | Không thể làm chậm cả thế giới vì một người | Xong ở giai đoạn 0: khi không phải offline, hit-stop chỉ giữ hình nhân vật trúng đòn, không làm chậm thời gian; phần thưởng Lướt Hoàn Hảo giữ nguyên. |
-| `SaveManager` ghi JSON vào `AppData\LocalLow\...\saves`, 3 ô lưu | Người chơi sửa được file | Server ghi vào DB. 3 ô lưu → 3 ô nhân vật trên mỗi tài khoản. Giai đoạn 0 đã tách được dữ liệu từng nhân vật (`SaveManager.CaptureCharacter`). |
+| ✓ `SaveManager` ghi JSON vào `AppData\LocalLow\...\saves`, 3 ô lưu | Người chơi sửa được file | Xong ở giai đoạn 2: online, máy chủ giữ nhân vật (mỗi tài khoản một nhân vật cùng tên, dùng `SaveManager.CaptureCharacter`); file lưu offline không đổi. |
 | ✓ Menu Esc "Tạm dừng" | Thế giới online không dừng | Xong ở giai đoạn 0: chỉ offline mới dừng thời gian. |
-| Cheat F5–F9 và bảng lệnh `` ` `` | Ai cũng dùng được | Chỉ tài khoản GM, lệnh chạy trên server. |
-| Lệnh Yarn `<<give_item>>`, `<<quest_complete>>`… chạy trên client | Gian lận được | Client gửi yêu cầu, server kiểm tra điều kiện rồi mới thực hiện. |
-| `DayNightCycle` mỗi máy tự chạy | Mỗi người một giờ khác nhau | Giờ do server phát, client chỉ hiển thị. |
-| Boss `BossBear` lưu trạng thái trong save của người chơi | Boss là của chung | Boss sống trên zone server, có thời gian hồi sinh; phần thưởng chia theo đóng góp sát thương, mỗi người nhận loot riêng. |
+| ✓ Cheat F5–F9 và bảng lệnh `` ` `` | Ai cũng dùng được | Xong ở giai đoạn 3: online, lệnh thay đổi thế giới chạy trên server, chỉ cho tài khoản GM (`gm.txt`). |
+| ✓ Lệnh Yarn `<<give_item>>`, `<<quest_complete>>`… chạy trên client | Gian lận được | Xong ở giai đoạn 3: client gửi yêu cầu và chờ trả lời; server kiểm tra (nhiệm vụ đủ điều kiện, cờ phải có trong nhiệm vụ, `give_item` chỉ GM). |
+| ✓ `DayNightCycle` mỗi máy tự chạy | Mỗi người một giờ khác nhau | Xong: giờ đi theo server. |
+| ✓ Boss `BossBear` lưu trạng thái trong save của người chơi | Boss là của chung | Xong ở giai đoạn 3: boss sống trên server, hồi sinh sau 3 phút; ai gây sát thương cũng nhận đủ XP và loot riêng (chưa chia theo đóng góp: PvE bạn bè thì mỗi người đủ phần). |
 
 ### Dữ liệu lưu: tách từ các `ISaveable` đang có
 
@@ -74,8 +74,8 @@ Game có Lướt Hoàn Hảo (cửa sổ 0.15 s), input buffer 150 ms, vòng c�
 |---|---|---|---|
 | **0. Chuẩn bị** ✓ | Tách logic khỏi hiển thị; bỏ giả định 1 người chơi (16 file); đổi `TimeFX` thành hiệu ứng cục bộ; quái chọn mục tiêu theo aggro. Game vẫn chơi một người như cũ. | Toàn bộ test hiện có vẫn qua; chơi offline không đổi. **Xong** — xem mục 8. | 2–4 tuần |
 | **1. Hai người thấy nhau** ✓ | Cài FishNet; build dedicated server; 2 client vào cùng vùng, đi lại, Lướt, thấy nhau. | Chạy server trên máy, 2 cửa sổ game thấy nhau di chuyển mượt. **Xong** — xem mục 9. | 3–5 tuần |
-| **2. Tài khoản và lưu nhân vật** | Nakama + PostgreSQL bằng Docker; đăng ký/đăng nhập; tạo/chọn nhân vật; server nạp và ghi dữ liệu nhân vật. | Thoát game, mở lại trên máy khác, nhân vật còn nguyên. | 3–5 tuần |
-| **3. Chiến đấu online** | Skill, sát thương, trạng thái, quái, bãi hồi sinh, boss Gấu Ma, Thanh Trấn Áp, rơi đồ, XP, nhiệm vụ, hội thoại — tất cả do server quyết định; lag compensation. | 3–5 người cùng hạ Gấu Ma, ai cũng nhận thưởng đúng. | 6–10 tuần |
+| **2. Tài khoản và lưu nhân vật** ✓ | Máy chủ luôn bật; màn hình chính tự tìm máy chủ; đăng ký/đăng nhập (mật khẩu không qua mạng); server nạp và ghi nhân vật. Dữ liệu nằm ngay trong máy chủ game, không dùng Nakama/PostgreSQL (lý do ở mục 10). | Thoát game, mở lại trên máy khác, nhân vật còn nguyên. **Xong** — xem mục 10. | 3–5 tuần |
+| **3. Chiến đấu online** ✓ | Skill, sát thương, trạng thái, quái, bãi hồi sinh, boss Gấu Ma, Thanh Trấn Áp, rơi đồ, XP, nhiệm vụ, hội thoại — tất cả do server quyết định. Lag compensation cho Lướt: chưa (mục 11). | 3–5 người cùng hạ Gấu Ma, ai cũng nhận thưởng đúng. **Xong phần chính** — xem mục 11. | 6–10 tuần |
 | **4. Thế giới** | Nhiều vùng, chuyển vùng giữa các zone server, kênh (k1, k2…), chat, party, danh sách bạn. | Đi từ Làng sang Rừng, đổi kênh, chat được. | 4–6 tuần |
 | **5. Vận hành** | Đưa lên VPS; giám sát, log, backup; chống gian lận cơ bản; thử tải 50+ người (dùng bot client — tái dùng chế độ `-autoshot` tự chơi). | Chạy thử kín với người thật. | 3–5 tuần |
 
@@ -94,7 +94,9 @@ Game có Lướt Hoàn Hảo (cửa sổ 0.15 s), input buffer 150 ms, vòng c�
 | Số người cùng lúc ban đầu | **Khoảng 20 người** để thử nghiệm (đã chốt). |
 | PvE hay PvP | **Chỉ PvE** (đã chốt). |
 | Giữ bản offline một người | **Giữ, dùng chung code** (đã chốt). |
-| Tự thuê VPS hay dịch vụ có sẵn | Còn mở. Mặc định: tự thuê VPS + Docker. |
+| Tự thuê VPS hay dịch vụ có sẵn | Bây giờ: máy chủ luôn bật trên máy nhà (tự chạy khi đăng nhập Windows), bạn bè vào qua Radmin VPN hoặc LAN. Khi cần 24/7: thuê VPS Windows, chạy cùng bản build, không cần Docker. |
+| Thử nghiệm hay chạy thật | **Chạy thật** (đã chốt 24/09): bản online là bản chính, có quái, boss và lưu game. |
+| Nhập IP để vào | **Bỏ** (đã chốt 24/09): người chơi bấm *Vào thế giới*, game tự tìm máy chủ. |
 | Chỉ Windows/PC | Còn mở. Mặc định: có. |
 | Ai quyết định vị trí nhân vật | Đề xuất (giai đoạn 1, có thể đổi): máy người chơi, server kiểm tra từ giai đoạn 3. Mọi thứ khác do server quyết định. |
 
@@ -149,7 +151,7 @@ Trong game, bảng lệnh `` ` `` có `host`, `join <địa chỉ>`, `leave` (v�
 - **Di chuyển do người chơi điều khiển** (client-authoritative): máy của mỗi người tự di chuyển nhân vật mình như lúc offline, `NetworkTransform` gửi vị trí cho máy chủ và máy chủ chuyển cho mọi người. Lý do: game hành động cần điều khiển tức thì cả khi mạng trễ, và game chỉ PvE nên rủi ro gian lận di chuyển thấp. Giai đoạn 3 thêm kiểm tra tốc độ trên máy chủ. Mọi thứ khác (sát thương, quái, rơi đồ, XP, nhiệm vụ) sẽ do máy chủ quyết định.
 - **Nhân vật của người khác** trên màn hình mình là "con rối" (`PlayerController.Puppet`): đi theo vị trí nhận được, tự chọn hoạt ảnh đi/lướt/đứng theo tốc độ, có bảng tên "Người chơi N" và không tự làm gì. Các nhân vật đi xuyên qua nhau.
 
-### Chưa có ở giai đoạn 1 (có chủ đích)
+### Chưa có ở giai đoạn 1 (có chủ đích; đã làm ở giai đoạn 2–3, mục 10 và 11)
 
 - **Quái và boss tắt** khi chơi online, vì chưa đồng bộ (giai đoạn 3). Nếu để lại, mỗi người sẽ đánh một bản quái khác nhau.
 - NPC, hội thoại, nhiệm vụ, túi đồ, cấp độ: vẫn chạy riêng trên máy từng người, chưa đồng bộ (giai đoạn 3).
@@ -164,3 +166,51 @@ Trong game, bảng lệnh `` ` `` có `host`, `join <địa chỉ>`, `leave` (v�
 ### Lỗi đã biết
 
 - **Hai cửa sổ game trên cùng một máy: cửa sổ đóng sau có thể crash lúc thoát.** Thấy 2/2 lần chạy hai cửa sổ; không gặp khi chỉ có một cửa sổ (offline, host không ai vào, hoặc client chạy nền `-batchmode -nographics`). Crash nằm trong phần Unity tắt cửa sổ (Windows UI Automation, lệnh `UiaDisconnectAllProviders`), sau khi mọi code của game và FishNet đã dừng; không ảnh hưởng lúc chơi và không mất gì (online chưa lưu). Thử hai máy khác nhau thì không có tình huống này. Nếu cần xử lý: thử bản vá Unity 6000.6 mới hơn, hoặc báo lỗi cho Unity kèm file `crash.dmp`.
+
+## 10. Giai đoạn 2 đã làm gì: máy chủ luôn bật, tài khoản, lưu nhân vật
+
+Người chơi mở game, bấm **Vào thế giới** là vào: không nhập IP, không cần ai "mở thế giới". Vận hành máy chủ: `Docs/MayChu.md`.
+
+| Phần | Làm thế nào | Code |
+|---|---|---|
+| **Máy chủ luôn bật** | Bản game chạy `-server -batchmode -nographics`, không màn hình (HUD, âm thanh, hiệu ứng tắt hẳn cho nhẹ máy). `Tools/Server/install-server.ps1` cài vào `%LOCALAPPDATA%\RungThiTham-Server` và đăng ký chạy mỗi khi đăng nhập Windows; `run-server.ps1` bật lại sau 5 giây nếu nó tắt. | `GameManager.WithoutScreen`, `Tools/Server/` |
+| **Màn hình chính** | Scene mới `Title` (đầu bản build): *Vào thế giới*, *Chơi một mình*, *Thoát*; nền là cảnh làng lúc hoàng hôn do chính game chụp (`-backdropshot`). Chạy với `-server` / `-host` / `-client` / `-autoshot` / `-netsmoke` thì bỏ qua màn hình này. | `UI/TitleScreen.cs`, `Editor/TitleBuilder.cs` |
+| **Tự tìm máy chủ** | Máy chủ trả lời trên UDP cổng game + 1 (7771). Game hỏi mọi mạng máy đang ở (LAN, Radmin VPN… bằng broadcast), `127.0.0.1`, các địa chỉ trong `StreamingAssets/servers.txt` (mặc định `26.253.10.125`) và địa chỉ người chơi tự gõ; vào máy chủ trả lời nhanh nhất, cùng phiên bản, còn chỗ. Câu trả lời có tên máy chủ, số người, phiên bản. | `Net/ServerDiscovery.cs` |
+| **Tài khoản** | Tên nhân vật + mật khẩu, một nhân vật mỗi tài khoản. Mật khẩu không qua mạng: máy người chơi tạo khóa PBKDF2-SHA256 (60 000 vòng) từ mật khẩu và muối của tài khoản, rồi ký số dùng một lần (nonce) của máy chủ bằng HMAC. Máy chủ chỉ giữ khóa. Máy người chơi nhớ khóa (không nhớ mật khẩu) để lần sau bấm là vào; đổi máy thì nhập lại mật khẩu. Tên không phân biệt hoa thường; một tên chỉ vào được một chỗ một lúc; máy chủ đủ người thì từ chối. Dùng cơ chế `Authenticator` của FishNet: chưa đăng nhập thì không làm được gì. | `Net/LoginCrypto.cs`, `Net/AccountAuthenticator.cs`, `Net/LoginInfo.cs` |
+| **Lưu nhân vật trên máy chủ** | Một file JSON mỗi nhân vật, đúng định dạng file lưu offline (`SaveManager.CaptureCharacter`: cấp, chỉ số, túi đồ, nhiệm vụ, Bách Khoa Trùm, biến hội thoại, vị trí). Ghi an toàn (file tạm rồi thay, giữ `.bak`), sao lưu mỗi ngày giữ 14 ngày. Lưu 30 giây một lần khi có thay đổi, khoảng 2 giây sau khi lên cấp hay hạ boss, khi thoát, khi máy chủ tắt. Vào lại: nhân vật hiện đúng chỗ cũ. | `Net/ServerStore.cs`, `Net/ServerPlayers.cs`, `Save/SafeFile.cs` |
+| **Mất kết nối** | Về màn hình chính, báo lý do, tự vào lại sau 5 giây nếu máy nhớ đăng nhập. | `OnlineSession.Leave`, `TitleScreen.RejoinSoon` |
+
+**Vì sao không dùng Nakama + PostgreSQL như dự tính:** với khoảng 20 người một máy chủ, lưu thẳng trong máy chủ game là đủ và chỉ phải giữ một chương trình luôn chạy (không Docker, không cơ sở dữ liệu riêng); dời sang VPS chỉ là chép thư mục. Khi cần nhiều máy chủ vùng dùng chung dữ liệu (giai đoạn 4–5) thì thay `ServerStore` bằng cơ sở dữ liệu, phần còn lại giữ nguyên.
+
+## 11. Giai đoạn 3 đã làm gì: chiến đấu online do máy chủ quyết định
+
+Nguyên tắc: **máy chủ chạy luật chơi y như bản offline** (cùng code AI, kỹ năng, sát thương, trạng thái, boss); máy người chơi chỉ hiển thị và gửi yêu cầu. Code hỏi `GameSession.IsAuthority` (offline, host, server: luật chạy ở đây) và `GameSession.HasScreen` (máy này có màn hình).
+
+| Phần | Làm thế nào |
+|---|---|
+| **Quái, boss, Tảng Đá Lớn** | Chạy trên máy chủ. `NetWorld` đánh số chúng theo thứ tự trong scene (mọi máy cùng scene nên cùng số) và gửi khoảng 15 lần mỗi giây những gì đổi: vị trí, hoạt ảnh (clip và lần phát), hướng, máu, Thanh Trấn Áp, trạng thái (choáng, bỏng, lạnh…), độ cao khi boss Chụp Quăng. Máy người chơi vẽ chậm hơn máy chủ 0,12 giây để chuyển động mượt giữa hai lần nhận. Bản sao của quái trên máy người chơi không tự nghĩ. |
+| **Đòn đánh** | `TakeDamage` chỉ chạy trên máy chủ; mỗi đòn trúng gửi cho mọi người (số sát thương, chớp trắng, tia lửa, đẩy lùi, hit-stop). Đẩy lùi nhân vật do máy của chính người đó làm (di chuyển thuộc về họ). |
+| **Kỹ năng** | Bấm là máy mình diễn ngay (tư thế, hiệu ứng, cầu lửa bay, lướt đi), không chờ mạng (`CastMode.Predicted`); máy chủ kiểm tra hồi chiêu, năng lượng, choáng rồi chạy thật (sát thương) và cho người khác xem (`CastMode.Shown`, cùng hạt giống ngẫu nhiên nên tia sét, gai băng rơi cùng chỗ). Máy chủ từ chối thì trả hồi chiêu và báo lý do. Máy chủ bỏ qua sai lệch thời gian tới 0,15 giây vì nghe tiếng bấm hơi muộn. |
+| **Nhân vật** | Máu, năng lượng, trạng thái, buff do máy chủ giữ và gửi về. Hồi máu, bình thuốc, chết và hồi sinh do máy chủ quyết định. Người khác thấy thanh máu trên đầu mình khi vừa bị đánh. |
+| **Rơi đồ riêng** | Mỗi người có công hạ quái tự tung bảng rơi đồ của mình; chỉ người đó thấy và nhặt được (`LootPickup.owner`). Không ai giành đồ của ai. |
+| **XP, nhiệm vụ, Bách Khoa Trùm** | Tính trên máy chủ (ai gây sát thương đều được trọn XP). Máy chủ gửi "tờ nhân vật" (các phần lưu) về cho chủ nó mỗi khi đổi, và gửi riêng các thông báo ("Nhận được…", "Lên cấp!", banner nhiệm vụ) chỉ cho người đó (`Notify`). |
+| **Hội thoại** | Yarn chạy trên máy người chơi. Nói chuyện: hỏi máy chủ trước (phải đứng gần NPC), máy chủ ghi nhận mục tiêu Nói chuyện rồi mới bắt đầu. Lệnh `<<quest_start>>`, `<<quest_complete>>`, `<<set_flag>>`, `<<give_item>>` thành yêu cầu gửi máy chủ, hội thoại chờ trả lời. Biến hội thoại lưu cùng nhân vật. |
+| **Boss Gấu Ma** | Đánh trên máy chủ, thức khi có người lại gần, đánh người bị ghét nhất. Vòng cảnh báo, tiếng gầm, rung màn hình gửi cho người ở gần; vòng cảnh báo trên máy người chơi ngắn đi nửa ping để khép đúng lúc đòn đánh xuống. Thanh máu và nhạc boss hiện khi nhân vật của mình ở trong trận. Hạ xong: ai có công cũng nhận XP và đồ riêng; 3 phút sau boss quay lại. |
+| **Hiệu ứng theo luật** | Code luật chơi gọi `NetCues` (hiệu ứng, âm thanh, chữ bay, rung, vòng cảnh báo…): hiện trên máy có màn hình và máy chủ gửi cho mọi người; rung và lóe màn hình chỉ tới người ở gần. |
+| **Ngày đêm** | Theo giờ máy chủ. |
+| **Chat** (giai đoạn 4) | Bấm Enter trong game để nói với mọi người; hệ thống báo ai vào, ai ra. |
+| **GM** | Tài khoản trong `gm.txt` dùng được bảng lệnh và F5–F9 (chạy trên máy chủ, cho nhân vật của GM). Người thường thì không. |
+
+### Đã kiểm tra
+
+- 108 test EditMode qua, thêm `OnlineAccountTests`, `OnlineDiscoveryTests` và viết lại `OnlineSessionTests`: host thật trong editor có quái và boss chung; hạ quái được XP và ghi Bách Khoa Trùm; máy chủ lưu nhân vật và trả lại đúng cấp, vàng, chỗ đứng khi vào lại; boss thức, hiện thanh máu, hạ xong người có công nhận XP và đồ riêng, rồi boss quay lại; mật khẩu, tên, file tài khoản, sao lưu, GM, đăng nhập đã nhớ; đọc câu trả lời tìm máy chủ.
+- `Tools/Server/netsmoke.ps1` với bản build (24/09): một máy chủ và hai người chơi (SmokeA có cửa sổ, SmokeB chạy nền). Vòng 1: hai người thấy nhau đi (18,1–18,6 đơn vị), mỗi người hạ Slime Rêu trên máy chủ, nhận 32 XP và vàng. Vòng 2: vào lại, SmokeA còn đúng cấp 1 / 32 XP như lúc thoát, đánh tiếp lên 48 XP. Máy chủ không lỗi.
+- Màn hình chính tìm thấy máy chủ chạy nền trên máy này ("Rừng Thì Thầm · 0/20 người · 15 ms").
+
+### Còn thiếu, làm sau
+
+- **Bù trễ cho Lướt:** máy chủ nhận lệnh lướt muộn nửa ping, nên muốn né đòn phải bấm sớm hơn chừng ấy (qua Radmin trong nước khoảng 10–40 ms). Bước sau: máy chủ giữ đòn đánh vào người chơi thêm nửa ping và bỏ nó nếu lệnh lướt tới kịp ("nghiêng về phía người né", mục 4).
+- **Chống gian lận di chuyển:** máy chủ chưa kiểm tra tốc độ (giai đoạn 5).
+- **Máu boss theo số người:** 20 người cùng đánh thì Gấu Ma chết rất nhanh; cần tăng máu theo số người trong đấu trường.
+- **Nhiều vùng, kênh, party, bạn bè** (giai đoạn 4); **VPS, giám sát, thử tải 50 người** (giai đoạn 5).
+- Nhân vật online bắt đầu mới ở cấp 1, không mang từ file lưu offline sang (tránh sửa file để gian lận).

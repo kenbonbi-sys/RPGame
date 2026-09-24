@@ -47,6 +47,8 @@ namespace RPG
         public string zone;          // display name
         public string zoneId;        // ZoneDef id: which zone scene to load
         public string quest;
+        /// <summary>Online: the character's name (the server keeps one file per character). Empty offline.</summary>
+        public string character;
         public List<SaveSection> sections = new List<SaveSection>();
 
         public string Get(string key)

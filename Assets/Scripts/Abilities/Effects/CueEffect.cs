@@ -33,6 +33,7 @@ namespace RPG
 
         public override void Run(AbilityContext ctx)
         {
+            if (!ctx.visual) return;
             Vector2 p = at.Resolve(ctx);
             if (!string.IsNullOrEmpty(vfx))
             {
@@ -44,7 +45,10 @@ namespace RPG
                     fx.transform.localScale = new Vector3(s.x, -s.y, s.z);
                 }
             }
-            if (!string.IsNullOrEmpty(sfx)) AudioManager.Play(sfx, sfxVolume, sfxPitchVariance, sfxAtPoint ? p : (Vector3?)null, sfxMinInterval);
+            // in a shared world another player's skill is heard from where it happens and does not shake this screen
+            bool mine = !GameSession.Online || ctx.caster.Runner is PlayerController pc && pc.IsLocal;
+            if (!string.IsNullOrEmpty(sfx)) AudioManager.Play(sfx, sfxVolume, sfxPitchVariance, sfxAtPoint || !mine ? p : (Vector3?)null, sfxMinInterval);
+            if (!mine) return;
             if (shake > 0) CameraRig.Shake(shake);
             if (flashStrength > 0) ScreenFX.Flash(flashColor, flashStrength, flashDuration);
             if (impact > 0) ScreenFX.Impact(impact, impactDuration);

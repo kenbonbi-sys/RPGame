@@ -45,6 +45,8 @@ namespace RPG
         public bool stunImmune;
         [Tooltip("Multiplier applied to stun durations (bosses resist).")]
         public float stunResist = 1f;
+        /// <summary>A frozen character holds its pose here. Off on a client's copy of an enemy: the server's animation speed arrives with it.</summary>
+        [System.NonSerialized] public bool drivesAnimation = true;
 
         /// <summary>The clock of every status; tests pin it.</summary>
         public static Func<float> Clock = () => Time.time;
@@ -228,9 +230,9 @@ namespace RPG
             if (seconds <= 0f) return;
             freezeUntil = Mathf.Max(freezeUntil, Now + seconds);
             if (IsHeavy) ccImmuneUntil = Mathf.Max(ccImmuneUntil, freezeUntil + c.heavyCrowdControlImmunity);
-            if (health != null) GameEvents.RaiseWorldText("Đóng Băng!", health.HeadPosition + Vector3.up * 0.3f, Palette.Ice);
-            VFX.Spawn("ice_spike", transform.position, Quaternion.identity, 0.9f);
-            AudioManager.Play("sfx_ice_cast", 0.6f, 0.05f, transform.position);
+            if (health != null) NetCues.WorldText("Đóng Băng!", health.HeadPosition + Vector3.up * 0.3f, Palette.Ice);
+            NetCues.Vfx("ice_spike", transform.position, 0f, 0.9f);
+            NetCues.Sound("sfx_ice_cast", 0.6f, 0.05f, transform.position);
         }
 
         /// <summary>Tích Điện: adds stacks; the 3rd discharges <c>dischargeShare</c> of <paramref name="dealt"/> to the nearest others.</summary>
@@ -255,9 +257,9 @@ namespace RPG
         {
             var c = CombatConfig.Current;
             Vector2 at = transform.position;
-            VFX.Spawn("hit_lightning", (Vector3)at + Vector3.up * 0.5f, Quaternion.identity, 1.4f);
-            AudioManager.Play("sfx_thunder", 0.5f, 0.1f, at);
-            if (health != null) GameEvents.RaiseWorldText("Phóng Điện!", health.HeadPosition + Vector3.up * 0.3f, Palette.Lightning);
+            NetCues.Vfx("hit_lightning", (Vector3)at + Vector3.up * 0.5f, 0f, 1.4f);
+            NetCues.Sound("sfx_thunder", 0.5f, 0.1f, at);
+            if (health != null) NetCues.WorldText("Phóng Điện!", health.HeadPosition + Vector3.up * 0.3f, Palette.Lightning);
             if (amount <= 0f) return;
             Util.HealthsInCircle(at, c.dischargeRadius, team, Nearby);
             Nearby.Remove(health);
@@ -271,7 +273,7 @@ namespace RPG
                 var hit = DamageInfo.Make(amount, team, source, p, p - at, DamageType.Lightning, 1.5f);
                 hit.attackScaled = true;
                 hit.skillName = "Phóng Điện";
-                VFX.Spawn("lightning_strike", p, Quaternion.identity, 0.6f);
+                NetCues.Vfx("lightning_strike", p, 0f, 0.6f);
                 if (h.TakeDamage(hit) > 0) Combat.OnHitFeedback(h, hit);
             }
         }
@@ -286,7 +288,7 @@ namespace RPG
             {
                 poisonStacks = 0;
                 nextPoisonTick = Now + c.tickInterval;
-                VFX.Spawn("spore_puff", transform.position + Vector3.up * 0.6f, Quaternion.identity, 0.8f);
+                NetCues.Vfx("spore_puff", transform.position + Vector3.up * 0.6f, 0f, 0.8f);
             }
             poisonStacks = Mathf.Min(c.poisonMaxStacks, poisonStacks + stacks);
             poisonUntil = Now + c.poisonSeconds;
@@ -316,8 +318,8 @@ namespace RPG
             if (IsHeavy) ccImmuneUntil = Mathf.Max(ccImmuneUntil, stunUntil + CombatConfig.Current.heavyCrowdControlImmunity);
             if (!was && health != null)
             {
-                GameEvents.RaiseWorldText("Choáng!", health.HeadPosition + Vector3.up * 0.3f, Palette.Status);
-                AudioManager.Play("sfx_stun", 0.7f, 0.05f, transform.position);
+                NetCues.WorldText("Choáng!", health.HeadPosition + Vector3.up * 0.3f, Palette.Status);
+                NetCues.Sound("sfx_stun", 0.7f, 0.05f, transform.position);
             }
         }
 
@@ -334,8 +336,8 @@ namespace RPG
             bool was = IsRooted;
             rootUntil = Mathf.Max(rootUntil, Now + seconds);
             if (was) return;
-            if (health != null) GameEvents.RaiseWorldText("Trói!", health.HeadPosition + Vector3.up * 0.3f, Palette.Status);
-            VFX.Spawn("step_dust", transform.position, Quaternion.identity, 1.6f);
+            if (health != null) NetCues.WorldText("Trói!", health.HeadPosition + Vector3.up * 0.3f, Palette.Status);
+            NetCues.Vfx("step_dust", transform.position, 0f, 1.6f);
         }
 
         /// <summary>Làm Chậm: the strongest slow wins; the longest lasts.</summary>
@@ -353,7 +355,7 @@ namespace RPG
             if (seconds <= 0f) return;
             bool was = IsCursed;
             curseUntil = Mathf.Max(curseUntil, Now + seconds);
-            if (!was && health != null) GameEvents.RaiseWorldText("Nguyền!", health.HeadPosition + Vector3.up * 0.3f, Palette.Dark);
+            if (!was && health != null) NetCues.WorldText("Nguyền!", health.HeadPosition + Vector3.up * 0.3f, Palette.Dark);
         }
 
         /// <summary>Phán Xét: +20% damage taken from every source.</summary>
@@ -363,7 +365,7 @@ namespace RPG
             if (seconds <= 0f) return;
             bool was = IsJudged;
             judgmentUntil = Mathf.Max(judgmentUntil, Now + seconds);
-            if (!was && health != null) GameEvents.RaiseWorldText("Phán Xét!", health.HeadPosition + Vector3.up * 0.3f, Palette.Holy);
+            if (!was && health != null) NetCues.WorldText("Phán Xét!", health.HeadPosition + Vector3.up * 0.3f, Palette.Holy);
         }
 
         /// <summary>Removes every status (Thuốc Thảo Mộc, respawn).</summary>
@@ -392,11 +394,68 @@ namespace RPG
         void OnWallSlam(Vector2 point)
         {
             if (health != null && health.IsDead) return;
-            VFX.Spawn("rock_chips", point, Quaternion.identity);
-            VFX.Spawn("step_dust", point, Quaternion.identity, 1.4f);
-            AudioManager.Play("sfx_hit_heavy", 0.6f, 0.1f, point);
-            CameraRig.Shake(0.12f);
+            NetCues.Vfx("rock_chips", point);
+            NetCues.Vfx("step_dust", point, 0f, 1.4f);
+            NetCues.Sound("sfx_hit_heavy", 0.6f, 0.1f, point);
+            NetCues.Shake(0.12f, point);
             Stun(CombatConfig.Current.wallSlamStun);
+        }
+
+        // ------------------------------------------------------------------ online
+        static byte Tenths(float seconds) => (byte)Mathf.Clamp(Mathf.CeilToInt(seconds * 10f), 0, 255);
+
+        /// <summary>What screens need to know (server side of online play): times left, stacks, flags.</summary>
+        public StatusView CaptureView()
+        {
+            Ready();
+            float now = Now;
+            byte flags = 0;
+            if (IsCursed) flags |= 1;
+            if (IsJudged) flags |= 2;
+            if (CrowdControlImmune) flags |= 4;
+            return new StatusView
+            {
+                stun = Tenths(stunUntil - now),
+                freeze = Tenths(freezeUntil - now),
+                root = Tenths(rootUntil - now),
+                slow = (byte)(IsSlowed ? Mathf.RoundToInt(slowAmount * 100f) : 0),
+                slowLeft = Tenths(slowUntil - now),
+                chill = (byte)ChillStacks,
+                charge = (byte)ChargeStacks,
+                burn = (byte)BurnStacks,
+                poison = (byte)PoisonStacks,
+                flags = flags
+            };
+        }
+
+        /// <summary>
+        /// A client's copy of a character takes the server's statuses as they are: it shows them
+        /// (tint, stars, frozen pose) and moves by them, but deals no damage over time itself.
+        /// </summary>
+        public void ApplyView(StatusView v)
+        {
+            Ready();
+            float now = Now;
+            float Until(byte tenths) => tenths > 0 ? now + tenths / 10f : 0f;
+            stunUntil = Until(v.stun);
+            freezeUntil = Until(v.freeze);
+            rootUntil = Until(v.root);
+            slowAmount = v.slow / 100f;
+            slowUntil = v.slow > 0 ? Until(v.slowLeft) : 0f;
+            // stacks without timers of their own here: held until the next word from the server
+            const float hold = 0.6f;
+            chillStacks = v.chill;
+            chillUntil = v.chill > 0 ? now + hold : 0f;
+            chargeStacks = v.charge;
+            chargeUntil = v.charge > 0 ? now + hold : 0f;
+            while (burnStacks.Count > v.burn) burnStacks.RemoveAt(burnStacks.Count - 1);
+            while (burnStacks.Count < v.burn) burnStacks.Add(0f);
+            burnUntil = v.burn > 0 ? now + hold : 0f;
+            poisonStacks = v.poison;
+            poisonUntil = v.poison > 0 ? now + hold : 0f;
+            curseUntil = (v.flags & 1) != 0 ? now + hold : 0f;
+            judgmentUntil = (v.flags & 2) != 0 ? now + hold : 0f;
+            ccImmuneUntil = (v.flags & 4) != 0 ? now + hold : 0f;
         }
 
         // ------------------------------------------------------------------ ticking
@@ -419,15 +478,17 @@ namespace RPG
             }
             var c = CombatConfig.Current;
             float now = Now;
+            // damage over time is the world's rule: a client's copy only shows the statuses
+            bool rules = GameSession.IsAuthority;
             // Bỏng: every tick until the timer, the last one included
-            while (burnStacks.Count > 0 && nextBurnTick <= now && nextBurnTick <= burnUntil + 0.001f && !Dead)
+            while (rules && burnStacks.Count > 0 && nextBurnTick <= now && nextBurnTick <= burnUntil + 0.001f && !Dead)
             {
                 DotTick(BurnDpsRaw() * c.tickInterval, DamageType.Fire, burnTeam);
                 nextBurnTick += c.tickInterval;
             }
             if (burnStacks.Count > 0 && now >= burnUntil) burnStacks.Clear();
             // Độc: a share of max HP per stack
-            while (poisonStacks > 0 && nextPoisonTick <= now && nextPoisonTick <= poisonUntil + 0.001f && !Dead)
+            while (rules && poisonStacks > 0 && nextPoisonTick <= now && nextPoisonTick <= poisonUntil + 0.001f && !Dead)
             {
                 float maxHp = health != null ? health.maxHp : 0f;
                 DotTick(maxHp * c.poisonMaxHpPerSecond * poisonStacks * c.tickInterval, DamageType.Poison, poisonTeam);
@@ -481,7 +542,7 @@ namespace RPG
         /// <summary>A frozen character holds its pose.</summary>
         void SetAnimFrozen(bool on)
         {
-            if (anim == null || on == animFrozen) return;
+            if (anim == null || on == animFrozen || !drivesAnimation) return;
             animFrozen = on;
             if (on)
             {

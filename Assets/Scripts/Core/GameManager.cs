@@ -75,6 +75,23 @@ namespace RPG
             if (GetComponent<DebugConsole>() == null) gameObject.AddComponent<DebugConsole>();
             if (GetComponent<OnlineSession>() == null) gameObject.AddComponent<OnlineSession>();
             if (NetSmoke.Active && GetComponent<NetSmoke>() == null) gameObject.AddComponent<NetSmoke>();
+            if (BackdropShot.Active && GetComponent<BackdropShot>() == null) gameObject.AddComponent<BackdropShot>();
+            if (GameSession.Online && GameSession.HasScreen && GetComponent<ChatInput>() == null) gameObject.AddComponent<ChatInput>();
+            if (GameSession.Mode == SessionMode.Server) WithoutScreen();
+        }
+
+        /// <summary>
+        /// A zone server has no screen: the HUD, the camera's post-processing, ambient particles
+        /// and sound would only cost it time. Switched off before they wake up.
+        /// </summary>
+        void WithoutScreen()
+        {
+            foreach (var hud in FindObjectsByType<HUD>(FindObjectsInactive.Include)) hud.gameObject.SetActive(false);
+            foreach (var v in FindObjectsByType<UnityEngine.Rendering.Volume>(FindObjectsInactive.Include)) v.enabled = false;
+            foreach (var l in FindObjectsByType<AudioListener>(FindObjectsInactive.Include)) l.enabled = false;
+            var ambient = GameObject.Find("[Ambient]");
+            if (ambient != null) ambient.SetActive(false);
+            AudioListener.volume = 0f;
         }
 
         static void SetupPhysics()
@@ -91,7 +108,7 @@ namespace RPG
         {
             SetCursor(false);
             if (SaveManager.HasPendingLoad) return;   // loading a save: no welcome
-            bool screen = GameSession.Mode != SessionMode.Server && !AutoShot.Active && !NetSmoke.Active;
+            bool screen = GameSession.Mode != SessionMode.Server && !AutoShot.Active && !NetSmoke.Active && !BackdropShot.Active;
             if (showHelpOnStart && screen && HUD.I != null && HUD.I.help != null) HUD.I.help.Show();
             GameEvents.RaiseLog("Chào mừng đến Làng Lá Xanh! Bấm F1 để xem hướng dẫn.", Palette.LogQuest);
         }
@@ -112,6 +129,7 @@ namespace RPG
                 if (InputReader.Cancel) DebugConsole.I.Toggle();
                 return;   // typing in the console is not gameplay
             }
+            if (ChatInput.I != null && ChatInput.I.IsOpen) return;   // nor typing a chat line
             if (InputReader.Cancel)
             {
                 if (hud.inventory != null && hud.inventory.IsOpen) hud.inventory.Close();
@@ -185,15 +203,23 @@ namespace RPG
             TimeFX.Paused = on && pauseTime && GameSession.OwnsTime;
         }
 
-        /// <summary>A hero fell: they get up at the zone's spawn a few seconds later. The local one also sees the death screen.</summary>
+        /// <summary>Seconds from a hero's fall to getting up again.</summary>
+        public const float RespawnSeconds = 5.2f;
+
+        /// <summary>
+        /// A hero fell: they get up at the zone's spawn a few seconds later. The local one also sees
+        /// the death screen. Online the server decides, and tells a player when their hero fell
+        /// and got up (<see cref="LocalDowned"/>, <see cref="LocalRespawned"/>).
+        /// </summary>
         public void OnPlayerDied(PlayerController p)
         {
-            if (p == null) return;
+            if (p == null || !GameSession.IsAuthority) return;
             if (p.IsLocal)
             {
                 if (dead) return;
                 dead = true;
             }
+            else if (GameSession.Serving) ServerPlayers.SendTo(p, new ControlMsg { kind = ControlKind.Downed, value = RespawnSeconds });
             StartCoroutine(RespawnRoutine(p, p.IsLocal));
         }
 
@@ -201,13 +227,39 @@ namespace RPG
         {
             yield return new WaitForSecondsRealtime(1.2f);
             if (local) GameEvents.RaisePlayerDowned(4f);
-            yield return new WaitForSecondsRealtime(4f);
+            yield return new WaitForSecondsRealtime(RespawnSeconds - 1.2f);
             if (p != null && respawnPoint != null)
             {
-                p.Respawn(respawnPoint.position);
+                Vector2 at = respawnPoint.position;
+                p.Respawn(at);
                 if (local && CameraRig.I != null) CameraRig.I.SnapToTarget();
+                if (!local && GameSession.Serving) ServerPlayers.SendTo(p, new ControlMsg { kind = ControlKind.Respawn, pos = at });
             }
             if (!local) yield break;
+            GameEvents.RaisePlayerRespawned();
+            dead = false;
+            GameEvents.RaiseLog("Bạn đã hồi sinh tại Làng Lá Xanh.", Palette.LogInfo);
+        }
+
+        /// <summary>A player's machine online: the server says this screen's hero fell.</summary>
+        public void LocalDowned(float respawnIn)
+        {
+            if (dead) return;
+            dead = true;
+            StartCoroutine(DownedScreen(respawnIn));
+        }
+
+        IEnumerator DownedScreen(float respawnIn)
+        {
+            yield return new WaitForSecondsRealtime(1.2f);
+            if (dead) GameEvents.RaisePlayerDowned(Mathf.Max(0f, respawnIn - 1.2f));
+        }
+
+        /// <summary>A player's machine online: the server got this screen's hero up again.</summary>
+        public void LocalRespawned()
+        {
+            if (CameraRig.I != null) CameraRig.I.SnapToTarget();
+            if (!dead) return;
             GameEvents.RaisePlayerRespawned();
             dead = false;
             GameEvents.RaiseLog("Bạn đã hồi sinh tại Làng Lá Xanh.", Palette.LogInfo);

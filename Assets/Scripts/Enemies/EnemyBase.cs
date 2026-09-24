@@ -7,6 +7,8 @@ namespace RPG
     /// <summary>
     /// Shared enemy logic: idle/wander, aggro + leash, hurt stagger, death + loot. With several
     /// heroes around it chases the one it has the most threat on (<see cref="ThreatTable"/>).
+    /// Online the server thinks for it; a player's copy only shows it (<see cref="NetEntity"/>):
+    /// hurt flashes, its name plate and its fall still play on every screen.
     /// </summary>
     public class EnemyBase : MonoBehaviour
     {
@@ -108,7 +110,7 @@ namespace RPG
 
         protected virtual void Update()
         {
-            if (state == State.Dead) return;
+            if (state == State.Dead || !GameSession.IsAuthority) return;
             stateTime += Time.deltaTime;
             if (status != null && status.IsStunned)
             {
@@ -263,14 +265,17 @@ namespace RPG
         protected virtual void OnDamaged(DamageInfo d, float amount)
         {
             if (state == State.Dead) return;
-            threat.Add(d.SourcePlayer, amount);
-            if (state == State.Idle || state == State.Wander || state == State.Return) SetState(State.Chase);
+            if (GameSession.IsAuthority)
+            {
+                threat.Add(d.SourcePlayer, amount);
+                if (state == State.Idle || state == State.Wander || state == State.Return) SetState(State.Chase);
+            }
             if (d.dot) return;   // Bỏng / Độc ticks do not stagger
             staggerUntil = Time.time + 0.12f;
             if (anim != null) anim.Play("hurt", true);
             if (plate == null && HUD.I != null)
                 plate = HUD.I.CreateNameplate(transform, $"{displayName} · Cấp {level}", false, new Color(0.9f, 0.25f, 0.25f), health, 1.25f);
-            AudioManager.Play("sfx_hit", 0.5f, 0.15f, transform.position);
+            if (GameSession.HasScreen) AudioManager.Play("sfx_hit", 0.5f, 0.15f, transform.position);
         }
 
         protected virtual void OnDied(DamageInfo d)
@@ -279,15 +284,19 @@ namespace RPG
             motor.HardStop();
             foreach (var c in colliders) c.enabled = false;
             if (anim != null) anim.Play("dead", true);
-            Loot.Roll(loot, transform.position);
-            GameEvents.RaiseEnemyKilled(new KillInfo
+            if (GameSession.IsAuthority)
             {
-                id = enemyId, name = displayName, level = level, rank = rank, position = transform.position,
-                credited = new List<PlayerController>(health.Attackers)
-            });
+                // every hero who helped gets the kill; online each of them rolls their own loot
+                var credited = new List<PlayerController>(health.Attackers);
+                Loot.Roll(loot, transform.position, credited);
+                GameEvents.RaiseEnemyKilled(new KillInfo
+                {
+                    id = enemyId, name = displayName, level = level, rank = rank, position = transform.position, credited = credited
+                });
+            }
             threat.Clear();
             target = null;
-            VFX.Spawn("enemy_death", transform.position + Vector3.up * 0.4f, Quaternion.identity);
+            if (GameSession.HasScreen) VFX.Spawn("enemy_death", transform.position + Vector3.up * 0.4f, Quaternion.identity);
             if (plate != null)
             {
                 plate.Release();
@@ -308,7 +317,7 @@ namespace RPG
                     yield return null;
                 }
             }
-            if (spawner != null) spawner.NotifyDead(this);
+            if (spawner != null && GameSession.IsAuthority) spawner.NotifyDead(this);
             gameObject.SetActive(false);
         }
 

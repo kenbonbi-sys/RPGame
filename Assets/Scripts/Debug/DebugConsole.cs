@@ -110,10 +110,21 @@ namespace RPG
 
         public void Print(string line)
         {
+            if (printOverride != null)
+            {
+                printOverride(line);
+                return;
+            }
             output.Add(line);
             if (output.Count > 200) output.RemoveAt(0);
             scroll.y = float.MaxValue;
         }
+
+        /// <summary>
+        /// Commands a player's machine runs itself online; every other one changes the world, so it
+        /// goes to the server, which runs it for game masters only (Docs/KeHoach-Online.md).
+        /// </summary>
+        static readonly HashSet<string> OwnCommands = new HashSet<string> { "help", "clear", "net", "leave", "hitbox", "ttk", "stats", "host", "join", "players", "say" };
 
         /// <summary>Runs one command line (also used by tests).</summary>
         public void Execute(string line)
@@ -124,18 +135,50 @@ namespace RPG
             history.Add(line);
             historyIndex = history.Count;
             var words = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (!Commands.TryGetValue(words[0].ToLowerInvariant(), out var cmd))
+            string name = words[0].ToLowerInvariant();
+            if (!Commands.TryGetValue(name, out var cmd))
             {
                 Print($"Không có lệnh \"{words[0]}\".");
+                return;
+            }
+            if (GameSession.Mode == SessionMode.Client && printOverride == null && !OwnCommands.Contains(name))
+            {
+                OnlineSession.Ask(new ActRequest { kind = ActKind.Console, text = line });
                 return;
             }
             try { cmd.run(words.Skip(1).ToArray()); }
             catch (Exception e) { Print("Lỗi: " + e.Message); }
         }
 
+        // ------------------------------------------------------------------ run for another player (server)
+        static PlayerController heroOverride;
+        static Action<string> printOverride;
+
+        /// <summary>Server: runs a game master's command line on their own hero; the output goes back to them.</summary>
+        public static void RunFor(PlayerController hero, string line, Action<string> output)
+        {
+            if (I == null || hero == null) return;
+            heroOverride = hero;
+            printOverride = output;
+            try { I.Execute(line); }
+            finally
+            {
+                heroOverride = null;
+                printOverride = null;
+            }
+        }
+
+        /// <summary>Moves a hero and, when it is played on this screen, the camera with it.</summary>
+        static void Move(PlayerController p, Vector2 to)
+        {
+            if (GameSession.Serving && p.Puppet) ServerPlayers.Teleport(p, to);
+            else p.motor.Teleport(to);
+            if (p.IsLocal && CameraRig.I != null) CameraRig.I.SnapToTarget();
+        }
+
         // ------------------------------------------------------------------ commands
-        /// <summary>The hero on this screen: cheats act on them.</summary>
-        static PlayerController Hero => Players.Local;
+        /// <summary>The hero cheats act on: this screen's, or the game master's a server runs a command for.</summary>
+        static PlayerController Hero => heroOverride != null ? heroOverride : Players.Local;
 
         /// <summary>The live enemy or boss closest to the hero.</summary>
         static Health NearestEnemy()
@@ -216,6 +259,10 @@ namespace RPG
                 int n = 0;
                 foreach (var e in EnemyBase.All.ToArray())
                     if (!e.IsDead && Vector2.Distance(e.transform.position, Hero.transform.position) <= r) { e.health.Kill(); n++; }
+                // the boss only for a wide sweep (kill 20)
+                foreach (var b in BossBear.All)
+                    if (b != null && b.gameObject.activeInHierarchy && !b.health.IsDead && r >= 20f &&
+                        Vector2.Distance(b.transform.position, Hero.transform.position) <= r) { b.health.Kill(); n++; }
                 Print($"Đã hạ {n} quái.");
             });
             Register("tp", "tp <spot> — tới một điểm của vùng (spawn, forest, boss…)", a =>
@@ -227,11 +274,15 @@ namespace RPG
                     Print("Điểm: " + (zone != null ? string.Join(", ", zone.spots.Select(s => s.id)) : "(chưa có vùng)"));
                     return;
                 }
-                Hero.motor.Teleport(spot.position);
-                if (CameraRig.I != null) CameraRig.I.SnapToTarget();
+                Move(Hero, spot.position);
             });
             Register("zone", "zone <id> [điểm] — chuyển vùng", a =>
             {
+                if (GameSession.Online)
+                {
+                    Print("Thế giới online hiện có một vùng.");
+                    return;
+                }
                 var zone = a.Length > 0 ? GameManager.I.db.Zone(a[0]) : null;
                 if (zone == null)
                 {
@@ -259,21 +310,40 @@ namespace RPG
             {
                 if (a.Length > 0) Hero.quests.SetFlag(a[0]);
             });
-            Register("save", "save <1-3> — lưu", a => Print(SaveManager.I.Save(Int(a, 0, 1)) ? "Đã lưu." : "Không lưu được."));
+            Register("save", "save <1-3> — lưu (online: máy chủ lưu mọi nhân vật ngay)", a =>
+            {
+                if (GameSession.Serving && ServerPlayers.I != null)
+                {
+                    ServerPlayers.I.SaveAll("console");
+                    Print($"Máy chủ đã lưu {ServerPlayers.I.Count} nhân vật.");
+                    return;
+                }
+                Print(SaveManager.I.Save(Int(a, 0, 1)) ? "Đã lưu." : "Không lưu được.");
+            });
             Register("load", "load <0-3> — tải (0 = tự động lưu)", a => SaveManager.I.Load(Int(a, 0, 1)));
             Register("host", "host [cổng] — mở thế giới online trên máy này (người khác vào bằng join)", a =>
                 OnlineSession.Reboot(SessionMode.Host, null, (ushort)Mathf.Clamp(Int(a, 0, 0), 0, 65535)));
-            Register("join", "join <địa chỉ> [cổng] — vào thế giới online của máy khác", a =>
+            Register("join", "join <địa chỉ> [cổng] — vào thế giới online của máy khác (dùng tên đăng nhập đã nhớ)", a =>
             {
                 if (a.Length == 0)
                 {
-                    Print("Cần địa chỉ máy mở thế giới, ví dụ: join 192.168.1.5");
+                    Print("Cần địa chỉ máy chủ, ví dụ: join 192.168.1.5");
+                    return;
+                }
+                if (!LoginInfo.Ready && !LoginInfo.UseRemembered())
+                {
+                    Print("Chưa đăng nhập trên máy này: vào từ màn hình chính (Chơi online) trước.");
                     return;
                 }
                 OnlineSession.Reboot(SessionMode.Client, a[0], (ushort)Mathf.Clamp(Int(a, 1, 0), 0, 65535));
             });
-            Register("leave", "leave — rời thế giới online, quay về chơi một mình", a => OnlineSession.Reboot(SessionMode.Offline));
+            Register("leave", "leave — rời thế giới online, về màn hình chính", a => OnlineSession.Leave());
             Register("net", "trạng thái online", a => Print(OnlineSession.Status()));
+            Register("players", "danh sách người trong thế giới online", a => Print(OnlineSession.PlayerList()));
+            Register("say", "say <lời> — nói với mọi người trong thế giới (hoặc bấm Enter)", a =>
+            {
+                if (a.Length > 0) OnlineSession.Say(string.Join(" ", a));
+            });
             Register("hitbox", "bật/tắt hiện collider và vùng sát thương", a =>
             {
                 ShowHitboxes = !ShowHitboxes;

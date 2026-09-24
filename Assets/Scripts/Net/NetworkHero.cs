@@ -4,16 +4,17 @@ using UnityEngine;
 namespace RPG
 {
     /// <summary>
-    /// A hero in an online session (online phase 1, Docs/KeHoach-Online.md). The player who owns
-    /// it plays it exactly like offline, and its NetworkTransform sends where it walks. Every other
-    /// copy — on the server and on the other players' screens — is a puppet: it follows those
-    /// updates, animates from its motion and carries a name tag.
+    /// A hero in an online session (Docs/KeHoach-Online.md). The player who owns it moves it like
+    /// offline (its NetworkTransform sends where it walks) and asks the server for everything else;
+    /// the server's copy follows those positions and runs the rules for it (damage, skills, loot,
+    /// quests); every other screen shows a puppet with the character's name over it.
     /// </summary>
     [RequireComponent(typeof(PlayerController))]
     public class NetworkHero : NetworkBehaviour
     {
         PlayerController hero;
         NameplateUI plate;
+        string displayName;
 
         public PlayerController Hero => hero;
 
@@ -34,13 +35,23 @@ namespace RPG
             if (!IsOwner)
             {
                 hero.SetPuppet(true);
-                if (HUD.I != null) plate = HUD.I.CreateNameplate(transform, $"Người chơi {OwnerId}", false, new Color(0.55f, 0.85f, 1f), null, 1.62f);
+                SetDisplayName(NetWorld.HeroName(ObjectId + 1) ?? ServerPlayers.NameOf(hero) ?? "…");
                 return;
             }
             hero.SetPuppet(false);
             Players.SetLocal(hero);
             if (CameraRig.I != null) CameraRig.I.SnapToTarget();
-            GameEvents.RaiseLog($"Đã vào thế giới online (người chơi {OwnerId}).", Palette.LogQuest);
+            if (OnlineSession.I != null) OnlineSession.I.HeroArrived(hero);
+        }
+
+        /// <summary>The character's name over another player's hero.</summary>
+        public void SetDisplayName(string newName)
+        {
+            displayName = newName;
+            if (IsOwner || HUD.I == null) return;
+            if (plate == null)
+                plate = HUD.I.CreateNameplate(transform, displayName, false, new Color(0.55f, 0.85f, 1f), hero.health, 1.62f);
+            else plate.SetLabel(displayName);
         }
 
         public override void OnStopClient()

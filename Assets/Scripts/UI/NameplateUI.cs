@@ -52,6 +52,12 @@ namespace RPG
             Pool.Release(gameObject, true);
         }
 
+        /// <summary>Changes the name shown (a player's name arrives after their hero).</summary>
+        public void SetLabel(string label)
+        {
+            if (nameText != null) nameText.text = label;
+        }
+
         public void SetPrompt(string s)
         {
             if (promptText == null) return;

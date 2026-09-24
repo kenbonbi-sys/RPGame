@@ -168,7 +168,7 @@ namespace RPG
         /// <summary>Plays a one-shot by clip name. World position attenuates volume by camera distance.</summary>
         public static void Play(string id, float volume = 1f, float pitchVariance = 0.06f, Vector3? worldPos = null, float minInterval = 0.03f)
         {
-            if (I == null || I.library == null || string.IsNullOrEmpty(id)) return;
+            if (I == null || I.library == null || string.IsNullOrEmpty(id) || !GameSession.HasScreen) return;
             var clip = I.library.Get(id);
             if (clip == null) return;
             float now = Time.unscaledTime;

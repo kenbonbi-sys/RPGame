@@ -50,12 +50,23 @@ namespace RPG
             return n;
         }
 
-        /// <summary>Knockback, flash, sparks — applied to whoever got hit.</summary>
+        /// <summary>
+        /// Knockback, flash, sparks — applied to whoever got hit. Knockback moves the character on
+        /// the machine that moves it; the rest shows on this screen, and a server sends it along
+        /// with the hit (online players replay it from there).
+        /// </summary>
         public static void OnHitFeedback(Health h, DamageInfo d)
         {
             if (h == null) return;
             var motor = h.GetComponent<CharacterMotor>();
-            if (motor != null && d.knockback > 0) motor.AddKnockback(d.direction * d.knockback);
+            if (motor != null && motor.enabled && d.knockback > 0) motor.AddKnockback(d.direction * d.knockback);
+            if (GameSession.Serving) NetWorld.MarkFeedback(h);
+            if (GameSession.HasScreen) ShowHit(h, d);
+        }
+
+        /// <summary>The flash, sparks, hit-stop and crit punch of a hit (presentation only).</summary>
+        public static void ShowHit(Health h, DamageInfo d)
+        {
             var flash = h.GetComponentInChildren<HitFlash>();
             if (flash != null) flash.Flash(d.crit ? new Color(1f, 0.95f, 0.6f) : Color.white, 1f, 0.12f);
             Vector3 p = (Vector3)d.point + Vector3.up * 0.5f;
@@ -63,11 +74,12 @@ namespace RPG
             VFX.Spawn(fx, p, Quaternion.Euler(0, 0, Random.Range(0, 360f)));
             float stop = HitStopFor(h, d);
             if (stop > 0) TimeFX.HitStop(stop, h.gameObject, d.source);
-            if (d.crit)
-            {
-                CameraRig.Shake(0.12f);
-                AudioManager.Play("sfx_crit", 0.6f, 0.05f, p);
-            }
+            if (!d.crit) return;
+            // in a shared world only the players in the hit feel a crit
+            var me = Players.Local;
+            bool mine = !GameSession.Online || (me != null && (me.health == h || d.SourcePlayer == me));
+            if (mine) CameraRig.Shake(0.12f);
+            AudioManager.Play("sfx_crit", mine ? 0.6f : 0.3f, 0.05f, p);
         }
 
         /// <summary>

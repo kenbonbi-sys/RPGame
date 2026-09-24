@@ -1,0 +1,4 @@
+# Máy chủ mà game tự tìm khi bấm "Vào thế giới" (ngoài việc tự dò trong mạng LAN / Radmin VPN).
+# Mỗi dòng một địa chỉ, có thể kèm cổng: 26.253.10.125 hoặc rungthitham.example.com:7770
+# Sửa file này cạnh game (RungThiTham_Data/StreamingAssets/servers.txt) để trỏ mọi người sang máy chủ mới.
+26.253.10.125

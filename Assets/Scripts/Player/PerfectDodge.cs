@@ -65,27 +65,26 @@ namespace RPG
             Triggered?.Invoke(d);
         }
 
+        /// <summary>The bonus buff shown after a Lướt Hoàn Hảo (with the dash's icon).</summary>
+        public static BuffSpec MakeBuff(Sprite dashIcon) =>
+            new BuffSpec { id = BuffId, displayName = "Hoàn Hảo", icon = dashIcon, duration = CombatConfig.Current.perfectBonusSeconds };
+
         void Reward()
         {
             var c = CombatConfig.Current;
             Count++;
             pc.energy = Mathf.Min(pc.maxEnergy, pc.energy + c.perfectEnergy);
             bonusUntil = Time.time + c.perfectBonusSeconds;
-            pc.AddBuff(new BuffSpec { id = BuffId, displayName = "Hoàn Hảo", icon = icon, duration = c.perfectBonusSeconds });
+            pc.AddBuff(MakeBuff(icon));
 
             Vector3 head = health.HeadPosition;
-            GameEvents.RaiseWorldText("Hoàn Hảo!", head + Vector3.up * 0.4f, Palette.Gold);
-            GameEvents.RaiseWorldText($"+{c.perfectEnergy:0}", head + Vector3.right * 0.5f, Palette.Energy);
-            VFX.Spawn("dash_burst", transform.position + Vector3.up * 0.4f, Quaternion.identity, 1.4f);
-            if (!pc.IsLocal)
-            {
-                AudioManager.Play("sfx_crit", 0.8f, 0.02f, transform.position);
-                return;
-            }
-            // slow motion and the flash are the dodger's own (in a shared world TimeFX keeps them on this screen)
-            TimeFX.SlowMo(c.perfectTimeScale, c.perfectSlowSeconds, c.perfectSlowEase);
-            AudioManager.Play("sfx_crit", 0.8f, 0.02f);
-            ScreenFX.Flash(Palette.Gold, 0.15f, 0.25f);
+            NetCues.WorldText("Hoàn Hảo!", head + Vector3.up * 0.4f, Palette.Gold);
+            NetCues.Vfx("dash_burst", transform.position + Vector3.up * 0.4f, 0f, 1.4f);
+            // the energy, the sound, slow motion and the flash are the dodger's own
+            Notify.WorldText(pc, $"+{c.perfectEnergy:0}", head + Vector3.right * 0.5f, Palette.Energy);
+            Notify.Sound(pc, "sfx_crit", 0.8f, 0.02f);
+            Notify.SlowMo(pc, c.perfectTimeScale, c.perfectSlowSeconds, c.perfectSlowEase);
+            Notify.ScreenFlash(pc, Palette.Gold, 0.15f, 0.25f);
         }
 
         /// <summary>

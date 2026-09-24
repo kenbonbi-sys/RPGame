@@ -25,12 +25,33 @@ namespace RPG
         void RemoveBuff(string id);
     }
 
+    /// <summary>How much of a cast happens on this machine (online phase 3).</summary>
+    public enum CastMode
+    {
+        /// <summary>The rules and the show: offline, a host (every hero), a hero whose rules run here and are seen here.</summary>
+        Live,
+        /// <summary>The rules only: a server without a screen.</summary>
+        Rules,
+        /// <summary>The show now, the rules on the server: a player's machine casting for its own hero.</summary>
+        Predicted,
+        /// <summary>The show only: another player's hero, because the server said so.</summary>
+        Shown
+    }
+
     /// <summary>What one cast knows: who, where, which level, and where the current block happens.</summary>
     public class AbilityContext
     {
         public AbilityDef ability;
         public IAbilityCaster caster;
         public int level = 1;
+        /// <summary>Hits, heals, buffs and dodges really happen (where the world's rules run).</summary>
+        public bool live = true;
+        /// <summary>Effects, sounds and poses show (this machine has a screen).</summary>
+        public bool visual = true;
+        /// <summary>The player's own machine shows the cast before the server answers.</summary>
+        public bool predicted;
+        /// <summary>Random numbers of this cast; seeded the same on every machine so they show the same spikes and bolts.</summary>
+        public System.Random rng = new System.Random();
         /// <summary>Running combo count of a Combo block (0, 1, 2…).</summary>
         public int combo;
         /// <summary>Caster's feet when cast.</summary>
@@ -53,6 +74,22 @@ namespace RPG
         public Vector2 CasterPosition => caster.Runner.transform.position;
         public bool Alive => caster != null && caster.Runner != null && !caster.IsDead;
         public float PowerScale => 1f + ability.powerPerLevel * (Mathf.Max(1, level) - 1);
+
+        /// <summary>0..1 from this cast's random numbers.</summary>
+        public float Rand01() => (float)rng.NextDouble();
+
+        public float RandRange(float min, float max) => min + (max - min) * Rand01();
+
+        public int RandInt(int maxExclusive) => maxExclusive > 0 ? rng.Next(maxExclusive) : 0;
+
+        /// <summary>A point in a circle of radius <paramref name="r"/>, from this cast's random numbers.</summary>
+        public Vector2 RandInCircle(float r)
+        {
+            if (r <= 0f) return Vector2.zero;
+            float a = Rand01() * Mathf.PI * 2f;
+            float d = Mathf.Sqrt(Rand01()) * r;
+            return new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * d;
+        }
 
         public AbilityContext Copy() => (AbilityContext)MemberwiseClone();
 

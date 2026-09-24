@@ -88,11 +88,12 @@ namespace RPG
 
         /// <summary>
         /// Applies damage (armor, resistance and the random spread of plan §04) and the statuses the
-        /// hit carries. Returns the amount actually dealt.
+        /// hit carries. Returns the amount actually dealt. Only where the world's rules run: a
+        /// client learns about hits from the server (<see cref="ReplayHit"/>).
         /// </summary>
         public float TakeDamage(DamageInfo d)
         {
-            if (IsDead || !CanBeDamagedBy(d.sourceTeam)) return 0f;
+            if (!GameSession.IsAuthority || IsDead || !CanBeDamagedBy(d.sourceTeam)) return 0f;
             if (invulnerable)
             {
                 Evaded?.Invoke(d);
@@ -150,7 +151,7 @@ namespace RPG
 
         public void Heal(float amount, bool showText = true)
         {
-            if (IsDead || amount <= 0) return;
+            if (!GameSession.IsAuthority || IsDead || amount <= 0) return;
             float before = hp;
             hp = Mathf.Min(maxHp, hp + amount);
             float healed = hp - before;
@@ -161,11 +162,55 @@ namespace RPG
 
         public void Kill()
         {
-            if (IsDead) return;
+            if (IsDead || !GameSession.IsAuthority) return;
             var d = DamageInfo.Make(hp + 1, team == Team.Player ? Team.Enemy : Team.Player, null, transform.position, Vector2.down);
             d.pure = true;   // armor or the spread must not leave it alive
             invulnerable = false;
             TakeDamage(d);
+        }
+
+        // ------------------------------------------------------------------ a client's copy (online)
+        /// <summary>The server's numbers for this character.</summary>
+        public void SetRemote(float newHp, float newMaxHp)
+        {
+            if (newMaxHp > 0f) maxHp = newMaxHp;
+            hp = Mathf.Clamp(newHp, 0f, maxHp);
+        }
+
+        /// <summary>The server says this character fell (or got up). Falling tells the listeners, as a hit would.</summary>
+        public void SetRemoteDead(bool dead, bool raise = true)
+        {
+            if (dead == IsDead) return;
+            IsDead = dead;
+            if (!dead)
+            {
+                if (hp <= 0f) hp = maxHp;
+                return;
+            }
+            hp = 0f;
+            if (!raise) return;
+            var d = DamageInfo.Make(0f, team == Team.Player ? Team.Enemy : Team.Player, null, transform.position, Vector2.down);
+            Died?.Invoke(d);
+            GameEvents.RaiseDied(this);
+        }
+
+        /// <summary>A hit the server dealt: the bar drops now (the next snapshot confirms it), numbers and flashes show.</summary>
+        public void ReplayHit(DamageInfo d, float amount)
+        {
+            if (IsDead) return;
+            hp = Mathf.Max(0f, hp - amount);
+            LastDamageTime = Time.time;
+            Damaged?.Invoke(d, amount);
+            GameEvents.RaiseDamaged(this, d, amount);
+        }
+
+        /// <summary>A heal the server applied.</summary>
+        public void ReplayHeal(float amount, bool show)
+        {
+            if (IsDead || amount <= 0f) return;
+            hp = Mathf.Min(maxHp, hp + amount);
+            Healed?.Invoke(amount);
+            if (show) GameEvents.RaiseHealed(this, amount);
         }
     }
 }

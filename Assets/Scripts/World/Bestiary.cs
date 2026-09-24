@@ -32,9 +32,6 @@ namespace RPG
 
         public PlayerController Owner { get; private set; }
 
-        /// <summary>New entries are logged on the owner's screen only.</summary>
-        bool Local => Owner == null || Owner.IsLocal;
-
         void Awake()
         {
             Owner = GetComponent<PlayerController>();
@@ -49,7 +46,7 @@ namespace RPG
 
         void OnKilled(KillInfo k)
         {
-            if (k.Credits(Owner)) RecordKill(k.id, k.name);
+            if (GameSession.IsAuthority && k.Credits(Owner)) RecordKill(k.id, k.name);
         }
 
         /// <summary>Runs <paramref name="record"/> on the book of every living hero near <paramref name="at"/>.</summary>
@@ -67,7 +64,7 @@ namespace RPG
                 e = new Entry { id = id, name = name };
                 entries[id] = e;
                 nameToId[name] = id;
-                if (Local) GameEvents.RaiseLog($"{BookName}: ghi lại quái vật \"{name}\".", Palette.LogBestiary);
+                Notify.Log(Owner, $"{BookName}: ghi lại quái vật \"{name}\".", Palette.LogBestiary);
             }
             return e;
         }
@@ -90,7 +87,7 @@ namespace RPG
             var e = Get(id, monsterName);
             if (e.skills.Contains(skill)) return;
             e.skills.Add(skill);
-            if (Local) GameEvents.RaiseLog($"{BookName}: ghi lại kỹ năng \"{skill}\" của {monsterName}.", Palette.LogBestiary);
+            Notify.Log(Owner, $"{BookName}: ghi lại kỹ năng \"{skill}\" của {monsterName}.", Palette.LogBestiary);
             Changed?.Invoke();
         }
 

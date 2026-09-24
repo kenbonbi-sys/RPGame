@@ -32,3 +32,6 @@ crashlytics-build.properties
 # Python caches from Tools/
 __pycache__/
 *.pyc
+
+# Online server data written when a server runs from the editor or the project folder (accounts, characters)
+/ServerData/

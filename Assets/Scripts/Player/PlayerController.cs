@@ -127,7 +127,14 @@ namespace RPG
 
         // ------------------------------------------------------------------ buffs
         /// <summary>Adds or refreshes a buff; its speed, damage-taken and stun-immunity apply while it lasts.</summary>
-        public void AddBuff(BuffSpec spec)
+        public void AddBuff(BuffSpec spec) => AddBuff(spec, -1f);
+
+        /// <summary>
+        /// Adds or refreshes a buff for <paramref name="remaining"/> seconds (its full duration when
+        /// negative). A server tells every screen, so all of them show it and its player's buff bar
+        /// and speed follow it.
+        /// </summary>
+        public void AddBuff(BuffSpec spec, float remaining)
         {
             if (spec == null) return;
             var b = buffs.Find(x => x.id == spec.id);
@@ -135,15 +142,16 @@ namespace RPG
             {
                 b = new Buff { id = spec.id };
                 buffs.Add(b);
-                if (!string.IsNullOrEmpty(spec.attachedVfx))
+                if (!string.IsNullOrEmpty(spec.attachedVfx) && GameSession.HasScreen)
                     b.vfx = VFX.Spawn(spec.attachedVfx, transform.position, Quaternion.identity, 1f, transform, true);
             }
             b.spec = spec;
             b.name = spec.displayName;
             b.icon = spec.icon;
             b.duration = spec.duration;
-            b.until = Time.time + spec.duration;
+            b.until = Time.time + (remaining >= 0f ? remaining : spec.duration);
             ApplyBuffs();
+            if (GameSession.Serving) NetWorld.BuffChanged(this, spec.id, b.Remaining, true);
         }
 
         public void RemoveBuff(string id)
@@ -153,6 +161,7 @@ namespace RPG
             buffs.Remove(b);
             EndBuff(b, true);
             ApplyBuffs();
+            if (GameSession.Serving) NetWorld.BuffChanged(this, id, 0f, false);
         }
 
         public bool HasBuff(string id) => buffs.Exists(b => b.id == id && b.Remaining > 0);
@@ -161,7 +170,7 @@ namespace RPG
         {
             if (b.vfx != null) VFX.Release(b.vfx);
             b.vfx = null;
-            if (showEnd && !IsDead && b.spec != null && !string.IsNullOrEmpty(b.spec.endVfx))
+            if (showEnd && !IsDead && b.spec != null && !string.IsNullOrEmpty(b.spec.endVfx) && GameSession.HasScreen)
                 VFX.Spawn(b.spec.endVfx, transform.position + Vector3.up * 0.5f, Quaternion.identity);
         }
 
@@ -222,14 +231,16 @@ namespace RPG
 
         void Update()
         {
+            UpdateBuffs();
+            // regeneration is the world's rule: offline, on a host and on a server (every hero there)
+            if (GameSession.IsAuthority && !IsDead) Regen();
+            if (IsLocal) UpdateDanger();
             if (Puppet)
             {
                 AnimateFromMotion();
                 return;
             }
-            UpdateBuffs();
             if (IsDead) return;
-            Regen();
             if (IsLocal && !Autopilot) intent = ReadLocalInput();
             Act(intent);
             intent = intent.Held;
@@ -255,7 +266,10 @@ namespace RPG
             puppetLastPos = transform.position;
         }
 
-        /// <summary>Walk, dash or idle from how fast the puppet moved; updates arrive in steps, so a short pause keeps walking.</summary>
+        /// <summary>
+        /// Walk, dash or idle from how fast the puppet moved; updates arrive in steps, so a short
+        /// pause keeps walking. A skill's pose (the server shows it) plays through; a stun shows hurt.
+        /// </summary>
         void AnimateFromMotion()
         {
             Vector2 pos = transform.position;
@@ -265,12 +279,14 @@ namespace RPG
             float speed = v.magnitude;
             if (speed > 0.3f)
             {
-                motor.Facing = v / speed;
+                if (!IsActing) motor.Facing = v / speed;
                 puppetWalkUntil = Time.time + 0.15f;
             }
             if (speed > 9f) puppetDashUntil = Time.time + 0.12f;
             if (anim == null || IsDead) return;
             if (Time.time < puppetDashUntil) anim.PlayDir("dash", motor.Facing);
+            else if (IsActing) { }   // BeginAction started the attack or cast pose
+            else if (status != null && status.IsStunned) anim.PlayDir("hurt", motor.Facing);
             else if (Time.time < puppetWalkUntil) anim.PlayDir("walk", motor.Facing);
             else anim.PlayDir("idle", motor.Facing);
         }
@@ -312,8 +328,10 @@ namespace RPG
                     health.Heal(whole, false);
                 }
             }
-            if (IsLocal) ScreenFX.SetDanger(health.Fraction < 0.3f ? 1f - health.Fraction / 0.3f : 0f);
         }
+
+        /// <summary>The red vignette of low health, on this screen.</summary>
+        void UpdateDanger() => ScreenFX.SetDanger(!IsDead && health.Fraction < 0.3f ? 1f - health.Fraction / 0.3f : 0f);
 
         void UpdateBuffs()
         {
@@ -329,6 +347,10 @@ namespace RPG
             if (changed) ApplyBuffs();
         }
 
+        /// <summary>
+        /// Drinks the potion of slot 1–3. Online, a player's machine asks the server (the bottle,
+        /// the healing and the effect come back from there); the cooldown shows at once.
+        /// </summary>
         public bool UsePotion(int slot)
         {
             if (slot < 0 || slot >= potionIds.Length || Time.time < potionReadyAt) return false;
@@ -336,26 +358,28 @@ namespace RPG
             var item = db != null ? db.Item(potionIds[slot]) : null;
             if (item == null || inventory == null || inventory.Count(item) <= 0)
             {
-                if (IsLocal)
-                {
-                    GameEvents.RaiseWorldText("Hết bình!", health.HeadPosition + Vector3.up * 0.4f, new Color(0.8f, 0.8f, 0.8f));
-                    AudioManager.Play("sfx_denied", 0.5f);
-                }
+                Notify.WorldText(this, "Hết bình!", health.HeadPosition + Vector3.up * 0.4f, new Color(0.8f, 0.8f, 0.8f));
+                Notify.Sound(this, "sfx_denied", 0.5f);
                 return false;
             }
-            inventory.Remove(item, 1);
             potionReadyAt = Time.time + potionCooldown;
+            if (!GameSession.IsAuthority)
+            {
+                OnlineSession.Ask(new ActRequest { kind = ActKind.Potion, value = slot });
+                return true;
+            }
+            inventory.Remove(item, 1);
             if (item.healAmount > 0) health.Heal(item.healAmount);
             if (item.energyAmount > 0)
             {
                 float before = energy;
                 energy = Mathf.Min(maxEnergy, energy + item.energyAmount);
-                GameEvents.RaiseWorldText($"+{Mathf.RoundToInt(energy - before)}", health.HeadPosition + Vector3.right * 0.4f, Palette.Energy);
+                NetCues.WorldText($"+{Mathf.RoundToInt(energy - before)}", health.HeadPosition + Vector3.right * 0.4f, Palette.Energy);
             }
             if (item.cleanse && status != null) status.Cleanse();
             string fx = slot == 0 ? "potion_red" : slot == 1 ? "potion_blue" : "potion_green";
-            VFX.Spawn(fx, transform.position, Quaternion.identity, 1f, transform);
-            AudioManager.Play("sfx_potion", 0.8f, 0.06f, IsLocal ? (Vector3?)null : transform.position);
+            NetCues.VfxOn(fx, this);
+            NetCues.Sound("sfx_potion", 0.8f, 0.06f, transform.position);
             return true;
         }
 
@@ -526,7 +550,8 @@ namespace RPG
                 ScreenFX.Flash(new Color(0.9f, 0.1f, 0.1f), Mathf.Clamp(amount / 80f, 0.12f, 0.35f), 0.3f);
                 AudioManager.Play("sfx_player_hurt", 0.8f);
             }
-            if (motor != null && d.knockback > 0) motor.AddKnockback(d.direction * d.knockback);
+            // the machine that moves the hero pushes it (a server's copy of someone else's hero does not)
+            if (motor != null && motor.enabled && d.knockback > 0) motor.AddKnockback(d.direction * d.knockback);
         }
 
         void OnDied(DamageInfo d)
@@ -541,21 +566,59 @@ namespace RPG
                 AudioManager.Play("sfx_player_die");
                 TimeFX.SlowMo(0.3f, 1.2f);
             }
-            else AudioManager.Play("sfx_player_die", 1f, 0.06f, transform.position);
+            else if (GameSession.HasScreen) AudioManager.Play("sfx_player_die", 1f, 0.06f, transform.position);
             if (GameManager.I != null) GameManager.I.OnPlayerDied(this);
         }
 
         public void Respawn(Vector2 at)
         {
             motor.Teleport(at);
+            puppetLastPos = at;
             health.ResetHealth();
             energy = maxEnergy;
             if (status != null) status.Cleanse();
             skills.ResetCooldowns();
             health.invulnerable = false;
             if (anim != null) anim.Play("idle_down", true);
-            VFX.Spawn("respawn", transform.position, Quaternion.identity);
+            // the server shows it to everyone, its player included
+            if (GameSession.IsAuthority) NetCues.Vfx("respawn", at);
         }
+
+        // ------------------------------------------------------------------ online: the server's word
+        float energyHoldUntil;
+
+        /// <summary>This screen just spent energy on a skill it showed at once: the server's number catches up in a moment.</summary>
+        public void HoldEnergy(float seconds) => energyHoldUntil = Time.time + seconds;
+
+        /// <summary>
+        /// A client's copy takes the server's numbers: health, energy, statuses. Other players'
+        /// heroes also fall and get up with them; this player's own hero falls and gets up when the
+        /// server says so directly (<see cref="ControlKind.Downed"/>, <see cref="ControlKind.Respawn"/>).
+        /// </summary>
+        public void ApplyServerState(HeroState s)
+        {
+            bool dead = (s.flags & 1) != 0;
+            if (!IsLocal)
+            {
+                if (dead && !IsDead) health.SetRemoteDead(true);
+                else if (!dead && IsDead)
+                {
+                    health.SetRemoteDead(false);
+                    if (anim != null) anim.Play("idle_down", true);
+                }
+                remoteLevel = s.level;
+            }
+            if (!IsDead) health.SetRemote(s.hp, s.maxHp);
+            maxEnergy = s.maxEnergy;
+            if (Time.time >= energyHoldUntil) energy = Mathf.Min(s.energy, maxEnergy);
+            health.invulnerable = (s.flags & 2) != 0;
+            if (status != null) status.ApplyView(s.status);
+        }
+
+        int remoteLevel;
+
+        /// <summary>The hero's level as this screen knows it (other players' heroes: from the server).</summary>
+        public int Level => stats != null && (IsLocal || GameSession.IsAuthority) ? stats.level : Mathf.Max(1, remoteLevel);
 
         // ------------------------------------------------------------------ save
         [System.Serializable]
@@ -573,6 +636,18 @@ namespace RPG
         public string CaptureState()
         {
             var s = new SaveState { x = transform.position.x, y = transform.position.y, hp = health.hp, energy = energy };
+            if (IsDead)
+            {
+                // saved while down (online: a player left mid-fall): back on their feet at the zone's spawn
+                var spawn = GameManager.I != null ? GameManager.I.respawnPoint : null;
+                if (spawn != null)
+                {
+                    s.x = spawn.position.x;
+                    s.y = spawn.position.y;
+                }
+                s.hp = health.maxHp;
+                s.energy = maxEnergy;
+            }
             if (stats != null)
             {
                 s.level = stats.level;
@@ -591,10 +666,21 @@ namespace RPG
             // stats first: they set max HP / energy
             if (stats != null && s.level > 0) stats.SetState(s.level, s.xp, s.allocated, s.statPoints, s.talentPoints, s.skillPoints);
             motor.Teleport(new Vector2(s.x, s.y));
+            puppetLastPos = transform.position;
             hasMoveTarget = false;
             attackTarget = null;
             health.hp = Mathf.Clamp(s.hp, 1f, health.maxHp);
             energy = Mathf.Clamp(s.energy, 0f, maxEnergy);
+        }
+
+        /// <summary>
+        /// Level, XP and points from a saved "player" section, leaving where the hero stands and
+        /// its health alone: online, the server keeps its player's character sheet up to date this way.
+        /// </summary>
+        public void RestoreProgress(string json)
+        {
+            var s = JsonUtility.FromJson<SaveState>(json);
+            if (stats != null && s.level > 0) stats.SetState(s.level, s.xp, s.allocated, s.statPoints, s.talentPoints, s.skillPoints);
         }
 
         void OnDrawGizmosSelected()

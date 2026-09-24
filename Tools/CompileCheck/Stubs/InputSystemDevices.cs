@@ -49,6 +49,7 @@ namespace UnityEngine.InputSystem
         public UnityEngine.InputSystem.Utilities.ReadOnlyArray<KeyControl> allKeys => default;
         public KeyControl spaceKey => null;
         public KeyControl enterKey => null;
+        public KeyControl numpadEnterKey => null;
         public KeyControl tabKey => null;
         public KeyControl backquoteKey => null;
         public KeyControl escapeKey => null;

@@ -13,40 +13,62 @@ namespace RPG
         public int max = 1;
     }
 
-    /// <summary>Spawning items into the world.</summary>
+    /// <summary>
+    /// Spawning items into the world. Online loot is personal (Docs/KeHoach-Online.md): every
+    /// hero who shares a kill rolls the table for themselves, and only they see and pick up what
+    /// dropped for them, so nobody takes anybody's drops.
+    /// </summary>
     public static class Loot
     {
-        public static void Drop(ItemDef item, int count, Vector2 at)
+        /// <summary>Drops <paramref name="count"/> × <paramref name="item"/>; <paramref name="owner"/> alone may take it (null: anyone).</summary>
+        public static void Drop(ItemDef item, int count, Vector2 at, PlayerController owner = null)
         {
             var db = GameManager.I != null ? GameManager.I.db : null;
-            if (db == null || db.lootPrefab == null || item == null) return;
+            if (db == null || db.lootPrefab == null || item == null || !GameSession.IsAuthority) return;
             Vector2 land = at + UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(0.5f, 1.3f);
             var go = Pool.Get(db.lootPrefab, at, Quaternion.identity);
-            go.GetComponent<LootPickup>().Setup(item, count, at, land);
+            var pickup = go.GetComponent<LootPickup>();
+            pickup.Setup(item, count, at, land, owner, false);
+            if (GameSession.Serving) NetWorld.LootDropped(pickup);
         }
 
-        public static void Drop(string id, int count, Vector2 at)
+        public static void Drop(string id, int count, Vector2 at, PlayerController owner = null)
         {
             var db = GameManager.I != null ? GameManager.I.db : null;
-            if (db != null) Drop(db.Item(id), count, at);
+            if (db != null) Drop(db.Item(id), count, at, owner);
         }
 
-        public static void DropCoins(Vector2 at, int coins)
+        /// <summary>Coins, one pickup per coin; online each hero in <paramref name="credited"/> gets their own.</summary>
+        public static void DropCoins(Vector2 at, int coins, IReadOnlyList<PlayerController> credited = null)
         {
-            // one pickup per coin looks nicer than a single stack
-            for (int i = 0; i < coins; i++) Drop("coin", 1, at);
+            foreach (var owner in Owners(credited))
+                for (int i = 0; i < coins; i++) Drop("coin", 1, at, owner);   // one pickup per coin looks nicer than a single stack
         }
 
-        public static void Roll(List<LootEntry> table, Vector2 at)
+        /// <summary>Rolls a loot table at <paramref name="at"/>; online once for each hero in <paramref name="credited"/>.</summary>
+        public static void Roll(List<LootEntry> table, Vector2 at, IReadOnlyList<PlayerController> credited = null)
         {
             if (table == null) return;
-            foreach (var e in table)
+            foreach (var owner in Owners(credited))
             {
-                if (UnityEngine.Random.value > e.chance) continue;
-                int n = UnityEngine.Random.Range(e.min, e.max + 1);
-                if (e.itemId == "coin") DropCoins(at, n);
-                else Drop(e.itemId, n, at);
+                foreach (var e in table)
+                {
+                    if (UnityEngine.Random.value > e.chance) continue;
+                    int n = UnityEngine.Random.Range(e.min, e.max + 1);
+                    if (e.itemId == "coin")
+                        for (int i = 0; i < n; i++) Drop("coin", 1, at, owner);
+                    else Drop(e.itemId, n, at, owner);
+                }
             }
+        }
+
+        static readonly PlayerController[] Anyone = { null };
+
+        /// <summary>Who drops are for: offline (or a kill nobody is credited with) one drop anyone takes; online one per hero.</summary>
+        static IReadOnlyList<PlayerController> Owners(IReadOnlyList<PlayerController> credited)
+        {
+            if (!GameSession.Online || credited == null || credited.Count == 0) return Anyone;
+            return credited;
         }
     }
 }

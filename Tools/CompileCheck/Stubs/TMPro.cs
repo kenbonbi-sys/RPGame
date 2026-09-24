@@ -134,8 +134,18 @@ namespace TMPro
     }
     public class TMP_InputField : Selectable
     {
+        public enum ContentType { Standard, Autocorrected, IntegerNumber, DecimalNumber, Alphanumeric, Name, EmailAddress, Password, Pin, Custom }
+        public enum LineType { SingleLine, MultiLineSubmit, MultiLineNewline }
         public string text { get; set; }
         public TMP_Text textComponent { get; set; }
+        public RectTransform textViewport { get; set; }
+        public Graphic placeholder { get; set; }
+        public int characterLimit { get; set; }
+        public LineType lineType { get; set; }
+        public ContentType contentType { get; set; }
+        public char asteriskChar { get; set; }
+        public Color caretColor { get; set; }
+        public Color selectionColor { get; set; }
         public UnityEngine.Events.UnityEvent<string> onSubmit;
         public UnityEngine.Events.UnityEvent<string> onValueChanged;
         public UnityEngine.Events.UnityEvent<string> onEndEdit;

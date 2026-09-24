@@ -40,7 +40,7 @@ namespace RPG
 
         void Update()
         {
-            if (dead.Count == 0) return;
+            if (dead.Count == 0 || !GameSession.IsAuthority) return;   // online the server brings camps back
             bool watched = false;   // a hero nearby, even one lying dead, sees the camp
             foreach (var p in Players.All)
                 if (p != null && Vector2.Distance(p.transform.position, transform.position) < minPlayerDistance) watched = true;

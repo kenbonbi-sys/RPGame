@@ -81,13 +81,33 @@ namespace RPG
             current = npc;
             Speaker = speaker;
             onDone = done;
-            // Talk objectives complete here, before the script reads them
-            if (speaker != null && speaker.quests != null) speaker.quests.NotifyTalkStarted(npc.npcId);
             GameEvents.RaiseDialogueStarted(npc.npcId);
             DialogueUI.I.Begin(npc);
+            if (!GameSession.IsAuthority)
+            {
+                // online the server runs the quest log: it notes the talk, sends the log, then the script reads it
+                StartCoroutine(StartOnline(npc, yarn));
+                return true;
+            }
+            // Talk objectives complete here, before the script reads them
+            if (speaker != null && speaker.quests != null) speaker.quests.NotifyTalkStarted(npc.npcId);
             if (yarn) StartCoroutine(StartWhenIdle(npc.yarnNode));
             else fallback = StartCoroutine(PlayFallback(npc.fallbackLines));
             return true;
+        }
+
+        IEnumerator StartOnline(NPC npc, bool yarn)
+        {
+            var ask = new OnlineSession.Answer();
+            yield return OnlineSession.AskAndWait(new ActRequest { kind = ActKind.TalkStart, text = npc.npcId }, ask);
+            if (current != npc) yield break;   // skipped meanwhile
+            if (!ask.ok)
+            {
+                Finish();
+                yield break;
+            }
+            if (yarn) yield return StartWhenIdle(npc.yarnNode);
+            else fallback = StartCoroutine(PlayFallback(npc.fallbackLines));
         }
 
         /// <summary>
@@ -125,6 +145,12 @@ namespace RPG
             onDone = null;
             if (DialogueUI.I != null) DialogueUI.I.End();
             if (speaker != null && speaker.quests != null) speaker.quests.NotifyTalkEnded(npc.npcId);
+            if (!GameSession.IsAuthority)
+            {
+                // the server keeps this player's conversation variables with their character
+                OnlineSession.Ask(new ActRequest { kind = ActKind.TalkEnd, text = npc.npcId });
+                OnlineSession.Ask(new ActRequest { kind = ActKind.DialogueVars, text = CaptureState() });
+            }
             GameEvents.RaiseDialogueEnded(npc.npcId);
             cb?.Invoke();
         }

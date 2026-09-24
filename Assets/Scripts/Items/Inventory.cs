@@ -31,8 +31,6 @@ namespace RPG
 
         void OnDestroy() => SaveRegistry.Unregister(this);
 
-        /// <summary>Messages about the bag ("Nhận được…") go to its owner's screen only.</summary>
-        bool Announces => Owner == null || Owner.IsLocal;
 
         public int Count(ItemDef item)
         {
@@ -56,7 +54,7 @@ namespace RPG
             {
                 gold += n * Mathf.Max(1, item.value);
                 Changed?.Invoke();
-                if (announce && Announces) GameEvents.RaiseItemPicked(item, n);
+                if (announce) Notify.ItemPicked(Owner, item, n);   // "Nhận được…" on its owner's screen only
                 return true;
             }
             int left = n;
@@ -75,7 +73,7 @@ namespace RPG
                 left -= add;
             }
             Changed?.Invoke();
-            if (announce && Announces) GameEvents.RaiseItemPicked(item, n - left);
+            if (announce) Notify.ItemPicked(Owner, item, n - left);
             return left == 0;
         }
 

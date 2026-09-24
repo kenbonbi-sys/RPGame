@@ -83,9 +83,13 @@ namespace RPG
             pr.shake = 0.05f;
             pr.lifetime = 2.2f;
             pr.critChance = 0;
+            pr.explodeRadius = 0f;
+            pr.pierce = false;
             pr.Launch(target - start, gameObject);
-            VFX.Spawn("spore_puff", start, Quaternion.identity);
-            AudioManager.Play("sfx_spore_shot", 0.6f, 0.1f, transform.position);
+            // players' screens fly a spore of their own; the hit is this one's
+            NetCues.Projectile("spore", start, target - start, pr.speed, pr.lifetime, Team.Enemy, pr.hitVfx, pr.hitSfx, pr.shake, 0f);
+            NetCues.Vfx("spore_puff", start);
+            NetCues.Sound("sfx_spore_shot", 0.6f, 0.1f, transform.position);
         }
     }
 }

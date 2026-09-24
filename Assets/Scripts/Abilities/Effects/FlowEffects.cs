@@ -28,7 +28,7 @@ namespace RPG
         {
             for (int i = 0; i < count && ctx.Alive; i++)
             {
-                Vector2 p = ctx.origin + ctx.dir * (startOffset + i * spacing) + Util.RandomInCircle(jitter);
+                Vector2 p = ctx.origin + ctx.dir * (startOffset + i * spacing) + ctx.RandInCircle(jitter);
                 if (stopAtWalls && Util.LineBlocked(ctx.origin, p)) yield break;
                 var c = ctx.At(p);
                 c.scale = startScale + i * scaleStep;
@@ -64,17 +64,17 @@ namespace RPG
         IEnumerator Burst(AbilityContext ctx)
         {
             Vector2 c = center.Resolve(ctx);
-            var area = string.IsNullOrEmpty(areaVfx) ? null : VFX.Spawn(areaVfx, c, Quaternion.identity, areaVfxScale, null, true);
+            var area = string.IsNullOrEmpty(areaVfx) || !ctx.visual ? null : VFX.Spawn(areaVfx, c, Quaternion.identity, areaVfxScale, null, true);
             if (chargeTime > 0) yield return new WaitForSeconds(chargeTime);
             for (int i = 0; i < count && ctx.Alive; i++)
             {
-                Vector2 p = c + Util.RandomInCircle(radius * 0.85f);
+                Vector2 p = c + ctx.RandInCircle(radius * 0.85f);
                 Util.HealthsInCircle(c, radius, ctx.Team, buffer);
-                if (buffer.Count > 0 && Random.value < preferTargets)
-                    p = (Vector2)buffer[Random.Range(0, buffer.Count)].transform.position + Util.RandomInCircle(0.2f);
+                if (buffer.Count > 0 && ctx.Rand01() < preferTargets)
+                    p = (Vector2)buffer[ctx.RandInt(buffer.Count)].transform.position + ctx.RandInCircle(0.2f);
                 if (i == 0 && firstAtCenter) p = c;
                 ctx.At(p).Run(each);
-                yield return new WaitForSeconds(interval * Random.Range(1f - intervalJitter, 1f + intervalJitter));
+                yield return new WaitForSeconds(interval * ctx.RandRange(1f - intervalJitter, 1f + intervalJitter));
             }
             yield return new WaitForSeconds(0.2f);
             if (area != null) VFX.Release(area);
@@ -101,7 +101,7 @@ namespace RPG
 
         IEnumerator Pulse(AbilityContext ctx)
         {
-            var fx = string.IsNullOrEmpty(attachedVfx) ? null : VFX.Spawn(attachedVfx, ctx.CasterPosition, Quaternion.identity, 1f, ctx.CasterTransform, true);
+            var fx = string.IsNullOrEmpty(attachedVfx) || !ctx.visual ? null : VFX.Spawn(attachedVfx, ctx.CasterPosition, Quaternion.identity, 1f, ctx.CasterTransform, true);
             float end = Time.time + duration;
             float nextPulse = 0, nextSfx = 0;
             while (Time.time < end && ctx.Alive)
@@ -111,10 +111,11 @@ namespace RPG
                     nextPulse = Time.time + interval;
                     ctx.At(at.Resolve(ctx)).Run(each);
                 }
-                if (!string.IsNullOrEmpty(loopSfx) && Time.time >= nextSfx)
+                if (ctx.visual && !string.IsNullOrEmpty(loopSfx) && Time.time >= nextSfx)
                 {
                     nextSfx = Time.time + loopSfxInterval;
-                    AudioManager.Play(loopSfx, loopSfxVolume, 0.05f);
+                    bool mine = !GameSession.Online || ctx.caster.Runner is PlayerController pc && pc.IsLocal;
+                    AudioManager.Play(loopSfx, loopSfxVolume, 0.05f, mine ? (Vector3?)null : ctx.CasterPosition);
                 }
                 yield return null;
             }

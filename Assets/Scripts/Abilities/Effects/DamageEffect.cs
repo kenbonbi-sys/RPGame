@@ -43,11 +43,23 @@ namespace RPG
         [Tooltip("Run once when at least one target was hit (hit sound, shake).")]
         [SerializeReference, PickEffect] public List<AbilityEffect> onAnyHit = new List<AbilityEffect>();
 
+        static readonly List<Health> Seen = new List<Health>(16);
+
         public override void Run(AbilityContext ctx)
         {
             Vector2 p = at.Resolve(ctx);
-            var d = hit.Make(ctx, p, ctx.dir);
             float r = radius * ctx.scale;
+            if (!ctx.live)
+            {
+                // a screen that only shows the cast: the hit sound and shake as soon as it looks like a hit
+                // (the numbers come from the server)
+                bool looksHit = shape == Shape.Cone
+                    ? Util.HealthsInCone(p, ctx.dir, r, angle, ctx.Team, Seen).Count > 0
+                    : Util.HealthsInCircle(p, r, ctx.Team, Seen).Count > 0;
+                if (looksHit && ctx.visual) ctx.At(p).Run(onAnyHit);
+                return;
+            }
+            var d = hit.Make(ctx, p, ctx.dir);
             int n = shape == Shape.Cone
                 ? Combat.DamageCone(p, ctx.dir, r, angle, d, hit.critChance)
                 : Combat.DamageCircle(p, r, d, hit.critChance);
@@ -103,7 +115,8 @@ namespace RPG
             p.hitSfx = hitSfx;
             p.shake = hitShake;
             p.lifetime = lifetime > 0 ? lifetime : ctx.ability.maxRange / Mathf.Max(0.1f, speed);
-            p.Launch(ctx.dir, ctx.caster.Runner.gameObject);
+            // online: the server's copy deals the damage, every screen flies its own that only bursts
+            p.Launch(ctx.dir, ctx.caster.Runner.gameObject, ctx.live, ctx.visual);
         }
     }
 }

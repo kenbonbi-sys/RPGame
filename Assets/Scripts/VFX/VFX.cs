@@ -11,7 +11,7 @@ namespace RPG
         public static GameObject Spawn(string id, Vector3 pos, Quaternion rot = default, float scale = 1f, Transform parent = null, bool persistent = false)
         {
             var lib = Lib;
-            if (lib == null) return null;
+            if (lib == null || !GameSession.HasScreen) return null;   // a zone server shows nothing
             var prefab = lib.Get(id);
             if (prefab == null)
             {

@@ -24,12 +24,16 @@ namespace RPG
             var motor = ctx.caster.Motor;
             if (motor == null) return;
             Vector2 dir = preferMoveDirection && motor.Velocity.sqrMagnitude > 0.5f ? motor.Velocity.normalized : ctx.dir;
-            motor.Dash(dir * (distance / Mathf.Max(0.01f, time)), time);
-            if (afterImages && ctx.caster.AfterImages != null) ctx.caster.AfterImages.Emit(time + 0.05f);
-            if (!string.IsNullOrEmpty(startVfx))
-                VFX.Spawn(startVfx, (Vector3)ctx.CasterPosition + Vector3.up * 0.3f, Quaternion.Euler(0, 0, Util.Angle(dir)));
+            // the machine that moves the caster dashes it (online, a hero's own player); the others see it move
+            if (motor.enabled) motor.Dash(dir * (distance / Mathf.Max(0.01f, time)), time);
+            if (ctx.visual)
+            {
+                if (afterImages && ctx.caster.AfterImages != null) ctx.caster.AfterImages.Emit(time + 0.05f);
+                if (!string.IsNullOrEmpty(startVfx))
+                    VFX.Spawn(startVfx, (Vector3)ctx.CasterPosition + Vector3.up * 0.3f, Quaternion.Euler(0, 0, Util.Angle(dir)));
+            }
             ctx.Start(Invulnerable(ctx));
-            if (perfectDodge)
+            if (perfectDodge && ctx.live)
             {
                 var pd = ctx.caster.Runner.GetComponent<PerfectDodge>();
                 if (pd != null) pd.Open(ctx.ability.icon);
@@ -39,10 +43,10 @@ namespace RPG
         IEnumerator Invulnerable(AbilityContext ctx)
         {
             var h = ctx.caster.Health;
-            h.invulnerable = true;
+            if (ctx.live) h.invulnerable = true;
             yield return new WaitForSeconds(invulnerableTime);
-            if (!ctx.caster.IsDead) h.invulnerable = false;
-            if (!string.IsNullOrEmpty(endVfx)) VFX.Spawn(endVfx, ctx.CasterPosition, Quaternion.identity, endVfxScale);
+            if (ctx.live && !ctx.caster.IsDead) h.invulnerable = false;
+            if (ctx.visual && !string.IsNullOrEmpty(endVfx)) VFX.Spawn(endVfx, ctx.CasterPosition, Quaternion.identity, endVfxScale);
         }
     }
 
@@ -63,14 +67,14 @@ namespace RPG
         {
             var h = ctx.caster.Health;
             float now = instant + instantPercentOfMaxHp * h.maxHp;
-            if (now > 0) h.Heal(now);
+            if (now > 0 && ctx.live) h.Heal(now);
             if (duration > 0 && (perSecond > 0 || perSecondPercentOfMaxHp > 0)) ctx.Start(OverTime(ctx));
         }
 
         IEnumerator OverTime(AbilityContext ctx)
         {
             var h = ctx.caster.Health;
-            var aura = string.IsNullOrEmpty(auraVfx) ? null : VFX.Spawn(auraVfx, ctx.CasterPosition, Quaternion.identity, 1f, ctx.CasterTransform, true);
+            var aura = string.IsNullOrEmpty(auraVfx) || !ctx.visual ? null : VFX.Spawn(auraVfx, ctx.CasterPosition, Quaternion.identity, 1f, ctx.CasterTransform, true);
             float rate = perSecond + perSecondPercentOfMaxHp * h.maxHp;
             float t = 0, acc = 0;
             while (t < duration && ctx.Alive)
@@ -79,7 +83,7 @@ namespace RPG
                 acc += rate * Time.deltaTime;
                 if (acc >= rate * 0.5f)
                 {
-                    h.Heal(acc);
+                    if (ctx.live) h.Heal(acc);
                     acc = 0;
                 }
                 yield return null;
@@ -116,6 +120,8 @@ namespace RPG
 
         public override void Run(AbilityContext ctx)
         {
+            // where the rules run it is real (and told to every screen); the caster's own screen feels it at once
+            if (!ctx.live && !ctx.predicted) return;
             if (buff.clearStun && ctx.caster.Status != null) ctx.caster.Status.ClearStun();
             ctx.caster.AddBuff(buff);
         }

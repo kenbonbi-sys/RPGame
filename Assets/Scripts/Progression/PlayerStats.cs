@@ -62,13 +62,19 @@ namespace RPG
 
         public int Allocated(CoreStat a) => allocated[(int)a];
 
+        /// <summary>Puts a stat point into an attribute. Online a player's machine asks the server, which sends the new sheet back.</summary>
         public bool Spend(CoreStat a)
         {
             if (statPoints <= 0) return false;
+            if (IsLocal) AudioManager.Play("sfx_ui_click", 0.7f);
+            if (!GameSession.IsAuthority)
+            {
+                OnlineSession.Ask(new ActRequest { kind = ActKind.SpendStat, value = (int)a });
+                return true;
+            }
             statPoints--;
             allocated[(int)a]++;
             Recalculate();
-            if (IsLocal) AudioManager.Play("sfx_ui_click", 0.7f);
             return true;
         }
 
@@ -158,16 +164,17 @@ namespace RPG
         /// <summary>Every hero who shares a kill gets its full XP (PvE: helping never costs XP).</summary>
         void OnEnemyKilled(KillInfo k)
         {
-            if (!k.Credits(pc)) return;
+            if (!GameSession.IsAuthority || !k.Credits(pc)) return;
             AddXp(Config.KillXp(k.level, k.rank, level), k.position);
         }
 
         /// <summary>Adds XP, levelling up as many times as it covers. Shows "+N XP" at <paramref name="at"/> when given.</summary>
         public void AddXp(int amount, Vector3? at = null)
         {
-            if (amount <= 0 || IsMaxLevel) return;
+            // XP is the world's rule: online a player's copy gets its level from the server
+            if (amount <= 0 || IsMaxLevel || !GameSession.IsAuthority) return;
             xp += amount;
-            if (at.HasValue && IsLocal) GameEvents.RaiseWorldText($"+{amount} XP", at.Value + Vector3.up * 1.4f, Palette.Xp);
+            if (at.HasValue) Notify.WorldText(pc, $"+{amount} XP", at.Value + Vector3.up * 1.4f, Palette.Xp);
             int gained = 0;
             while (!IsMaxLevel && xp >= XpToNext)
             {
@@ -188,14 +195,14 @@ namespace RPG
             Recalculate();
             FillUp();
             LevelledUp?.Invoke(level);
-            VFX.Spawn("quest_complete", transform.position, Quaternion.identity, 1.2f, transform);
+            // everyone sees the glow and "Cấp N!"; the rest is its player's HUD
+            NetCues.VfxOn("quest_complete", this, 1.2f);
             if (pc != null && pc.health != null)
-                GameEvents.RaiseWorldText($"Cấp {level}!", pc.health.HeadPosition + Vector3.up * 0.5f, Palette.Xp);
-            if (!IsLocal) return;   // the rest is this screen's HUD
-            GameEvents.RaiseLevelUp(level);
-            GameEvents.RaiseLog($"Lên cấp {level}! Nhận {Config.statPointsPerLevel} điểm chỉ số — bấm C để phân bổ.", Palette.Xp);
-            GameEvents.RaiseBanner(BannerKind.Quest, "Lên cấp!", $"Cấp {level}");
-            AudioManager.Play("sfx_levelup", 1f, 0f);
+                NetCues.WorldText($"Cấp {level}!", pc.health.HeadPosition + Vector3.up * 0.5f, Palette.Xp);
+            Notify.LevelUp(pc, level);
+            Notify.Log(pc, $"Lên cấp {level}! Nhận {Config.statPointsPerLevel} điểm chỉ số — bấm C để phân bổ.", Palette.Xp);
+            Notify.Banner(pc, BannerKind.Quest, "Lên cấp!", $"Cấp {level}");
+            Notify.Sound(pc, "sfx_levelup", 1f, 0f);
         }
 
         /// <summary>Sets level/XP/points directly (loading a save). Does not fill HP/energy.</summary>

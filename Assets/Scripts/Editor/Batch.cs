@@ -11,6 +11,7 @@ namespace RPG.EditorTools
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildScene
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.MoveHeroState
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildOnline
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildTitle
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildPlayer
     /// </summary>
     public static class Batch
@@ -45,6 +46,14 @@ namespace RPG.EditorTools
         {
             PrefabFactory.BuildOnline();
             Debug.Log("[RPG] Batch.BuildOnline done");
+        }
+
+        /// <summary>Builds the title screen scene and puts it first in the build (online phase 2).</summary>
+        public static void BuildTitle()
+        {
+            TitleBuilder.Build();
+            SceneBuilder.UpdateBuildSettings();
+            Debug.Log("[RPG] Batch.BuildTitle done");
         }
 
         /// <summary>Moves the bag and the quest log of an older Core scene onto the Player prefab (online phase 0).</summary>

@@ -31,6 +31,18 @@ namespace RPG
         public string Current => clipName;
         public bool Finished => finished;
         public int Frame => frame;
+        /// <summary>Counts clip starts and restarts: online, a server tells screens to play an attack again.</summary>
+        public int PlayCount { get; private set; }
+
+        /// <summary>Index of the playing clip in the set (-1: none), the same on every machine.</summary>
+        public int ClipIndex => set != null && clip != null ? set.clips.IndexOf(clip) : -1;
+
+        /// <summary>Plays the clip at <paramref name="index"/> of the set (a server's choice, see <see cref="ClipIndex"/>).</summary>
+        public void PlayIndex(int index, bool restart)
+        {
+            if (set == null || index < 0 || index >= set.clips.Count || set.clips[index] == null) return;
+            Play(set.clips[index].name, restart);
+        }
         /// <summary>The frame is being held (a hit-stop felt by this character only).</summary>
         public bool Held => Time.unscaledTime < holdUntil;
 
@@ -68,6 +80,7 @@ namespace RPG
             timer = 0;
             finished = false;
             onComplete = completed;
+            PlayCount++;
             if (target != null && hideWhenDone) target.enabled = true;
             Apply();
         }

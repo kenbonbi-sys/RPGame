@@ -27,10 +27,12 @@ namespace RPG.EditorTools
 
         public static string ZoneScenePath(ZoneDef zone) => $"{ZoneFolder}/{zone.sceneName}.unity";
 
-        /// <summary>Core first (build index 0), then every zone of the database.</summary>
+        /// <summary>The title screen first (build index 0, when it exists), then Core, then every zone of the database.</summary>
         public static string[] AllScenePaths()
         {
-            var list = new List<string> { CoreScenePath };
+            var list = new List<string>();
+            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(TitleBuilder.ScenePath) != null) list.Add(TitleBuilder.ScenePath);
+            list.Add(CoreScenePath);
             var db = AssetFactory.Database;
             if (db != null)
                 foreach (var z in db.zones)
@@ -153,8 +155,16 @@ namespace RPG.EditorTools
                 if (all || AssetDatabase.LoadAssetAtPath<SceneAsset>(path) == null) BuildZone(zone, path);
                 else EditorUtil.Kept++;
             }
+            if (all || AssetDatabase.LoadAssetAtPath<SceneAsset>(TitleBuilder.ScenePath) == null) TitleBuilder.Build();
+            else EditorUtil.Kept++;
             if (all || AssetDatabase.LoadAssetAtPath<SceneAsset>(CoreScenePath) == null) BuildCore();
             else EditorUtil.Kept++;
+            UpdateBuildSettings();
+        }
+
+        /// <summary>The build's scenes: the title screen, Core, the zones.</summary>
+        public static void UpdateBuildSettings()
+        {
             EditorBuildSettings.scenes = AllScenePaths().Select(p => new EditorBuildSettingsScene(p, true)).ToArray();
             AssetDatabase.SaveAssets();
         }

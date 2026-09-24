@@ -24,10 +24,22 @@ namespace RPG
         public float Current { get; private set; }
         public float Threshold { get; private set; }
         public int Breaks { get; private set; }
-        public bool IsBroken => Time.time < brokenUntil;
+        public bool IsBroken => viewed ? viewBroken : Time.time < brokenUntil;
         /// <summary>0..1 for the HUD (full while broken).</summary>
-        public float Fraction => IsBroken ? 1f : Threshold > 0 ? Mathf.Clamp01(Current / Threshold) : 0f;
+        public float Fraction => viewed ? viewFraction : IsBroken ? 1f : Threshold > 0 ? Mathf.Clamp01(Current / Threshold) : 0f;
         public float BrokenRemaining => Mathf.Max(0f, brokenUntil - Time.time);
+
+        // a client's copy shows the server's bar (online)
+        bool viewed, viewBroken;
+        float viewFraction;
+
+        /// <summary>The server's bar on a client's copy of the boss.</summary>
+        public void SetView(float fraction, bool broken)
+        {
+            viewed = true;
+            viewFraction = Mathf.Clamp01(fraction);
+            viewBroken = broken;
+        }
 
         /// <summary>Raised when the bar breaks (the owner interrupts its attack).</summary>
         public event Action Broken;
@@ -66,11 +78,11 @@ namespace RPG
             AddPoise(d.poise * (stats != null ? stats.PoiseMultiplier : 1f));
         }
 
-        /// <summary>Fills the bar (the hero's hits, the counter after Lướt Hoàn Hảo); breaks it when full.</summary>
+        /// <summary>Fills the bar (the hero's hits, the counter after Lướt Hoàn Hảo); breaks it when full. The world's rule: a client's copy only shows the server's bar.</summary>
         public void AddPoise(float amount)
         {
             Ready();
-            if (amount <= 0f || IsBroken || health.IsDead) return;
+            if (!GameSession.IsAuthority || amount <= 0f || IsBroken || health.IsDead) return;
             Current += amount;
             lastHit = Time.time;
             if (Current >= Threshold) Break();
@@ -90,14 +102,15 @@ namespace RPG
             }
 
             Vector3 head = health.HeadPosition;
-            GameEvents.RaiseWorldText("Vỡ Trấn Áp!", head + Vector3.up * 0.6f, Palette.Gold);
-            GameEvents.RaiseLog($"{health.displayName} bị vỡ Trấn Áp! Choáng {breakStun:0.#} giây, nhận thêm {brokenDamageBonus * 100f:0}% sát thương.", Palette.Status);
-            VFX.Spawn("boulder_break", transform.position + Vector3.up * 0.8f, Quaternion.identity, 1.3f);
-            AudioManager.Play("sfx_boulder_break", 1f, 0.03f, transform.position);
-            AudioManager.Play("sfx_crit", 0.8f, 0.02f);
-            TimeFX.HitStop(CombatConfig.Current.hitStopBreak, gameObject);
-            CameraRig.Shake(0.5f);
-            ScreenFX.Impact(0.6f, 0.4f);
+            Vector2 at = transform.position;
+            NetCues.WorldText("Vỡ Trấn Áp!", head + Vector3.up * 0.6f, Palette.Gold);
+            NetCues.Log($"{health.displayName} bị vỡ Trấn Áp! Choáng {breakStun:0.#} giây, nhận thêm {brokenDamageBonus * 100f:0}% sát thương.", Palette.Status, at);
+            NetCues.Vfx("boulder_break", transform.position + Vector3.up * 0.8f, 0f, 1.3f);
+            NetCues.Sound("sfx_boulder_break", 1f, 0.03f, at);
+            NetCues.FlatSound("sfx_crit", at, 0.8f, 0.02f, NetCues.NearRadius);
+            if (GameSession.HasScreen) TimeFX.HitStop(CombatConfig.Current.hitStopBreak, gameObject);
+            NetCues.Shake(0.5f, at);
+            NetCues.Impact(0.6f, 0.4f, at);
             Broken?.Invoke();
         }
 

@@ -120,42 +120,132 @@ namespace RPG
             bufferedSlot = -1;
         }
 
+        /// <summary>
+        /// Casts slot <paramref name="i"/> toward <paramref name="aim"/> when it is ready. Where the
+        /// world's rules run the skill happens for real; a player's machine online shows it at once
+        /// (pose, effects, its dash) and asks the server, which deals the damage and shows it to
+        /// the others (and says so when it refuses: <see cref="Refused"/>).
+        /// </summary>
         public bool TryCast(int i, Vector2 aim)
         {
+            if (!CanCast(i, 0f, true, out _)) return false;
             var s = slots[i];
-            if (s == null) return false;
-            if (Time.time < gcdUntil) return false;
-            if (PoseWait(i) > 0f) return false;   // still in the pose before (Request buffers presses near its end)
-            if (Remaining(i) > 0)
+            Vector2 origin = pc.transform.position;
+            aim = ClampAim(s, origin, aim);
+            int level = LevelOf(i);
+            Commit(i, s, level);
+            int seed = UnityEngine.Random.Range(1, int.MaxValue);
+            if (GameSession.IsAuthority)
             {
-                Fail(i, null);
+                float bonus = pc.perfectDodge != null ? pc.perfectDodge.TakeBonus(s) : 1f;
+                LastCast = AbilityRunner.Cast(s, pc, aim, level, bonus, CastMode.Live, seed);
+                if (GameSession.Serving) NetWorld.CastShown(pc, i, aim, origin, level, seed);
+            }
+            else
+            {
+                pc.HoldEnergy(0.6f);
+                LastCast = AbilityRunner.Cast(s, pc, aim, level, 1f, CastMode.Predicted, seed);
+                OnlineSession.Ask(new CastRequest { slot = (byte)i, aim = aim, origin = origin });
+            }
+            SkillCast?.Invoke(i);
+            return true;
+        }
+
+        /// <summary>
+        /// Whether slot <paramref name="i"/> may fire now: global cooldown, the pose before, its own
+        /// cooldown, energy, Trói. <paramref name="grace"/> forgives timing (the server hears a
+        /// press a moment after the player's machine allowed it).
+        /// </summary>
+        bool CanCast(int i, float grace, bool feedback, out string reason)
+        {
+            reason = null;
+            var s = i >= 0 && i < slots.Length ? slots[i] : null;
+            if (s == null) return false;
+            if (Time.time < gcdUntil - grace) return false;
+            if (PoseWait(i) > grace) return false;   // still in the pose before (Request buffers presses near its end)
+            if (Remaining(i) > grace)
+            {
+                if (feedback) Fail(i, null);
                 return false;
             }
             if (pc.energy < s.energyCost)
             {
-                Fail(i, "Không đủ năng lượng!");
+                reason = "Không đủ năng lượng!";
+                if (feedback) Fail(i, reason);
                 return false;
             }
             if (s.HasTag(AbilityTags.Movement) && pc.status != null && pc.status.IsRooted)
             {
-                Fail(i, "Đang bị Trói!");
+                reason = "Đang bị Trói!";
+                if (feedback) Fail(i, reason);
                 return false;
             }
-            Vector2 origin = pc.transform.position;
+            return true;
+        }
+
+        Vector2 ClampAim(AbilityDef s, Vector2 origin, Vector2 aim)
+        {
             Vector2 to = aim - origin;
-            if (to.sqrMagnitude < 0.01f) aim = origin + pc.motor.Facing * 0.1f;
-            else if (to.magnitude > s.maxRange) aim = origin + to.normalized * s.maxRange;
-            int level = LevelOf(i);
+            if (to.sqrMagnitude < 0.01f) return origin + pc.motor.Facing * 0.1f;
+            if (to.magnitude > s.maxRange) return origin + to.normalized * s.maxRange;
+            return aim;
+        }
+
+        /// <summary>Spends the energy and starts the cooldowns of a cast.</summary>
+        void Commit(int i, AbilityDef s, int level)
+        {
             pc.energy -= s.energyCost;
             cooldownOf[i] = s.CooldownAt(level) * (pc.stats != null ? pc.stats.CooldownMultiplier(i, s) : 1f);
             if (i == 0 && pc.status != null) cooldownOf[i] /= Mathf.Max(0.1f, pc.status.AttackSpeedMultiplier);   // Lạnh slows the basic attack
             readyAt[i] = Time.time + cooldownOf[i];
             gcdUntil = Time.time + globalCooldown;
             commitUntil = Time.time + s.CommitTime;
+        }
+
+        // ------------------------------------------------------------------ online
+        /// <summary>How much earlier than the server a player's machine may think a skill is ready.</summary>
+        const float ServerGrace = 0.15f;
+
+        /// <summary>
+        /// Server: a player used slot <paramref name="i"/> from <paramref name="origin"/> (where their
+        /// hero stood on their screen). Returns null when the skill happened, else why not.
+        /// </summary>
+        public string ServerCast(int i, Vector2 aim, Vector2 origin)
+        {
+            if (pc.IsDead) return "";
+            if (pc.status != null && pc.status.IsStunned) return "Đang bị choáng!";
+            if (!CanCast(i, ServerGrace, false, out string reason)) return reason ?? "";
+            // the player's own position, unless it is far from what the server last heard
+            if (((Vector2)pc.transform.position - origin).sqrMagnitude > 3f * 3f) origin = pc.transform.position;
+            var s = slots[i];
+            aim = ClampAim(s, origin, aim);
+            int level = LevelOf(i);
+            Commit(i, s, level);
+            int seed = UnityEngine.Random.Range(1, int.MaxValue);
             float bonus = pc.perfectDodge != null ? pc.perfectDodge.TakeBonus(s) : 1f;
-            LastCast = AbilityRunner.Cast(s, pc, aim, level, bonus);
+            LastCast = AbilityRunner.Cast(s, pc, aim, level, bonus, GameSession.HasScreen ? CastMode.Live : CastMode.Rules, seed, origin);
+            NetWorld.CastShown(pc, i, aim, origin, level, seed);
             SkillCast?.Invoke(i);
-            return true;
+            return null;
+        }
+
+        /// <summary>A player's machine: the server refused a skill this screen already showed. Its cooldown is given back.</summary>
+        public void Refused(int i, string reason)
+        {
+            if (i < 0 || i >= readyAt.Length) return;
+            readyAt[i] = 0f;
+            gcdUntil = 0f;
+            commitUntil = 0f;
+            pc.HoldEnergy(0f);
+            if (!string.IsNullOrEmpty(reason)) Fail(i, reason);
+        }
+
+        /// <summary>Another player's hero used a skill (the server says so): show it on this screen.</summary>
+        public void ShowCast(int i, Vector2 aim, Vector2 origin, int level, int seed)
+        {
+            var s = i >= 0 && i < slots.Length ? slots[i] : null;
+            if (s == null) return;
+            LastCast = AbilityRunner.Cast(s, pc, aim, level, 1f, CastMode.Shown, seed, origin);
         }
 
         void Fail(int i, string reason)

@@ -48,6 +48,14 @@ namespace RPG
         public string CaptureState() => JsonUtility.ToJson(new SaveState { time = time });
         public void RestoreState(string json) => time = Mathf.Repeat(JsonUtility.FromJson<SaveState>(json).time, 1f);
 
+        /// <summary>A player's machine online: the server's time of day (everyone lives in the same day).</summary>
+        public void SetFromServer(float serverTime)
+        {
+            // small drifts are smoothed by running on; a jump (a GM's time command) is taken at once
+            float diff = Mathf.Abs(Mathf.DeltaAngle(time * 360f, serverTime * 360f)) / 360f;
+            if (diff > 0.002f) time = Mathf.Repeat(serverTime, 1f);
+        }
+
         void Update()
         {
             if (dayLength > 0) time = Mathf.Repeat(time + Time.deltaTime / dayLength, 1f);

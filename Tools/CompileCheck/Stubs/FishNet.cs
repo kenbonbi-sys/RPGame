@@ -4,6 +4,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace FishNet.Broadcast
+{
+    public interface IBroadcast { }
+}
+
 namespace FishNet.Connection
 {
     public partial class NetworkConnection
@@ -13,11 +18,16 @@ namespace FishNet.Connection
         public bool IsValid => ClientId >= 0;
         public bool IsHost => false;
         public bool IsLocalClient => false;
+        public bool IsAuthenticated { get; private set; }
+        public string GetAddress() => string.Empty;
+        public void Disconnect(bool immediately) { }
     }
 }
 
 namespace FishNet.Transporting
 {
+    public enum Channel : byte { Reliable = 0, Unreliable = 1 }
+
     [Flags]
     public enum LocalConnectionState : int { Stopped = 1 << 0, Stopping = 1 << 1, Starting = 1 << 2, Started = 1 << 3 }
     public enum RemoteConnectionState : byte { Stopped = 0, Started = 2 }
@@ -77,6 +87,9 @@ namespace FishNet.Object
     {
         public bool IsGlobal { get; private set; }
         public void SetIsGlobal(bool value) { }
+        public int ObjectId { get; private set; } = ushort.MaxValue;
+        public bool GetIsNetworked() => true;
+        public void SetIsNetworked(bool value) { }
         public bool IsOwner => false;
         public NetworkConnection Owner => null;
         public int OwnerId => -1;
@@ -96,6 +109,7 @@ namespace FishNet.Object
         public bool IsController => false;
         public NetworkConnection Owner => null;
         public int OwnerId => -1;
+        public int ObjectId => -1;
         public virtual void OnStartNetwork() { }
         public virtual void OnStopNetwork() { }
         public virtual void OnStartServer() { }
@@ -182,14 +196,37 @@ namespace FishNet.Managing.Scened
     }
 }
 
+namespace FishNet.Authenticating
+{
+    using FishNet.Connection;
+    using FishNet.Managing;
+
+    public abstract class Authenticator : MonoBehaviour
+    {
+        public bool Initialized { get; private set; }
+        protected NetworkManager NetworkManager { get; private set; }
+        public abstract event Action<NetworkConnection, bool> OnAuthenticationResult;
+        public virtual void InitializeOnce(NetworkManager networkManager) { }
+        public virtual void OnRemoteConnection(NetworkConnection connection) { }
+    }
+}
+
 namespace FishNet.Managing.Server
 {
+    using FishNet.Authenticating;
+    using FishNet.Broadcast;
     using FishNet.Connection;
     using FishNet.Object;
     using FishNet.Transporting;
 
     public sealed partial class ServerManager : MonoBehaviour
     {
+        public Authenticator GetAuthenticator() => null;
+        public void SetAuthenticator(Authenticator value) { }
+        public void RegisterBroadcast<T>(Action<NetworkConnection, T, Channel> handler, bool requireAuthentication = true) where T : struct, IBroadcast { }
+        public void UnregisterBroadcast<T>(Action<NetworkConnection, T, Channel> handler) where T : struct, IBroadcast { }
+        public void Broadcast<T>(NetworkConnection connection, T message, bool requireAuthenticated = true, Channel channel = Channel.Reliable) where T : struct, IBroadcast { }
+        public void Broadcast<T>(T message, bool requireAuthenticated = true, Channel channel = Channel.Reliable) where T : struct, IBroadcast { }
         public event Action<ServerConnectionStateArgs> OnServerConnectionState;
         public event Action<NetworkConnection, RemoteConnectionStateArgs> OnRemoteConnectionState;
         public bool Started { get; private set; }
@@ -206,11 +243,15 @@ namespace FishNet.Managing.Server
 
 namespace FishNet.Managing.Client
 {
+    using FishNet.Broadcast;
     using FishNet.Connection;
     using FishNet.Transporting;
 
     public sealed partial class ClientManager : MonoBehaviour
     {
+        public void RegisterBroadcast<T>(Action<T, Channel> handler) where T : struct, IBroadcast { }
+        public void UnregisterBroadcast<T>(Action<T, Channel> handler) where T : struct, IBroadcast { }
+        public void Broadcast<T>(T message, Channel channel = Channel.Reliable) where T : struct, IBroadcast { }
         public event Action OnAuthenticated;
         public event Action<ClientConnectionStateArgs> OnClientConnectionState;
         public event Action<RemoteConnectionStateArgs> OnRemoteConnectionState;

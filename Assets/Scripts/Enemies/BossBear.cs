@@ -10,6 +10,11 @@ namespace RPG
     /// that stays on the field), Chụp Quăng (leap slam; landing on a boulder stuns the bear).
     /// Enrages at 50% HP. Wakes for any hero, fights the one it has the most threat on and resets
     /// once every hero is down or has left the arena.
+    /// Online (Docs/KeHoach-Online.md, phase 3) the server fights; every screen near the arena gets
+    /// its warnings, roars and effects (<see cref="NetCues"/>), its big moments
+    /// (<see cref="Present"/>), and shows its bar and music while its hero is in the fight. It
+    /// comes back <see cref="respawnSeconds"/> after it falls, and everyone who hurt it gets the
+    /// kill and their own loot.
     /// </summary>
     public class BossBear : MonoBehaviour, ISaveable
     {
@@ -24,6 +29,8 @@ namespace RPG
         public Transform arenaCenter;
         public float arenaRadius = 11f;
         public float wakeRadius = 7.5f;
+        [Tooltip("Online: seconds after its fall before the bear is back (a shared world has more than one hero).")]
+        public float respawnSeconds = 180f;
 
         [Header("Refs")]
         public CharacterMotor motor;
@@ -45,10 +52,20 @@ namespace RPG
         public float pounceRadius = 2.4f, pounceDamage = 30f, pounceAir = 0.75f;
         public List<LootEntry> loot = new List<LootEntry>();
 
+        /// <summary>The bear's big moments, shown by every screen near it.</summary>
+        public enum Moment : byte
+        {
+            Intro = 1,
+            Enrage = 2,
+            Death = 3,
+            Reset = 4
+        }
+
         enum State { Dormant, Intro, Chase, Busy, Stunned, Returning, Dead }
         State state = State.Dormant;
         bool enraged;
         float recoverUntil;
+        float baseWalkSpeed;
         readonly Dictionary<string, float> ready = new Dictionary<string, float>();
         readonly List<Telegraph> liveTelegraphs = new List<Telegraph>();
         Coroutine routine;
@@ -56,8 +73,15 @@ namespace RPG
         Vector2 home;
         PlayerController target;
         readonly ThreatTable threat = new ThreatTable();
+        // a client's copy: what the server says
+        bool remoteEngaged, remoteEnraged;
+        // this screen shows the fight (bar, music) — online, only while its hero is in it
+        bool shownHere;
 
-        public bool Engaged => state != State.Dormant && state != State.Dead && state != State.Returning;
+        public bool Engaged => GameSession.IsAuthority
+            ? state != State.Dormant && state != State.Dead && state != State.Returning
+            : remoteEngaged;
+        public bool Enraged => GameSession.IsAuthority ? enraged : remoteEnraged;
         /// <summary>The hero the bear is fighting (null while dormant).</summary>
         public PlayerController Target => target;
 
@@ -78,6 +102,7 @@ namespace RPG
             if (poise == null) poise = GetComponent<Poise>();
             if (style == null) style = GetComponentInChildren<SpriteStyle>();
             if (poise != null) poise.Broken += OnPoiseBroken;
+            baseWalkSpeed = walkSpeed;
             All.Add(this);
             SaveRegistry.Register(this);
         }
@@ -106,6 +131,7 @@ namespace RPG
         // ================================================================= loop
         void Update()
         {
+            if (!GameSession.IsAuthority) return;   // online the server fights; this copy only shows
             switch (state)
             {
                 case State.Dormant:
@@ -171,16 +197,15 @@ namespace RPG
             threat.Clear();
             target = null;
             enraged = false;
+            walkSpeed = baseWalkSpeed;
+            motor.moveSpeed = walkSpeed;
             if (auraFx != null) { VFX.Release(auraFx); auraFx = null; }
-            if (flash != null) flash.SetTint(Color.white, 0);
             health.ResetHealth(maxHp);
+            health.ForgetAttackers();
             if (poise != null) poise.ResetPoise();
             state = State.Returning;
-            GameEvents.RaiseBossDisengaged();
-            CameraRig.SetZoom(1f);
-            CameraRig.SetFocus(null);
-            AudioManager.PlayMusic(ZoneMusic, 2f);
             if (bodyRoot != null) bodyRoot.localPosition = Vector3.zero;
+            NetCues.Boss(this, Moment.Reset);
         }
 
         /// <summary>Music of the zone the boss lives in (back to it after the fight).</summary>
@@ -289,7 +314,7 @@ namespace RPG
 
         void Announce(string skill)
         {
-            GameEvents.RaiseSkillAnnounced(health, "Kỹ năng: " + skill);
+            NetCues.Announce(health, "Kỹ năng: " + skill);
             Bestiary.ForWitnesses(Pos, b => b.RecordSkill(displayName, skill));
         }
 
@@ -304,6 +329,7 @@ namespace RPG
             foreach (var t in liveTelegraphs)
                 if (t != null && t.gameObject.activeInHierarchy) t.Cancel();
             liveTelegraphs.Clear();
+            NetCues.CancelTelegraphs(this);
         }
 
         // ================================================================= phases
@@ -313,21 +339,15 @@ namespace RPG
             motor.Stop();
             var waker = PickTarget();
             if (waker != null) Face(waker.transform.position);
-            if (GameManager.I != null) GameManager.I.SetCinematic(true);
-            CameraRig.SetZoom(0.8f);
-            CameraRig.SetFocus(transform, 0.35f);
+            NetCues.Boss(this, Moment.Intro);
             yield return new WaitForSeconds(0.4f);
             anim.Play("roar", true);
-            AudioManager.Play("sfx_boss_roar", 1f, 0.02f);
-            VFX.Spawn("boss_roar", Pos + Vector2.up * 2.4f, Quaternion.identity);
-            CameraRig.Shake(0.7f);
-            ScreenFX.Impact(0.8f, 0.8f);
-            GameEvents.RaiseBanner(BannerKind.Title, displayName, title, new Color(1f, 0.45f, 0.4f));
-            GameEvents.RaiseBossEngaged(health, displayName, level);
-            AudioManager.PlayMusic("music_boss", 0.8f);
+            NetCues.FlatSound("sfx_boss_roar", Pos, 1f, 0.02f);
+            NetCues.Vfx("boss_roar", Pos + Vector2.up * 2.4f);
+            NetCues.Shake(0.7f, Pos, NetCues.FarRadius);
+            NetCues.Impact(0.8f, 0.8f, Pos, NetCues.FarRadius);
             Bestiary.ForWitnesses(Pos, b => b.RecordSeen(bossId, displayName));
             yield return new WaitForSeconds(1.6f);
-            if (GameManager.I != null) GameManager.I.SetCinematic(false);
             anim.Play("idle", true);
             SetCooldown("stomp", 2.5f);
             SetCooldown("pounce", 4f);
@@ -339,16 +359,15 @@ namespace RPG
         {
             enraged = true;
             anim.Play("roar", true);
-            GameEvents.RaiseSkillAnnounced(health, "Cuồng Nộ!");
-            GameEvents.RaiseLog($"{displayName} nổi cơn cuồng nộ!", new Color(1f, 0.5f, 0.5f));
-            AudioManager.Play("sfx_enrage", 1f, 0.02f);
-            VFX.Spawn("enrage_burst", Pos + Vector2.up * 1.6f, Quaternion.identity);
-            auraFx = VFX.Spawn("enrage_aura", Pos, Quaternion.identity, 1f, transform, true);
-            if (flash != null) flash.SetTint(new Color(0.75f, 0.3f, 1f), 0.18f);
-            ScreenFX.Flash(new Color(0.6f, 0.2f, 0.9f), 0.35f, 0.5f);
-            ScreenFX.Impact(1f, 0.9f);
-            CameraRig.Shake(0.8f);
-            walkSpeed *= 1.2f;
+            NetCues.Announce(health, "Cuồng Nộ!");
+            NetCues.Log($"{displayName} nổi cơn cuồng nộ!", new Color(1f, 0.5f, 0.5f), Pos);
+            NetCues.FlatSound("sfx_enrage", Pos, 1f, 0.02f);
+            NetCues.Vfx("enrage_burst", Pos + Vector2.up * 1.6f);
+            NetCues.Boss(this, Moment.Enrage);
+            NetCues.Flash(new Color(0.6f, 0.2f, 0.9f), 0.35f, 0.5f, Pos, NetCues.FarRadius);
+            NetCues.Impact(1f, 0.9f, Pos, NetCues.FarRadius);
+            NetCues.Shake(0.8f, Pos, NetCues.FarRadius);
+            walkSpeed = baseWalkSpeed * 1.2f;
             motor.moveSpeed = walkSpeed;
             yield return new WaitForSeconds(1.4f);
         }
@@ -360,18 +379,18 @@ namespace RPG
             Face(p.transform.position);
             Announce("Vồ");
             float windup = enraged ? 0.42f : 0.55f;
-            Warn(Telegraph.Cone(Pos + Vector2.up * 0.3f, dir, swipeRange + 0.3f, windup));
+            Warn(NetCues.Cone(this, Pos + Vector2.up * 0.3f, dir, swipeRange + 0.3f, windup));
             anim.Play("windup", true);
-            AudioManager.Play("sfx_telegraph", 0.5f, 0.05f, transform.position);
+            NetCues.Sound("sfx_telegraph", 0.5f, 0.05f, transform.position);
             yield return new WaitForSeconds(windup);
             anim.Play("slam", true);
             motor.Dash(dir * 5f, 0.12f);
-            AudioManager.Play("sfx_boss_swipe", 1f, 0.08f, transform.position);
-            VFX.Spawn("claw_swipe", Pos + Vector2.up * 0.9f + dir * 1.4f, Quaternion.Euler(0, 0, Util.Angle(dir) - 90f), 1.4f);
+            NetCues.Sound("sfx_boss_swipe", 1f, 0.08f, transform.position);
+            NetCues.Vfx("claw_swipe", Pos + Vector2.up * 0.9f + dir * 1.4f, Util.Angle(dir) - 90f, 1.4f);
             var d = DamageInfo.Make(swipeDamage, Team.Enemy, gameObject, Pos, dir, DamageType.Physical, 7f);
             d.skillName = "Vồ";
             Combat.DamageCone(Pos + Vector2.up * 0.3f, dir, swipeRange + 0.3f, 100f, d);
-            CameraRig.Shake(0.2f);
+            NetCues.Shake(0.2f, Pos);
             yield return new WaitForSeconds(0.45f);
             if (enraged && Random.value < 0.5f)
             {
@@ -390,16 +409,16 @@ namespace RPG
                 Announce("Dậm Đất");
                 float windup = i == 0 ? 1.0f : 0.7f;
                 float radius = stompRadius + i * 1.2f;
-                Warn(Telegraph.Circle(Pos, radius, windup));
+                Warn(NetCues.Circle(this, Pos, radius, windup));
                 anim.Play("windup", true);
-                AudioManager.Play("sfx_telegraph", 0.6f, 0.05f, transform.position);
+                NetCues.Sound("sfx_telegraph", 0.6f, 0.05f, transform.position);
                 yield return new WaitForSeconds(windup);
                 anim.Play("slam", true);
-                AudioManager.Play("sfx_boss_stomp", 1f, 0.05f, transform.position);
-                VFX.Spawn("stomp_shockwave", Pos + Vector2.up * 0.1f, Quaternion.identity, radius / 4.2f);
-                CameraRig.Shake(0.65f);
-                ScreenFX.Impact(0.6f, 0.4f);
-                TimeFX.HitStop(0.06f, gameObject);
+                NetCues.Sound("sfx_boss_stomp", 1f, 0.05f, transform.position);
+                NetCues.Vfx("stomp_shockwave", Pos + Vector2.up * 0.1f, 0f, radius / 4.2f);
+                NetCues.Shake(0.65f, Pos);
+                NetCues.Impact(0.6f, 0.4f, Pos);
+                if (GameSession.HasScreen) TimeFX.HitStop(0.06f, gameObject);
                 var d = DamageInfo.Make(stompDamage, Team.Enemy, gameObject, Pos, Vector2.down, DamageType.Physical, 8f);
                 d.status.stun = stompStun;
                 d.skillName = "Dậm Đất";
@@ -423,9 +442,9 @@ namespace RPG
                 if (i > 0) t += Util.RandomInCircle(3.2f);
                 if (arenaCenter != null && Vector2.Distance(t, home) > arenaRadius) t = home + (t - home).normalized * arenaRadius;
                 targets.Add(t);
-                Warn(Telegraph.Circle(t, rockRadius, 0.75f + rockFlight + i * 0.18f));
+                Warn(NetCues.Circle(this, t, rockRadius, 0.75f + rockFlight + i * 0.18f));
             }
-            AudioManager.Play("sfx_telegraph", 0.5f, 0.05f, transform.position);
+            NetCues.Sound("sfx_telegraph", 0.5f, 0.05f, transform.position);
             yield return new WaitForSeconds(0.75f);
             anim.speed = 1;
             anim.Play("throw", true);
@@ -445,15 +464,16 @@ namespace RPG
             var go = Pool.Get(db.rockProjectilePrefab, start, Quaternion.identity);
             var fx = go.GetComponent<PooledFX>();
             if (fx != null) fx.Persistent = true;
-            AudioManager.Play("sfx_rock_throw", 0.9f, 0.08f, transform.position);
+            NetCues.Sound("sfx_rock_throw", 0.9f, 0.08f, transform.position);
+            NetCues.Arc(start, target, rockFlight);
             go.GetComponent<ArcProjectile>().Launch(start, target, rockFlight, RockLanded);
         }
 
         void RockLanded(Vector2 at)
         {
-            VFX.Spawn("rock_impact", at, Quaternion.identity);
-            AudioManager.Play("sfx_rock_impact", 1f, 0.06f, at);
-            CameraRig.Shake(0.35f);
+            NetCues.Vfx("rock_impact", at);
+            NetCues.Sound("sfx_rock_impact", 1f, 0.06f, at);
+            NetCues.Shake(0.35f, at);
             var d = DamageInfo.Make(rockDamage, Team.Enemy, gameObject, at, Vector2.down, DamageType.Physical, 6f);
             d.skillName = "Ném Đá Lớn";
             Combat.DamageCircle(at, rockRadius, d);
@@ -462,7 +482,10 @@ namespace RPG
             bool free = Boulder.Nearest(at, 1.6f) == null && Boulder.All.Count < 6 &&
                         Physics2D.OverlapCircle(at, 0.5f, Layers.ObstacleMask) == null;
             if (db.boulderPrefab != null && free)
-                Instantiate(db.boulderPrefab, at, Quaternion.identity, transform.parent);
+            {
+                var rock = Instantiate(db.boulderPrefab, at, Quaternion.identity, transform.parent);
+                NetWorld.BoulderMade(rock.GetComponent<Boulder>());
+            }
         }
 
         IEnumerator Pounce(PlayerController p)
@@ -474,14 +497,14 @@ namespace RPG
             Vector2 target = p.transform.position;
             if (Vector2.Distance(target, home) > arenaRadius) target = home + (target - home).normalized * arenaRadius;
             float crouch = enraged ? 0.35f : 0.5f;
-            Warn(Telegraph.Circle(target, pounceRadius, crouch + pounceAir));
-            AudioManager.Play("sfx_telegraph", 0.6f, 0.05f, transform.position);
+            Warn(NetCues.Circle(this, target, pounceRadius, crouch + pounceAir));
+            NetCues.Sound("sfx_telegraph", 0.6f, 0.05f, transform.position);
             yield return new WaitForSeconds(crouch);
 
             anim.Play("air", true);
-            AudioManager.Play("sfx_boss_leap", 1f, 0.05f, transform.position);
-            VFX.Spawn("step_dust", Pos, Quaternion.identity, 3f);
-            if (afterImages != null) afterImages.Emit(pounceAir, new Color(0.6f, 0.4f, 1f, 0.5f));
+            NetCues.Sound("sfx_boss_leap", 1f, 0.05f, transform.position);
+            NetCues.Vfx("step_dust", Pos, 0f, 3f);
+            if (afterImages != null && GameSession.HasScreen) afterImages.Emit(pounceAir, new Color(0.6f, 0.4f, 1f, 0.5f));
             var cols = GetComponentsInChildren<Collider2D>();
             foreach (var c in cols) c.enabled = false;
             Vector2 start = Pos;
@@ -498,10 +521,10 @@ namespace RPG
             foreach (var c in cols) c.enabled = true;
 
             anim.Play("slam", true);
-            VFX.Spawn("pounce_land", target, Quaternion.identity);
-            AudioManager.Play("sfx_boss_stomp", 0.8f, 0.1f, target);
-            CameraRig.Shake(0.55f);
-            ScreenFX.Impact(0.5f, 0.35f);
+            NetCues.Vfx("pounce_land", target);
+            NetCues.Sound("sfx_boss_stomp", 0.8f, 0.1f, target);
+            NetCues.Shake(0.55f, target);
+            NetCues.Impact(0.5f, 0.35f, target);
             var d = DamageInfo.Make(pounceDamage, Team.Enemy, gameObject, target, Vector2.down, DamageType.Physical, 9f);
             d.skillName = "Chụp Quăng";
             Combat.DamageCircle(target, pounceRadius, d);
@@ -512,7 +535,7 @@ namespace RPG
             {
                 rock.Shatter(false);
                 status.ForceStun(2.8f);
-                GameEvents.RaiseLog($"{displayName} đâm sầm vào Tảng Đá Lớn và bị choáng!", Palette.Status);
+                NetCues.Log($"{displayName} đâm sầm vào Tảng Đá Lớn và bị choáng!", Palette.Status, target);
                 EnterStun();
                 yield break;
             }
@@ -522,6 +545,7 @@ namespace RPG
         /// <summary>Forces an attack (used by AutoShot / debugging).</summary>
         public void DebugForce(string attack)
         {
+            if (!GameSession.IsAuthority) return;
             var p = PickTarget() ?? Players.Local;
             if (p == null || state == State.Dead) return;
             if (state == State.Dormant) state = State.Chase;
@@ -541,6 +565,7 @@ namespace RPG
         void OnDamaged(DamageInfo d, float amount)
         {
             if (flash != null) flash.Flash(Color.white, 0.85f, 0.1f);
+            if (!GameSession.IsAuthority) return;
             if (state != State.Dead) threat.Add(d.SourcePlayer, amount);
             if (state == State.Dormant && d.sourceTeam == Team.Player) routine = StartCoroutine(Intro());
             if (state == State.Chase && status.IsStunned) EnterStun();
@@ -548,6 +573,11 @@ namespace RPG
 
         void OnDied(DamageInfo d)
         {
+            if (!GameSession.IsAuthority)
+            {
+                state = State.Dead;   // the server's death sequence reaches this screen as a moment
+                return;
+            }
             if (routine != null) StopCoroutine(routine);
             StopAllCoroutines();
             ClearTelegraphs();
@@ -561,31 +591,21 @@ namespace RPG
 
         IEnumerator DeathSequence()
         {
-            TimeFX.SlowMo(0.2f, 1.6f);
             anim.Play("dead", true);
-            AudioManager.Play("sfx_boss_roar", 0.9f, 0f);
-            ScreenFX.Flash(Color.white, 0.7f, 0.6f);
-            ScreenFX.Impact(1f, 1.2f);
-            CameraRig.Shake(1f);
-            VFX.Spawn("boss_death", Pos + Vector2.up * 1.5f, Quaternion.identity);
+            NetCues.Boss(this, Moment.Death);
             yield return new WaitForSecondsRealtime(1.2f);
-            Loot.Roll(loot, Pos);
-            Loot.DropCoins(Pos, 12);
+            var credited = new List<PlayerController>(health.Attackers);
+            Loot.Roll(loot, Pos, credited);
+            Loot.DropCoins(Pos, 12, credited);
             GameEvents.RaiseEnemyKilled(new KillInfo
             {
-                id = bossId, name = displayName, level = level, rank = EnemyRank.Boss, position = Pos,
-                credited = new List<PlayerController>(health.Attackers)
+                id = bossId, name = displayName, level = level, rank = EnemyRank.Boss, position = Pos, credited = credited
             });
             threat.Clear();
             target = null;
-            GameEvents.RaiseBanner(BannerKind.Victory, "CHIẾN THẮNG!", $"Đã đánh bại {displayName}");
-            GameEvents.RaiseBossDisengaged(1.5f);
-            AudioManager.Play("sfx_victory", 1f, 0f);
-            CameraRig.SetZoom(1f);
-            CameraRig.SetFocus(null);
             yield return new WaitForSeconds(4f);
-            AudioManager.PlayMusic(ZoneMusic, 3f);
-            if (style != null && style.Supported) yield return style.Dissolve(1.8f);
+            if (!GameSession.HasScreen) yield return new WaitForSeconds(1.8f);
+            else if (style != null && style.Supported) yield return style.Dissolve(1.8f);
             else
             {
                 for (float t = 0; t < 1.5f; t += Time.deltaTime)
@@ -595,6 +615,153 @@ namespace RPG
                 }
             }
             gameObject.SetActive(false);
+            // a shared world has more heroes to come: the bear returns
+            if (GameSession.Online && respawnSeconds > 0f && GameManager.I != null) GameManager.I.StartCoroutine(ReturnLater(respawnSeconds));
+        }
+
+        IEnumerator ReturnLater(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            if (this == null || state != State.Dead) yield break;
+            transform.position = home + Vector2.up * 1.2f;
+            gameObject.SetActive(true);
+            foreach (var c in GetComponentsInChildren<Collider2D>(true)) c.enabled = true;
+            enraged = false;
+            walkSpeed = baseWalkSpeed;
+            motor.moveSpeed = walkSpeed;
+            health.ResetHealth(maxHp);
+            if (poise != null) poise.ResetPoise();
+            if (status != null) status.Cleanse();
+            if (body != null) body.color = Color.white;
+            anim.speed = 1f;
+            anim.Play("idle", true);
+            state = State.Dormant;
+            NetCues.Boss(this, Moment.Reset);
+            NetCues.Log($"{displayName} đã trở lại Rừng Già Cổ Thụ.", Palette.LogQuest, home, 60f);
+        }
+
+        // ================================================================= what screens show
+        /// <summary>
+        /// A big moment on this screen: the intro's camera and title, the rage aura, the fall and
+        /// its victory banner, the walk home. Offline all of it; online the camera, the pause and
+        /// the banners only for a hero near the arena (bar and music follow <see cref="LateUpdate"/>).
+        /// </summary>
+        public void Present(Moment moment)
+        {
+            var me = Players.Local;
+            bool near = !GameSession.Online || me != null && Vector2.Distance(me.transform.position, home) <= LeashRadius;
+            switch (moment)
+            {
+                case Moment.Intro:
+                    if (!near) return;
+                    // on the game manager: a fall during the intro must not leave the screen frozen
+                    if (GameManager.I != null) GameManager.I.StartCoroutine(Cinematic(2f));
+                    CameraRig.SetZoom(0.8f);
+                    CameraRig.SetFocus(transform, 0.35f);
+                    StartCoroutine(IntroTitle());
+                    if (!GameSession.Online) ShowFight(true);
+                    break;
+                case Moment.Enrage:
+                    if (auraFx == null) auraFx = VFX.Spawn("enrage_aura", Pos, Quaternion.identity, 1f, transform, true);
+                    if (flash != null) flash.SetTint(new Color(0.75f, 0.3f, 1f), 0.18f);
+                    break;
+                case Moment.Death:
+                    if (auraFx != null) { VFX.Release(auraFx); auraFx = null; }
+                    StartCoroutine(DeathShow(near));
+                    break;
+                case Moment.Reset:
+                    if (auraFx != null) { VFX.Release(auraFx); auraFx = null; }
+                    if (flash != null) flash.SetTint(Color.white, 0);
+                    if (!GameSession.Online)
+                    {
+                        ShowFight(false);
+                        CameraRig.SetZoom(1f);
+                        CameraRig.SetFocus(null);
+                    }
+                    break;
+            }
+        }
+
+        IEnumerator Cinematic(float seconds)
+        {
+            GameManager.I.SetCinematic(true);
+            yield return new WaitForSeconds(seconds);
+            if (GameManager.I != null) GameManager.I.SetCinematic(false);
+        }
+
+        IEnumerator IntroTitle()
+        {
+            yield return new WaitForSeconds(0.4f);
+            GameEvents.RaiseBanner(BannerKind.Title, displayName, title, new Color(1f, 0.45f, 0.4f));
+        }
+
+        IEnumerator DeathShow(bool near)
+        {
+            if (near)
+            {
+                TimeFX.SlowMo(0.2f, 1.6f);
+                AudioManager.Play("sfx_boss_roar", 0.9f, 0f);
+                ScreenFX.Flash(Color.white, 0.7f, 0.6f);
+                ScreenFX.Impact(1f, 1.2f);
+                CameraRig.Shake(1f);
+            }
+            VFX.Spawn("boss_death", Pos + Vector2.up * 1.5f, Quaternion.identity);
+            yield return new WaitForSecondsRealtime(1.2f);
+            if (near)
+            {
+                GameEvents.RaiseBanner(BannerKind.Victory, "CHIẾN THẮNG!", $"Đã đánh bại {displayName}");
+                AudioManager.Play("sfx_victory", 1f, 0f);
+                CameraRig.SetZoom(1f);
+                CameraRig.SetFocus(null);
+            }
+            if (!GameSession.Online) GameEvents.RaiseBossDisengaged(1.5f);
+            yield return new WaitForSeconds(4f);
+            if (!GameSession.Online) AudioManager.PlayMusic(ZoneMusic, 3f);
+            // a client fades its copy with the server's
+            if (GameSession.IsAuthority) yield break;
+            if (style != null && style.Supported) yield return style.Dissolve(1.8f);
+        }
+
+        /// <summary>The fight's bar and music on this screen.</summary>
+        void ShowFight(bool on)
+        {
+            if (on == shownHere) return;
+            shownHere = on;
+            if (on)
+            {
+                GameEvents.RaiseBossEngaged(health, displayName, level);
+                AudioManager.PlayMusic("music_boss", 0.8f);
+                return;
+            }
+            GameEvents.RaiseBossDisengaged(health.IsDead ? 1.5f : 0f);
+            AudioManager.PlayMusic(ZoneMusic, 2f);
+            CameraRig.SetZoom(1f);
+            CameraRig.SetFocus(null);
+        }
+
+        /// <summary>Online: the bar and the boss music show while this screen's hero is in a fight with the bear.</summary>
+        void LateUpdate()
+        {
+            if (!GameSession.Online || !GameSession.HasScreen) return;
+            var me = Players.Local;
+            bool fight = Engaged && me != null && Vector2.Distance(me.transform.position, home) <= LeashRadius;
+            ShowFight(fight);
+        }
+
+        void OnDisable()
+        {
+            if (GameSession.Online && shownHere && GameSession.HasScreen) ShowFight(false);
+        }
+
+        /// <summary>A client's copy: whether the server's bear is fighting and enraged.</summary>
+        public void SetRemoteFlags(bool engaged, bool isEnraged)
+        {
+            remoteEngaged = engaged;
+            if (isEnraged != remoteEnraged)
+            {
+                remoteEnraged = isEnraged;
+                Present(isEnraged ? Moment.Enrage : Moment.Reset);
+            }
         }
 
         // ================================================================= save

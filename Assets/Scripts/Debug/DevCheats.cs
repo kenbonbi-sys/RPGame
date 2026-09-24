@@ -6,7 +6,8 @@ namespace RPG
     /// Handy keys while prototyping:
     /// F5 full heal/energy + potions · F6 skip time (day/night) · F7 teleport to boss arena
     /// F8 teleport to village · F9 kill enemies nearby · ` opens the DebugConsole.
-    /// Turning enableCheats off also disables the console.
+    /// Turning enableCheats off also disables the console. Online the keys become console
+    /// commands the server runs for game masters only.
     /// </summary>
     public class DevCheats : MonoBehaviour
     {
@@ -18,6 +19,11 @@ namespace RPG
             var gm = GameManager.I;
             var p = Players.Local;
             if (gm == null || p == null) return;
+            if (GameSession.Online)
+            {
+                ServerKeys();
+                return;
+            }
             if (InputReader.Cheat(0))
             {
                 p.health.Heal(9999);
@@ -47,6 +53,22 @@ namespace RPG
                 foreach (var e in EnemyBase.All.ToArray())
                     if (!e.IsDead && Vector2.Distance(e.transform.position, p.transform.position) < 12f) e.health.Kill();
             }
+        }
+
+        /// <summary>Online the same keys ask the server (game masters only).</summary>
+        static void ServerKeys()
+        {
+            var console = DebugConsole.I;
+            if (console == null) return;
+            if (InputReader.Cheat(0)) console.Execute("heal");
+            if (InputReader.Cheat(1))
+            {
+                float t = Mathf.Repeat((DayNightCycle.I != null ? DayNightCycle.I.time : 0f) + 0.25f, 1f);
+                console.Execute("time " + t.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+            }
+            if (InputReader.Cheat(2)) console.Execute("tp boss");
+            if (InputReader.Cheat(3)) console.Execute("tp spawn");
+            if (InputReader.Cheat(4)) console.Execute("kill");
         }
     }
 }

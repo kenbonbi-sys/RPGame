@@ -4,17 +4,19 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 
 ## Mở và chạy
 
-- **Chơi ngay:** `Builds/Windows/RungThiTham.exe`
+- **Chơi ngay:** `Builds/Windows/RungThiTham.exe` (màn hình chính: *Vào thế giới* online hoặc *Chơi một mình*)
 - **Mở trong Unity:** Unity Hub → *Add project from disk* → chọn thư mục `RPG` → mở bằng **Unity 6000.6.0f1** → mở scene `Assets/Scenes/Core.unity` → bấm **Play**.
-- **Cấu trúc scene:** `Core.unity` (quản lý, nhân vật, camera, ánh sáng, HUD — luôn được tải) + mỗi vùng một scene trong `Assets/Scenes/Zones` (địa hình, NPC, quái, boss), tải thêm bởi `SceneLoader` có màn chuyển. Mở riêng một scene vùng rồi bấm Play cũng chạy được: Core tự được tải kèm.
+- **Cấu trúc scene:** `Title.unity` (màn hình chính, cảnh đầu tiên của bản build), `Core.unity` (quản lý, nhân vật, camera, ánh sáng, HUD — luôn được tải) + mỗi vùng một scene trong `Assets/Scenes/Zones` (địa hình, NPC, quái, boss), tải thêm bởi `SceneLoader` có màn chuyển. Mở riêng một scene vùng rồi bấm Play cũng chạy được: Core tự được tải kèm.
 
-## Chơi online (thử nghiệm)
+## Chơi online
 
-Nhiều người vào cùng một thế giới và thấy nhau đi lại (giai đoạn 1 của `Docs/KeHoach-Online.md`, dùng FishNet, cổng UDP 7770):
+Một thế giới chung, luôn bật, cho khoảng 20 người (kế hoạch: `Docs/KeHoach-Online.md`, vận hành máy chủ: `Docs/MayChu.md`):
 
-- **Mở thế giới:** `RungThiTham.exe -host`. **Vào:** `RungThiTham.exe -client <IP máy mở>` (thử trên một máy: `-client 127.0.0.1`). **Máy chủ riêng:** `RungThiTham.exe -server -batchmode -nographics`. Đổi cổng: `-port <n>`.
-- Trong game, bảng lệnh `` ` ``: `host`, `join <IP>`, `leave`, `net`.
-- Chưa có ở giai đoạn này: quái và boss (tạm tắt khi online), đồng bộ nhiệm vụ và túi đồ, lưu game online.
+- **Người chơi:** mở game, bấm **Vào thế giới**. Game tự tìm máy chủ trong LAN / Radmin VPN và các địa chỉ trong `RungThiTham_Data/StreamingAssets/servers.txt`, không cần nhập IP. Lần đầu nhập tên nhân vật và mật khẩu (tên mới thì *Tạo nhân vật mới*); game nhớ đăng nhập trên máy đó. Bấm **Enter** để chat.
+- **Máy chủ luôn bật:** `Tools/Server/install-server.ps1` cài bản build thành máy chủ chạy nền, tự bật khi đăng nhập Windows và tự bật lại khi lỗi. Nhân vật (cấp, túi đồ, nhiệm vụ, vị trí…) lưu trên máy chủ, sao lưu mỗi ngày.
+- **Online có đủ:** quái, bãi hồi sinh, boss Gấu Ma (hồi sinh sau 3 phút), kỹ năng, trạng thái, rơi đồ riêng từng người, XP, nhiệm vụ, hội thoại — tất cả do máy chủ quyết định.
+- **Dòng lệnh:** máy chủ `RungThiTham.exe -server -batchmode -nographics [-port 7770] [-data <thư mục>] [-maxplayers 20]`; vào thẳng `-client <địa chỉ> -login <tên> <mật khẩu>`; một máy vừa mở vừa chơi `-host`. Bảng lệnh `` ` ``: `players`, `net`, `say`, `leave`; lệnh cheat online chỉ dành cho GM (`gm.txt` của máy chủ).
+- **Kiểm tra tự động:** `Tools/Server/netsmoke.ps1` (một máy chủ và hai người chơi đánh quái, thoát rồi vào lại).
 
 ## Điều khiển (theo layout của game tham khảo)
 

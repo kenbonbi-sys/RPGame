@@ -47,7 +47,7 @@ namespace RPG
                     hopTimer = hopPause * Random.Range(0.8f, 1.3f);
                     motor.Stop();
                     if (anim != null) anim.Play("idle");
-                    if (Random.value < 0.35f) AudioManager.Play("sfx_slime_hop", 0.3f, 0.2f, transform.position, 0.1f);
+                    if (Random.value < 0.35f) NetCues.Sound("sfx_slime_hop", 0.3f, 0.2f, transform.position, 0.1f);
                 }
             }
             else
@@ -75,7 +75,7 @@ namespace RPG
                 lunged = true;
                 Vector2 dir = ((Vector2)p.transform.position - Pos).normalized;
                 motor.Dash(dir * lungeSpeed, 0.25f);
-                AudioManager.Play("sfx_slime_hop", 0.6f, 0.1f, transform.position);
+                NetCues.Sound("sfx_slime_hop", 0.6f, 0.1f, transform.position);
             }
             if (stateTime > 0.3f && stateTime < 0.55f && p != null && !p.IsDead &&
                 Vector2.Distance(Pos, p.transform.position) < 0.8f)
@@ -101,6 +101,7 @@ namespace RPG
         protected override void OnDied(DamageInfo d)
         {
             base.OnDied(d);
+            if (!GameSession.HasScreen) return;   // every screen plays the fall of its own copy
             AudioManager.Play("sfx_slime_die", 0.8f, 0.1f, transform.position);
             VFX.Spawn("slime_splat", transform.position + Vector3.up * 0.2f, Quaternion.identity);
         }

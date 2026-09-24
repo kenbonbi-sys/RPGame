@@ -128,7 +128,7 @@ namespace RPG
             reason = null;
             var gm = GameManager.I;
             var me = Players.Local;
-            if (GameSession.Mode != SessionMode.Offline) reason = "Chơi online chưa lưu được (giai đoạn 2 sẽ lưu trên máy chủ).";
+            if (GameSession.Mode != SessionMode.Offline) reason = "Chơi online: máy chủ tự lưu nhân vật của bạn.";
             else if (gm == null || me == null) reason = "Chưa thể lưu lúc này.";
             else if (me.IsDead || gm.State == GameState.Dead) reason = "Không thể lưu khi đã gục.";
             else if (gm.State == GameState.Dialogue || gm.State == GameState.Cinematic) reason = "Không thể lưu lúc này.";
@@ -157,7 +157,7 @@ namespace RPG
             foreach (var s in CaptureCharacter(me)) f.Set(s.key, s.json);
             try
             {
-                Write(PathFor(slot), JsonUtility.ToJson(f, true));
+                SafeFile.Write(PathFor(slot), JsonUtility.ToJson(f, true));
                 return true;
             }
             catch (Exception e)
@@ -168,7 +168,8 @@ namespace RPG
             }
         }
 
-        static string CurrentQuestTitle(PlayerController hero)
+        /// <summary>The first quest of a hero's tracker (shown in save lists).</summary>
+        public static string CurrentQuestTitle(PlayerController hero)
         {
             var q = hero != null ? hero.quests : null;
             if (q == null) return "";
@@ -176,62 +177,40 @@ namespace RPG
             return list.Count > 0 ? list[0].title : "";
         }
 
-        /// <summary>Writes to a temp file, then swaps it in and keeps the previous version as .bak.</summary>
-        static void Write(string path, string json)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            string tmp = path + ".tmp";
-            string bak = path + ".bak";
-            File.WriteAllText(tmp, json, new UTF8Encoding(false));
-            if (!File.Exists(path))
-            {
-                File.Move(tmp, path);
-                return;
-            }
-            try
-            {
-                File.Replace(tmp, path, bak);
-            }
-            catch (PlatformNotSupportedException)
-            {
-                File.Copy(path, bak, true);
-                File.Delete(path);
-                File.Move(tmp, path);
-            }
-        }
-
         // ------------------------------------------------------------------ load
         /// <summary>Reads a slot (falls back to its .bak if the file is damaged). Null when empty or unreadable.</summary>
-        public static SaveFile Read(int slot)
+        public static SaveFile Read(int slot) => ReadFile(PathFor(slot));
+
+        /// <summary>Reads a save file (or its .bak), upgrading older versions. Null when missing or unreadable.</summary>
+        public static SaveFile ReadFile(string path)
         {
-            string path = PathFor(slot);
-            return ReadPath(path) ?? ReadPath(path + ".bak");
+            SaveFile result = null;
+            SafeFile.Read(path, text =>
+            {
+                try
+                {
+                    var f = JsonUtility.FromJson<SaveFile>(text);
+                    if (f == null || f.game != "RungThiTham" || !SaveFile.Migrate(f)) return false;
+                    result = f;
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[Save] Cannot read {path}: {e.Message}");
+                    return false;
+                }
+            });
+            return result;
         }
 
-        static SaveFile ReadPath(string path)
-        {
-            if (!File.Exists(path)) return null;
-            try
-            {
-                var f = JsonUtility.FromJson<SaveFile>(File.ReadAllText(path));
-                if (f == null || f.game != "RungThiTham" || !SaveFile.Migrate(f)) return null;
-                return f;
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"[Save] Cannot read {path}: {e.Message}");
-                return null;
-            }
-        }
-
-        public static bool Exists(int slot) => File.Exists(PathFor(slot)) || File.Exists(PathFor(slot) + ".bak");
+        public static bool Exists(int slot) => SafeFile.Exists(PathFor(slot));
 
         /// <summary>Reloads the scene and restores the slot once it is running.</summary>
         public bool Load(int slot)
         {
             if (GameSession.Mode != SessionMode.Offline)
             {
-                GameEvents.RaiseLog("Chơi online không tải được file lưu. Gõ \"leave\" để quay về chơi một mình.", new Color(1f, 0.6f, 0.5f));
+                GameEvents.RaiseLog("Chơi online không tải được file lưu offline: nhân vật online nằm trên máy chủ.", new Color(1f, 0.6f, 0.5f));
                 return false;
             }
             var f = Read(slot);

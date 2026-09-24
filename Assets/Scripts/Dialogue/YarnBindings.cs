@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -55,38 +56,50 @@ namespace RPG
         public static bool IsNight() => DayNightCycle.IsNight;
 
         // ------------------------------------------------------------------ commands
+        // Online a player's machine asks the server (which checks and applies) and the conversation
+        // waits for its answer: a script may read the quest log right after (Docs/KeHoach-Online.md).
+        // Where the world's rules run, they happen at once (null: nothing to wait for).
+
         [YarnCommand("quest_start")]
-        public static void QuestStart(string id)
+        public static IEnumerator QuestStart(string id)
         {
+            if (!GameSession.IsAuthority) return OnlineSession.AskAndWait(new ActRequest { kind = ActKind.QuestStart, text = id });
             if (Quests != null) Quests.StartQuest(id);
+            return null;
         }
 
         [YarnCommand("quest_complete")]
-        public static void QuestComplete(string id)
+        public static IEnumerator QuestComplete(string id)
         {
+            if (!GameSession.IsAuthority) return OnlineSession.AskAndWait(new ActRequest { kind = ActKind.QuestComplete, text = id });
             var q = Quests;
             if (q != null && !q.CompleteQuest(id))
                 Debug.LogWarning($"[Yarn] quest_complete {id}: quest is not ready ({q.Status(id)})");
+            return null;
         }
 
         [YarnCommand("set_flag")]
-        public static void SetFlag(string flag)
+        public static IEnumerator SetFlag(string flag)
         {
+            if (!GameSession.IsAuthority) return OnlineSession.AskAndWait(new ActRequest { kind = ActKind.SetFlag, text = flag });
             if (Quests != null) Quests.SetFlag(flag);
+            return null;
         }
 
         [YarnCommand("give_item")]
-        public static void GiveItem(string itemId, int count = 1)
+        public static IEnumerator GiveItem(string itemId, int count = 1)
         {
+            if (!GameSession.IsAuthority) return OnlineSession.AskAndWait(new ActRequest { kind = ActKind.GiveItem, text = itemId, value = count });
             var db = GameManager.I != null ? GameManager.I.db : null;
             var item = db != null ? db.Item(itemId) : null;
             var bag = Bag;
             if (item == null || bag == null)
             {
                 Debug.LogWarning("[Yarn] give_item: unknown item " + itemId);
-                return;
+                return null;
             }
             bag.Add(item, count);
+            return null;
         }
 
         [YarnCommand("victory")]
