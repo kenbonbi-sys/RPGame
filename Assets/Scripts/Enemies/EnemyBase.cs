@@ -50,6 +50,8 @@ namespace RPG
 
         protected PlayerController Player => GameManager.I != null ? GameManager.I.player : null;
         protected Vector2 Pos => transform.position;
+        /// <summary>Attack speed from statuses (Lạnh lowers it): attack cooldowns are divided by it.</summary>
+        protected float AttackSpeed => status != null ? Mathf.Max(0.1f, status.AttackSpeedMultiplier) : 1f;
         public bool IsDead => state == State.Dead;
 
         protected virtual void Awake()
@@ -162,7 +164,7 @@ namespace RPG
 
         protected virtual void AttackBehaviour(PlayerController p, float dist)
         {
-            nextAttack = Time.time + attackCooldown;
+            nextAttack = Time.time + attackCooldown / AttackSpeed;
             SetState(State.Chase);
         }
 
@@ -217,6 +219,7 @@ namespace RPG
         {
             if (state == State.Dead) return;
             if (state == State.Idle || state == State.Wander || state == State.Return) SetState(State.Chase);
+            if (d.dot) return;   // Bỏng / Độc ticks do not stagger
             staggerUntil = Time.time + 0.12f;
             if (anim != null) anim.Play("hurt", true);
             if (plate == null && HUD.I != null)

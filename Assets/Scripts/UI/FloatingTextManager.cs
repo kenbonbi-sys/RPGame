@@ -42,7 +42,7 @@ namespace RPG
             else
             {
                 Color c = d.type == DamageType.Physical ? Palette.Damage : Color.Lerp(Palette.ForType(d.type), Color.white, 0.25f);
-                Spawn(s, p, c, d.burnDps > 0 || amount < 8 ? 0.8f : 1f, FloatingText.Style.Normal);
+                Spawn(s, p, c, d.dot || amount < 8 ? 0.8f : 1f, FloatingText.Style.Normal);
             }
         }
 

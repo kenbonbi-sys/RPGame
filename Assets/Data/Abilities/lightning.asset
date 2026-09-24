@@ -120,9 +120,15 @@ MonoBehaviour:
           knockback: 2
           poise: 8
           hitStop: 0
-          stun: 0.8
-          slow: 0
-          slowDuration: 2
-          burnPower: 0
-          burnDuration: 3
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0.8
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
         onAnyHit: []

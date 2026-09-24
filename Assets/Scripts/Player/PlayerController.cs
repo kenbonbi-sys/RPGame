@@ -435,6 +435,12 @@ namespace RPG
         // ------------------------------------------------------------------ damage
         void OnDamaged(DamageInfo d, float amount)
         {
+            if (d.dot)
+            {
+                // Bỏng / Độc ticks: a light flash, no shake or hurt sound every half second
+                if (flash != null) flash.Flash(new Color(1f, 0.3f, 0.3f), 0.4f, 0.1f);
+                return;
+            }
             if (flash != null) flash.Flash(new Color(1f, 0.3f, 0.3f), 0.9f, 0.18f);
             if (amount >= 12f) hurtAnimUntil = Time.time + 0.18f;
             CameraRig.Shake(Mathf.Clamp(amount / 60f, 0.1f, 0.45f));

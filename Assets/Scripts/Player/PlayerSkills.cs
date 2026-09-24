@@ -134,6 +134,11 @@ namespace RPG
                 Fail(i, "Không đủ năng lượng!");
                 return false;
             }
+            if (s.HasTag(AbilityTags.Movement) && pc.status != null && pc.status.IsRooted)
+            {
+                Fail(i, "Đang bị Trói!");
+                return false;
+            }
             Vector2 origin = pc.transform.position;
             Vector2 to = aim - origin;
             if (to.sqrMagnitude < 0.01f) aim = origin + pc.motor.Facing * 0.1f;
@@ -141,6 +146,7 @@ namespace RPG
             int level = LevelOf(i);
             pc.energy -= s.energyCost;
             cooldownOf[i] = s.CooldownAt(level) * (PlayerStats.I != null ? PlayerStats.I.CooldownMultiplier(i, s) : 1f);
+            if (i == 0 && pc.status != null) cooldownOf[i] /= Mathf.Max(0.1f, pc.status.AttackSpeedMultiplier);   // Lạnh slows the basic attack
             readyAt[i] = Time.time + cooldownOf[i];
             gcdUntil = Time.time + globalCooldown;
             commitUntil = Time.time + s.CommitTime;

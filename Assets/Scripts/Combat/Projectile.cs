@@ -14,7 +14,7 @@ namespace RPG
         public DamageType damageType = DamageType.Physical;
         public float explodeRadius = 0f;
         public float knockback = 3f;
-        public float stun, slow, slowDuration, burnDps, burnDuration;
+        public StatusHit status;
         public float critChance = 0.1f;
         public float poise;
         [Tooltip("Damage already includes the shooter's Attack (set by ability projectiles).")]
@@ -79,7 +79,7 @@ namespace RPG
         void ApplyTo(Health h, Vector2 point)
         {
             var d = DamageInfo.Make(damage, team, owner, point, (Vector2)h.transform.position - point, damageType, knockback).RollCrit(critChance);
-            d.stun = stun; d.slow = slow; d.slowDuration = slowDuration; d.burnDps = burnDps; d.burnDuration = burnDuration;
+            d.status = status;
             d.poise = poise;
             d.attackScaled = attackScaled;
             d.skillName = skillName;

@@ -23,3 +23,30 @@ MonoBehaviour:
   perfectDamageMultiplier: 1.3
   perfectBonusSeconds: 1.5
   perfectCounterPoise: 25
+  tickInterval: 0.5
+  burnShare: 0.3
+  burnMaxStacks: 3
+  burnSeconds: 3
+  chillSlowPerStack: 0.12
+  chillMaxStacks: 4
+  chillSeconds: 4
+  freezeSeconds: 1.5
+  heavyFreezeSeconds: 0.6
+  heavyFreezePoise: 60
+  chargeMaxStacks: 3
+  chargeSeconds: 5
+  dischargeShare: 0.8
+  dischargeTargets: 3
+  dischargeRadius: 4
+  poisonMaxHpPerSecond: 0.015
+  poisonMaxStacks: 5
+  poisonSeconds: 6
+  slowSeconds: 2
+  curseDamageTaken: 0.15
+  curseDamageDealt: 0.2
+  judgmentDamageTaken: 0.2
+  crowdControlRepeatWindow: 6
+  crowdControlRepeatFactor: 0.6
+  heavyCrowdControlImmunity: 4
+  wallSlamSpeed: 5
+  wallSlamStun: 0.5

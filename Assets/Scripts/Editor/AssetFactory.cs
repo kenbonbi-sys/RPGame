@@ -432,7 +432,7 @@ namespace RPG.EditorTools
                         });
                     }),
                 Ability("fireball", "Cầu Lửa", "sk_fireball", AbilityTags.Fire | AbilityTags.Projectile, 3f, 12f, "cast", 0.3f,
-                    "Phóng cầu lửa nổ tung khi trúng mục tiêu, thiêu đốt kẻ địch trong 3 giây.", a =>
+                    "Phóng cầu lửa nổ tung khi trúng mục tiêu, gây 1 tầng Bỏng: đốt 30% sát thương mỗi giây trong 3 giây.", a =>
                     {
                         a.commitTime = 0.15f;
                         a.castSfx = "sfx_fireball_cast";
@@ -440,12 +440,12 @@ namespace RPG.EditorTools
                         a.effects.Add(new ProjectileEffect
                         {
                             prefab = fireball, spawn = new Anchor(Anchor.From.Caster, 0.55f, 0.5f), speed = 11f, explodeRadius = 1.7f,
-                            hit = new HitSpec { power = 1.88f, type = DamageType.Fire, critChance = 0.12f, knockback = 3f, poise = 12f, burnPower = 0.33f, burnDuration = 3f },
+                            hit = new HitSpec { power = 1.88f, type = DamageType.Fire, critChance = 0.12f, knockback = 3f, poise = 12f, status = new StatusHit { burn = 1 } },
                             hitVfx = "fire_explosion", hitSfx = "sfx_fireball_explode", hitShake = 0.28f
                         });
                     }),
                 Ability("ice", "Mũi Băng", "sk_ice", AbilityTags.Ice | AbilityTags.Area, 6f, 15f, "cast", 0.35f,
-                    "Gọi hàng gai băng trồi lên theo hướng chuột, làm chậm kẻ địch 50%.", a =>
+                    "Gọi hàng gai băng trồi lên theo hướng chuột, mỗi gai gây 2 tầng Lạnh (chậm 12% mỗi tầng); đủ 4 tầng thì Đóng Băng.", a =>
                     {
                         a.commitTime = 0.2f;
                         a.castSfx = "sfx_ice_cast";
@@ -460,7 +460,7 @@ namespace RPG.EditorTools
                                 new DamageEffect
                                 {
                                     at = point, radius = 0.95f,
-                                    hit = new HitSpec { power = 1.22f, type = DamageType.Ice, critChance = 0.1f, knockback = 1.5f, slow = 0.5f, slowDuration = 2.5f, poise = 5f },
+                                    hit = new HitSpec { power = 1.22f, type = DamageType.Ice, critChance = 0.1f, knockback = 1.5f, poise = 5f, status = new StatusHit { chill = 2 } },
                                     onAnyHit = { new CueEffect { shake = 0.05f } }
                                 }
                             }
@@ -487,7 +487,7 @@ namespace RPG.EditorTools
                                 new DamageEffect
                                 {
                                     at = point, radius = 1.1f,
-                                    hit = new HitSpec { power = 2.12f, type = DamageType.Lightning, critChance = 0.15f, knockback = 2f, stun = 0.8f, poise = 8f }
+                                    hit = new HitSpec { power = 2.12f, type = DamageType.Lightning, critChance = 0.15f, knockback = 2f, poise = 8f, status = new StatusHit { stun = 0.8f } }
                                 }
                             }
                         });

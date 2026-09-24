@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace RPG
@@ -16,6 +17,11 @@ namespace RPG
         public Vector2 Velocity => rb != null ? rb.linearVelocity : Vector2.zero;
         public bool IsDashing => Time.time < dashUntil;
         public float SpeedMultiplier { get; set; } = 1f;
+        /// <summary>Trói or Đóng Băng (set by StatusEffects): no walking and no dashing; knockback still moves.</summary>
+        public bool Rooted { get; set; }
+
+        /// <summary>A knockback drove this character into a wall (plan §04: Đẩy Lùi); the contact point.</summary>
+        public event Action<Vector2> WallSlammed;
 
         Rigidbody2D rb;
         Vector2 desired;
@@ -74,9 +80,26 @@ namespace RPG
         void FixedUpdate()
         {
             float dt = Time.fixedDeltaTime;
-            current = Vector2.MoveTowards(current, desired * SpeedMultiplier, acceleration * dt);
+            current = Vector2.MoveTowards(current, Rooted ? Vector2.zero : desired * SpeedMultiplier, acceleration * dt);
             knock = Vector2.MoveTowards(knock, Vector2.zero, knockbackDecay * dt);
+            if (Rooted) dashUntil = 0f;
             rb.linearVelocity = IsDashing ? dashVel : current + knock;
+        }
+
+        void OnCollisionEnter2D(Collision2D c) => CheckWallSlam(c);
+
+        void OnCollisionStay2D(Collision2D c) => CheckWallSlam(c);
+
+        /// <summary>Knocked back fast enough, head-on into an obstacle: the knockback ends in a slam.</summary>
+        void CheckWallSlam(Collision2D c)
+        {
+            float min = CombatConfig.Current.wallSlamSpeed;
+            if (IsDashing || knock.sqrMagnitude < min * min || c.contactCount == 0) return;
+            if (((1 << c.collider.gameObject.layer) & Layers.ObstacleMask) == 0) return;
+            var contact = c.GetContact(0);
+            if (Vector2.Dot(knock.normalized, contact.normal) > -0.5f) return;   // a glancing touch
+            knock = Vector2.zero;
+            WallSlammed?.Invoke(contact.point);
         }
     }
 }

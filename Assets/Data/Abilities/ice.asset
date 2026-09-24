@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
   id: ice
   displayName: "M\u0169i B\u0103ng"
-  description: "G\u1ECDi h\xE0ng gai b\u0103ng tr\u1ED3i l\xEAn theo h\u01B0\u1EDBng chu\u1ED9t, l\xE0m ch\u1EADm k\u1EBB \u0111\u1ECBch 50%."
+  description: "G\u1ECDi h\xE0ng gai b\u0103ng tr\u1ED3i l\xEAn theo h\u01B0\u1EDBng chu\u1ED9t, m\u1ED7i gai g\xE2y 2 t\u1EA7ng L\u1EA1nh (ch\u1EADm 12% m\u1ED7i t\u1EA7ng); \u0111\u1EE7 4 t\u1EA7ng th\xEC \u0110\xF3ng B\u0103ng."
   icon: {fileID: 62970466, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
   tags: 4100
   cooldown: 6
@@ -115,11 +115,17 @@ MonoBehaviour:
           knockback: 1.5
           poise: 5
           hitStop: 0
-          stun: 0
-          slow: 0.5
-          slowDuration: 2.5
-          burnPower: 0
-          burnDuration: 3
+          status:
+            burn: 0
+            chill: 2
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
         onAnyHit:
         - rid: 8556425323349540868
     - rid: 8556425323349540868

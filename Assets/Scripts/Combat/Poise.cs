@@ -38,8 +38,12 @@ namespace RPG
         float brokenUntil;
         bool bonusApplied;
 
-        void Awake()
+        void Awake() => Ready();
+
+        /// <summary>Hooks into Health (in Awake, or on first use when made in a test).</summary>
+        void Ready()
         {
+            if (health != null) return;
             health = GetComponent<Health>();
             status = GetComponent<StatusEffects>();
             Threshold = maxPoise;
@@ -64,6 +68,7 @@ namespace RPG
         /// <summary>Fills the bar (the hero's hits, the counter after Lướt Hoàn Hảo); breaks it when full.</summary>
         public void AddPoise(float amount)
         {
+            Ready();
             if (amount <= 0f || IsBroken || health.IsDead) return;
             Current += amount;
             lastHit = Time.time;

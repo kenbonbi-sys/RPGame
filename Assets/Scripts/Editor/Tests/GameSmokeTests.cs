@@ -347,6 +347,62 @@ namespace RPG.EditorTools.Tests
         }
 
         [UnityTest]
+        public IEnumerator ChargeDischargesIntoEnemiesNearby()
+        {
+            var enemies = EnemyBase.All.FindAll(e => !e.IsDead);
+            Assert.GreaterOrEqual(enemies.Count, 3, "three enemies in the zone");
+            Vector2 at = new Vector2(500f, 500f);   // an empty spot outside the map
+            enemies[0].motor.Teleport(at);
+            enemies[1].motor.Teleport(at + Vector2.right * 1.2f);
+            enemies[2].motor.Teleport(at + Vector2.left * 1.2f);
+            yield return Frames(2);
+            float hp1 = enemies[1].health.hp, hp2 = enemies[2].health.hp;
+            var d = DamageInfo.Make(10f, Team.Player, GameManager.I.player.gameObject, at, Vector2.up, DamageType.Lightning);
+            d.attackScaled = true;
+            d.status.charge = 3;
+            enemies[0].health.TakeDamage(d);
+            Assert.AreEqual(0, enemies[0].status.ChargeStacks, "the 3rd Tích Điện stack discharged");
+            Assert.Less(enemies[1].health.hp, hp1, "into the enemy on the right");
+            Assert.Less(enemies[2].health.hp, hp2, "and the one on the left");
+        }
+
+        [UnityTest]
+        public IEnumerator KnockbackIntoAWallStuns()
+        {
+            var e = EnemyBase.All.Find(x => !x.IsDead);
+            Vector2 at = new Vector2(520f, 500f);   // an empty spot outside the map
+            e.motor.Teleport(at);
+            var wall = new GameObject("test wall") { layer = Layers.Obstacle };
+            wall.transform.position = at + Vector2.right * 1.4f;
+            wall.AddComponent<BoxCollider2D>().size = new Vector2(0.4f, 4f);
+            yield return Frames(3);
+            Assert.IsFalse(e.status.IsStunned);
+            e.motor.AddKnockback(Vector2.right * 14f / Mathf.Max(0.1f, e.motor.knockbackResist));
+            float end = Time.time + 0.6f;
+            while (!e.status.IsStunned && Time.time < end) yield return null;
+            Assert.IsTrue(e.status.IsStunned, "Đẩy Lùi into a wall: Choáng");
+            Assert.AreEqual(CombatConfig.Current.wallSlamStun, e.status.StunRemaining, 0.1f);
+            Object.Destroy(wall);
+        }
+
+        [UnityTest]
+        public IEnumerator RootedHeroCannotDashButCanCast()
+        {
+            var hero = GameManager.I.player;
+            var sk = hero.skills;
+            hero.energy = hero.maxEnergy;
+            Vector2 aim = (Vector2)hero.transform.position + Vector2.right * 3f;
+            hero.status.Root(1.5f);
+            yield return Frames(1);
+            Assert.IsTrue(hero.motor.Rooted, "Trói holds the motor");
+            Assert.IsFalse(sk.TryCast(7, aim), "no Lướt while rooted");
+            Assert.IsTrue(sk.TryCast(1, aim), "casting still works");
+            hero.status.Cleanse();
+            yield return Frames(1);
+            Assert.IsFalse(hero.motor.Rooted, "Thuốc Thảo Mộc frees it");
+        }
+
+        [UnityTest]
         public IEnumerator ChiefIntroFinishesFirstQuestAndOpensTheForest()
         {
             var q = QuestSystem.I;
@@ -700,6 +756,10 @@ namespace RPG.EditorTools.Tests
             c.Execute("hitbox");
             Assert.IsTrue(c.ShowHitboxes);
             c.Execute("hitbox");
+            c.Execute("status troi 2 me");
+            Assert.IsTrue(GameManager.I.player.status.IsRooted, "status troi me");
+            c.Execute("status sach me");
+            Assert.IsFalse(GameManager.I.player.status.IsRooted, "status sach me");
             yield return null;
         }
 

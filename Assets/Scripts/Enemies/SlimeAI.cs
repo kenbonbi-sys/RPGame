@@ -87,7 +87,7 @@ namespace RPG
             }
             if (stateTime > 0.9f)
             {
-                nextAttack = Time.time + attackCooldown;
+                nextAttack = Time.time + attackCooldown / AttackSpeed;
                 SetState(State.Chase);
             }
         }
