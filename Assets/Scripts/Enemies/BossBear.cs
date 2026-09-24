@@ -10,7 +10,7 @@ namespace RPG
     /// that stays on the field), Chụp Quăng (leap slam; landing on a boulder stuns the bear).
     /// Enrages at 50% HP.
     /// </summary>
-    public class BossBear : MonoBehaviour
+    public class BossBear : MonoBehaviour, ISaveable
     {
         [Header("Identity")]
         public string bossId = "bear";
@@ -543,6 +543,26 @@ namespace RPG
                 if (body != null) body.color = new Color(1, 1, 1, 1 - t / 1.5f);
                 yield return null;
             }
+            gameObject.SetActive(false);
+        }
+
+        // ================================================================= save
+        [System.Serializable]
+        class SaveState
+        {
+            public bool defeated;
+        }
+
+        public string SaveKey => "boss:" + bossId;
+
+        public string CaptureState() => JsonUtility.ToJson(new SaveState { defeated = state == State.Dead || health.IsDead });
+
+        public void RestoreState(string json)
+        {
+            if (!JsonUtility.FromJson<SaveState>(json).defeated) return;
+            StopAllCoroutines();
+            ClearTelegraphs();
+            state = State.Dead;
             gameObject.SetActive(false);
         }
 

@@ -8,7 +8,7 @@ namespace RPG
     ///   Main: talk to the chief → clear the forest → defeat Gấu Ma Rừng Già → report back.
     ///   Side: Bé Mai wants 3 mushroom caps.
     /// </summary>
-    public class QuestSystem : MonoBehaviour
+    public class QuestSystem : MonoBehaviour, ISaveable
     {
         public static QuestSystem I { get; private set; }
 
@@ -263,6 +263,31 @@ namespace RPG
             if (item != null && item.id == "shroom_cap") GameEvents.RaiseQuestChanged();
         }
 
+        // ------------------------------------------------------------ save
+        [System.Serializable]
+        class SaveState
+        {
+            public Main main;
+            public Side side;
+            public int slimes, shrooms, focus;
+        }
+
+        public string SaveKey => "quests";
+
+        public string CaptureState() =>
+            JsonUtility.ToJson(new SaveState { main = main, side = side, slimes = slimes, shrooms = shrooms, focus = focus });
+
+        public void RestoreState(string json)
+        {
+            var s = JsonUtility.FromJson<SaveState>(json);
+            main = s.main;
+            side = s.side;
+            slimes = s.slimes;
+            shrooms = s.shrooms;
+            focus = s.focus;
+            GameEvents.RaiseQuestChanged();
+        }
+
         void Begin(string title)
         {
             GameEvents.RaiseLog($"Nhiệm vụ mới: {title}", Palette.LogQuest);
@@ -274,6 +299,7 @@ namespace RPG
         {
             GameEvents.RaiseLog(xp > 0 ? $"Hoàn thành: {title} (+{xp} XP)" : $"Hoàn thành: {title}", Palette.LogQuest);
             if (PlayerStats.I != null) PlayerStats.I.AddXp(xp);
+            GameEvents.RaiseQuestCompleted(title);
             AudioManager.Play("sfx_levelup", 0.7f, 0f);
             var p = GameManager.I.player;
             if (p != null) VFX.Spawn("quest_complete", p.transform.position, Quaternion.identity, 1f, p.transform);

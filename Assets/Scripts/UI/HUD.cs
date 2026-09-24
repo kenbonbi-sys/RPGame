@@ -27,6 +27,7 @@ namespace RPG
         public JournalUI journal;
         public CharacterUI character;
         public XpBarUI xpBar;
+        public SaveSlotsUI saves;
 
         [Header("World-anchored UI")]
         public RectTransform worldLayer;

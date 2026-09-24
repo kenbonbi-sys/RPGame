@@ -163,6 +163,7 @@ namespace RPG.EditorTools
             hud.character = BuildCharacter(root);
             hud.help = BuildHelp(root);
             hud.pause = BuildPause(root);
+            hud.saves = BuildSaves(root);
             hud.death = BuildDeath(root);
             hud.tooltip = BuildTooltip(root);
             BuildHint(root);
@@ -659,15 +660,40 @@ namespace RPG.EditorTools
 
         static PauseMenuUI BuildPause(Transform root)
         {
-            var w = Window(root, "Pause", new Vector2(440, 400), Vector2.zero, out var g, "Tạm Dừng");
+            var w = Window(root, "Pause", new Vector2(440, 560), Vector2.zero, out var g, "Tạm Dừng");
             var ui = w.parent.gameObject.AddComponent<PauseMenuUI>();
             ui.group = g;
             ui.window = w;
             ui.pausesGame = true;
             Button PauseBtn(string label, float y) => Btn(w, "Btn_" + label, label, C, new Vector2(0, y), new Vector2(300, 60));
-            ui.resumeButton = PauseBtn("Tiếp tục", 30);
-            ui.helpButton = PauseBtn("Hướng dẫn", -44);
-            ui.quitButton = PauseBtn("Thoát game", -118);
+            ui.resumeButton = PauseBtn("Tiếp tục", 118);
+            ui.saveButton = PauseBtn("Lưu game", 44);
+            ui.loadButton = PauseBtn("Tải game", -30);
+            ui.helpButton = PauseBtn("Hướng dẫn", -104);
+            ui.quitButton = PauseBtn("Thoát game", -178);
+            return ui;
+        }
+
+        static SaveSlotsUI BuildSaves(Transform root)
+        {
+            var w = Window(root, "Saves", new Vector2(640, 560), Vector2.zero, out var g, "Lưu Game");
+            var ui = w.parent.gameObject.AddComponent<SaveSlotsUI>();
+            ui.group = g;
+            ui.window = w;
+            ui.pausesGame = true;
+            ui.title = w.Find("Title").GetComponent<TextMeshProUGUI>();
+            for (int i = 0; i <= SaveManager.SlotCount; i++)
+            {
+                var b = Btn(w, "Slot_" + i, "", new Vector2(0.5f, 1f), new Vector2(0, -140 - i * 94), new Vector2(560, 84), 23);
+                var label = b.GetComponentInChildren<TextMeshProUGUI>();
+                label.alignment = TextAlignmentOptions.MidlineLeft;
+                label.margin = new Vector4(22, 0, 22, 0);
+                label.lineSpacing = -8;
+                ui.rows[i] = b;
+                ui.labels[i] = label;
+            }
+            Txt(w, "Hint", "[Esc] Đóng  ·  File lưu cũ được giữ lại dạng .bak", 17, Muted, TextAlignmentOptions.Center,
+                new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(560, 24), false);
             return ui;
         }
 

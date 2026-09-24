@@ -57,6 +57,7 @@ namespace RPG
             Pool.ClearAll();
             SetupPhysics();
             Application.targetFrameRate = 120;
+            if (GetComponent<SaveManager>() == null) gameObject.AddComponent<SaveManager>();   // scenes built before saves existed
         }
 
         static void SetupPhysics()
@@ -73,6 +74,7 @@ namespace RPG
             SetCursor(false);
             AudioManager.PlayMusic(startMusic, 2f);
             AudioManager.PlayAmbience(startAmbience);
+            if (SaveManager.HasPendingLoad) return;   // loading a save: no welcome
             if (showHelpOnStart && HUD.I != null && HUD.I.help != null && !AutoShot.Active) HUD.I.help.Show();
             GameEvents.RaiseLog("Chào mừng đến Làng Lá Xanh! Bấm F1 để xem hướng dẫn.", Palette.LogQuest);
         }
@@ -93,6 +95,7 @@ namespace RPG
                 if (hud.inventory != null && hud.inventory.IsOpen) hud.inventory.Close();
                 else if (hud.journal != null && hud.journal.IsOpen) hud.journal.Close();
                 else if (hud.character != null && hud.character.IsOpen) hud.character.Close();
+                else if (hud.saves != null && hud.saves.IsOpen) hud.saves.Close();
                 else if (hud.help != null && hud.help.IsOpen) hud.help.Close();
                 else if (!dialogue && hud.pause != null) hud.pause.Toggle();
             }

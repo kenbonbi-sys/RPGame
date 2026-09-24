@@ -7,7 +7,7 @@ namespace RPG
     /// Drives the global 2D light through dawn / day / dusk / night.
     /// Other lights (campfire, lanterns, fireflies) read <see cref="NightFactor"/>.
     /// </summary>
-    public class DayNightCycle : MonoBehaviour
+    public class DayNightCycle : MonoBehaviour, ISaveable
     {
         public static DayNightCycle I { get; private set; }
 
@@ -31,6 +31,16 @@ namespace RPG
         float night;
 
         void Awake() => I = this;
+
+        [System.Serializable]
+        class SaveState
+        {
+            public float time;
+        }
+
+        public string SaveKey => "time";
+        public string CaptureState() => JsonUtility.ToJson(new SaveState { time = time });
+        public void RestoreState(string json) => time = Mathf.Repeat(JsonUtility.FromJson<SaveState>(json).time, 1f);
 
         void Update()
         {

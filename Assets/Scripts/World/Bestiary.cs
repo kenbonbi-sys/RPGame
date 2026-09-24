@@ -55,6 +55,51 @@ namespace RPG
             Changed?.Invoke();
         }
 
+        // ------------------------------------------------------------------ save
+        [System.Serializable]
+        class SaveState
+        {
+            public List<EntryState> entries = new List<EntryState>();
+        }
+
+        [System.Serializable]
+        class EntryState
+        {
+            public string id;
+            public string name;
+            public int kills;
+            public List<string> skills = new List<string>();
+        }
+
+        /// <summary>Saves the static bestiary through the SaveManager.</summary>
+        public class Saveable : ISaveable
+        {
+            public string SaveKey => "bestiary";
+
+            public string CaptureState()
+            {
+                var s = new SaveState();
+                foreach (var e in Entries.Values)
+                    s.entries.Add(new EntryState { id = e.id, name = e.name, kills = e.kills, skills = new List<string>(e.skills) });
+                return JsonUtility.ToJson(s);
+            }
+
+            public void RestoreState(string json)
+            {
+                var s = JsonUtility.FromJson<SaveState>(json);
+                Entries.Clear();
+                NameToId.Clear();
+                foreach (var st in s.entries)
+                {
+                    var e = new Entry { id = st.id, name = st.name, kills = st.kills };
+                    e.skills.AddRange(st.skills);
+                    Entries[e.id] = e;
+                    NameToId[e.name] = e.id;
+                }
+                Changed?.Invoke();
+            }
+        }
+
         public static void RecordSkill(string monsterName, string skill)
         {
             string id = NameToId.TryGetValue(monsterName, out var found) ? found : monsterName;

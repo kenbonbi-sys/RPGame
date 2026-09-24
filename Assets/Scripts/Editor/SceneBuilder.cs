@@ -85,6 +85,7 @@ namespace RPG.EditorTools
             audio.library = AssetDatabase.LoadAssetAtPath<AudioLibrary>("Assets/Data/AudioLibrary.asset");
             game.AddComponent<TimeFX>();
             game.AddComponent<QuestSystem>();
+            game.AddComponent<SaveManager>();
             var inv = game.AddComponent<Inventory>();
             inv.gold = 25;
             inv.stacks.Add(new Inventory.Stack { item = db.Item("potion_red"), count = 4 });

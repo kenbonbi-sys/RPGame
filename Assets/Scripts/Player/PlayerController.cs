@@ -17,7 +17,7 @@ namespace RPG
     /// The hero. Mouse (hold left/right button) or arrow keys to move, click an enemy to
     /// attack it, Q W E R A S D Space for skills, 1 2 3 potions, F to talk.
     /// </summary>
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, ISaveable
     {
         [Header("Refs")]
         public CharacterMotor motor;
@@ -370,6 +370,44 @@ namespace RPG
             health.invulnerable = false;
             if (anim != null) anim.Play("idle_down", true);
             VFX.Spawn("respawn", transform.position, Quaternion.identity);
+        }
+
+        // ------------------------------------------------------------------ save
+        [System.Serializable]
+        class SaveState
+        {
+            public float x, y, hp, energy;
+            public int level, xp, statPoints, talentPoints, skillPoints;
+            public int[] allocated;
+        }
+
+        public string SaveKey => "player";
+
+        public string CaptureState()
+        {
+            var s = new SaveState { x = transform.position.x, y = transform.position.y, hp = health.hp, energy = energy };
+            if (stats != null)
+            {
+                s.level = stats.level;
+                s.xp = stats.xp;
+                s.allocated = stats.allocated;
+                s.statPoints = stats.statPoints;
+                s.talentPoints = stats.talentPoints;
+                s.skillPoints = stats.skillPoints;
+            }
+            return JsonUtility.ToJson(s);
+        }
+
+        public void RestoreState(string json)
+        {
+            var s = JsonUtility.FromJson<SaveState>(json);
+            // stats first: they set max HP / energy
+            if (stats != null && s.level > 0) stats.SetState(s.level, s.xp, s.allocated, s.statPoints, s.talentPoints, s.skillPoints);
+            motor.Teleport(new Vector2(s.x, s.y));
+            hasMoveTarget = false;
+            attackTarget = null;
+            health.hp = Mathf.Clamp(s.hp, 1f, health.maxHp);
+            energy = Mathf.Clamp(s.energy, 0f, maxEnergy);
         }
 
         void OnDrawGizmosSelected()

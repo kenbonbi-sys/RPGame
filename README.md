@@ -18,7 +18,7 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 | **1 2 3** | Bình Máu · Bình Năng Lượng · Thuốc Thảo Mộc |
 | **F** | Nói chuyện với NPC |
 | **B / I** · **C** · **J** · **Tab** | Túi đồ · Nhân vật (phân bổ điểm) · Bách Khoa Trùm · Đổi nhiệm vụ đang theo dõi |
-| **F1** · **Esc** | Hướng dẫn · Tạm dừng |
+| **F1** · **Esc** | Hướng dẫn · Tạm dừng (Lưu game / Tải game) |
 | **F5–F9** (cheat) | Hồi đầy · Tua giờ · Tới boss · Về làng · Hạ quái gần |
 
 ## Nội dung đã có
@@ -29,6 +29,7 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 - **Quái:** Slime Rêu (nhảy lao tới), Nấm Độc (bắn bào tử làm chậm). Có AI tuần tra / đuổi / quay về, rớt đồ, hồi sinh theo bãi.
 - **Boss Gấu Ma Rừng Già (Cấp 6):** Vồ, **Dậm Đất** (choáng), **Ném Đá Lớn** (đá rơi xuống thành *★ Tảng Đá Lớn* phá được), **Chụp Quăng** (nhảy vồ; đáp trúng Tảng Đá Lớn thì boss bị **Choáng!**), **Cuồng Nộ** khi dưới 50% máu. Mỗi chiêu có vòng cảnh báo trên đất và hiện "Kỹ năng: …" trên đầu boss.
 - **Bách Khoa Trùm:** tự ghi lại quái và kỹ năng boss lần đầu gặp (hiện ở log bên trái, xem đầy đủ bằng phím J).
+- **Lưu game:** 3 ô + tự động lưu (sau boss, khi xong nhiệm vụ, 5 phút một lần khi ngoài chiến đấu). File JSON có số phiên bản trong `%USERPROFILE%\AppData\LocalLow\<công ty>\<game>\saves`, bản cũ giữ dạng `.bak`.
 - **Nhiệm vụ:** chuỗi chính với Trưởng Làng + nhiệm vụ phụ của Bé Mai (hiện "(+1 · Tab)" như bản tham khảo).
 - **HUD:** thanh máu boss khung trang trí, minimap + tên vùng + ngày/đêm, quest tracker, orb Máu/Năng lượng dạng chất lỏng, thanh bình thuốc, skill bar với cooldown/chi phí, log sự kiện, số damage bay, nameplate, hội thoại có portrait, túi đồ + tooltip, màn chết/hồi sinh, banner khu vực/chiến thắng.
 - **Âm thanh:** 42 SFX, nhạc rừng, nhạc boss, âm nền rừng (tự tổng hợp, `Tools/AudioGen`).
