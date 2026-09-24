@@ -31,8 +31,21 @@ namespace RPG
         public Tilemap ground;
         public Tilemap tallGrass;
         public Tilemap dirt;
+        public Tilemap mud;
+        public Tilemap water;
         [Tooltip("Parent of trees and rocks drawn as dots on the minimap.")]
         public Transform obstacles;
+
+        [Header("Terrain")]
+        [Tooltip("One byte per grid corner, row by row from the bottom left (terrainWidth per row): " +
+                 "Water (1) marks swamp water, which characters wade through slower.")]
+        [HideInInspector] public byte[] terrain;
+        public int terrainWidth;
+
+        /// <summary>Flags of <see cref="terrain"/>.</summary>
+        public const byte Water = 1, Mud = 2;
+        /// <summary>Share of their speed characters keep while wading (swimmers keep all of it).</summary>
+        public const float WaterSpeed = 0.6f;
 
         /// <summary>The zone loaded right now.</summary>
         public static ZoneRoot Current { get; private set; }
@@ -40,6 +53,36 @@ namespace RPG
         public const string CoreScene = "Core";
 
         public Scene Scene => gameObject.scene;
+
+        /// <summary>Whether a point is in swamp water: the corners' flags blended across the tile, as the water tiles are drawn.</summary>
+        public bool IsWater(Vector2 p) => Has(p, Water);
+
+        public bool IsMud(Vector2 p) => Has(p, Mud);
+
+        /// <summary>Share of their speed a wader keeps at a point.</summary>
+        public float SpeedAt(Vector2 p) => IsWater(p) ? WaterSpeed : 1f;
+
+        bool Has(Vector2 p, byte flag)
+        {
+            if (terrain == null || terrainWidth <= 1) return false;
+            int rows = terrain.Length / terrainWidth;
+            float fx = p.x - bounds.xMin, fy = p.y - bounds.yMin;
+            int x0 = Mathf.FloorToInt(fx), y0 = Mathf.FloorToInt(fy);
+            if (x0 < 0 || y0 < 0 || x0 + 1 >= terrainWidth || y0 + 1 >= rows) return false;
+            float tx = fx - x0, ty = fy - y0;
+            float Corner(int x, int y) => (terrain[y * terrainWidth + x] & flag) != 0 ? 1f : 0f;
+            float bottom = Mathf.Lerp(Corner(x0, y0), Corner(x0 + 1, y0), tx);
+            float top = Mathf.Lerp(Corner(x0, y0 + 1), Corner(x0 + 1, y0 + 1), tx);
+            return Mathf.Lerp(bottom, top, ty) > 0.5f;
+        }
+
+        /// <summary>The flag of <see cref="terrain"/> set at a grid corner (tests, tools).</summary>
+        public bool CornerHas(int x, int y, byte flag)
+        {
+            if (terrain == null || terrainWidth <= 0 || x < 0 || y < 0 || x >= terrainWidth) return false;
+            int i = y * terrainWidth + x;
+            return i < terrain.Length && (terrain[i] & flag) != 0;
+        }
 
         public Transform SpotOf(string id)
         {

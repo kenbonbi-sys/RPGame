@@ -1,6 +1,6 @@
 # Kế hoạch online — Rừng Thì Thầm (hướng C: thế giới online nhiều người)
 
-> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Còn lại: nhiều vùng (chờ có vùng thứ hai), đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
+> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Thế giới lớn dần thành một bản đồ liền mạch (mục 13): Đầm Lầy Sương Mù đã nối vào phía đông, một máy chủ mỗi kênh giữ cả bản đồ, không cần máy chủ riêng cho từng vùng; giao thức 4. Còn lại: đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
 
 ## 1. Mục tiêu
 
@@ -76,7 +76,7 @@ Game có Lướt Hoàn Hảo (cửa sổ 0.15 s), input buffer 150 ms, vòng c�
 | **1. Hai người thấy nhau** ✓ | Cài FishNet; build dedicated server; 2 client vào cùng vùng, đi lại, Lướt, thấy nhau. | Chạy server trên máy, 2 cửa sổ game thấy nhau di chuyển mượt. **Xong** — xem mục 9. | 3–5 tuần |
 | **2. Tài khoản và lưu nhân vật** ✓ | Máy chủ luôn bật; màn hình chính tự tìm máy chủ; đăng ký/đăng nhập (mật khẩu không qua mạng); server nạp và ghi nhân vật. Dữ liệu nằm ngay trong máy chủ game, không dùng Nakama/PostgreSQL (lý do ở mục 10). | Thoát game, mở lại trên máy khác, nhân vật còn nguyên. **Xong** — xem mục 10. | 3–5 tuần |
 | **3. Chiến đấu online** ✓ | Skill, sát thương, trạng thái, quái, bãi hồi sinh, boss Gấu Ma, Thanh Trấn Áp, rơi đồ, XP, nhiệm vụ, hội thoại — tất cả do server quyết định. Lag compensation cho Lướt: chưa (mục 11). | 3–5 người cùng hạ Gấu Ma, ai cũng nhận thưởng đúng. **Xong phần chính** — xem mục 11. | 6–10 tuần |
-| **4. Thế giới** ◐ | Nhiều vùng, chuyển vùng giữa các zone server, kênh (k1, k2…), chat, party, danh sách bạn. | Đi từ Làng sang Rừng, đổi kênh, chat được. **Xong kênh, tổ đội, bạn bè, chat** (đổi kênh giữ nguyên nhân vật); nhiều vùng chờ có vùng thứ hai — mục 12. | 4–6 tuần |
+| **4. Thế giới** ◐ | Nhiều vùng, chuyển vùng giữa các zone server, kênh (k1, k2…), chat, party, danh sách bạn. | Đi từ Làng sang Rừng, đổi kênh, chat được. **Xong kênh, tổ đội, bạn bè, chat** (đổi kênh giữ nguyên nhân vật) — mục 12; nhiều vùng thành một bản đồ liền mạch trên cùng máy chủ — mục 13. | 4–6 tuần |
 | **5. Vận hành** ◐ | Đưa lên VPS; giám sát, log, backup; chống gian lận cơ bản; thử tải 50+ người (dùng bot client — tái dùng chế độ `-autoshot` tự chơi). | Chạy thử kín với người thật. **Xong giám sát, tắt đúng cách, kiểm tra di chuyển, thử tải** (10 bot trên một máy); VPS chưa — mục 12. | 3–5 tuần |
 
 **Tổng: khoảng 5–8 tháng** cho 1 người toàn thời gian để tới bản chạy thử kín. Chưa tính nội dung mới (vùng, quái, boss) và các hệ thống MMO thường có sau này (giao dịch, chợ, guild, PvP).
@@ -231,7 +231,7 @@ Giao thức lên **3**: game cũ (giao thức 2) vào máy chủ mới sẽ đư
 | **Tổ đội** | Tối đa 5 người; người mời đầu tiên là đội trưởng, đội trưởng rời thì người kế tiếp lên thay. `/moi <tên>` mời; người được mời thấy hộp lời mời (Y vào, N từ chối, hoặc bấm nút, hoặc `/dongy`, `/tuchoi`); `/roi` rời, `/duoi <tên>` mời ra. Bảng tổ đội ở góc trên bên trái: tên, cấp, máu. Thành viên đứng trong 30 đơn vị quanh chỗ quái chết cùng nhận công (XP, nhiệm vụ, đồ rơi riêng) dù không đánh. Tổ đội không lưu: rời game là rời tổ đội. | `Net/Parties.cs`, `ServerPlayers.Social.cs`, `Net/PartyState.cs`, `UI/PartyUI.cs` |
 | **Chat** | Enter mở ô chat. Chữ thường nói với cả kênh; `/n <lời>` nói với tổ đội (màu xanh lá); `/w <tên> <lời>` nhắn riêng (màu hồng, tên có dấu cách vẫn được); `/ai` ai đang chơi; `/giup` danh sách lệnh. Lệnh gõ có dấu hay không dấu đều được (`/mời` = `/moi`). | `Net/ChatCommands.cs`, `NetWorld.ShowChat` |
 | **Bạn bè** | `/ketban <tên>`, `/huyban <tên>`, `/banbe` (ai đang chơi, ở kênh nào). Danh sách lưu cùng tài khoản trên máy chủ; người được thêm nhận thông báo. | `ServerPlayers.Friend`, `AccountRecord.friends` |
-| **Nhiều vùng** | Chưa làm: game mới có một scene vùng (làng → rừng → đấu trường chung một bản đồ). Cách làm khi có vùng thứ hai: mỗi vùng là một máy chủ như một kênh (`-zone`), đi qua cổng vùng = đổi máy chủ đúng như `/kenh` (lưu, nhả khóa, vào máy chủ vùng kia). | — |
+| **Nhiều vùng** | Đổi cách (24/09, mục 13): các vùng nối liền vào cùng một bản đồ, một máy chủ mỗi kênh giữ cả bản đồ, sang vùng khác không phải đổi máy chủ. Cách cũ (mỗi vùng một máy chủ, đi qua cổng vùng = đổi máy chủ như `/kenh`) để dành cho khi một kênh không gánh nổi cả thế giới. | `WorldBuilder`, `NetWorld` |
 
 ### Vận hành (giai đoạn 5)
 
@@ -250,3 +250,27 @@ Giao thức lên **3**: game cũ (giao thức 2) vào máy chủ mới sẽ đư
 - `Tools/Server/netsmoke.ps1` với bản build, 3 vòng, 0 lỗi: (1) hai người thấy nhau đi, lập tổ đội, chat tổ đội, nhắn riêng, kết bạn, mỗi người hạ một Slime Rêu; (2) vào lại: đúng cấp và XP, bạn bè còn; (3) hai kênh trên cùng dữ liệu: SmokeA thấy danh sách kênh, `/kenh 2`, sang kênh 2 đúng cấp, XP, vàng.
 - `Tools/Server/loadtest.ps1 -Bots 10 -Seconds 90`: 10/10 người cùng lúc, máy chủ 48–57 FPS (giữ 60), CPU nhiều nhất 14% một nhân, khoảng 234 MB; không lỗi; không ai bị kéo về vì đi quá nhanh (mỗi bot lướt khoảng 15 lần); tắt đúng cách, bot còn chơi được lưu. Mỗi bot tốn khoảng 245 MB RAM nên một máy 16 GB chỉ thử được khoảng 15 bot; muốn thử 50 cần vài máy hoặc máy lớn.
 - Máy chủ thật trên máy nhà đã cập nhật lên bản này: trả lời ở 127.0.0.1 và địa chỉ Radmin 26.253.10.125 (giao thức 3, kênh 1).
+
+## 13. Thế giới lớn dần: một bản đồ liền mạch
+
+Từ 24/09 game là game cày cuốc (`Docs/KeHoach-RungThiTham.md`, đầu tài liệu): các vùng mới nối liền vào cùng một bản đồ, không phải mỗi vùng một scene. Mỗi kênh vẫn là một máy chủ, và máy chủ đó giữ cả bản đồ: bạn bè ở hai đầu bản đồ vẫn chung kênh, chung tổ đội, chat được, không phải chuyển máy chủ khi sang vùng khác. Bản đồ bây giờ: 200 × 64 ô, Rừng Thì Thầm ở phía tây, Đầm Lầy Sương Mù ở phía đông.
+
+| Phần | Làm thế nào | Code |
+|---|---|---|
+| **Gửi theo tầm nhìn** | Mỗi người chỉ nhận những gì trong 32 đơn vị quanh nhân vật của mình (xa hơn màn hình và minimap): quái, đòn trúng, hồi máu, chiêu, hiệu ứng. Một vật vừa vào tầm được gửi trọn một lần, và mọi thứ trong tầm vẫn được gửi lại mỗi giây, nên bản đồ lớn thêm không làm tăng băng thông của mỗi người. Khoảnh khắc của boss và âm thanh nghe khắp nơi vẫn tới mọi người. | `ServerPlayers.ViewRadius`, `NetWorld` |
+| **Quái ngủ** | Quái không có nhân vật nào trong 40 đơn vị thì đứng ngủ tại chỗ (không nghĩ, không tìm đường); đồ vật chỉ vẽ lại khi đang mờ đi. Hàng nghìn cây và vài chục bãi quái tốn rất ít. | `EnemyBase.SleepRadius`, `FadeWhenBehind` |
+| **Boss chung một khung** | `BossBase` giữ phần mọi boss giống nhau (thức, thù hận, máu theo số người, cuồng nộ, đồ rơi cho mọi người có công, quay lại 3 phút sau khi gục, intro, thanh máu, nhạc); mỗi boss chỉ viết các đòn của nó. Đã có: Gấu Ma, Cóc Tía (mini-boss), Xà Mẫu. | `Enemies/BossBase.cs` |
+| **Đá Truyền Tống** | Máy chủ đánh thức đá khi nhân vật lại gần và ghi viên chạm sau cùng (chỗ hồi sinh). Danh sách đá là một phần mới của tờ nhân vật (`waystones`), lưu trên máy chủ và gửi về chủ nó (đá sáng lên, bản đồ hiện đá). Dịch chuyển: máy người chơi xin (`ActKind.Travel`), máy chủ kiểm tra người đó đang đứng ở một viên đã thức và viên đích đã thức, rồi dời nhân vật (như `tp` của GM, không bị kiểm tra di chuyển kéo về). | `World/WaystoneLog.cs`, `ServerPlayers` |
+| **Thân xuyên qua** | Khi Cóc Tía nhảy lên, Xà Mẫu lặn, Đỉa Bùn bám vào người, thân nó trên máy chủ không cản ai; cờ mới `EntityFlags.Intangible` báo để bản sao trên máy người chơi cũng cho đi xuyên (vẫn bị đòn đánh trúng như trước). | `NetEntity.SetIntangible` |
+| **Nọc độc** | Đạn độc bay thẳng (Cóc Độc, Xà Mẫu) và cục độc bay vòng (Cóc Tía) cho người khác xem như Bào Tử và Ném Đá Lớn (`"venom"`); vũng độc là `HazardZone` trên máy chủ, cả hình và sát thương theo thời gian. | `EnemyShots`, `HazardZone` |
+
+Giao thức lên **4** (phần `waystones`, `ActKind.Travel`, cờ `Intangible`, đạn `"venom"`): game giao thức 3 vào máy chủ mới được báo tải bản mới; `RungThiTham.zip` đóng gói lại.
+
+Sửa kèm: chơi một mình thì intro, thanh máu, nhạc của boss và dòng "Kỹ năng: …" trên đầu quái không hiện (chúng tra số hiệu mạng, mà offline không có); nay máy có màn hình tự hiện, máy chủ vẫn gửi cho người chơi như cũ.
+
+### Đã kiểm tra (24/09)
+
+- 142 test EditMode (2 test phông chữ bỏ qua như trước), thêm `SwampTests`: đầm nằm phía đông rừng, nước làm chậm người lội mà không làm chậm quái bơi, boss hiện trận đấu trên màn hình khi chơi một mình, đá thức / mang theo / hồi sinh và dịch chuyển, Người Bùn tách đôi, vũng độc gây sát thương, hai boss đầm chạy đủ mọi đòn.
+- `Tools/Server/netsmoke.ps1` với bản build mới, 3 vòng, 0 lỗi (thấy nhau đi 15,8–18,4 đơn vị, tổ đội, chat, bạn bè, lưu và vào lại, đổi kênh).
+- `Tools/Server/loadtest.ps1` (10 bot, 120 giây): 10/10 người cùng lúc, máy chủ 47–54 FPS (trung bình 51), CPU nhiều nhất 16% một nhân, 248 MB; 0 lỗi, không ai bị kéo về; tắt đúng cách, lưu 2 nhân vật còn chơi.
+- `RungThiTham.exe -autoshot -autoshotOnly swamp`: 28 ảnh đi qua đầm, quái, từng đòn của hai boss, ban đêm, dịch chuyển về làng; 0 lỗi.

@@ -34,6 +34,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b64dd0d615888974f82f3c6084f35e88, type: 2}
   - {fileID: 11400000, guid: 40972aa092910ac4b9f614dac3ea426a, type: 2}
   - {fileID: 11400000, guid: be0441401d16df64d97895e32b062ddd, type: 2}
+  - {fileID: 11400000, guid: 974dbe90715877745b735cce43ec58cb, type: 2}
+  - {fileID: 11400000, guid: 2f2e1d5f6934fb7419829cce2d84918b, type: 2}
+  - {fileID: 11400000, guid: 20a1c0a8258a7c448a7a3a5366c80ffa, type: 2}
+  - {fileID: 11400000, guid: f4919b31f7cb1da458d71680546fe6e3, type: 2}
+  - {fileID: 11400000, guid: efda39d8b5bcac1458b1af3d1745c960, type: 2}
+  - {fileID: 11400000, guid: 077b8cecceb086245b7bf5d3eb9c1910, type: 2}
+  - {fileID: 11400000, guid: d78efac9d0e0e054db5f6c9f7786c0b4, type: 2}
+  - {fileID: 11400000, guid: 75c6f56d45e63894f916b3ba04c00bd9, type: 2}
+  - {fileID: 11400000, guid: 909a88e7f37958a429e4807da41bf5bd, type: 2}
   abilities:
   - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
   - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}
@@ -50,6 +59,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6fb51df590d44164fb1bff3d7cb9a655, type: 2}
   - {fileID: 11400000, guid: 851a3537d31a1bb418f9aac2c4c8d799, type: 2}
   - {fileID: 11400000, guid: 6b22d0c804ec8ae48ab51bece3e81c1a, type: 2}
+  - {fileID: 11400000, guid: f60cbc3b5692ec248abf695b3649174d, type: 2}
+  - {fileID: 11400000, guid: dfa73432ad6a04d449568bd01590066f, type: 2}
+  - {fileID: 11400000, guid: 7e87a3d8e8243434d93ecfe4dcde8932, type: 2}
+  - {fileID: 11400000, guid: 89eec7b663e4108418968ec6fe31009f, type: 2}
+  - {fileID: 11400000, guid: b9b514017c7c8b34e8da788930f75a12, type: 2}
   zones:
   - {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
   startZone: {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
@@ -80,5 +94,8 @@ MonoBehaviour:
   rockProjectilePrefab: {fileID: 4887976638785927589, guid: 99d4a012649b7944c966d828601841ee, type: 3}
   fireballPrefab: {fileID: 1260040946324525447, guid: f1d1754b37fb14245927ca86a84d88c4, type: 3}
   sporePrefab: {fileID: 6042711782838213100, guid: fd31be627857a9e42acb63795f625cd5, type: 3}
+  venomPrefab: {fileID: 40009730964553345, guid: 4db1f30aa617ae149b088a5680f172bb, type: 3}
+  venomArcPrefab: {fileID: 6563847976823840878, guid: 248b66c04de4c244781b426d6379a513, type: 3}
+  mistMaterial: {fileID: 2100000, guid: 9151a6cf50d0f064183f54e52369e00a, type: 2}
   netHeroPrefab: {fileID: 4885084979465001528, guid: ae3e903ab7b28a648b5a6f37a73a1646, type: 3}
   networkManagerPrefab: {fileID: 3420617665053863353, guid: c2b98b4a3e3834f4db920baf9ec1f0d0, type: 3}

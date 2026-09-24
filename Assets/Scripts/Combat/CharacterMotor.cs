@@ -12,8 +12,12 @@ namespace RPG
         public float knockbackDecay = 18f;
         [Tooltip("Heavy characters (bosses) take less knockback.")]
         public float knockbackResist = 1f;
+        [Tooltip("Wades slower through swamp water (ZoneRoot.WaterSpeed). Off for swimmers: toads, leeches, snakes.")]
+        public bool slowedByWater = true;
 
         public Vector2 Facing { get; set; } = Vector2.down;
+        /// <summary>Standing in swamp water (splashes, a swimmer's hiding).</summary>
+        public bool InWater { get; private set; }
         public Vector2 Velocity => rb != null ? rb.linearVelocity : Vector2.zero;
         public bool IsDashing => Time.time < dashUntil;
         public float SpeedMultiplier { get; set; } = 1f;
@@ -80,7 +84,10 @@ namespace RPG
         void FixedUpdate()
         {
             float dt = Time.fixedDeltaTime;
-            current = Vector2.MoveTowards(current, Rooted ? Vector2.zero : desired * SpeedMultiplier, acceleration * dt);
+            var zone = ZoneRoot.Current;
+            InWater = zone != null && zone.IsWater(rb.position);
+            float ground = InWater && slowedByWater ? ZoneRoot.WaterSpeed : 1f;
+            current = Vector2.MoveTowards(current, Rooted ? Vector2.zero : desired * SpeedMultiplier * ground, acceleration * dt);
             knock = Vector2.MoveTowards(knock, Vector2.zero, knockbackDecay * dt);
             if (Rooted) dashUntil = 0f;
             rb.linearVelocity = IsDashing ? dashVel : current + knock;

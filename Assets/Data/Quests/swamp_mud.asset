@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: swamp_mud
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: swamp_mud
+  title: "Truy N\xE3: Ng\u01B0\u1EDDi B\xF9n"
+  kind: 2
+  summary: "Ng\u01B0\u1EDDi B\xF9n l\u1EEB \u0111\u1EEB quanh c\xE1c v\u0169ng l\u1EA7y s\xE2u. M\u1ED7i l\u1EA7n g\u1EE5c ch\xFAng l\u1EA1i t\xE1ch ra th\xE0nh B\xF9n Con."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: f60cbc3b5692ec248abf695b3649174d, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: mudman
+    count: 3
+    text: "H\u1EA1 Ng\u01B0\u1EDDi B\xF9n"
+    countPrevious: 0
+    marker: mudfield
+  xp: 380
+  gold: 50
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 3
+  setFlags: []
+  followUps: []

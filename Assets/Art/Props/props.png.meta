@@ -214,8 +214,8 @@ TextureImporter:
       name: pine_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 76
+        x: 82
+        y: 204
         width: 34
         height: 52
       alignment: 9
@@ -236,8 +236,8 @@ TextureImporter:
       name: pine_1
       rect:
         serializedVersion: 2
-        x: 35
-        y: 76
+        x: 117
+        y: 204
         width: 34
         height: 52
       alignment: 9
@@ -258,8 +258,8 @@ TextureImporter:
       name: pine_2
       rect:
         serializedVersion: 2
-        x: 70
-        y: 76
+        x: 152
+        y: 204
         width: 34
         height: 52
       alignment: 9
@@ -280,8 +280,8 @@ TextureImporter:
       name: hut
       rect:
         serializedVersion: 2
-        x: 105
-        y: 78
+        x: 187
+        y: 206
         width: 52
         height: 50
       alignment: 9
@@ -302,8 +302,8 @@ TextureImporter:
       name: oak_0
       rect:
         serializedVersion: 2
-        x: 158
-        y: 80
+        x: 143
+        y: 153
         width: 44
         height: 48
       alignment: 9
@@ -324,8 +324,8 @@ TextureImporter:
       name: oak_1
       rect:
         serializedVersion: 2
-        x: 203
-        y: 80
+        x: 188
+        y: 153
         width: 44
         height: 48
       alignment: 9
@@ -346,8 +346,8 @@ TextureImporter:
       name: pillar_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 39
+        x: 233
+        y: 165
         width: 18
         height: 36
       alignment: 9
@@ -368,8 +368,8 @@ TextureImporter:
       name: pillar_1
       rect:
         serializedVersion: 2
-        x: 19
-        y: 39
+        x: 0
+        y: 114
         width: 18
         height: 36
       alignment: 9
@@ -390,8 +390,8 @@ TextureImporter:
       name: tent
       rect:
         serializedVersion: 2
-        x: 38
-        y: 45
+        x: 57
+        y: 120
         width: 36
         height: 30
       alignment: 9
@@ -412,8 +412,8 @@ TextureImporter:
       name: well
       rect:
         serializedVersion: 2
-        x: 75
-        y: 45
+        x: 94
+        y: 120
         width: 26
         height: 30
       alignment: 9
@@ -434,8 +434,8 @@ TextureImporter:
       name: lantern
       rect:
         serializedVersion: 2
-        x: 102
-        y: 49
+        x: 163
+        y: 124
         width: 10
         height: 26
       alignment: 9
@@ -456,8 +456,8 @@ TextureImporter:
       name: boulder
       rect:
         serializedVersion: 2
-        x: 113
-        y: 51
+        x: 174
+        y: 126
         width: 28
         height: 24
       alignment: 9
@@ -478,8 +478,8 @@ TextureImporter:
       name: signpost
       rect:
         serializedVersion: 2
-        x: 142
-        y: 53
+        x: 203
+        y: 128
         width: 18
         height: 22
       alignment: 9
@@ -500,8 +500,8 @@ TextureImporter:
       name: bush_big_0
       rect:
         serializedVersion: 2
-        x: 161
-        y: 55
+        x: 222
+        y: 130
         width: 26
         height: 20
       alignment: 9
@@ -522,8 +522,8 @@ TextureImporter:
       name: bush_big_1
       rect:
         serializedVersion: 2
-        x: 188
-        y: 55
+        x: 0
+        y: 93
         width: 26
         height: 20
       alignment: 9
@@ -544,8 +544,8 @@ TextureImporter:
       name: flame_0
       rect:
         serializedVersion: 2
-        x: 215
-        y: 55
+        x: 27
+        y: 93
         width: 16
         height: 20
       alignment: 9
@@ -566,8 +566,8 @@ TextureImporter:
       name: flame_1
       rect:
         serializedVersion: 2
-        x: 232
-        y: 55
+        x: 44
+        y: 93
         width: 16
         height: 20
       alignment: 9
@@ -588,8 +588,8 @@ TextureImporter:
       name: flame_2
       rect:
         serializedVersion: 2
-        x: 0
-        y: 18
+        x: 61
+        y: 93
         width: 16
         height: 20
       alignment: 9
@@ -610,8 +610,8 @@ TextureImporter:
       name: flame_3
       rect:
         serializedVersion: 2
-        x: 17
-        y: 18
+        x: 78
+        y: 93
         width: 16
         height: 20
       alignment: 9
@@ -632,8 +632,8 @@ TextureImporter:
       name: rock_big_0
       rect:
         serializedVersion: 2
-        x: 34
-        y: 20
+        x: 95
+        y: 95
         width: 22
         height: 18
       alignment: 9
@@ -654,8 +654,8 @@ TextureImporter:
       name: rock_big_1
       rect:
         serializedVersion: 2
-        x: 57
-        y: 20
+        x: 118
+        y: 95
         width: 22
         height: 18
       alignment: 9
@@ -676,8 +676,8 @@ TextureImporter:
       name: barrel
       rect:
         serializedVersion: 2
-        x: 80
-        y: 20
+        x: 141
+        y: 95
         width: 14
         height: 18
       alignment: 9
@@ -698,8 +698,8 @@ TextureImporter:
       name: log
       rect:
         serializedVersion: 2
-        x: 95
-        y: 22
+        x: 206
+        y: 97
         width: 32
         height: 16
       alignment: 9
@@ -720,8 +720,8 @@ TextureImporter:
       name: stump
       rect:
         serializedVersion: 2
-        x: 128
-        y: 22
+        x: 0
+        y: 76
         width: 18
         height: 16
       alignment: 9
@@ -742,8 +742,8 @@ TextureImporter:
       name: crate
       rect:
         serializedVersion: 2
-        x: 147
-        y: 22
+        x: 19
+        y: 76
         width: 16
         height: 16
       alignment: 9
@@ -764,8 +764,8 @@ TextureImporter:
       name: bush_small_0
       rect:
         serializedVersion: 2
-        x: 164
-        y: 24
+        x: 36
+        y: 78
         width: 18
         height: 14
       alignment: 9
@@ -786,8 +786,8 @@ TextureImporter:
       name: bush_small_1
       rect:
         serializedVersion: 2
-        x: 183
-        y: 24
+        x: 55
+        y: 78
         width: 18
         height: 14
       alignment: 9
@@ -808,8 +808,8 @@ TextureImporter:
       name: mushrooms
       rect:
         serializedVersion: 2
-        x: 202
-        y: 24
+        x: 74
+        y: 78
         width: 16
         height: 14
       alignment: 9
@@ -830,8 +830,8 @@ TextureImporter:
       name: campfire
       rect:
         serializedVersion: 2
-        x: 219
-        y: 24
+        x: 91
+        y: 78
         width: 20
         height: 14
       alignment: 9
@@ -852,8 +852,8 @@ TextureImporter:
       name: fence_h
       rect:
         serializedVersion: 2
-        x: 240
-        y: 24
+        x: 112
+        y: 78
         width: 16
         height: 14
       alignment: 9
@@ -874,8 +874,8 @@ TextureImporter:
       name: fence_post
       rect:
         serializedVersion: 2
-        x: 0
-        y: 3
+        x: 129
+        y: 78
         width: 6
         height: 14
       alignment: 9
@@ -896,8 +896,8 @@ TextureImporter:
       name: rock_small_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 7
+        x: 192
+        y: 82
         width: 12
         height: 10
       alignment: 9
@@ -918,8 +918,8 @@ TextureImporter:
       name: rock_small_1
       rect:
         serializedVersion: 2
-        x: 20
-        y: 7
+        x: 205
+        y: 82
         width: 12
         height: 10
       alignment: 9
@@ -932,6 +932,336 @@ TextureImporter:
       bones: []
       spriteID: 3ec09a5fe5bbf96924b074e35986461f
       internalID: 2114989198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deadtree_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 202
+        width: 40
+        height: 54
+      alignment: 9
+      pivot: {x: 0.4875, y: 0.07407}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f64cb0c728f199a5d86ff438109498a4
+      internalID: 1271073441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: deadtree_1
+      rect:
+        serializedVersion: 2
+        x: 41
+        y: 202
+        width: 40
+        height: 54
+      alignment: 9
+      pivot: {x: 0.4625, y: 0.07407}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e63306c6acbe25cd84094b22a8fde982
+      internalID: -1416110562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: willow_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 151
+        width: 46
+        height: 50
+      alignment: 9
+      pivot: {x: 0.51087, y: 0.08}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 13efae290f7e3f4505a4cf2756021ee8
+      internalID: -1304874048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: willow_1
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 151
+        width: 46
+        height: 50
+      alignment: 9
+      pivot: {x: 0.51087, y: 0.08}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6032529189c397cd847eb001507bec15
+      internalID: -970113125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stilthut
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 151
+        width: 48
+        height: 50
+      alignment: 9
+      pivot: {x: 0.51042, y: 0.06}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd5c398ad6b341046776b2a88639b83b
+      internalID: 1301655703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waystone
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 116
+        width: 18
+        height: 34
+      alignment: 9
+      pivot: {x: 0.52778, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e02bb302c4ffb63dad44ac6736ce0c45
+      internalID: 535392299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: waystone_lit
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 116
+        width: 18
+        height: 34
+      alignment: 9
+      pivot: {x: 0.52778, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c03226ec460a2097004845b47b6b181
+      internalID: 2046041596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cattails_0
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 122
+        width: 20
+        height: 28
+      alignment: 9
+      pivot: {x: 0.525, y: 0.03571}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d1f4ba418b87d36fd82698ac436bace
+      internalID: -267243871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cattails_1
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 122
+        width: 20
+        height: 28
+      alignment: 9
+      pivot: {x: 0.525, y: 0.03571}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f241f79d9511de04d131d1cdcdb77bc9
+      internalID: 1301222911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: swamprock_big_0
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 95
+        width: 24
+        height: 18
+      alignment: 9
+      pivot: {x: 0.52083, y: 0.11111}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 98aea1adbc4c0e4794743477adfdd624
+      internalID: 1499456121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: swamprock_big_1
+      rect:
+        serializedVersion: 2
+        x: 181
+        y: 95
+        width: 24
+        height: 18
+      alignment: 9
+      pivot: {x: 0.52083, y: 0.11111}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d836f7838e29c9be2073a039b7aaf826
+      internalID: 900757368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mossylog
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 78
+        width: 34
+        height: 14
+      alignment: 9
+      pivot: {x: 0.51471, y: 0.14286}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf120b2c9fc3a5422ed8b4de3059dc12
+      internalID: 467823156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bones
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 80
+        width: 20
+        height: 12
+      alignment: 9
+      pivot: {x: 0.525, y: 0.08333}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eac7c85a8e276f0ed95f9e0f2a0104a3
+      internalID: -987511971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: swamprock_small_0
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 82
+        width: 14
+        height: 10
+      alignment: 9
+      pivot: {x: 0.53571, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1043efe20ab7b205b88cfd30b1a8d5e6
+      internalID: -1144797375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: swamprock_small_1
+      rect:
+        serializedVersion: 2
+        x: 233
+        y: 82
+        width: 14
+        height: 10
+      alignment: 9
+      pivot: {x: 0.53571, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f4db8daa5ef63ed19f2d209c78101d7
+      internalID: 523235296
       vertices: []
       indices: 
       edges: []
@@ -951,13 +1281,18 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       barrel: -1887357517
+      bones: -987511971
       boulder: 1477158193
       bush_big_0: -639442741
       bush_big_1: -526606660
       bush_small_0: -1365412942
       bush_small_1: 117339170
       campfire: -1169827857
+      cattails_0: -267243871
+      cattails_1: 1301222911
       crate: -1869675553
+      deadtree_0: 1271073441
+      deadtree_1: -1416110562
       fence_h: 28545197
       fence_post: -1182865611
       flame_0: -460536006
@@ -967,6 +1302,7 @@ TextureImporter:
       hut: 2052509440
       lantern: 1459000917
       log: 248818757
+      mossylog: 467823156
       mushrooms: -1442523392
       oak_0: 221009688
       oak_1: -996467787
@@ -980,11 +1316,20 @@ TextureImporter:
       rock_small_0: -144341374
       rock_small_1: 2114989198
       signpost: 869973550
+      stilthut: 1301655703
       stump: 479710220
+      swamprock_big_0: 1499456121
+      swamprock_big_1: 900757368
+      swamprock_small_0: -1144797375
+      swamprock_small_1: 523235296
       tent: 943344662
+      waystone: 535392299
+      waystone_lit: 2046041596
       well: 1682081605
+      willow_0: -1304874048
+      willow_1: -970113125
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  userData: rpg:ae2af056a398a819f360b54a84d8b222
+  userData: rpg:ff757ebadce01f38b2ac8454b466a763
   assetBundleName: 
   assetBundleVariant: 

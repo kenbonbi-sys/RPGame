@@ -16,7 +16,7 @@ namespace RPG
         static InputActionAsset asset;
         static InputAction[] skills, potions, choices, cheats;
         static InputAction move, point, primary, secondary, interact;
-        static InputAction cancel, help, bag, character, journal, questCycle, advance, console;
+        static InputAction cancel, help, bag, character, journal, questCycle, advance, console, map;
 
         static InputReader() => Build();
 
@@ -61,6 +61,7 @@ namespace RPG
             character = A(GameControls.Menus, "Character");
             journal = A(GameControls.Menus, "Journal");
             questCycle = A(GameControls.Menus, "QuestCycle");
+            map = A(GameControls.Menus, "Map");
             advance = A(GameControls.Menus, "Advance");
             console = A(GameControls.Debug, "Console");
         }
@@ -169,6 +170,7 @@ namespace RPG
         public static bool ToggleHelp => Down(help);
         public static bool ToggleJournal => Down(journal);
         public static bool ToggleCharacter => Down(character);
+        public static bool ToggleMap => Down(map);
         public static bool Cancel => Down(cancel);
         public static bool Advance => Down(advance);
         public static bool ToggleConsole => Down(console);

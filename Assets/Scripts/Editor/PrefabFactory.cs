@@ -17,6 +17,8 @@ namespace RPG.EditorTools
         public static readonly Dictionary<string, GameObject> Props = new Dictionary<string, GameObject>();
 
         public static GameObject Player, NetHero, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
+        // Đầm Lầy Sương Mù
+        public static GameObject Toad, Leech, MudMan, Mudling, ToadKing, Snake;
 
         /// <summary>Abilities on Q W E R A S D Space.</summary>
         static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
@@ -33,6 +35,12 @@ namespace RPG.EditorTools
             Slime = BuildSlime();
             Shroom = BuildShroom();
             Bear = BuildBear();
+            Toad = BuildToad();
+            Leech = BuildLeech();
+            MudMan = BuildMudMan();
+            Mudling = BuildMudling();
+            ToadKing = BuildToadKing();
+            Snake = BuildSnake();
             Boulder = BuildBoulder();
             Loot = BuildLoot();
             BuildProps();
@@ -138,6 +146,12 @@ namespace RPG.EditorTools
                     pc.stats = root.AddComponent<PlayerStats>();
                     changed = true;
                 }
+                // Đá Truyền Tống the hero has woken (T49)
+                if (root.GetComponent<WaystoneLog>() == null)
+                {
+                    pc.waystones = root.AddComponent<WaystoneLog>();
+                    changed = true;
+                }
                 // prefabs from before Ability System v2 lost their (SkillDef) slots: fill them with the ported abilities
                 var skills = root.GetComponent<PlayerSkills>();
                 if (skills != null && System.Array.TrueForAll(skills.slots, s => s == null))
@@ -197,6 +211,12 @@ namespace RPG.EditorTools
             Slime = L($"{CharFolder}/Slime");
             Shroom = L($"{CharFolder}/Shroom");
             Bear = L($"{CharFolder}/BossBear");
+            Toad = L($"{CharFolder}/Toad");
+            Leech = L($"{CharFolder}/Leech");
+            MudMan = L($"{CharFolder}/MudMan");
+            Mudling = L($"{CharFolder}/Mudling");
+            ToadKing = L($"{CharFolder}/BossToadKing");
+            Snake = L($"{CharFolder}/BossSnakeMother");
             Boulder = L($"{GameplayFolder}/TangDaLon");
             Loot = L($"{GameplayFolder}/Loot");
             Props.Clear();
@@ -521,6 +541,229 @@ namespace RPG.EditorTools
             return EditorUtil.SavePrefab(root, $"{CharFolder}/BossBear.prefab");
         }
 
+        // ================================================================== Đầm Lầy Sương Mù
+        /// <summary>The body gets the dissolve / outline material and a SpriteStyle (T22).</summary>
+        static SpriteStyle Style(GameObject root, SpriteRenderer body)
+        {
+            var fx = AssetFactory.SpriteLitFX;
+            if (fx != null) body.sharedMaterial = fx;
+            var style = root.AddComponent<SpriteStyle>();
+            style.target = body;
+            return style;
+        }
+
+        static LootEntry Drop(string item, float chance, int min = 1, int max = 1) =>
+            new LootEntry { itemId = item, chance = chance, min = min, max = max };
+
+        /// <summary>The frame of every swamp creature: body, collider, motor, health, statuses.</summary>
+        static (GameObject root, SpriteRenderer body) Creature(string name, string firstFrame, float mass, float radius, float colliderY,
+                                                             float speed, bool swims, float shadow)
+        {
+            var root = new GameObject(name);
+            root.layer = Layers.Enemy;
+            Group(root);
+            Body(root, mass);
+            var col = root.AddComponent<CircleCollider2D>();
+            col.radius = radius;
+            col.offset = new Vector2(0, colliderY);
+            var motor = root.AddComponent<CharacterMotor>();
+            motor.moveSpeed = speed;
+            motor.slowedByWater = !swims;
+            root.AddComponent<Health>();
+            root.AddComponent<StatusEffects>();
+            if (shadow > 0f) Shadow(root, shadow);
+            var body = Sprite(root, "Body", firstFrame, AssetFactory.SpriteLit);
+            return (root, body);
+        }
+
+        static GameObject BuildToad()
+        {
+            var (root, body) = Creature("Toad", "toad_idle_0", 0.8f, 0.32f, 0.22f, 2.4f, true, 1f);
+            var ai = root.AddComponent<ToadAI>();
+            EnemyCommon(root, ai, body, "toad", 1.05f, 150f);
+            root.GetComponent<Health>().resistances.poison = 0.5f;
+            ai.style = Style(root, body);
+            ai.enemyId = "toad";
+            ai.displayName = "Cóc Độc";
+            ai.level = 8;
+            ai.contactDamage = 0f;
+            ai.attackRange = 1.1f;
+            ai.attackCooldown = 1.8f;
+            ai.aggroRange = 6.5f;
+            ai.leashRange = 14f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("toad_skin", 0.55f), Drop("poison_gland", 0.22f), Drop("coin", 0.85f, 2, 5), Drop("lotus", 0.06f), Drop("potion_green", 0.04f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Toad.prefab");
+        }
+
+        static GameObject BuildLeech()
+        {
+            var (root, body) = Creature("Leech", "leech_idle_0", 0.5f, 0.28f, 0.15f, 3.2f, true, 0f);
+            var ai = root.AddComponent<LeechAI>();
+            EnemyCommon(root, ai, body, "leech", 0.8f, 120f);
+            ai.style = Style(root, body);
+            ai.enemyId = "leech";
+            ai.displayName = "Đỉa Bùn";
+            ai.level = 9;
+            ai.contactDamage = 0f;
+            ai.attackRange = 1f;
+            ai.attackCooldown = 2.2f;
+            ai.aggroRange = 4.5f;
+            ai.leashRange = 7f;
+            ai.wanderRadius = 1.2f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("leech_tooth", 0.5f), Drop("coin", 0.8f, 1, 4), Drop("potion_red", 0.1f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Leech.prefab");
+        }
+
+        static GameObject BuildMudMan()
+        {
+            var (root, body) = Creature("MudMan", "mudman_idle_0", 3f, 0.45f, 0.35f, 1.5f, false, 1.4f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.6f;
+            var ai = root.AddComponent<MudManAI>();
+            EnemyCommon(root, ai, body, "mudman", 2.1f, 420f);
+            var h = root.GetComponent<Health>();
+            h.resistances.physical = 0.15f;
+            h.resistances.fire = -0.2f;   // the mud dries and cracks
+            ai.style = Style(root, body);
+            ai.enemyId = "mudman";
+            ai.displayName = "Người Bùn";
+            ai.level = 11;
+            ai.contactDamage = 6f;
+            ai.attackCooldown = 2.6f;
+            ai.aggroRange = 6f;
+            ai.leashRange = 12f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("mud_core", 0.45f), Drop("coin", 0.9f, 3, 7), Drop("herb", 0.2f), Drop("potion_red", 0.12f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/MudMan.prefab");
+        }
+
+        static GameObject BuildMudling()
+        {
+            var (root, body) = Creature("Mudling", "mudling_idle_0", 0.7f, 0.3f, 0.22f, 2.8f, false, 0.9f);
+            var ai = root.AddComponent<SlimeAI>();
+            EnemyCommon(root, ai, body, "mudling", 1f, 70f);
+            ai.style = Style(root, body);
+            ai.enemyId = "mudling";
+            ai.displayName = "Bùn Con";
+            ai.level = 9;
+            ai.contactDamage = 5f;
+            ai.attackRange = 1.2f;
+            ai.lungeDamage = 12f;
+            ai.aggroRange = 7f;
+            ai.loot = new List<LootEntry> { Drop("coin", 0.5f, 1, 2) };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Mudling.prefab");
+        }
+
+        /// <summary>The frame every boss shares (the bear's own builder predates it).</summary>
+        static (GameObject root, T boss) Boss<T>(string name, string set, float mass, float radius, float colliderY, float speed, bool swims,
+                                                 float hp, float shadow, float headY) where T : BossBase
+        {
+            var root = new GameObject(name);
+            root.layer = Layers.Enemy;
+            Group(root);
+            Body(root, mass);
+            var col = root.AddComponent<CircleCollider2D>();
+            col.radius = radius;
+            col.offset = new Vector2(0, colliderY);
+            var motor = root.AddComponent<CharacterMotor>();
+            motor.moveSpeed = speed;
+            motor.knockbackResist = 0.1f;
+            motor.slowedByWater = !swims;
+            var health = root.AddComponent<Health>();
+            health.team = Team.Enemy;
+            health.maxHp = hp;
+            health.hp = hp;
+            var status = root.AddComponent<StatusEffects>();
+            status.stunResist = 0.5f;
+            if (shadow > 0f) Shadow(root, shadow, 0.05f);
+            var bodyRoot = EditorUtil.Child(root, "BodyRoot");
+            var body = Sprite(bodyRoot, "Body", set + "_idle_0", AssetFactory.SpriteLit);
+            var anim = Animator(body, set, "idle");
+            var flash = Flash(body);
+            health.head = Head(root, headY);
+            var ghost = root.AddComponent<AfterImageSpawner>();
+            ghost.source = body;
+            var boss = root.AddComponent<T>();
+            boss.motor = motor;
+            boss.anim = anim;
+            boss.health = health;
+            boss.status = status;
+            boss.flash = flash;
+            boss.bodyRoot = bodyRoot.transform;
+            boss.body = body;
+            boss.afterImages = ghost;
+            boss.maxHp = hp;
+            boss.walkSpeed = speed;
+            boss.style = Style(root, body);
+            boss.poise = root.AddComponent<Poise>();
+            return (root, boss);
+        }
+
+        static GameObject BuildToadKing()
+        {
+            var (root, boss) = Boss<BossToadKing>("BossToadKing", "toadking", 25f, 0.95f, 0.6f, 2f, true, 2400f, 2.6f, 3.1f);
+            var crown = PointLight(boss.bodyRoot.gameObject, new Color(1f, 0.8f, 0.4f), 1.4f, 0.5f, new Vector3(0, 2.7f, 0));
+            var nl = crown.gameObject.AddComponent<NightLight>();
+            nl.target = crown;
+            nl.dayIntensity = 0.2f;
+            nl.nightIntensity = 0.8f;
+            nl.flicker = 0.1f;
+            root.GetComponent<Health>().resistances.poison = 0.6f;
+            boss.poise.maxPoise = 220f;
+            boss.bossId = "toadking";
+            boss.displayName = "Cóc Tía";
+            boss.title = "Chúa Ao Độc";
+            boss.level = 11;
+            boss.rank = EnemyRank.MiniBoss;
+            boss.homeName = "Ao Cóc Tía";
+            boss.arenaRadius = 8f;
+            boss.wakeRadius = 6f;
+            boss.coins = 8;
+            boss.loot = new List<LootEntry>
+            {
+                Drop("toad_crown", 1f), Drop("poison_gland", 1f, 2, 3), Drop("toad_skin", 1f, 2, 3), Drop("venom_sac", 0.5f),
+                Drop("lotus", 0.8f, 1, 2), Drop("gem_blue", 0.3f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/BossToadKing.prefab");
+        }
+
+        static GameObject BuildSnake()
+        {
+            // no shadow: it rises out of the water
+            var (root, boss) = Boss<BossSnakeMother>("BossSnakeMother", "snake", 45f, 1.2f, 0.7f, 2.2f, true, 5200f, 0f, 4.2f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.08f;
+            var eyes = PointLight(boss.bodyRoot.gameObject, new Color(1f, 0.35f, 0.3f), 1.8f, 0.6f, new Vector3(0, 3.1f, 0));
+            var nl = eyes.gameObject.AddComponent<NightLight>();
+            nl.target = eyes;
+            nl.dayIntensity = 0.3f;
+            nl.nightIntensity = 1.2f;
+            nl.flicker = 0.12f;
+            root.GetComponent<Health>().resistances.poison = 0.75f;
+            boss.poise.maxPoise = 360f;
+            boss.bossId = "snake";
+            boss.displayName = "Xà Mẫu Đầm Lầy";
+            boss.title = "Mẹ Của Đầm Sâu";
+            boss.level = 14;
+            boss.rank = EnemyRank.Boss;
+            boss.homeName = "Đầm Xà Mẫu";
+            boss.arenaRadius = 11f;
+            boss.wakeRadius = 8f;
+            boss.coins = 16;
+            boss.loot = new List<LootEntry>
+            {
+                Drop("snake_fang", 1f), Drop("snake_scale", 1f, 2, 3), Drop("venom_sac", 1f, 2, 2), Drop("gem_red", 0.6f),
+                Drop("gem_blue", 0.6f), Drop("lotus", 1f, 2, 2), Drop("potion_red", 1f, 2, 2),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/BossSnakeMother.prefab");
+        }
+
         static GameObject BuildBoulder()
         {
             var root = new GameObject("TangDaLon");
@@ -647,6 +890,35 @@ namespace RPG.EditorTools
                     nl.flickerSpeed = 2f;
                 });
             }
+            // Đầm Lầy Sương Mù
+            for (int i = 0; i < 2; i++)
+            {
+                Prop($"deadtree_{i}", $"deadtree_{i}", new Vector2(0.5f, 0.3f), new Vector2(0, 0.15f), 1.6f, true);
+                Prop($"willow_{i}", $"willow_{i}", new Vector2(0.7f, 0.4f), new Vector2(0, 0.18f), 2.4f, true);
+                Prop($"cattails_{i}", $"cattails_{i}");
+                Prop($"swamprock_big_{i}", $"swamprock_big_{i}", new Vector2(1.2f, 0.5f), new Vector2(0, 0.25f), 1.5f);
+                Prop($"swamprock_small_{i}", $"swamprock_small_{i}", null, default, 0.7f);
+            }
+            Prop("mossylog", "mossylog", new Vector2(1.9f, 0.4f), new Vector2(0, 0.18f), 2f);
+            Prop("bones", "bones");
+            Prop("stilthut", "stilthut", new Vector2(2.4f, 0.8f), new Vector2(0, 0.4f), 3f, true, (go, sr) =>
+            {
+                var l = PointLight(go, new Color(1f, 0.75f, 0.4f), 2.6f, 0f, new Vector3(0.2f, 1.6f, 0));
+                var nl = l.gameObject.AddComponent<NightLight>();
+                nl.target = l;
+                nl.dayIntensity = 0.05f;
+                nl.nightIntensity = 1.1f;
+                nl.flicker = 0.06f;
+            });
+            Prop("waystone", "waystone", new Vector2(0.7f, 0.35f), new Vector2(0, 0.15f), 0.9f, false, (go, sr) =>
+            {
+                var w = go.AddComponent<Waystone>();
+                w.sprite = sr;
+                w.dark = ArtImporter.S("waystone");
+                w.lit = ArtImporter.S("waystone_lit");
+                w.glow = PointLight(go, new Color(0.45f, 1f, 0.95f), 3.6f, 1.1f, new Vector3(0, 1.4f, 0));
+                w.glow.enabled = false;
+            });
             Prop("lantern", "lantern", new Vector2(0.3f, 0.25f), new Vector2(0, 0.12f), 0.6f, false, (go, sr) =>
             {
                 var l = PointLight(go, new Color(1f, 0.78f, 0.45f), 4.2f, 0.3f, new Vector3(0.3f, 1.2f, 0));

@@ -665,7 +665,7 @@ namespace RPG
         {
             var db = GameManager.I != null ? GameManager.I.db : null;
             if (db == null) return;
-            var prefab = m.id == "spore" ? db.sporePrefab : m.id == "fireball" ? db.fireballPrefab : null;
+            var prefab = m.id == "spore" ? db.sporePrefab : m.id == "venom" ? db.venomPrefab : m.id == "fireball" ? db.fireballPrefab : null;
             if (prefab == null) return;
             var go = Pool.Get(prefab, m.pos, Quaternion.identity);
             var fx = go.GetComponent<PooledFX>();
@@ -688,12 +688,13 @@ namespace RPG
             pr.Launch(m.pos2, null, false);
         }
 
-        /// <summary>A lobbed rock seen on this screen (its landing arrives as its own cues).</summary>
+        /// <summary>A lobbed rock or poison glob seen on this screen (its landing arrives as its own cues).</summary>
         public static void ShowArc(CueMsg m)
         {
             var db = GameManager.I != null ? GameManager.I.db : null;
-            if (db == null || db.rockProjectilePrefab == null) return;
-            var go = Pool.Get(db.rockProjectilePrefab, m.pos, Quaternion.identity);
+            var prefab = db == null ? null : m.id == "venom" ? db.venomArcPrefab : db.rockProjectilePrefab;
+            if (prefab == null) return;
+            var go = Pool.Get(prefab, m.pos, Quaternion.identity);
             var fx = go.GetComponent<PooledFX>();
             if (fx != null) fx.Persistent = true;
             var arc = go.GetComponent<ArcProjectile>();

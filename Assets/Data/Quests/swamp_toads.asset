@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: swamp_toads
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: swamp_toads
+  title: "Truy N\xE3: C\xF3c \u0110\u1ED9c V\xE0 \u0110\u1EC9a B\xF9n"
+  kind: 2
+  summary: "Ng\u01B0 d\xE2n \u1EDF tr\u1EA1m nh\xE0 s\xE0n treo th\u01B0\u1EDFng: C\xF3c \u0110\u1ED9c v\xE0 \u0110\u1EC9a B\xF9n kh\xF4ng cho ai th\u1EA3 l\u01B0\u1EDBi."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: f60cbc3b5692ec248abf695b3649174d, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: toad
+    count: 6
+    text: "H\u1EA1 C\xF3c \u0110\u1ED9c"
+    countPrevious: 0
+    marker: swamp
+  - kind: 1
+    target: leech
+    count: 3
+    text: "H\u1EA1 \u0110\u1EC9a B\xF9n"
+    countPrevious: 0
+    marker: swamp
+  xp: 320
+  gold: 40
+  items:
+  - item: {fileID: 11400000, guid: 077b8cecceb086245b7bf5d3eb9c1910, type: 2}
+    count: 3
+  setFlags: []
+  followUps: []

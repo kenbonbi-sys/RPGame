@@ -34,6 +34,11 @@ namespace RPG
         StatusEffects status;
         Poise poise;
         Transform lift;
+        // the body's colliders and which were triggers to begin with (a copy lets heroes through when the server's does)
+        Collider2D[] solids;
+        bool[] triggerAtStart;
+        Collider2D mainSolid;
+        bool intangible;
 
         // server: what the snapshots last said
         internal EntityState lastSent;
@@ -92,6 +97,13 @@ namespace RPG
             }
             if (anim == null) anim = GetComponentInChildren<SpriteAnimator>();
             if (body == null && anim != null) body = anim.target;
+            solids = GetComponentsInChildren<Collider2D>(true);
+            triggerAtStart = new bool[solids.Length];
+            for (int i = 0; i < solids.Length; i++)
+            {
+                triggerAtStart[i] = solids[i].isTrigger;
+                if (mainSolid == null && !solids[i].isTrigger) mainSolid = solids[i];
+            }
             if (GameSession.IsAuthority) return;
             // a client's copy is moved by the server, not by physics or its own feet
             var motor = GetComponent<CharacterMotor>();
@@ -127,6 +139,7 @@ namespace RPG
             byte f = 0;
             if (body != null && body.flipX) f |= EntityFlags.FlipX;
             if (Health != null && Health.IsDead) f |= EntityFlags.Dead;
+            else if (mainSolid != null && (!mainSolid.enabled || mainSolid.isTrigger)) f |= EntityFlags.Intangible;
             if (gameObject.activeInHierarchy) f |= EntityFlags.Visible;
             if (Boss != null)
             {
@@ -194,8 +207,18 @@ namespace RPG
             }
             if (dead && !wasDead && Health != null) Health.SetRemoteDead(true);
             else if (!dead && wasDead && Health != null) Health.SetRemoteDead(false);
+            SetIntangible((s.flags & EntityFlags.Intangible) != 0);
             wasDead = dead;
             applied = true;
+        }
+
+        /// <summary>A copy's body lets heroes through while the server's does (triggers: still hit by attacks).</summary>
+        void SetIntangible(bool on)
+        {
+            if (on == intangible || solids == null) return;
+            intangible = on;
+            for (int i = 0; i < solids.Length; i++)
+                if (solids[i] != null) solids[i].isTrigger = on || triggerAtStart[i];
         }
 
         void Hide()

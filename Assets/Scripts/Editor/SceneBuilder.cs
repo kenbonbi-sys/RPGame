@@ -67,6 +67,14 @@ namespace RPG.EditorTools
             Debug.Log($"[RPG] Force Rebuild Everything done ({EditorUtil.Stats})");
         }
 
+        /// <summary>Every generated asset but the scenes, creating only what is missing (hand edits survive).</summary>
+        public static void BuildAssetsOnly()
+        {
+            EditorUtil.ResetStats();
+            RunSteps();
+            MoveHeroStateOntoPlayer();
+        }
+
         static void RunSteps()
         {
             ProjectSetup.EnsureSortingLayers();
@@ -141,6 +149,22 @@ namespace RPG.EditorTools
             Debug.Log("[RPG] Scenes rebuilt → " + string.Join(", ", AllScenePaths()));
         }
 
+        /// <summary>
+        /// Regenerates only the zone scenes (the world map) from the prefabs on disk, leaving Core,
+        /// the title screen and the VFX gallery as they are (hand edits there survive).
+        /// </summary>
+        [MenuItem("Tools/RPG/Steps/6b. Rebuild Zone Scenes Only (the world map)", priority = 106)]
+        public static void RebuildZonesOnly()
+        {
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            PrefabFactory.LoadExisting();
+            var db = AssetFactory.Database;
+            foreach (var zone in db.zones)
+                if (zone != null) BuildZone(zone, ZoneScenePath(zone));
+            UpdateBuildSettings();
+            Debug.Log("[RPG] Zone scenes rebuilt");
+        }
+
         /// <summary>Builds the missing scenes (or all of them when <paramref name="all"/>), then the build settings.</summary>
         static void BuildScenes(bool all)
         {
@@ -187,9 +211,18 @@ namespace RPG.EditorTools
             Spot("boss", res.bossSpot);
             Spot("chief", res.chief);
             Spot("girl", res.girl);
+            Spot("outpost", res.outpost);
+            Spot("swamp", res.swampSpot);
+            Spot("mudfield", res.mudField);
+            Spot("toadpond", res.toadPond);
+            Spot("snakelair", res.snakeLair);
             root.ground = res.ground;
             root.tallGrass = res.tall;
             root.dirt = res.dirt;
+            root.mud = res.mud;
+            root.water = res.water;
+            root.terrain = res.terrain;
+            root.terrainWidth = res.terrainWidth;
             root.obstacles = res.props;
             EditorUtility.SetDirty(root);
             EditorUtil.EnsureFolder(ZoneFolder);

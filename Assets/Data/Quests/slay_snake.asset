@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: slay_snake
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: slay_snake
+  title: "X\xE0 M\u1EABu \u0110\u1EA7m L\u1EA7y"
+  kind: 0
+  summary: "S\xE2u trong \u0111\u1EA7m, X\xE0 M\u1EABu cu\u1ED9n m\xECnh gi\u1EEFa h\u1ED3 n\u01B0\u1EDBc c\xF3 b\u1ED1n g\xF2 \u0111\u1EA5t. D\u1EE5 n\xF3 lao v\xE0o g\xF2 \u0111\u1EA5t \u0111\u1EC3 n\xF3 cho\xE1ng v\xE1ng."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 7e87a3d8e8243434d93ecfe4dcde8932, type: 2}
+  - {fileID: 11400000, guid: 89eec7b663e4108418968ec6fe31009f, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: snake
+    count: 1
+    text: "\u0110\xE1nh b\u1EA1i X\xE0 M\u1EABu \u0110\u1EA7m L\u1EA7y"
+    countPrevious: 0
+    marker: snakelair
+  xp: 1200
+  gold: 150
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 4
+  - item: {fileID: 11400000, guid: 077b8cecceb086245b7bf5d3eb9c1910, type: 2}
+    count: 4
+  setFlags:
+  - swamp_saved
+  followUps: []

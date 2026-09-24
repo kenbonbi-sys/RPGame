@@ -334,6 +334,7 @@ GameObject:
   - component: {fileID: 7653062301060653840}
   - component: {fileID: 8719649478814836203}
   - component: {fileID: 6181002921241023267}
+  - component: {fileID: 5446808342200610147}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -452,6 +453,7 @@ MonoBehaviour:
   acceleration: 60
   knockbackDecay: 18
   knockbackResist: 1
+  slowedByWater: 1
 --- !u!114 &7877704080734933306
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -561,6 +563,7 @@ MonoBehaviour:
   inventory: {fileID: 7653062301060653840}
   quests: {fileID: 8719649478814836203}
   bestiary: {fileID: 6181002921241023267}
+  waystones: {fileID: 5446808342200610147}
   maxEnergy: 63
   energy: 50
   energyRegen: 3.5
@@ -643,6 +646,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b7fefdddc552ba42b030d343c139fdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RPG.Bestiary
+--- !u!114 &5446808342200610147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3700953153124468682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba2a147debc8f3b4fa148b56aa224a6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.WaystoneLog
 --- !u!1 &8470633948553409350
 GameObject:
   m_ObjectHideFlags: 0

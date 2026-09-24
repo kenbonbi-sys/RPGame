@@ -7,18 +7,19 @@ using UnityEngine.UI;
 namespace RPG
 {
     /// <summary>
-    /// Top-right minimap. The map texture is generated from the tilemaps at start;
-    /// markers (player, NPCs, enemies, boss, quest objective) are UI images.
+    /// Top-right minimap. The map texture is generated from the tilemaps at start (the world map,
+    /// M, shows the same texture whole); markers (player, NPCs, enemies, boss, woken Đá Truyền
+    /// Tống, quest objective) are UI images.
     /// </summary>
     public class MinimapUI : MonoBehaviour
     {
-        public enum MarkerKind { Enemy, NPC, Boss, Objective }
+        public enum MarkerKind { Enemy, NPC, Boss, Objective, Waystone }
 
         [Header("Map")]
         public RawImage map;
         public RectTransform markerRoot;
         public RectTransform playerMarker;
-        public Tilemap ground, tallGrass, dirt;
+        public Tilemap ground, tallGrass, dirt, mud, water;
         public Transform obstaclesRoot;
         public Vector2Int worldSize = new Vector2Int(100, 64);
         public Vector2 viewTiles = new Vector2(44, 22);
@@ -37,6 +38,15 @@ namespace RPG
 
         static readonly List<(Transform t, MarkerKind k)> Pending = new List<(Transform, MarkerKind)>();
         static MinimapUI inst;
+
+        /// <summary>The map of the zone as drawn for the minimap (the world map shows it whole), or null.</summary>
+        public static Texture2D MapTexture => inst != null ? inst.tex : null;
+        /// <summary>The size of the zone in world units (one pixel of <see cref="MapTexture"/> each).</summary>
+        public static Vector2Int WorldSize => inst != null ? inst.worldSize : new Vector2Int(100, 64);
+        /// <summary>The hero arrow's sprite (the world map uses it too).</summary>
+        public static Sprite PlayerSprite => inst != null && inst.playerMarker != null && inst.playerMarker.GetComponent<Image>() != null
+            ? inst.playerMarker.GetComponent<Image>().sprite : null;
+        public static Sprite BossSprite => inst != null ? inst.bossSprite : null;
         readonly List<(Transform t, MarkerKind k, RectTransform icon)> markers = new List<(Transform, MarkerKind, RectTransform)>();
         RectTransform objectiveMarker;
         Texture2D tex;
@@ -73,6 +83,8 @@ namespace RPG
             ground = zone.ground;
             tallGrass = zone.tallGrass;
             dirt = zone.dirt;
+            mud = zone.mud;
+            water = zone.water;
             obstaclesRoot = zone.obstacles;
             worldSize = new Vector2Int(Mathf.CeilToInt(zone.bounds.xMax), Mathf.CeilToInt(zone.bounds.yMax));
             if (tex != null) Destroy(tex);
@@ -88,8 +100,9 @@ namespace RPG
         {
             if (t == null || markerRoot == null) return;
             Sprite s = kind == MarkerKind.Boss ? bossSprite : kind == MarkerKind.NPC ? npcSprite : dotSprite;
-            Color c = kind == MarkerKind.Enemy ? new Color(1f, 0.35f, 0.3f) : kind == MarkerKind.NPC ? new Color(1f, 0.9f, 0.4f) : Color.white;
-            float size = kind == MarkerKind.Boss ? 22 : kind == MarkerKind.NPC ? 14 : 8;
+            Color c = kind == MarkerKind.Enemy ? new Color(1f, 0.35f, 0.3f) : kind == MarkerKind.NPC ? new Color(1f, 0.9f, 0.4f)
+                    : kind == MarkerKind.Waystone ? new Color(0.45f, 1f, 0.95f) : Color.white;
+            float size = kind == MarkerKind.Boss ? 22 : kind == MarkerKind.NPC ? 14 : kind == MarkerKind.Waystone ? 12 : 8;
             markers.Add((t, kind, MakeIcon(s, c, size)));
         }
 
@@ -112,17 +125,30 @@ namespace RPG
             tex = new Texture2D(w, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
             var cols = new Color32[w * h];
             Color32 grass = new Color32(74, 110, 58, 255);
+            Color32 swamp = new Color32(66, 84, 58, 255);
             Color32 tall = new Color32(38, 70, 44, 255);
             Color32 dirtC = new Color32(150, 118, 80, 255);
+            Color32 mudC = new Color32(98, 82, 58, 255);
+            Color32 waterC = new Color32(52, 92, 88, 255);
             Color32 edge = new Color32(20, 30, 24, 255);
+            var zone = ZoneRoot.Current;
+            var groundColors = new Dictionary<TileBase, Color32>();
             for (int y = 0; y < h; y++)
                 for (int x = 0; x < w; x++)
                 {
                     var p = new Vector3Int(x, y, 0);
                     Color32 c = edge;
-                    if (ground != null && ground.HasTile(p)) c = grass;
+                    var g = ground != null ? ground.GetTile(p) : null;
+                    if (g != null)
+                    {
+                        if (!groundColors.TryGetValue(g, out c))
+                            groundColors[g] = c = g.name.StartsWith("swamp") ? swamp : grass;
+                    }
                     if (tallGrass != null && tallGrass.HasTile(p)) c = tall;
                     if (dirt != null && dirt.HasTile(p)) c = dirtC;
+                    if (mud != null && mud.HasTile(p)) c = mudC;
+                    // water where the middle of the tile is wet (its edge tiles are partly land)
+                    if (water != null && water.HasTile(p) && (zone == null || zone.IsWater(new Vector2(x + 0.5f, y + 0.5f)))) c = waterC;
                     cols[y * w + x] = c;
                 }
             // obstacles (trees, rocks) as dark pixels
@@ -132,7 +158,7 @@ namespace RPG
                 {
                     int x = Mathf.FloorToInt(t.position.x), y = Mathf.FloorToInt(t.position.y);
                     if (x < 0 || y < 0 || x >= w || y >= h) continue;
-                    bool tree = t.name.StartsWith("pine") || t.name.StartsWith("oak");
+                    bool tree = t.name.StartsWith("pine") || t.name.StartsWith("oak") || t.name.StartsWith("deadtree") || t.name.StartsWith("willow");
                     cols[y * w + x] = tree ? new Color32(22, 48, 34, 255) : new Color32(110, 104, 118, 255);
                     if (tree && y + 1 < h) cols[(y + 1) * w + x] = new Color32(28, 58, 40, 255);
                 }
@@ -173,6 +199,11 @@ namespace RPG
                 }
                 var e = m.k == MarkerKind.Enemy ? m.t.GetComponent<EnemyBase>() : null;
                 bool alive = m.t.gameObject.activeInHierarchy && (e == null || !e.IsDead);
+                if (m.k == MarkerKind.Waystone)
+                {
+                    var stone = m.t.GetComponent<Waystone>();
+                    alive &= stone != null && p.waystones != null && p.waystones.Knows(stone.stoneId);
+                }
                 Vector2 ui = ToUI(m.t.position);
                 m.icon.gameObject.SetActive(alive && Inside(ui));
                 m.icon.anchoredPosition = ui;

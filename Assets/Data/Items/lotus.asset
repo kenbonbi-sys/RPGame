@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: lotus
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: lotus
+  displayName: "Sen \u0110\u1EA7m"
+  description: "Hoa sen tr\u1EAFng m\u1ECDc gi\u1EEFa \u0111\u1EA7m l\u1EA7y. H\u1ED3i 40 M\xE1u v\xE0 20 N\u0103ng l\u01B0\u1EE3ng."
+  icon: {fileID: -1795970577, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 1
+  rarity: 1
+  maxStack: 20
+  value: 8
+  healAmount: 40
+  energyAmount: 20
+  cleanse: 0

@@ -183,7 +183,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator TheBossComesBackToBeFoughtAgain()
         {
-            var boss = BossBear.All.Find(b => b != null && b.gameObject.activeSelf);
+            var boss = BossBase.Find("bear");
             Assert.NotNull(boss, "the bear is in the zone");
             boss.respawnSeconds = 1f;
             var hero = Players.Local;
@@ -656,7 +656,7 @@ namespace RPG.EditorTools.Tests
             yield return RealSeconds(0.6f);
             Assert.AreEqual(1f, audio.Duck, 0.01f, "back to full after the conversation");
 
-            GameEvents.RaiseSkillAnnounced(BossBear.All[0].health, "Kỹ năng: thử");
+            GameEvents.RaiseSkillAnnounced(BossBase.Find("bear").health, "Kỹ năng: thử");
             yield return RealSeconds(0.3f);
             Assert.Less(audio.Duck, 0.95f, "a boss skill call ducks the music");
             yield return RealSeconds(audio.skillDuckSeconds + 0.6f);
@@ -716,7 +716,7 @@ namespace RPG.EditorTools.Tests
             var zone = ZoneRoot.Current;
             Assert.AreEqual("RungThiTham", zone.gameObject.scene.name);
             Assert.AreEqual(zone.gameObject.scene, UnityEngine.SceneManagement.SceneManager.GetActiveScene(), "zone is the active scene");
-            Assert.AreEqual(zone.gameObject.scene, BossBear.All[0].gameObject.scene, "the boss belongs to the zone");
+            Assert.AreEqual(zone.gameObject.scene, BossBase.Find("bear").gameObject.scene, "the boss belongs to the zone");
             Assert.NotNull(GameManager.I.respawnPoint, "spots come from the zone");
             Assert.AreEqual(zone.bounds, CameraRig.I.worldBounds);
             yield return null;
@@ -736,7 +736,7 @@ namespace RPG.EditorTools.Tests
             Assert.NotNull(ZoneRoot.Current);
             var boss = GameManager.I.bossSpot;
             Assert.Less(Vector2.Distance(Players.Local.transform.position, boss.position), 0.1f, "entered at the boss spot");
-            Assert.AreEqual(1, BossBear.All.Count, "old zone unloaded, new one loaded");
+            Assert.AreEqual(1, BossBase.All.FindAll(b => b != null && b.bossId == "bear").Count, "old zone unloaded, new one loaded");
             Assert.IsNotNull(VFX.Spawn("hit_spark", Vector3.zero, Quaternion.identity), "pool still works after the swap");
         }
 

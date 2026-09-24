@@ -4,7 +4,8 @@ using UnityEngine.Rendering.Universal;
 namespace RPG
 {
     /// <summary>
-    /// Drives the global 2D light through dawn / day / dusk / night.
+    /// Drives the global 2D light through dawn / day / dusk / night, tinted by the region the
+    /// hero on this screen walks in (<see cref="ZoneArea.tint"/>, blended over a few seconds).
     /// Other lights (campfire, lanterns, fireflies) read <see cref="NightFactor"/>.
     /// </summary>
     public class DayNightCycle : MonoBehaviour, ISaveable
@@ -27,8 +28,12 @@ namespace RPG
         /// <summary>0 during the day, 1 at deep night.</summary>
         public static float NightFactor => I != null ? I.night : 0f;
         public static bool IsNight => NightFactor > 0.5f;
+        /// <summary>The region's mist around the hero on this screen, blended (0–1).</summary>
+        public static float Mist => I != null ? I.mist : 0f;
 
         float night;
+        Color tint = Color.white;
+        float mist;
 
         void Awake()
         {
@@ -60,6 +65,14 @@ namespace RPG
         {
             if (dayLength > 0) time = Mathf.Repeat(time + Time.deltaTime / dayLength, 1f);
             Evaluate(out Color c, out float intensity, out night);
+            if (GameSession.HasScreen)
+            {
+                ZoneArea.Mood(out Color want, out float wantMist);
+                float k = 1f - Mathf.Exp(-Time.unscaledDeltaTime * 0.8f);
+                tint = Color.Lerp(tint, want, k);
+                mist = Mathf.Lerp(mist, wantMist, k);
+                c *= tint;
+            }
             if (globalLight != null)
             {
                 globalLight.color = c;

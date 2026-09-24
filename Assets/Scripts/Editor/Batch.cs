@@ -9,6 +9,7 @@ namespace RPG.EditorTools
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildAll
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.ForceBuildAll
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildScene
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildZones
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.MoveHeroState
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildOnline
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildTitle
@@ -39,6 +40,23 @@ namespace RPG.EditorTools
         public static void RebuildScene()
         {
             SceneBuilder.RebuildSceneOnly();
+        }
+
+        /// <summary>Regenerates only the zone scenes (the world map) from the prefabs on disk; Core and the title stay.</summary>
+        public static void RebuildZones()
+        {
+            SceneBuilder.RebuildZonesOnly();
+        }
+
+        /// <summary>
+        /// Art import, data, VFX and prefabs (creating only what is missing, like Build Everything),
+        /// then the zone scenes regenerated: new regions of the map without touching Core or the title.
+        /// </summary>
+        public static void GrowWorld()
+        {
+            SceneBuilder.BuildAssetsOnly();
+            SceneBuilder.RebuildZonesOnly();
+            Debug.Log($"[RPG] Batch.GrowWorld done ({EditorUtil.Stats})");
         }
 
         /// <summary>Builds the NetHero prefab and links the network prefabs into the GameDatabase (online phase 1).</summary>

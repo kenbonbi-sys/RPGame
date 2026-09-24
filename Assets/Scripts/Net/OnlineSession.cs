@@ -334,6 +334,7 @@ namespace RPG
                     case "inventory": if (me.inventory != null) me.inventory.RestoreState(m.json); break;
                     case "quests": if (me.quests != null) me.quests.RestoreState(m.json); break;
                     case "bestiary": if (me.bestiary != null) me.bestiary.RestoreState(m.json); break;
+                    case "waystones": if (me.waystones != null) me.waystones.RestoreState(m.json); break;
                     case "dialogue": if (DialogueDirector.I != null) DialogueDirector.I.RestoreState(m.json); break;
                 }
             }

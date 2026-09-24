@@ -829,6 +829,129 @@ def _spore_shot(rng):
     return norm(pew) + 0.35 * tail
 
 
+# ---------------------------------------------------------------- swamp (Đầm Lầy Sương Mù)
+@sfx("sfx_croak")
+def _croak(rng):
+    """A toad's rough two-part croak: a ratcheting low buzz through nasal formants."""
+    n = ns(0.55)
+    y = np.zeros(n)
+    for t0, dur, f0 in ((0.0, 0.2, rng.uniform(150, 175)), (0.25, 0.24, rng.uniform(122, 142))):
+        m = ns(dur)
+        tt = tvec(m)
+        f = f0 * (1 + 0.14 * np.sin(np.pi * np.clip(tt / dur, 0, 1)))
+        buzz = osc("saw", f, m) + 0.5 * osc("square", f * 0.5, m, duty=0.4)
+        ratchet = 0.5 + 0.5 * (np.sin(TAU * rng.uniform(32, 40) * tt) > -0.2)
+        voice = formant(buzz * ratchet, [(430, 4.0, 1.0), (1150, 5.0, 0.55), (2400, 6.0, 0.2)])
+        place(y, rmsn(voice) * env_hump(m, 0.3, 1.2, 1.6), t0 * SR)
+    return lp(y, 3200, 0.8)
+
+
+@sfx("sfx_splash")
+def _splash(rng):
+    """Something heavy breaking the water: a wet burst and falling drops."""
+    n = ns(0.75)
+    t = tvec(n)
+    burst = rmsn(bp(white(n, rng), 700 + 2600 * np.exp(-t / 0.06), 0.8)) * env_perc(n, 0.003, 0.12)
+    body = rmsn(lp(pink(n, rng), 600, 0.9)) * env_perc(n, 0.002, 0.08)
+    drops = np.zeros(n)
+    for t0 in 0.08 + 0.5 * rng.random(9):
+        m = ns(0.06)
+        tt = tvec(m)
+        d = osc("sine", rng.uniform(700, 1600) * np.exp(np.minimum(tt, 0.03) / 0.025), m) * env_perc(m, 0.001, 0.018)
+        place(drops, rng.uniform(0.4, 1.0) * d, t0 * SR)
+    low = thump(n, 140, 60, 0.08, 0.03)
+    return 0.9 * burst + 0.5 * body + 0.5 * drops + 0.4 * low
+
+
+@sfx("sfx_wade")
+def _wade(rng):
+    """A step through shallow water."""
+    n = ns(0.28)
+    t = tvec(n)
+    slosh = rmsn(bp(white(n, rng), 500 + 1400 * np.exp(-t / 0.05), 1.0)) * env_hump(n, 0.25, 1.5, 2.2)
+    drops = np.zeros(n)
+    for t0 in 0.05 + 0.15 * rng.random(3):
+        m = ns(0.05)
+        tt = tvec(m)
+        place(drops, osc("sine", rng.uniform(900, 1700) * np.exp(tt / 0.03), m) * env_perc(m, 0.001, 0.015), t0 * SR)
+    return lp1(slosh + 0.35 * drops, 5000)
+
+
+@sfx("sfx_hiss")
+def _hiss(rng):
+    """A big snake's hiss: bright breath swelling and fading, with a tongue flutter."""
+    n = ns(0.9)
+    t = tvec(n)
+    air = rmsn(hp(white(n, rng), 3200)) * env_hump(n, 0.35, 1.4, 2.2)
+    sib = rmsn(bp(white(n, rng), 6500 + 900 * np.sin(TAU * 2.2 * t), 2.0)) * env_hump(n, 0.4, 1.6, 2.0)
+    flutter = 0.75 + 0.25 * np.sin(TAU * 17 * t)
+    rasp = rmsn(bp(pink(n, rng), 1400, 1.5)) * env_hump(n, 0.3, 1.5, 2.5)
+    return (0.8 * air + 0.6 * sib) * flutter + 0.25 * rasp
+
+
+@sfx("sfx_spit")
+def _spit(rng):
+    """A wet spit: a plosive puff and a gurgling squelch."""
+    n = ns(0.35)
+    t = tvec(n)
+    puff = rmsn(lp(white(n, rng), 1800 + 3000 * np.exp(-t / 0.02), 0.8)) * env_perc(n, 0.002, 0.04)
+    f = 320 + 900 * np.exp(-t / 0.05)
+    gurgle = rmsn(bp(white(n, rng), f, 5.0)) * (0.6 + 0.4 * np.sin(TAU * 45 * t)) * env_perc(n, 0.004, 0.09)
+    return puff + 0.7 * gurgle
+
+
+@sfx("sfx_splat")
+def _splat(rng):
+    """Poison or mud hitting the ground: a soft thump and a squelch."""
+    n = ns(0.4)
+    t = tvec(n)
+    squelch = rmsn(bp(white(n, rng), 400 + 1800 * np.exp(-t / 0.03), 1.6)) * env_perc(n, 0.002, 0.07)
+    bubbles = rmsn(bp(pink(n, rng), 900, 3.0)) * (0.5 + 0.5 * np.sin(TAU * 26 * t)) * env_perc(n, 0.004, 0.12)
+    return squelch + 0.5 * bubbles + 0.5 * thump(n, 160, 70, 0.06, 0.03)
+
+
+@sfx("sfx_mud_slam")
+def _mud_slam(rng):
+    """A mud man's fists into the mud: a heavy thud, sucking mud and clods."""
+    n = ns(0.8)
+    t = tvec(n)
+    thud = thump(n, 110, 42, 0.16, 0.04)
+    muck = rmsn(lp(brown(n, rng), 300 + 1600 * np.exp(-t / 0.05), 1.2)) * env_perc(n, 0.004, 0.18)
+    suck = rmsn(bp(white(n, rng), 500 + 500 * np.clip((t - 0.15) / 0.3, 0, 1), 4.0)) * env_hump(n, 0.55, 2.0, 2.0) * 0.5
+    clods = np.zeros(n)
+    for t0 in 0.1 + 0.45 * rng.random(6):
+        m = ns(0.05)
+        place(clods, rmsn(bp(white(m, rng), rng.uniform(400, 900), 3.0)) * env_perc(m, 0.001, 0.02), t0 * SR)
+    return 1.0 * thud + 0.8 * muck + suck + 0.3 * clods
+
+
+@sfx("sfx_tongue")
+def _tongue(rng):
+    """Cóc Tía's tongue: a wet whip out and a sticky smack."""
+    n = ns(0.4)
+    t = tvec(n)
+    whip = whoosh(n, rng, [(0, 500), (0.5, 3500), (1, 1200)], q=2.0, peak=0.35, rise=1.4, fall=3.0)
+    m = ns(0.12)
+    smack = rmsn(bp(white(m, rng), 1300, 1.5)) * env_perc(m, 0.001, 0.03) + 0.6 * thump(m, 300, 120, 0.03, 0.01)
+    y = 0.8 * whip
+    place(y, smack, 0.17 * SR)
+    return y
+
+
+@sfx("sfx_waystone")
+def _waystone(rng):
+    """A standing stone waking: a soft bell chord with a rising shimmer."""
+    n = ns(1.5)
+    t = tvec(n)
+    y = np.zeros(n)
+    for i, (name, amp) in enumerate((("A4", 0.8), ("E5", 0.6), ("A5", 0.5), ("C#6", 0.35))):
+        m = ns(1.4)
+        place(y, amp * fm_bell(nf(name), m, ratio=2.0, index=0.8, tau=0.7, itau=0.2), i * 0.06 * SR)
+    shimmer = sparkles(n, rng, 26, 0.05, 1.1, 3500, 8000, tau=0.03)
+    swell = rmsn(bp(pink(n, rng), 1800 + 2500 * np.clip(t / 1.2, 0, 1), 2.0)) * env_hump(n, 0.5, 2.0, 2.0) * 0.25
+    return reverb(y + 0.3 * shimmer + swell, 0.35, 1.6, seed=61)
+
+
 # ---------------------------------------------------------------- boss
 def _beast_voice(n, rng, f, detunes, formants_v, formants_n, growl_hz, growl_depth, sub=0.8):
     """Detuned saws + sub square through formants, gritty AM growl, breathy formant noise."""
@@ -1585,6 +1708,68 @@ def build_boss():
 
 
 # ---------------------------------------------------------------- forest ambience
+# ---------------------------------------------------------------- swamp theme
+def build_swamp():
+    """A aeolian with a flat second, 72 BPM, 16 bars: a slow pad and a plodding bass under a sparse,
+    wandering flute; water-drop plucks and a soft heartbeat kick. Misty rather than scary."""
+    sr = MSR
+    S16 = 6667                       # samples per 16th -> 72.0 BPM at 32 kHz
+    NB = 16
+    N = NB * 16 * S16                # 1,707,392 samples = 53.4 s
+    rng = np.random.default_rng(seed_of("music_swamp"))
+    PAD = {"Am": "A2 E3 A3 C4", "Bb": "Bb2 F3 Bb3 D4", "F": "F2 C3 A3 C4", "Dm": "D3 F3 A3 E4",
+           "Em": "E2 B2 G3 D4", "E": "E2 B2 G#3 D4"}
+    ROOT = {"Am": "A1", "Bb": "Bb1", "F": "F1", "Dm": "D2", "Em": "E2", "E": "E2"}
+    prog = ["Am", "Am", "Bb", "Am", "F", "Dm", "Em", "Am",
+            "Am", "Bb", "F", "Am", "Dm", "Bb", "Em", "E"]
+    MEL = ["-:4 E5:4 C5:2 B4:2 A4:4", "-:8 A4:2 C5:2 E5:4", "F5:6 E5:2 D5:4 -:4", "E5:8 -:8",
+           "-:4 C5:4 A4:4 C5:4", "D5:6 F5:2 E5:4 D5:4", "B4:6 G4:2 E4:8", "-:16",
+           "-:4 A5:4 G5:2 E5:2 C5:4", "D5:6 Bb4:2 A4:8", "-:4 C5:2 D5:2 F5:4 E5:4", "E5:12 -:4",
+           "F5:4 E5:2 D5:2 A4:8", "Bb4:6 D5:2 F5:4 E5:4", "G5:6 E5:2 B4:8", "G#4:4 B4:4 E5:8"]
+
+    pad = Loop(N)
+    for b, ch in enumerate(prog):
+        sig = inst_pad([midi(x) for x in PAD[ch].split()], 16 * S16 / sr, sr, rng, cutoff=620, att=0.9, rel=1.2, detune=10)
+        pad.add(sig, b * 16 * S16 - int(0.2 * sr))
+
+    bass = Loop(N)
+    for b, ch in enumerate(prog):
+        r = midi(ROOT[ch])
+        for s, l in ((0, 6), (8, 6)):
+            bass.add(inst_softbass(mtof(r if s == 0 else r + 7), l * S16 / sr * 0.9, sr), (b * 16 + s) * S16)
+
+    flute = Loop(N)
+    put_melody(flute, MEL, 0, S16, lambda f, d: inst_flute(f, d, sr, rng, tail=0.4), rng, gain=0.9, gate=0.96, jitter_ms=6)
+
+    drops = Loop(N)
+    for b in range(NB):
+        tones = sorted(midi(x) + 24 for x in PAD[prog[b]].split())
+        for i in range(3):
+            st = int(rng.integers(0, 16))
+            sig = inst_pluck(mtof(tones[int(rng.integers(len(tones)))]), 1.5 * S16 / sr, sr, rng, bright=0.3, decay=0.45, tail=0.5)
+            drops.add(sig, (b * 16 + st) * S16 + humanize(rng, 8, sr), rng.uniform(0.35, 0.7))
+
+    drums = Loop(N)
+    kick = drum_softkick(sr, rng)
+    shakers = [drum_shaker(sr, rng) for _ in range(3)]
+    for b in range(NB):
+        base = b * 16
+        for p, v in ((0, 0.8), (3, 0.45)):                  # a slow heartbeat
+            drums.add(kick, (base + p) * S16, 0.5 * v)
+        for i in range(0, 16, 2):
+            drums.add(shakers[int(rng.integers(3))], (base + i) * S16 + humanize(rng, 4, sr), 0.25 * (0.9 if i % 4 == 2 else 0.5))
+
+    G = {"flute": 0.55, "pad": 0.75, "bass": 0.32, "drops": 0.4, "drums": 0.9}
+    fl = circ_echo(flute.buf, 6 * S16, 0.32, 3, sr, damp=2800)
+    buses = {"flute": G["flute"] * fl, "pad": G["pad"] * pad.buf, "bass": G["bass"] * bass.buf,
+             "drops": G["drops"] * circ_echo(drops.buf, 3 * S16, 0.4, 4, sr, damp=3000), "drums": G["drums"] * drums.buf}
+    dry = sum(buses.values())
+    send = buses["flute"] + 0.9 * buses["pad"] + buses["drops"] + 0.1 * buses["drums"]
+    buses["wet"] = 0.65 * cconv(send, make_ir(3.2, MSR, predelay=0.035, damp=2400, seed=71))
+    mix = circ_shape(dry + buses["wet"], sr, lo=32.0, hi=9000.0)
+    return mix - mix.mean(), {"bars": NB, "bpm": 60.0 * sr / (4 * S16), "buses": buses}
+
+
 def bird_phrase(kind, rng, sr):
     def chirp(f0, f1, dur, harm=0.12, shape=1.0):
         n = int(dur * sr)
@@ -1648,6 +1833,60 @@ def build_ambience():
     return out - out.mean(), {"crossfade_s": X / sr}
 
 
+def build_swamp_ambience():
+    """20 s swamp bed: still air, a far frog chorus, near croaks, insects and water drips.
+    Rendered 2 s long and the overhang is equal-power cross-faded into the start."""
+    sr = MSR
+    N = 20 * sr
+    X = 2 * sr
+    M = N + X
+    rng = np.random.default_rng(seed_of("amb_swamp"))
+    t = tvec(M, sr)
+    air = rmsn(lp(brown(M, rng, sr), 260 + 80 * np.sin(TAU * t / 11.0), 0.7, sr))
+    # the chorus: many small frogs far away, a pulsing band of buzz
+    chorus = np.zeros(M)
+    for k in range(6):
+        f = rng.uniform(900, 1700)
+        rate = rng.uniform(5.5, 9.0)
+        gate = (0.5 + 0.5 * np.sin(TAU * rate * t + rng.random() * TAU)) ** 6
+        swell = 0.4 + 0.6 * (0.5 + 0.5 * smooth_rand(M, 0.15, rng, sr))
+        chorus += rmsn(bp(white(M, rng), f, 8.0, sr)) * gate * swell
+    chorus = lp1(chorus, 3000, sr)
+    # a few near toads
+    near = np.zeros(M)
+    for t0 in (1.3, 4.8, 7.1, 10.9, 13.6, 17.2):
+        f0 = rng.uniform(110, 160)
+        for j in range(int(rng.integers(2, 4))):
+            m = int(0.18 * sr)
+            tt = tvec(m, sr)
+            buzz = osc("saw", f0 * (1 + 0.1 * np.sin(np.pi * tt / 0.18)), m, sr)
+            ratchet = 0.5 + 0.5 * (np.sin(TAU * 36 * tt) > -0.2)
+            v = formant(buzz * ratchet, [(420, 4.0, 1.0), (1100, 5.0, 0.5)], sr)
+            place(near, rmsn(v) * env_hump(m, 0.3, 1.2, 1.6), (t0 + rng.uniform(-0.3, 0.3) + j * 0.26) * sr)
+    # insects: thin high trills
+    insects = np.zeros(M)
+    for t0 in rng.uniform(0, 19, 9):
+        m = int(rng.uniform(0.8, 1.6) * sr)
+        tt = tvec(m, sr)
+        am = (0.5 + 0.5 * np.sin(TAU * rng.uniform(40, 60) * tt)) ** 2
+        insects_part = osc("sine", rng.uniform(5200, 6800) * (1 + 0.01 * np.sin(TAU * 3 * tt)), m, sr) * am * env_hump(m, 0.5, 2.0, 2.0)
+        place(insects, insects_part, t0 * sr)
+    # water drips
+    drips = np.zeros(M)
+    for t0 in rng.uniform(0, 19.5, 16):
+        m = int(0.06 * sr)
+        tt = tvec(m, sr)
+        d = osc("sine", rng.uniform(800, 1500) * np.exp(np.minimum(tt, 0.03) / 0.025), m, sr) * env_perc(m, 0.001, 0.02, sr)
+        place(drips, d * rng.uniform(0.4, 1.0), t0 * sr)
+    drips = drips + 0.5 * fftconv(drips, make_ir(1.2, sr, 0.02, 3500, seed=73), M)
+    y = 0.55 * norm(air) + 0.28 * norm(chorus) + 0.3 * norm(near) + 0.08 * norm(insects) + 0.3 * norm(drips)
+    w = np.linspace(0.0, 1.0, X, endpoint=False)
+    out = y[:N].copy()
+    out[:X] = y[:X] * np.sin(0.5 * np.pi * w) + y[N:N + X] * np.cos(0.5 * np.pi * w)
+    out = circ_shape(out, sr, lo=30.0)
+    return out - out.mean(), {"crossfade_s": X / sr}
+
+
 # ============================================================================
 # output / verification
 # ============================================================================
@@ -1660,12 +1899,15 @@ SFX_NAMES = [
     "sfx_ui_click", "sfx_ui_open", "sfx_ui_close", "sfx_quest", "sfx_victory", "sfx_dialogue_blip",
     "sfx_telegraph", "sfx_stun", "sfx_step", "sfx_denied", "sfx_levelup", "sfx_enrage",
     "sfx_boulder_break", "sfx_lightning_charge",
+    "sfx_croak", "sfx_splash", "sfx_wade", "sfx_hiss", "sfx_spit", "sfx_splat", "sfx_mud_slam", "sfx_tongue", "sfx_waystone",
 ]
 # name, builder, allowed duration range (s), target peak dBFS
 MUSIC = [
     ("music_forest", build_forest, (48.0, 64.0), -3.0),
     ("music_boss", build_boss, (32.0, 48.0), -2.0),
     ("amb_forest", build_ambience, (19.5, 20.5), -12.0),
+    ("music_swamp", build_swamp, (40.0, 64.0), -3.0),
+    ("amb_swamp", build_swamp_ambience, (19.5, 20.5), -12.0),
 ]
 
 

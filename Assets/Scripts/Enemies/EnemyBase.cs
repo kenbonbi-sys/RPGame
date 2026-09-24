@@ -180,7 +180,31 @@ namespace RPG
             }
         }
 
-        float DistanceTo(PlayerController p) => Vector2.Distance(Pos, p.transform.position);
+        protected float DistanceTo(PlayerController p) => Vector2.Distance(Pos, p.transform.position);
+
+        /// <summary>Called up to fight (a boss's croak, a brood let out): goes straight for <paramref name="p"/>.</summary>
+        public void Alert(PlayerController p)
+        {
+            if (p == null || state == State.Dead || !GameSession.IsAuthority) return;
+            threat.Add(p, NoticeThreat);
+            SetState(State.Chase);
+        }
+
+        /// <summary>Turns the body toward a point.</summary>
+        protected void Face(Vector2 at)
+        {
+            if (body != null && Mathf.Abs(at.x - Pos.x) > 0.05f) body.flipX = at.x < Pos.x;
+        }
+
+        /// <summary>
+        /// Passes through heroes (its colliders turn into triggers: still hit by attacks, no longer
+        /// pushing anyone), e.g. a leech clinging to a hero. Online the players' copies follow.
+        /// </summary>
+        protected void SetIntangible(bool on)
+        {
+            foreach (var c in colliders)
+                if (c != null) c.isTrigger = on;
+        }
 
         /// <summary>A hero walked into the aggro range: they are the first target.</summary>
         bool Notice()

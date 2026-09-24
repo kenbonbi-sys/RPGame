@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: swamp_road
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: swamp_road
+  title: "\u0110\u01B0\u1EDDng T\u1EDBi \u0110\u1EA7m L\u1EA7y"
+  kind: 0
+  summary: "Tr\u01B0\u1EDFng L\xE0ng k\u1EC3: qua R\u1EEBng Gi\xE0 v\u1EC1 ph\xEDa \u0111\xF4ng l\xE0 \u0110\u1EA7m L\u1EA7y S\u01B0\u01A1ng M\xF9. Ng\u01B0 d\xE2n d\u1EF1ng m\u1ED9t tr\u1EA1m nh\xE0 s\xE0n \u1EDF b\xECa \u0111\u1EA7m."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 851a3537d31a1bb418f9aac2c4c8d799, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 3
+    target: "Tr\u1EA1m Nh\xE0 S\xE0n"
+    count: 1
+    text: "T\u1EDBi Tr\u1EA1m Nh\xE0 S\xE0n \u1EDF b\xECa \u0111\u1EA7m"
+    countPrevious: 0
+    marker: outpost
+  xp: 150
+  gold: 0
+  items:
+  - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
+    count: 2
+  setFlags: []
+  followUps: []

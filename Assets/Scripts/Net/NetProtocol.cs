@@ -10,7 +10,7 @@ namespace RPG
     /// </summary>
     public static class NetProtocol
     {
-        public const int Version = 3;
+        public const int Version = 4;
 
         /// <summary>First id of the replicated objects of a zone (enemies, boss, rocks); heroes use their NetworkObject id, below it.</summary>
         public const int SceneIdBase = 1000000;
@@ -108,6 +108,8 @@ namespace RPG
     public static class EntityFlags
     {
         public const byte FlipX = 1, Dead = 2, Visible = 4, Engaged = 8, Enraged = 16, PoiseBroken = 32;
+        /// <summary>Its body lets heroes through (a leap in the air, a dive under water, a leech clinging on).</summary>
+        public const byte Intangible = 64;
     }
 
     /// <summary>One hero's numbers (its position travels with FishNet's NetworkTransform).</summary>
@@ -329,7 +331,9 @@ namespace RPG
         /// <summary>Adds <see cref="ActRequest.text"/> to this player's friends (<see cref="ActRequest.value"/> 0: removes them).</summary>
         Friend = 17,
         /// <summary>This player's friends and who of them is playing, as an <see cref="ControlKind.Info"/> line.</summary>
-        FriendList = 18
+        FriendList = 18,
+        /// <summary>Travel from the Đá Truyền Tống the hero stands at to the woken one <see cref="ActRequest.text"/>.</summary>
+        Travel = 19
     }
 
     /// <summary>Client → server: everything else a player wants (potions, talking, dialogue commands, stat points, chat).</summary>

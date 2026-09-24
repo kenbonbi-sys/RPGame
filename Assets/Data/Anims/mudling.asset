@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: mudling
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: 252846342, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    - {fileID: 1129359724, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    fps: 4
+    loop: 1
+  - name: move
+    frames:
+    - {fileID: 516342091, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    - {fileID: -1582101277, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    - {fileID: 468809120, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    - {fileID: -491521936, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    fps: 8
+    loop: 1
+  - name: attack
+    frames:
+    - {fileID: -946327151, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    - {fileID: 992167507, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    - {fileID: -104129253, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    fps: 10
+    loop: 0
+  - name: hurt
+    frames:
+    - {fileID: -240547099, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: -2131045658, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    - {fileID: -2058307499, guid: acc9f2b6122a8e54aa67d90f12842563, type: 3}
+    fps: 6
+    loop: 0

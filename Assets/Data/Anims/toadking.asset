@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: toadking
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: 535198156, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: 1040879028, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 3
+    loop: 1
+  - name: walk
+    frames:
+    - {fileID: 1414895415, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: 1556657683, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: 1132156816, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: 314287015, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 8
+    loop: 1
+  - name: windup
+    frames:
+    - {fileID: 594957500, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: -1532131293, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 5
+    loop: 0
+  - name: slam
+    frames:
+    - {fileID: -1497420514, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: 1488712943, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 10
+    loop: 0
+  - name: air
+    frames:
+    - {fileID: -984133617, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 1
+    loop: 0
+  - name: tongue
+    frames:
+    - {fileID: 1945103518, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: -1796046769, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 10
+    loop: 0
+  - name: spit
+    frames:
+    - {fileID: -1450013372, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: 1505222443, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 8
+    loop: 0
+  - name: roar
+    frames:
+    - {fileID: -773416392, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: 1240926478, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 6
+    loop: 1
+  - name: hurt
+    frames:
+    - {fileID: -448659143, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: -1823014795, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    - {fileID: 64690019, guid: dcadbbf9afe86eb47abb8fb0a799314f, type: 3}
+    fps: 3
+    loop: 0

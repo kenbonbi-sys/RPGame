@@ -7,8 +7,9 @@ namespace RPG
 {
     /// <summary>
     /// Automated showcase used for testing builds: start the player with
-    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 300]
-    /// It plays a scripted tour (dialogue, skills, boss attacks, night), saves screenshots and quits.
+    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp]
+    /// It plays a scripted tour (dialogue, skills, boss attacks, the swamp and its bosses, the
+    /// world map, night), saves screenshots and quits; -autoshotOnly swamp tours the swamp alone.
     /// Exit code: 0 = clean run, 1 = errors or exceptions were logged, 2 = the tour did not finish
     /// within the timeout (CI reads it). Does nothing in normal play.
     /// </summary>
@@ -34,7 +35,7 @@ namespace RPG
             Directory.CreateDirectory(dir);
             i = Array.IndexOf(args, "-autoshotTimeout");
             float timeout = i >= 0 && i + 1 < args.Length && float.TryParse(args[i + 1], System.Globalization.NumberStyles.Float,
-                System.Globalization.CultureInfo.InvariantCulture, out float t) ? t : 300f;
+                System.Globalization.CultureInfo.InvariantCulture, out float t) ? t : 480f;
             Application.logMessageReceived += CountErrors;
             StartCoroutine(Run());
             StartCoroutine(Watchdog(timeout));
@@ -119,6 +120,180 @@ namespace RPG
             return best;
         }
 
+        /// <summary>The part of the tour asked for with -autoshotOnly (null: all of it).</summary>
+        static string Only
+        {
+            get
+            {
+                var args = Environment.GetCommandLineArgs();
+                int i = Array.IndexOf(args, "-autoshotOnly");
+                return i >= 0 && i + 1 < args.Length ? args[i + 1] : null;
+            }
+        }
+
+        /// <summary>
+        /// Đầm Lầy Sương Mù: the road in, the outpost and its Đá Truyền Tống, the world map, wading,
+        /// leeches, toads, a mud man's split, Cóc Tía's and Xà Mẫu's attacks, the swamp at night,
+        /// and the trip home through the stones.
+        /// </summary>
+        IEnumerator Swamp(PlayerController p, DayNightCycle dn)
+        {
+            var zone = ZoneRoot.Current;
+            Transform Spot(string id) => zone != null ? zone.SpotOf(id) : null;
+            if (dn != null) dn.time = 0.42f;
+
+            Place(p, new Vector2(99f, 29.2f));
+            yield return Wait(1.5f);
+            yield return Shot("swamp_edge");
+            var outpost = Waystone.Find("outpost");
+            if (outpost != null)
+            {
+                Place(p, outpost.Arrival + new Vector2(0.6f, 0f));
+                yield return Wait(1.4f);
+                yield return Shot("outpost_waystone");
+                // wake every stone for the map, the outpost's last (where the hero gets up)
+                foreach (var w in Waystone.All)
+                    if (w != outpost && p.waystones != null) p.waystones.Touch(w);
+                if (p.waystones != null) p.waystones.Touch(outpost);
+                yield return Wait(0.3f);
+                if (WorldMapUI.I != null)
+                {
+                    WorldMapUI.I.Show();
+                    yield return Wait(0.8f);
+                    yield return Shot("world_map");
+                    WorldMapUI.I.Close();
+                    yield return Wait(0.3f);
+                }
+            }
+
+            // wading into the leeches' pool
+            var leech = FindEnemy("leech", new Vector2(124f, 33f));
+            if (leech != null)
+            {
+                Place(p, (Vector2)leech.transform.position + new Vector2(-2.2f, 0.2f));
+                yield return Wait(2.6f);
+                yield return Shot("leech_pool");
+            }
+
+            // toads spitting
+            var swamp = Spot("swamp");
+            var toad = FindEnemy("toad", swamp != null ? (Vector2)swamp.position : new Vector2(121f, 20.5f));
+            if (toad != null)
+            {
+                Place(p, (Vector2)toad.transform.position + new Vector2(-4.2f, -0.8f));
+                yield return Wait(2.4f);
+                yield return Shot("toads");
+            }
+
+            // a mud man slams, falls and splits
+            var field = Spot("mudfield");
+            var mud = FindEnemy("mudman", field != null ? (Vector2)field.position : new Vector2(141f, 18f));
+            if (mud != null)
+            {
+                Place(p, (Vector2)mud.transform.position + new Vector2(-1.8f, -0.4f));
+                yield return Wait(2.2f);
+                yield return Shot("mudman");
+                mud.health.Kill();
+                yield return Wait(0.9f);
+                yield return Shot("mudman_split");
+                yield return Wait(0.5f);
+            }
+
+            // Cóc Tía
+            var king = BossBase.Find("toadking");
+            if (king != null)
+            {
+                Place(p, king.Home + new Vector2(-2.5f, -4.4f));
+                yield return Wait(1.8f);
+                yield return Shot("toadking_intro");
+                yield return Wait(2.2f);
+                king.DebugForce("tongue");
+                yield return Wait(0.45f);
+                yield return Shot("toadking_tongue_warning");
+                yield return Wait(0.35f);
+                yield return Shot("toadking_tongue");
+                yield return Wait(1.2f);
+                king.DebugForce("spit");
+                yield return Wait(1.1f);
+                yield return Shot("toadking_spit");
+                yield return Wait(1.1f);
+                yield return Shot("poison_pools");
+                king.DebugForce("leap");
+                yield return Wait(0.8f);
+                yield return Shot("toadking_leap");
+                yield return Wait(1.4f);
+                king.health.TakeDamage(DamageInfo.Make(king.health.maxHp * 0.55f, Team.Player, p.gameObject, king.transform.position, Vector2.up));
+                yield return Wait(1.8f);
+                king.DebugForce("summon");
+                yield return Wait(1.6f);
+                yield return Shot("toadking_summon");
+                king.health.Kill();
+                yield return Wait(2.4f);
+                yield return Shot("toadking_defeated");
+                yield return Wait(1.5f);
+            }
+
+            // Xà Mẫu Đầm Lầy
+            var snake = BossBase.Find("snake");
+            if (snake != null)
+            {
+                Place(p, snake.Home + new Vector2(-7.4f, -0.8f));
+                yield return Wait(1.8f);
+                yield return Shot("snake_intro");
+                yield return Wait(2.2f);
+                snake.DebugForce("tail");
+                yield return Wait(0.6f);
+                yield return Shot("snake_tail_warning");
+                yield return Wait(0.35f);
+                yield return Shot("snake_tail");
+                yield return Wait(1.2f);
+                snake.DebugForce("venom");
+                yield return Wait(0.6f);
+                yield return Shot("snake_venom_warning");
+                yield return Wait(0.45f);
+                yield return Shot("snake_venom");
+                yield return Wait(1.5f);
+                snake.DebugForce("dive");
+                yield return Wait(1.1f);
+                yield return Shot("snake_dive");
+                yield return Wait(2.2f);
+                yield return Shot("snake_emerge");
+                yield return Wait(1.5f);
+                // enraged, it charges; a mound between it and the hero stops it cold
+                snake.health.TakeDamage(DamageInfo.Make(snake.health.maxHp * 0.55f, Team.Player, p.gameObject, snake.transform.position, Vector2.up));
+                yield return Wait(2f);
+                snake.motor.Teleport(snake.Home);
+                Place(p, snake.Home + new Vector2(-8.4f, 4.8f));
+                yield return Wait(0.2f);
+                snake.DebugForce("charge");
+                yield return Wait(0.6f);
+                yield return Shot("snake_charge_warning");
+                yield return Wait(0.9f);
+                yield return Shot("snake_crash");
+                yield return Wait(3.2f);
+                snake.DebugForce("summon");
+                yield return Wait(1.6f);
+                yield return Shot("snake_summon");
+                snake.health.Kill();
+                yield return Wait(2.4f);
+                yield return Shot("snake_defeated");
+                yield return Wait(1.5f);
+            }
+
+            // the swamp at night, and home through the stones
+            if (dn != null) dn.time = 0.02f;
+            if (outpost != null)
+            {
+                Place(p, outpost.Arrival + new Vector2(0.6f, 0f));
+                yield return Wait(2.5f);
+                yield return Shot("swamp_night");
+                if (p.waystones != null) p.waystones.RequestTravel("village");
+                yield return Wait(1.2f);
+                yield return Shot("travel_village");
+            }
+            if (dn != null) dn.time = 0.42f;
+        }
+
         IEnumerator Run()
         {
             var gm = GameManager.I;
@@ -131,6 +306,12 @@ namespace RPG
             }
             p.health.invulnerable = true;
             yield return Wait(2.5f);
+            if (Only == "swamp")
+            {
+                yield return Swamp(p, dn);
+                Finish();
+                yield break;
+            }
             yield return Shot("village");
             HUD.I.help.Show();
             yield return Wait(0.6f);
@@ -318,6 +499,8 @@ namespace RPG
                 yield return Shot("boss_defeated");
                 yield return Wait(2f);
             }
+
+            yield return Swamp(p, dn);
 
             // --- night
             if (dn != null) dn.time = 0.02f;

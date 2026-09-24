@@ -103,3 +103,26 @@ MonoBehaviour:
     prefab: {fileID: 2795923927097017417, guid: 6ce318387a2ce8043861680fb9d724c4, type: 3}
   - id: boss_death
     prefab: {fileID: 5600817194895829594, guid: 37c1e2b6efabd0e4c95aff05d5a4421d, type: 3}
+  - id: venom_puff
+    prefab: {fileID: 219117479701785063, guid: 8cf671f819a358c4585562a78c5143e9, type: 3}
+  - id: venom_hit
+    prefab: {fileID: 8767627622771213651, guid: 98ab7aafec3d48443b7b40267fb9d507, type: 3}
+  - id: venom_pool
+    prefab: {fileID: 4910864893310241144, guid: bc9c2ee6971a2f94da6a009d87db57a5, type: 3}
+  - id: water_splash
+    prefab: {fileID: 4560158138836167292, guid: 54aa6a9821f81f740a83eeddfb3c342b, type: 3}
+  - id: water_ripple
+    prefab: {fileID: 7856575346510741400, guid: 183dce0e1d4121a45961ad8271eab1b1, type: 3}
+  - id: water_step
+    prefab: {fileID: 4532234765093026642, guid: bb89920222a4b064daf9d0ac3a5e607d, type: 3}
+  - id: mud_splat
+    prefab: {fileID: 974742310832824400, guid: 12972b00e47c6cc488588d5f7e56c247, type: 3}
+  - id: tongue_lash
+    prefab: {fileID: 6663901745170001128, guid: 40bb39b51562fea4cbefaf35f244464b, type: 3}
+  - id: waystone_wake
+    prefab: {fileID: 8938891605868857582, guid: de743daf95a504341b17f41b37ad458a, type: 3}
+  particleBudget: 150
+  lightBudget: 1
+  ultimateIds:
+  - storm_circle
+  - lightning_strike

@@ -19,6 +19,8 @@ import gen_enemies
 import gen_icons
 import gen_ui
 import gen_vfx
+import gen_swamp
+import gen_swamp_creatures
 from pixelkit import Canvas, pack_shelf
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -87,7 +89,16 @@ def char_fps(k):
 
 
 def build_terrain():
-    sheet, rects = gen_terrain.build()
+    forest, rects = gen_terrain.build()
+    # the swamp's rows under the forest's (Đầm Lầy Sương Mù, east of the forest)
+    T = gen_terrain.T
+    sheet = Canvas(forest.w, 16 * T)
+    sheet.blit(forest, 0, 0)
+    y0 = forest.h
+    for r, row in enumerate(gen_swamp.tiles()):
+        for c, (name, tile) in enumerate(row):
+            sheet.blit(tile, c * T, y0 + r * T)
+            rects.append((name, c * T, y0 + r * T, T, T))
     img = sheet.to_image()
     path = os.path.join(ART, "Tiles", "terrain.png")
     save(img, path)
@@ -96,7 +107,7 @@ def build_terrain():
 
 
 def build_props():
-    items = gen_props.build()
+    items = gen_props.build() + gen_swamp.props()
     sheet, rects = pack_shelf(items, 256)
     img = sheet.to_image()
     path = os.path.join(ART, "Props", "props.png")
@@ -125,6 +136,25 @@ def build_chars():
                       "crouch": (1, False), "air": (1, False), "roar": (6, True), "hurt": (1, False), "dead": (3, False)}[k]
     grid_sheet("bear", B, ["idle", "walk", "windup", "slam", "throw", "crouch", "air", "roar", "hurt", "dead"],
                64, 64, (32, 61), os.path.join(ART, "Characters", "bear.png"), bfps)
+    # Đầm Lầy Sương Mù
+    small = lambda k: {"idle": (4, True), "move": (8, True), "attack": (10, False), "hurt": (1, False), "dead": (6, False)}[k]
+    order = ["idle", "move", "attack", "hurt", "dead"]
+    grid_sheet("toad", gen_swamp_creatures.build_toad(), order, 24, 24, (12, 22), os.path.join(ART, "Characters", "toad.png"), small)
+    grid_sheet("leech", gen_swamp_creatures.build_leech(), order, 24, 24, (12, 22), os.path.join(ART, "Characters", "leech.png"), small)
+    grid_sheet("mudling", gen_swamp_creatures.build_mudling(), order, 24, 24, (12, 22), os.path.join(ART, "Characters", "mudling.png"), small)
+    mfps2 = lambda k: {"idle": (3, True), "move": (6, True), "attack": (8, False), "hurt": (1, False), "dead": (5, False)}[k]
+    grid_sheet("mudman", gen_swamp_creatures.build_mudman(), order, 32, 32, (16, 30), os.path.join(ART, "Characters", "mudman.png"), mfps2)
+    kfps = lambda k: {"idle": (3, True), "walk": (8, True), "windup": (5, False), "slam": (10, False), "air": (1, False),
+                      "tongue": (10, False), "spit": (8, False), "roar": (6, True), "hurt": (1, False), "dead": (3, False)}[k]
+    grid_sheet("toadking", gen_swamp_creatures.build_toad_king(),
+               ["idle", "walk", "windup", "slam", "air", "tongue", "spit", "roar", "hurt", "dead"],
+               48, 48, (24, 45), os.path.join(ART, "Characters", "toadking.png"), kfps)
+    sfps = lambda k: {"idle": (3, True), "walk": (6, True), "windup": (6, False), "bite": (12, False), "tail": (8, False),
+                      "spit": (8, False), "submerge": (6, False), "emerge": (6, False), "roar": (5, True), "hurt": (1, False),
+                      "dead": (3, False)}[k]
+    grid_sheet("snake", gen_swamp_creatures.build_snake(),
+               ["idle", "walk", "windup", "bite", "tail", "spit", "submerge", "emerge", "roar", "hurt", "dead"],
+               72, 64, (36, 60), os.path.join(ART, "Characters", "snake.png"), sfps)
 
 
 def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):
@@ -142,7 +172,7 @@ def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):
 
 
 def build_icons():
-    simple_grid(gen_icons.build_items(), 16, 16, os.path.join(ART, "Icons", "items.png"), ppu=16)
+    simple_grid(gen_icons.build_items() + gen_swamp.icons(), 16, 16, os.path.join(ART, "Icons", "items.png"), ppu=16)
     simple_grid(gen_icons.build_skills(), 24, 24, os.path.join(ART, "Icons", "skills.png"), ppu=16)
     simple_grid(gen_icons.build_status(), 10, 10, os.path.join(ART, "Icons", "status.png"), ppu=16)
 

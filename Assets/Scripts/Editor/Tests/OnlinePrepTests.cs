@@ -162,7 +162,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator TheBossFightsTheAngriestHeroAndResetsOnlyWhenAllAreGone()
         {
-            var boss = BossBear.All[0];
+            var boss = BossBase.Find("bear");
             var spot = (Vector2)GameManager.I.bossSpot.position;
             me.health.invulnerable = other.health.invulnerable = true;
             me.motor.Teleport(spot + new Vector2(-2f, -4f));
@@ -190,7 +190,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator TheBossGrowsWithTheHeroesInTheFight()
         {
-            var boss = BossBear.All[0];
+            var boss = BossBase.Find("bear");
             var spot = (Vector2)GameManager.I.bossSpot.position;
             float baseHp = boss.maxHp;
             float two = BossBear.MaxHpFor(baseHp, 2, boss.hpPerExtraHero);

@@ -55,7 +55,7 @@ namespace RPG
             I = this;
             GameEvents.Reset();
             Players.Reset();
-            ZoneArea.Reset();
+            ZoneArea.ForgetAll();
             OnlineSession.ReadCommandLine();
             if (localPlayer != null)
             {
@@ -108,6 +108,7 @@ namespace RPG
         void Start()
         {
             SetCursor(false);
+            if (GameSession.HasScreen && HUD.I != null) WorldMapUI.Ensure(HUD.I);
             if (SaveManager.HasPendingLoad) return;   // loading a save: no welcome
             bool screen = GameSession.Mode != SessionMode.Server && !AutoShot.Active && !NetSmoke.Active && !LoadBot.Active && !BackdropShot.Active;
             if (showHelpOnStart && screen && HUD.I != null && HUD.I.help != null) HUD.I.help.Show();
@@ -131,9 +132,11 @@ namespace RPG
                 return;   // typing in the console is not gameplay
             }
             if (ChatInput.I != null && ChatInput.I.IsOpen) return;   // nor typing a chat line
+            var map = WorldMapUI.I;
             if (InputReader.Cancel)
             {
-                if (hud.inventory != null && hud.inventory.IsOpen) hud.inventory.Close();
+                if (map != null && map.IsOpen) map.Close();
+                else if (hud.inventory != null && hud.inventory.IsOpen) hud.inventory.Close();
                 else if (hud.journal != null && hud.journal.IsOpen) hud.journal.Close();
                 else if (hud.character != null && hud.character.IsOpen) hud.character.Close();
                 else if (hud.saves != null && hud.saves.IsOpen) hud.saves.Close();
@@ -147,6 +150,13 @@ namespace RPG
             if (InputReader.ToggleCharacter && hud.character != null) hud.character.Toggle();
             var me = Players.Local;
             if (InputReader.ToggleQuest && me != null && me.quests != null) me.quests.CycleFocus();
+            if (map != null && me != null)
+            {
+                if (InputReader.ToggleMap) map.Toggle();
+                // F at a Đá Truyền Tống (and no one to talk to): the map, ready to travel
+                else if (InputReader.Interact && !map.IsOpen && !me.IsDead && Waystone.At(me.transform.position, 0f) != null &&
+                         NPC.Nearest(me.transform.position, me.interactRadius) == null) map.Show();
+            }
         }
 
         static readonly Color EnemyOutline = new Color(1.8f, 0.45f, 0.35f, 1f);
@@ -229,9 +239,8 @@ namespace RPG
             yield return new WaitForSecondsRealtime(1.2f);
             if (local) GameEvents.RaisePlayerDowned(4f);
             yield return new WaitForSecondsRealtime(RespawnSeconds - 1.2f);
-            if (p != null && respawnPoint != null)
+            if (p != null && RespawnPointFor(p, out Vector2 at))
             {
-                Vector2 at = respawnPoint.position;
                 p.Respawn(at);
                 if (local && CameraRig.I != null) CameraRig.I.SnapToTarget();
                 if (!local && GameSession.Serving) ServerPlayers.SendTo(p, new ControlMsg { kind = ControlKind.Respawn, pos = at });
@@ -239,7 +248,31 @@ namespace RPG
             if (!local) yield break;
             GameEvents.RaisePlayerRespawned();
             dead = false;
-            GameEvents.RaiseLog("Bạn đã hồi sinh tại Làng Lá Xanh.", Palette.LogInfo);
+            GameEvents.RaiseLog($"Bạn đã hồi sinh tại {RespawnPlaceName(p)}.", Palette.LogInfo);
+        }
+
+        /// <summary>The name of where a hero gets up ("Đá Truyền Tống …" or the village).</summary>
+        public static string RespawnPlaceName(PlayerController p)
+        {
+            var stone = p != null && p.waystones != null ? Waystone.Find(p.waystones.Last) : null;
+            return stone != null ? "Đá Truyền Tống " + stone.displayName : "Làng Lá Xanh";
+        }
+
+        /// <summary>
+        /// Where a fallen hero gets up: at the Đá Truyền Tống they touched last, else at the zone's
+        /// spawn. False when the zone has neither.
+        /// </summary>
+        public bool RespawnPointFor(PlayerController p, out Vector2 at)
+        {
+            var stone = p != null && p.waystones != null ? Waystone.Find(p.waystones.Last) : null;
+            if (stone != null)
+            {
+                at = stone.Arrival;
+                return true;
+            }
+            var spawn = respawnPoint;
+            at = spawn != null ? (Vector2)spawn.position : Vector2.zero;
+            return spawn != null;
         }
 
         /// <summary>A player's machine online: the server says this screen's hero fell.</summary>
@@ -263,7 +296,7 @@ namespace RPG
             if (!dead) return;
             GameEvents.RaisePlayerRespawned();
             dead = false;
-            GameEvents.RaiseLog("Bạn đã hồi sinh tại Làng Lá Xanh.", Palette.LogInfo);
+            GameEvents.RaiseLog($"Bạn đã hồi sinh tại {RespawnPlaceName(Players.Local)}.", Palette.LogInfo);
         }
 
         public void QuitGame()

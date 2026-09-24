@@ -102,6 +102,10 @@ namespace RPG
         /// <summary>Every boss and mini-boss in the loaded scenes, alive or defeated.</summary>
         public static readonly List<BossBase> All = new List<BossBase>();
 
+        static int fightsShown;
+        /// <summary>A boss fight's bar and music are on this screen (a place's music waits for it to end).</summary>
+        public static bool FightShown => fightsShown > 0;
+
         /// <summary>The first boss of that id (tests, tools), or null.</summary>
         public static BossBase Find(string id) => All.Find(b => b != null && b.bossId == id);
 
@@ -125,7 +129,11 @@ namespace RPG
             All.Add(this);
         }
 
-        protected virtual void OnDestroy() => All.Remove(this);
+        protected virtual void OnDestroy()
+        {
+            All.Remove(this);
+            if (shownHere) fightsShown = Mathf.Max(0, fightsShown - 1);
+        }
 
         void OnPoiseBroken()
         {
@@ -441,6 +449,8 @@ namespace RPG
             if (routine != null) StopCoroutine(routine);
             ClearTelegraphs();
             if (bodyRoot != null) bodyRoot.localPosition = Vector3.zero;
+            foreach (var c in GetComponentsInChildren<Collider2D>(true)) c.enabled = true;
+            OnInterrupted();   // whatever the attack it cut short had changed
             Run(r);
             return true;
         }
@@ -621,6 +631,7 @@ namespace RPG
         {
             if (on == shownHere) return;
             shownHere = on;
+            fightsShown = Mathf.Max(0, fightsShown + (on ? 1 : -1));
             if (on)
             {
                 GameEvents.RaiseBossEngaged(health, displayName, level);

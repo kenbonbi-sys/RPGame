@@ -91,6 +91,16 @@ namespace RPG.EditorTools
             Build("slime_splat", SlimeSplat, 1.2f);
             Build("spore_puff", SporePuff, 0.8f);
             Build("spore_hit", SporeHit, 1f);
+            // swamp (Đầm Lầy Sương Mù)
+            Build("venom_puff", VenomPuff, 0.8f);
+            Build("venom_hit", VenomHit, 1f);
+            Build("venom_pool", VenomPool, HazardZone.PoolSeconds + 0.2f);
+            Build("water_splash", WaterSplash, 1.2f);
+            Build("water_ripple", WaterRipple, 1f);
+            Build("water_step", WaterStep, 0.6f);
+            Build("mud_splat", MudSplat, 1.2f);
+            Build("tongue_lash", TongueLash, 0.4f);
+            Build("waystone_wake", WaystoneWake, 2.2f);
             // boss
             Build("boss_roar", BossRoar, 1.6f);
             Build("enrage_burst", EnrageBurst, 1.8f);
@@ -107,6 +117,9 @@ namespace RPG.EditorTools
             var db = AssetFactory.Database;
             EditorUtil.Assign(ref db.fireballPrefab, BuildFireball());
             EditorUtil.Assign(ref db.sporePrefab, BuildSpore());
+            EditorUtil.Assign(ref db.venomPrefab, BuildVenom());
+            EditorUtil.Assign(ref db.venomArcPrefab, BuildVenomGlob());
+            EditorUtil.Assign(ref db.mistMaterial, Mat("smoke", false, 1f));
             EditorUtil.Assign(ref db.rockProjectilePrefab, BuildRockProjectile());
             EditorUtil.Assign(ref db.telegraphPrefab, BuildTelegraph());
             EditorUtility.SetDirty(db);
@@ -887,6 +900,102 @@ namespace RPG.EditorTools
             Light(r, new Color(0.6f, 1f, 0.35f), 2f, 0.8f, 0.4f);
         }
 
+        // ================================================================== swamp
+        static readonly Color Venom = new Color(0.72f, 0.32f, 0.95f);
+        static readonly Color VenomGreen = new Color(0.55f, 0.95f, 0.35f);
+        static readonly Color Water = new Color(0.7f, 0.93f, 1f);
+        static readonly Color Mud = new Color(0.45f, 0.34f, 0.22f);
+
+        static void VenomPuff(GameObject r)
+        {
+            PS(r, "Puff", Mat("smoke", false, 1f)).Burst(5).Life(0.35f, 0.6f).Speed(0.4f, 1.2f).Size(0.35f, 0.6f)
+                .Col(A(Venom, 0.8f), A(VenomGreen, 0.6f)).Circle(0.15f).Rot().SizeLife(0, 0.5f, 1, 1.4f).Fade();
+            PS(r, "Drops", Mat("px_square", true, 1.6f)).Burst(6).Life(0.3f, 0.6f).Speed(1f, 2.5f).Size(0.06f, 0.12f)
+                .Col(Venom, VenomGreen).Circle(0.1f).Grav(1.5f).Fade();
+        }
+
+        static void VenomHit(GameObject r)
+        {
+            var splash = Spr(r, "Splash", "smoke", Mat("smoke", false, 1f), A(Venom, 0.85f), SortingLayerNames.VFX, 0, 1f);
+            SFX(splash, 0.6f, C(0, 0.3f, 1, 1.2f), C(0, 1, 0.5f, 0.8f, 1, 0), 60f);
+            PS(r, "Drops", Mat("px_square", true, 1.7f)).Burst(14).Life(0.35f, 0.8f).Speed(2f, 4.5f).Size(0.08f, 0.16f)
+                .Col(Venom, VenomGreen).ConeUp(70f, 0.25f).Grav(2.5f).Fade();
+            PS(r, "Bubbles", Mat("bubble", false, 1f)).Burst(6).Life(0.5f, 0.9f).Speed(0.3f, 1f).Size(0.12f, 0.24f)
+                .Col(A(Venom, 0.9f), A(VenomGreen, 0.8f)).Circle(0.4f).Vel(0, 0, 0.4f, 1f).Fade();
+            Light(r, Venom, 2f, 0.9f, 0.4f);
+        }
+
+        /// <summary>A poison pool on the ground (radius 1.4 at scale 1), bubbling for as long as the hazard lasts.</summary>
+        static void VenomPool(GameObject r)
+        {
+            float life = HazardZone.PoolSeconds;
+            float rad = HazardZone.PoolEffectRadius;
+            // a dark, murky puddle with a faint green rim: it must not hide the ground's warnings
+            var pool = Spr(r, "Pool", "tele_fill", Mat("tele_fill", false, 1.1f), new Color(0.42f, 0.16f, 0.55f, 0.42f), SortingLayerNames.Decal, 4);
+            SFX(pool, life, C(0, 0.35f * rad, 0.04f, rad, 1, rad), C(0, 0, 0.03f, 1, 0.88f, 1, 1, 0));
+            var rim = Spr(r, "Rim", "tele_ring", Mat("tele_ring", false, 1.2f), A(VenomGreen, 0.3f), SortingLayerNames.Decal, 5);
+            SFX(rim, life, C(0, 0.35f * rad, 0.04f, rad, 1, rad), C(0, 0, 0.03f, 1, 0.88f, 1, 1, 0));
+            PS(r, "Bubbles", Mat("bubble", false, 1f)).Loop(life).Rate(7).Life(0.5f, 1f).Size(0.1f, 0.22f)
+                .Col(A(Venom, 0.95f), A(VenomGreen, 0.9f)).Circle(1.1f).Vel(0, 0, 0.2f, 0.6f).Fade(0.2f);
+            PS(r, "Fumes", Mat("smoke", false, 1f), SortingLayerNames.VFX, -1).Loop(life).Rate(2.5f).Life(1.2f, 2f).Size(0.6f, 1f)
+                .Col(A(Venom, 0.25f), A(VenomGreen, 0.2f)).Circle(0.9f).Vel(-0.1f, 0.1f, 0.3f, 0.6f).Rot().Fade(0.25f);
+            Light(r, Venom, 2.6f, 0.55f, pulse: false, flicker: 0.15f);
+        }
+
+        static void WaterSplash(GameObject r)
+        {
+            PS(r, "Drops", Mat("px_square", true, 1.4f)).Burst(18).Life(0.4f, 0.8f).Speed(2f, 5f).Size(0.07f, 0.14f)
+                .Col(Color.white, Water).ConeUp(55f, 0.35f).Grav(2.6f).Fade();
+            PS(r, "Spray", Mat("smoke", false, 1f)).Burst(4).Life(0.4f, 0.7f).Speed(0.5f, 1.5f).Size(0.5f, 0.9f)
+                .Col(A(Water, 0.45f)).Circle(0.3f).Vel(0, 0, 0.5f, 1.2f).Rot().Fade();
+            Ring(r, "Ring", A(Water, 0.8f), 0.3f, 1.8f, 0.7f, "ring", SortingLayerNames.Decal, 0.6f);
+        }
+
+        static void WaterRipple(GameObject r)
+        {
+            Ring(r, "Ring1", A(Water, 0.7f), 0.2f, 1.3f, 0.9f, "ring", SortingLayerNames.Decal, 0.55f);
+            var second = Spr(r, "Ring2", "ring", Mat("ring", true, 1.8f), A(Water, 0.5f), SortingLayerNames.Decal, -1);
+            second.transform.localScale = new Vector3(1f, 0.55f, 1f);
+            SFX(second, 1f, C(0, 0.05f, 0.3f, 0.1f, 1, 0.9f), C(0, 0, 0.3f, 1, 1, 0));
+        }
+
+        static void WaterStep(GameObject r)
+        {
+            Ring(r, "Ring", A(Water, 0.6f), 0.1f, 0.6f, 0.5f, "ring", SortingLayerNames.Decal, 0.55f);
+            PS(r, "Drops", Mat("px_square", true, 1.3f)).Burst(4).Life(0.2f, 0.4f).Speed(1f, 2f).Size(0.05f, 0.09f)
+                .Col(Color.white, Water).ConeUp(40f, 0.1f).Grav(2f).Fade();
+        }
+
+        static void MudSplat(GameObject r)
+        {
+            PS(r, "Clods", Mat("px_square", false, 1f)).Burst(16).Life(0.4f, 0.8f).Speed(2f, 5f).Size(0.1f, 0.22f)
+                .Col(Mud, new Color(0.32f, 0.24f, 0.16f)).ConeUp(70f, 0.35f).Grav(3f).Fade();
+            PS(r, "Muck", Mat("smoke", false, 1f), SortingLayerNames.VFX, -1).Burst(6).Life(0.5f, 0.9f).Speed(1f, 2.5f).Size(0.6f, 1f)
+                .Col(A(Mud, 0.7f)).Circle(0.4f, 360, 0f).Drag(3f).Rot().Fade(0.05f);
+            var puddle = Spr(r, "Puddle", "tele_fill", Mat("tele_fill", false, 1f), A(Mud, 0.6f), SortingLayerNames.Decal, 3);
+            SFX(puddle, 1.2f, C(0, 0.4f, 0.1f, 1.1f, 1, 1.2f), C(0, 1, 0.6f, 0.8f, 1, 0));
+        }
+
+        static void TongueLash(GameObject r)
+        {
+            var tip = Spr(r, "Tongue", "glow_hard", Mat("glow_hard", false, 1.1f), new Color(1f, 0.42f, 0.58f, 0.95f), SortingLayerNames.VFX, 2, 0.45f);
+            SFX(tip, 0.35f, C(0, 0.6f, 0.3f, 1f, 1, 0.8f), C(0, 1, 0.6f, 1, 1, 0));
+            PS(r, "Spit", Mat("px_square", true, 1.4f)).Burst(3).Life(0.15f, 0.3f).Speed(1f, 2f).Size(0.05f, 0.08f)
+                .Col(new Color(1f, 0.7f, 0.8f)).Circle(0.1f).Fade();
+        }
+
+        static void WaystoneWake(GameObject r)
+        {
+            var c = new Color(0.45f, 1f, 0.95f);
+            var beam = Spr(r, "Beam", "beam", Mat("beam", true, 2f), c, SortingLayerNames.VFX, 0, 1f, 0, 1.4f);
+            beam.transform.localScale = new Vector3(1.6f, 2.4f, 1f);
+            SFX(beam, 1.6f, C(0, 1, 1, 1), C(0, 0, 0.1f, 1, 1, 0));
+            Ring(r, "Ring", c, 0.3f, 3f, 0.9f, "ring", SortingLayerNames.Decal, 0.55f);
+            PS(r, "Sparkle", Mat("spark4", true, 2.2f)).Burst(22).Life(0.7f, 1.5f).Speed(0.4f, 1.6f).Size(0.16f, 0.3f)
+                .Col(Color.white, c).Circle(0.5f).Vel(0, 0, 1f, 2.4f).Fade();
+            Light(r, c, 4.5f, 2f, 1.4f);
+        }
+
         // ================================================================== boss
         static void BossRoar(GameObject r)
         {
@@ -1038,6 +1147,46 @@ namespace RPG.EditorTools
                 .Col(new Color(0.55f, 0.95f, 0.3f, 0.8f)).Circle(0.08f).Fade();
             Light(root, new Color(0.6f, 1f, 0.35f), 1.8f, 0.8f, pulse: false);
             return EditorUtil.SavePrefab(root, $"{GameplayFolder}/Spore.prefab");
+        }
+
+        static GameObject BuildVenom()
+        {
+            var root = new GameObject("Venom");
+            root.layer = Layers.Projectile;
+            var fx = root.AddComponent<PooledFX>();
+            fx.lifetime = 0f;
+            fx.stopLinger = 0.5f;
+            var p = root.AddComponent<Projectile>();
+            p.rotateToDirection = false;
+            Spr(root, "Core", "glow_hard", Mat("glow_hard", true, 2f), Venom, scale: 0.55f);
+            var drop = Spr(root, "Drop", "bubble", Mat("bubble", false, 1.1f), new Color(0.85f, 0.6f, 1f), scale: 0.45f, order: 1);
+            drop.gameObject.AddComponent<Spinner>().degreesPerSecond = 160f;
+            PS(root, "Trail", Mat("glow", true, 1.4f), SortingLayerNames.VFX, -1).Loop().Rate(30).Life(0.3f, 0.5f).Size(0.12f, 0.25f)
+                .Col(A(Venom, 0.8f), A(VenomGreen, 0.7f)).Circle(0.08f).Fade();
+            Light(root, Venom, 1.8f, 0.8f, pulse: false);
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/Venom.prefab");
+        }
+
+        static GameObject BuildVenomGlob()
+        {
+            var root = new GameObject("VenomGlob");
+            var fx = root.AddComponent<PooledFX>();
+            fx.lifetime = 0f;
+            fx.stopLinger = 0.3f;
+            var arc = root.AddComponent<ArcProjectile>();
+            var shadow = Spr(root, "Shadow", "shadow", AssetFactory.SpriteUnlit, new Color(1, 1, 1, 0.7f), SortingLayerNames.Decal, 4);
+            shadow.transform.localScale = new Vector3(0.9f, 0.9f, 1);
+            var visual = EditorUtil.Child(root, "Visual");
+            Spr(visual, "Core", "glow_hard", Mat("glow_hard", true, 2f), Venom, SortingLayerNames.VFX, 5, 0.7f);
+            Spr(visual, "Drop", "bubble", Mat("bubble", false, 1.1f), new Color(0.85f, 0.6f, 1f), SortingLayerNames.VFX, 6, 0.55f);
+            PS(visual, "Trail", Mat("glow", true, 1.4f)).Loop().Rate(26).Life(0.25f, 0.45f).Size(0.12f, 0.24f)
+                .Col(A(Venom, 0.8f), A(VenomGreen, 0.7f)).Circle(0.1f).Fade();
+            Light(visual, Venom, 1.8f, 0.7f, pulse: false);
+            arc.visual = visual.transform;
+            arc.shadow = shadow;
+            arc.height = 2.6f;
+            arc.spin = 0f;
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/VenomGlob.prefab");
         }
 
         static GameObject BuildRockProjectile()

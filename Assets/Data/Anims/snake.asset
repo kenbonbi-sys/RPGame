@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: snake
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: 551793330, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: -2070439180, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: -741984371, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 3
+    loop: 1
+  - name: walk
+    frames:
+    - {fileID: -627988568, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: -1403263628, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: 473552970, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: -1920512705, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 6
+    loop: 1
+  - name: windup
+    frames:
+    - {fileID: 1886532800, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: -1197520119, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 6
+    loop: 0
+  - name: bite
+    frames:
+    - {fileID: 1006065766, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: 283402180, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 12
+    loop: 0
+  - name: tail
+    frames:
+    - {fileID: -320399475, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: 340961129, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 8
+    loop: 0
+  - name: spit
+    frames:
+    - {fileID: -1025049232, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: 365373066, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 8
+    loop: 0
+  - name: submerge
+    frames:
+    - {fileID: 1121212205, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: 1241382954, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: 1446293755, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 6
+    loop: 0
+  - name: emerge
+    frames:
+    - {fileID: 1670305513, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: 488592615, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 6
+    loop: 0
+  - name: roar
+    frames:
+    - {fileID: -1378391871, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: -1534991092, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 5
+    loop: 1
+  - name: hurt
+    frames:
+    - {fileID: 1264973327, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: 1178987331, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    - {fileID: 892397322, guid: 1bcbb7050b85b19409d4fdfaa666d88e, type: 3}
+    fps: 3
+    loop: 0

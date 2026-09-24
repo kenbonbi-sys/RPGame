@@ -171,7 +171,7 @@ namespace RPG.EditorTools.Tests
             yield return WaitForZone();
             yield return WaitForHero();
             var me = Players.Local;
-            var boss = BossBear.All.Find(b => b != null && b.gameObject.activeSelf);
+            var boss = BossBase.Find("bear");
             Assert.NotNull(boss, "the bear is in the online world");
             boss.respawnSeconds = 1f;
             bool barShown = false;

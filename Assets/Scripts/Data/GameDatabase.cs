@@ -51,6 +51,12 @@ namespace RPG
         public GameObject rockProjectilePrefab;
         public GameObject fireballPrefab;
         public GameObject sporePrefab;
+        [Tooltip("The swamp's poison spit (toads, the snake mother).")]
+        public GameObject venomPrefab;
+        [Tooltip("A lobbed poison glob that leaves a pool where it lands (Cóc Tía).")]
+        public GameObject venomArcPrefab;
+        [Tooltip("Soft puff for the swamp's low mist (AmbientParticles).")]
+        public Material mistMaterial;
 
         [Header("Online (Docs/KeHoach-Online.md)")]
         [Tooltip("The hero spawned for every player of an online session (Prefabs/Characters/NetHero).")]

@@ -6,7 +6,7 @@ Lộ trình biến bản prototype hiện có (1 vùng, 1 boss, 8 chiêu) thành
 
 Bản HTML có sơ đồ tương tác và bộ lọc backlog: https://claude.ai/artifact/9g8PZSohsGFxQz1ykcadMe (link riêng tư, cần bật chia sẻ để người khác xem).
 
-> **Đổi hướng (24/09/2026): game cày cuốc kiểu Terraria, không phải RPG cốt truyện tuyến tính.** Thế giới online liền mạch nhiều người chơi (`Docs/KeHoach-Online.md`), càng đi xa quái càng mạnh. Mọi boss và quái đều hồi sinh để cày lại (boss sau 3 phút, cả khi chơi một mình); tiến bộ đến từ cấp, đồ rơi, chế tạo và mở vùng mới, không từ các hồi truyện. Các vùng mới nối liền vào cùng một bản đồ thay vì mỗi vùng một màn riêng. Cốt truyện (mục 12) chỉ còn là bối cảnh và nhiệm vụ phụ; các mục khác giữ nguyên cho tới khi được xem lại.
+> **Đổi hướng (24/09/2026): game cày cuốc kiểu Terraria, không phải RPG cốt truyện tuyến tính.** Thế giới online liền mạch nhiều người chơi (`Docs/KeHoach-Online.md`), càng đi xa quái càng mạnh. Mọi boss và quái đều hồi sinh để cày lại (boss sau 3 phút, cả khi chơi một mình); tiến bộ đến từ cấp, đồ rơi, chế tạo và mở vùng mới, không từ các hồi truyện. Các vùng mới nối liền vào cùng một bản đồ thay vì mỗi vùng một màn riêng. Cốt truyện (mục 12) chỉ còn là bối cảnh và nhiệm vụ phụ; các mục khác giữ nguyên cho tới khi được xem lại. Bản đồ đã có tới đâu: mục 10, phần *Đã có trong game* (Đầm Lầy Sương Mù đã nối vào phía đông).
 
 **Phạm vi bản 1.0**
 
@@ -732,6 +732,26 @@ Làng Lá Xanh ở trung tâm, 7 vùng xếp theo cấp. Mỗi vùng có một c
 - **Thời tiết:** Nắng, mưa (Lửa −20%, Lôi +20%, Vua Slime Hoàng Kim xuất hiện), sương, gió mạnh, bão tuyết, mưa tro. Mỗi vùng một bảng tỉ lệ riêng.
 - **Ngày và đêm:** 1 ngày trong game = 6 phút như prototype (chỉnh được). Ban đêm có quái riêng (Ma Rừng, Ma Trơi, Hồn Ma Lạc), quái mạnh hơn và cho thêm XP, NPC về nhà.
 
+### Đã có trong game (24/09/2026)
+
+Một bản đồ liền mạch 200 × 64 ô (`Editor/WorldBuilder.cs`): đi bộ từ làng tới cuối đầm không qua màn chuyển nào. Online, mỗi kênh là một máy chủ giữ cả bản đồ; máy chủ chỉ gửi cho mỗi người những gì trong 32 đơn vị quanh họ, và quái không có ai trong 40 đơn vị thì ngủ, nên bản đồ lớn thêm không làm nặng mạng hay máy chủ (`Docs/KeHoach-Online.md` mục 13).
+
+| Khu | Có gì |
+|---|---|
+| **Làng Lá Xanh → Rừng Thì Thầm** (tây, x 0–100) | Như prototype: 5 bãi Slime Rêu và Nấm Độc, Gấu Ma ở Rừng Già Cổ Thụ. |
+| **Đường Đông → Trạm Nhà Sàn** | Đường mòn từ giữa rừng ra bìa đầm, tới trạm nhà sàn của ngư dân (x ≈ 113). |
+| **Đầm Lầy Sương Mù** (đông, x 100–200, cấp 8–14) | Nước làm chậm người lội (còn 60% tốc độ, có tiếng lội và gợn nước); Cóc Độc, Đỉa Bùn và rắn bơi nên không bị chậm. Đường bùn nối các vũng, cây chết, liễu, sậy, sen, nhà sàn. Ánh sáng ngả xanh rêu, sương thấp trôi trên mặt đất, nhạc và âm nền riêng (đổi dần khi bước qua ranh giới vùng). |
+| **Quái đầm** | **Cóc Độc** (cấp 8, 4 bãi): nhảy từng bước dài, phun độc từ xa (gây Độc), lao vào húc người đứng gần. **Đỉa Bùn** (cấp 9, 3 vũng): ẩn dưới nước, lao ra bám vào người và hút máu (tự hồi máu) tới khi bị đánh mạnh văng ra, người đó Lướt, hoặc nó no. **Người Bùn** (cấp 11, 2 bãi): chậm, trâu, giơ hai tay đập đất (bùn làm chậm); gục thì tách thành 2 **Bùn Con**. |
+| **Cóc Tía** (mini-boss, cấp 11, Ao Cóc Tía ở phía bắc) | Lưỡi Kéo (kéo người về phía nó, vào các vũng độc), Nhảy Đè, Phun Độc (3–5 cục, để lại vũng độc), Bụng Đè khi bị vây. Cuồng nộ: nhanh hơn, phun nhiều hơn, Gọi Bầy 2 Cóc Độc lên từ ao. |
+| **Xà Mẫu Đầm Lầy** (boss, cấp 14, Đầm Xà Mẫu ở phía đông) | Hồ nước với 4 gò đất. Cắn, Quật Đuôi (nửa vòng phía trước), Phun Nọc (hình nón, để lại 3 vũng độc), Lặn–Trồi (lặn, bơi theo người chơi, gợn nước báo chỗ trồi). Cuồng nộ: Lao Thẳng (dụ nó đâm vào gò đất → Choáng 3 s) và Gọi Đỉa (3 Đỉa Bùn). |
+| **Đá Truyền Tống** (T49) | 5 viên: Làng Lá Xanh, Cửa Rừng Già, Trạm Nhà Sàn, Ao Cóc Tía, Đầm Xà Mẫu. Lại gần là đánh thức; gục ngã thì hồi sinh ở viên chạm vào sau cùng (chưa có thì ở làng); đứng cạnh viên đã thức bấm F, hoặc mở bản đồ (M), để dịch chuyển tới viên đã thức khác. Mỗi nhân vật giữ các viên của mình, lưu cùng nhân vật (online: trên máy chủ). |
+| **Bản đồ thế giới** (M) | Toàn bộ bản đồ, vị trí mình, các đá đã thức (đứng ở đá thì bấm một viên để đi), boss. Chưa có sương khám phá và ghim. |
+| **Nhiệm vụ** | Sau Gấu Ma tự mở: Đường Tới Đầm Lầy → Truy Nã Cóc Độc và Đỉa Bùn, Truy Nã Người Bùn → Cóc Tía Ao Độc → Xà Mẫu Đầm Lầy. Vật phẩm mới: Da Cóc, Tuyến Độc, Răng Đỉa, Lõi Bùn, Túi Nọc, Sen Đầm (hồi máu và năng lượng), Vương Miện Cóc Tía, Vảy Xà Mẫu, Nanh Xà Mẫu. |
+
+Mọi boss và mini-boss quay lại 3 phút sau khi gục, cả khi chơi một mình (`BossBase`: phần chung của mọi boss; mỗi boss mới chỉ viết các đòn của nó). Online, máu boss tăng 70% cho mỗi người thêm trong trận.
+
+**Khác với thiết kế ở trên:** Xà Mẫu gọi Đỉa Bùn thay cho Ấp Trứng, và cú Lao Thẳng là đòn cuồng nộ (không cần phá trứng mới lao); chưa có Siết. **Chưa làm ở Đầm Lầy:** Rắn Nước, Ma Trơi, Chuồn Chuồn Kim, quái riêng ban đêm, sương làm thu hẹp minimap.
+
 <a id="quai-boss"></a>
 
 ## 11 · Quái & boss
@@ -996,7 +1016,7 @@ Giữ phong cách HUD của bản tham khảo (khung trang trí vàng, orb chấ
 | **Cây Thiên Phú** | <kbd>T</kbd> | 3 nhánh, xem trước hiệu ứng, tẩy điểm | P0 | ○ Chưa có |
 | **Bách Khoa Trùm** | <kbd>J</kbd> | Dạng sổ tay: tab theo loài và vùng, tiến độ nghiên cứu, Bí Kíp | P0 | ◐ Tạm |
 | **Nhật ký nhiệm vụ** | <kbd>L</kbd> | Chính, phụ, truy nã; chọn nhiệm vụ theo dõi (<kbd>Tab</kbd>) | P0 | ◐ Tạm |
-| **Bản đồ thế giới** | <kbd>M</kbd> | Sương khám phá, Đá Truyền Tống, ghim đánh dấu | P0 | ○ Chưa có |
+| **Bản đồ thế giới** | <kbd>M</kbd> | Sương khám phá, Đá Truyền Tống, ghim đánh dấu | P0 | ◐ Bản 1: cả bản đồ, đá đã thức (dịch chuyển), boss; chưa có sương, ghim |
 | **Hội thoại** | <kbd>F</kbd> | Chân dung theo biểu cảm, lựa chọn, tua nhanh | P0 | ◐ Tạm |
 | **Trạm** (cửa hàng, rèn, chế, nấu) | — | Một khung chung, mỗi trạm một tab | P1 | ○ Chưa có |
 | **Cài đặt** | <kbd>Esc</kbd> | Đồ họa, âm thanh, điều khiển (đổi phím), tùy chọn hỗ trợ | P0 | ○ Chưa có |

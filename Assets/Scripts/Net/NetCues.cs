@@ -51,7 +51,10 @@ namespace RPG
         public static void VfxOn(string id, Component on, float scale = 1f, float up = 0f)
         {
             if (string.IsNullOrEmpty(id) || on == null) return;
-            Send(new CueMsg { kind = (byte)Kind.VfxOn, id = id, pos = on.transform.position, target = NetWorld.IdOf(on), b = scale, d = up });
+            // this screen follows the character itself (offline it has no network id to look up)
+            if (GameSession.HasScreen) VFX.Spawn(id, on.transform.position + Vector3.up * up, Quaternion.identity, scale, on.transform);
+            if (GameSession.Serving)
+                NetWorld.SendCue(new CueMsg { kind = (byte)Kind.VfxOn, id = id, pos = on.transform.position, target = NetWorld.IdOf(on), b = scale, d = up });
         }
 
         /// <summary>A sound heard from a point (quieter away from the camera), or flat when <paramref name="at"/> is null.</summary>
@@ -96,7 +99,9 @@ namespace RPG
         public static void Announce(Health who, string text)
         {
             if (who == null) return;
-            Send(new CueMsg { kind = (byte)Kind.Announce, target = NetWorld.IdOf(who), text = text, pos = who.transform.position });
+            if (GameSession.HasScreen) GameEvents.RaiseSkillAnnounced(who, text);
+            if (GameSession.Serving)
+                NetWorld.SendCue(new CueMsg { kind = (byte)Kind.Announce, target = NetWorld.IdOf(who), text = text, pos = who.transform.position });
         }
 
         /// <summary>A ground warning (circle) of <paramref name="source"/>'s attack; the local one is returned (null on a server without a screen).</summary>
@@ -113,7 +118,7 @@ namespace RPG
 
         /// <summary>
         /// A projectile the others only watch (an enemy's spore, seen by the players' screens): it
-        /// flies and bursts there, the hits are the server's. <paramref name="prefabKey"/>: "spore", "fireball".
+        /// flies and bursts there, the hits are the server's. <paramref name="prefabKey"/>: "spore", "venom", "fireball".
         /// </summary>
         public static void Projectile(string prefabKey, Vector2 start, Vector2 dir, float speed, float lifetime, Team team,
                                       string hitVfx, string hitSfx, float shake, float explodeRadius)
@@ -126,18 +131,24 @@ namespace RPG
             });
         }
 
-        /// <summary>A lobbed rock others only watch (its landing is sent on its own).</summary>
-        public static void Arc(Vector2 from, Vector2 to, float time)
+        /// <summary>
+        /// A lobbed rock (or <paramref name="prefabKey"/> "venom": a poison glob) others only watch
+        /// (its landing is sent on its own).
+        /// </summary>
+        public static void Arc(Vector2 from, Vector2 to, float time, string prefabKey = null)
         {
             if (!GameSession.Serving) return;
-            NetWorld.SendCue(new CueMsg { kind = (byte)Kind.Arc, pos = from, pos2 = to, a = time });
+            NetWorld.SendCue(new CueMsg { kind = (byte)Kind.Arc, id = prefabKey, pos = from, pos2 = to, a = time });
         }
 
         /// <summary>A boss's moment (intro, rage, fall, reset): screens near it run the boss's own presentation.</summary>
         public static void Boss(BossBase boss, BossBase.Moment moment)
         {
             if (boss == null) return;
-            Send(new CueMsg { kind = (byte)Kind.Boss, target = NetWorld.IdOf(boss), flag = (byte)moment, pos = boss.transform.position });
+            // this screen presents the boss itself: offline it has no network id to look up
+            if (GameSession.HasScreen) boss.Present(moment);
+            if (GameSession.Serving)
+                NetWorld.SendCue(new CueMsg { kind = (byte)Kind.Boss, target = NetWorld.IdOf(boss), flag = (byte)moment, pos = boss.transform.position });
         }
 
         // ------------------------------------------------------------------ plumbing

@@ -241,7 +241,7 @@ namespace RPG
         }
 
         // ================================================================== the character sheet
-        static readonly string[] SectionKeys = { "player", "inventory", "quests", "bestiary" };
+        static readonly string[] SectionKeys = { "player", "inventory", "quests", "bestiary", "waystones" };
 
         /// <summary>Marks what changed about a hero: its player gets the new sheet, the disk gets it later.</summary>
         void Watch(Session s)
@@ -255,6 +255,7 @@ namespace RPG
             }
             if (h.quests != null) h.quests.Changed += () => Changed(s, "quests");
             if (h.bestiary != null) h.bestiary.Changed += () => Changed(s, "bestiary");
+            if (h.waystones != null) h.waystones.Changed += () => Changed(s, "waystones");
         }
 
         void Changed(Session s, string key)
@@ -277,6 +278,7 @@ namespace RPG
             else if (key == "inventory") part = s.hero.inventory;
             else if (key == "quests") part = s.hero.quests;
             else if (key == "bestiary") part = s.hero.bestiary;
+            else if (key == "waystones") part = s.hero.waystones;
             if (part == null) return;
             nm.ServerManager.Broadcast(s.conn, new SectionMsg { key = key, json = part.CaptureState() });
         }
@@ -505,6 +507,9 @@ namespace RPG
                     return;
                 case ActKind.Ping:
                     s.pingMs = Mathf.Clamp(r.value, 0, 2000);
+                    return;
+                case ActKind.Travel:
+                    if (hero.waystones != null && r.text != null && r.text.Length < 64) hero.waystones.Travel(r.text);
                     return;
                 case ActKind.Console:
                     RunConsole(s, r.text);

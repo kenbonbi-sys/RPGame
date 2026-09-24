@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: toad_crown
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: toad_crown
+  displayName: "V\u01B0\u01A1ng Mi\u1EC7n C\xF3c T\xEDa"
+  description: "Chi\u1EBFc v\u01B0\u01A1ng mi\u1EC7n v\xE0ng m\xE9o m\xF3 c\u1EE7a C\xF3c T\xEDa, d\xEDnh \u0111\u1EA7y nh\u1EF1a \u0111\u1ED9c."
+  icon: {fileID: -579325442, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 2
+  maxStack: 99
+  value: 150
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

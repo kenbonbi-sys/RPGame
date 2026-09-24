@@ -331,6 +331,16 @@ namespace RPG.EditorTools
                 Item("scroll", "Cuộn Giấy Cổ", ItemKind.Quest, ItemRarity.Uncommon, "Ghi chép về Rừng Già Cổ Thụ.", 0, maxStack: 1),
                 Item("sword", "Kiếm Sắt", ItemKind.Equipment, ItemRarity.Common, "Thanh kiếm sắt đáng tin cậy.", 30, maxStack: 1),
                 Item("shield", "Khiên Gỗ", ItemKind.Equipment, ItemRarity.Common, "Chiếc khiên gỗ bọc sắt.", 25, maxStack: 1),
+                // Đầm Lầy Sương Mù
+                Item("toad_skin", "Da Cóc", M, ItemRarity.Common, "Da cóc sần sùi, vẫn còn rịn nhựa độc.", 4),
+                Item("poison_gland", "Tuyến Độc", M, ItemRarity.Uncommon, "Túi độc nhỏ của Cóc Độc. Bà lang nào cũng muốn có.", 10),
+                Item("leech_tooth", "Răng Đỉa", M, ItemRarity.Common, "Chiếc răng cưa li ti, sắc như dao cạo.", 5),
+                Item("mud_core", "Lõi Bùn", M, ItemRarity.Uncommon, "Hòn bùn cứng như đá, vẫn còn ấm. Người Bùn sống nhờ nó.", 12),
+                Item("venom_sac", "Túi Nọc", M, ItemRarity.Uncommon, "Túi nọc đặc quánh, lấp lánh ánh tím.", 20),
+                Item("lotus", "Sen Đầm", C, ItemRarity.Uncommon, "Hoa sen trắng mọc giữa đầm lầy. Hồi 40 Máu và 20 Năng lượng.", 8, heal: 40, energy: 20, maxStack: 20),
+                Item("toad_crown", "Vương Miện Cóc Tía", M, ItemRarity.Rare, "Chiếc vương miện vàng méo mó của Cóc Tía, dính đầy nhựa độc.", 150),
+                Item("snake_scale", "Vảy Xà Mẫu", M, ItemRarity.Rare, "Vảy lục thẫm cứng hơn thép, phản chiếu ánh sương.", 160),
+                Item("snake_fang", "Nanh Xà Mẫu", M, ItemRarity.Epic, "Chiếc nanh dài của Xà Mẫu Đầm Lầy, nọc vẫn còn nhỏ giọt.", 320),
             };
         }
 
@@ -705,6 +715,55 @@ namespace RPG.EditorTools
                 q.items.Add(Reward("potion_red", 3));
                 q.setFlags.Add("forest_saved");
             });
+            // Đầm Lầy Sương Mù: bounties that start by themselves once the forest is safe
+            var swampRoad = Quest("swamp_road", "Đường Tới Đầm Lầy", QuestKind.Main, q =>
+            {
+                q.summary = "Trưởng Làng kể: qua Rừng Già về phía đông là Đầm Lầy Sương Mù. Ngư dân dựng một trạm nhà sàn ở bìa đầm.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Reach, "Trạm Nhà Sàn", 1, "Tới Trạm Nhà Sàn ở bìa đầm", "outpost"));
+                q.xp = 150;
+                q.items.Add(Reward("potion_green", 2));
+            });
+            var swampToads = Quest("swamp_toads", "Truy Nã: Cóc Độc Và Đỉa Bùn", QuestKind.Bounty, q =>
+            {
+                q.summary = "Ngư dân ở trạm nhà sàn treo thưởng: Cóc Độc và Đỉa Bùn không cho ai thả lưới.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "toad", 6, "Hạ Cóc Độc", "swamp"));
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "leech", 3, "Hạ Đỉa Bùn", "swamp"));
+                q.xp = 320;
+                q.gold = 40;
+                q.items.Add(Reward("lotus", 3));
+            });
+            var swampMud = Quest("swamp_mud", "Truy Nã: Người Bùn", QuestKind.Bounty, q =>
+            {
+                q.summary = "Người Bùn lừ đừ quanh các vũng lầy sâu. Mỗi lần gục chúng lại tách ra thành Bùn Con.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "mudman", 3, "Hạ Người Bùn", "mudfield"));
+                q.xp = 380;
+                q.gold = 50;
+                q.items.Add(Reward("potion_red", 3));
+            });
+            var toadKing = Quest("slay_toadking", "Cóc Tía Ao Độc", QuestKind.Bounty, q =>
+            {
+                q.summary = "Cóc Tía ngự giữa Ao Cóc Tía phía bắc đầm. Lưỡi nó kéo người vào vũng độc.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "toadking", 1, "Đánh bại Cóc Tía", "toadpond"));
+                q.xp = 600;
+                q.gold = 80;
+                q.items.Add(Reward("potion_green", 3));
+            });
+            var snake = Quest("slay_snake", "Xà Mẫu Đầm Lầy", QuestKind.Main, q =>
+            {
+                q.summary = "Sâu trong đầm, Xà Mẫu cuộn mình giữa hồ nước có bốn gò đất. Dụ nó lao vào gò đất để nó choáng váng.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "snake", 1, "Đánh bại Xà Mẫu Đầm Lầy", "snakelair"));
+                q.xp = 1200;
+                q.gold = 150;
+                q.items.Add(Reward("potion_red", 4));
+                q.items.Add(Reward("lotus", 4));
+                q.setFlags.Add("swamp_saved");
+            });
+
             var mushrooms = Quest("mushrooms", "Nấm Cho Bé Mai", QuestKind.Side, q =>
             {
                 q.summary = "Mẹ Bé Mai bị ốm, cô bé cần 3 Mũ Nấm Đỏ để nấu thuốc.";
@@ -727,7 +786,13 @@ namespace RPG.EditorTools
             Link(forest, talk, bear);
             Link(bear, forest, null);
             Link(mushrooms, talk, null);
-            return new List<QuestDef> { talk, forest, bear, mushrooms };
+            Link(swampRoad, bear, null);
+            Link(swampToads, swampRoad, null);
+            Link(swampMud, swampRoad, null);
+            Link(toadKing, swampToads, null);
+            Link(snake, swampMud, null);
+            Link(snake, toadKing, null);
+            return new List<QuestDef> { talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake };
         }
 
         // ------------------------------------------------------------------ database

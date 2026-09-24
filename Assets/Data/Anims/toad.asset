@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: toad
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: 170168547, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    - {fileID: 405452524, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    fps: 4
+    loop: 1
+  - name: move
+    frames:
+    - {fileID: -908861873, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    - {fileID: -1126039692, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    - {fileID: 1807820228, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    - {fileID: -442152502, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    fps: 8
+    loop: 1
+  - name: attack
+    frames:
+    - {fileID: -1481029607, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    - {fileID: 550095832, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    - {fileID: 131349117, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    fps: 10
+    loop: 0
+  - name: hurt
+    frames:
+    - {fileID: 1331345197, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: -1265131972, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    - {fileID: 233709201, guid: 7f0d4c80e939d56469e63fc169cc7522, type: 3}
+    fps: 6
+    loop: 0

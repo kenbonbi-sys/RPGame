@@ -39,6 +39,7 @@ namespace RPG
         public Inventory inventory;
         public QuestSystem quests;
         public Bestiary bestiary;
+        public WaystoneLog waystones;
 
         [Header("Stats")]
         public float maxEnergy = 63f;
@@ -94,6 +95,7 @@ namespace RPG
             if (inventory == null) inventory = gameObject.GetOrAdd<Inventory>();
             if (quests == null) quests = gameObject.GetOrAdd<QuestSystem>();
             if (bestiary == null) bestiary = gameObject.GetOrAdd<Bestiary>();
+            if (waystones == null) waystones = gameObject.GetOrAdd<WaystoneLog>();
             health.Damaged += OnDamaged;
             health.Died += OnDied;
             if (anim != null) anim.FrameChanged += OnFrame;
@@ -531,8 +533,11 @@ namespace RPG
         {
             if (clip != null && clip.StartsWith("walk") && (frame == 0 || frame == 2))
             {
-                AudioManager.Play("sfx_step", 0.25f, 0.15f, IsLocal ? (Vector3?)null : transform.position, 0.1f);
-                if (Random.value < 0.6f) VFX.Spawn("step_dust", transform.position + new Vector3(Random.Range(-0.1f, 0.1f), 0.05f), Quaternion.identity);
+                var zone = ZoneRoot.Current;
+                bool wading = zone != null && zone.IsWater(transform.position);
+                AudioManager.Play(wading ? "sfx_wade" : "sfx_step", wading ? 0.3f : 0.25f, 0.15f, IsLocal ? (Vector3?)null : transform.position, 0.1f);
+                if (wading) VFX.Spawn("water_step", transform.position + new Vector3(Random.Range(-0.1f, 0.1f), 0.05f), Quaternion.identity);
+                else if (Random.value < 0.6f) VFX.Spawn("step_dust", transform.position + new Vector3(Random.Range(-0.1f, 0.1f), 0.05f), Quaternion.identity);
             }
         }
 
@@ -641,12 +646,11 @@ namespace RPG
             var s = new SaveState { x = transform.position.x, y = transform.position.y, hp = health.hp, energy = energy };
             if (IsDead)
             {
-                // saved while down (online: a player left mid-fall): back on their feet at the zone's spawn
-                var spawn = GameManager.I != null ? GameManager.I.respawnPoint : null;
-                if (spawn != null)
+                // saved while down (online: a player left mid-fall): back on their feet where they would get up
+                if (GameManager.I != null && GameManager.I.RespawnPointFor(this, out Vector2 spawn))
                 {
-                    s.x = spawn.position.x;
-                    s.y = spawn.position.y;
+                    s.x = spawn.x;
+                    s.y = spawn.y;
                 }
                 s.hp = health.maxHp;
                 s.energy = maxEnergy;
