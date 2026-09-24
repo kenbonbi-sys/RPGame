@@ -36,9 +36,10 @@ namespace RPG.EditorTools
             var items = CreateItems();
             var abilities = CreateAbilities();
             var progression = CreateProgression();
+            var combat = CreateConfig<CombatConfig>("Combat");
             var quests = CreateQuests();
             var zones = CreateZones();
-            CreateDatabase(items, abilities, progression, quests, zones);
+            CreateDatabase(items, abilities, progression, combat, quests, zones);
             CreateAudioLibrary();
             AssetDatabase.SaveAssets();
         }
@@ -416,6 +417,7 @@ namespace RPG.EditorTools
                 Ability("slash", "Chém Gió", "sk_slash", AbilityTags.Physical | AbilityTags.Wind | AbilityTags.Melee, 0.42f, 0f, "attack", 0.26f,
                     "Vung kiếm tạo luồng gió chém hình vòng cung. Đòn thứ 3 liên tiếp gây sát thương cực mạnh.", a =>
                     {
+                        a.commitTime = 0.05f;   // the hit frame: a dash may cancel the recovery after it (plan §04)
                         a.moveWhileCasting = 0.35f;
                         a.maxRange = 12f;
                         a.effects.Add(new ComboEffect
@@ -430,20 +432,22 @@ namespace RPG.EditorTools
                         });
                     }),
                 Ability("fireball", "Cầu Lửa", "sk_fireball", AbilityTags.Fire | AbilityTags.Projectile, 3f, 12f, "cast", 0.3f,
-                    "Phóng cầu lửa nổ tung khi trúng mục tiêu, thiêu đốt kẻ địch trong 3 giây.", a =>
+                    "Phóng cầu lửa nổ tung khi trúng mục tiêu, gây 1 tầng Bỏng: đốt 30% sát thương mỗi giây trong 3 giây.", a =>
                     {
+                        a.commitTime = 0.15f;
                         a.castSfx = "sfx_fireball_cast";
                         a.effects.Add(Cue(new Anchor(Anchor.From.Caster, 0.55f, 0.5f), "cast_fire"));
                         a.effects.Add(new ProjectileEffect
                         {
                             prefab = fireball, spawn = new Anchor(Anchor.From.Caster, 0.55f, 0.5f), speed = 11f, explodeRadius = 1.7f,
-                            hit = new HitSpec { power = 1.88f, type = DamageType.Fire, critChance = 0.12f, knockback = 3f, poise = 12f, burnPower = 0.33f, burnDuration = 3f },
+                            hit = new HitSpec { power = 1.88f, type = DamageType.Fire, critChance = 0.12f, knockback = 3f, poise = 12f, status = new StatusHit { burn = 1 } },
                             hitVfx = "fire_explosion", hitSfx = "sfx_fireball_explode", hitShake = 0.28f
                         });
                     }),
                 Ability("ice", "Mũi Băng", "sk_ice", AbilityTags.Ice | AbilityTags.Area, 6f, 15f, "cast", 0.35f,
-                    "Gọi hàng gai băng trồi lên theo hướng chuột, làm chậm kẻ địch 50%.", a =>
+                    "Gọi hàng gai băng trồi lên theo hướng chuột, mỗi gai gây 2 tầng Lạnh (chậm 12% mỗi tầng); đủ 4 tầng thì Đóng Băng.", a =>
                     {
+                        a.commitTime = 0.2f;
                         a.castSfx = "sfx_ice_cast";
                         a.effects.Add(Cue(new Anchor(Anchor.From.Caster, 0.5f), "cast_ice"));
                         a.effects.Add(new LineEffect
@@ -456,7 +460,7 @@ namespace RPG.EditorTools
                                 new DamageEffect
                                 {
                                     at = point, radius = 0.95f,
-                                    hit = new HitSpec { power = 1.22f, type = DamageType.Ice, critChance = 0.1f, knockback = 1.5f, slow = 0.5f, slowDuration = 2.5f, poise = 5f },
+                                    hit = new HitSpec { power = 1.22f, type = DamageType.Ice, critChance = 0.1f, knockback = 1.5f, poise = 5f, status = new StatusHit { chill = 2 } },
                                     onAnyHit = { new CueEffect { shake = 0.05f } }
                                 }
                             }
@@ -465,6 +469,7 @@ namespace RPG.EditorTools
                 Ability("lightning", "Lôi Phạt", "sk_lightning", AbilityTags.Lightning | AbilityTags.Area, 16f, 28f, "cast", 0.5f,
                     "Triệu hồi bão sét tại vị trí chuột. Mỗi tia sét gây choáng ngắn.", a =>
                     {
+                        a.commitTime = 0.3f;
                         a.targeting = AbilityTargeting.Point;
                         a.effects.Add(Cue(new Anchor(Anchor.From.Caster, 0.6f), "cast_lightning", "sfx_lightning_charge"));
                         a.effects.Add(new BurstEffect
@@ -482,7 +487,7 @@ namespace RPG.EditorTools
                                 new DamageEffect
                                 {
                                     at = point, radius = 1.1f,
-                                    hit = new HitSpec { power = 2.12f, type = DamageType.Lightning, critChance = 0.15f, knockback = 2f, stun = 0.8f, poise = 8f }
+                                    hit = new HitSpec { power = 2.12f, type = DamageType.Lightning, critChance = 0.15f, knockback = 2f, poise = 8f, status = new StatusHit { stun = 0.8f } }
                                 }
                             }
                         });
@@ -490,6 +495,7 @@ namespace RPG.EditorTools
                 Ability("heal", "Hồi Phục", "sk_heal", AbilityTags.Holy | AbilityTags.Support, 14f, 18f, "cast", 0.35f,
                     "Hồi ngay 40 Máu và hồi thêm máu liên tục trong 4 giây.", a =>
                     {
+                        a.commitTime = 0.2f;
                         a.castSfx = "sfx_heal";
                         a.targeting = AbilityTargeting.Self;
                         a.effects.Add(new HealEffect { instant = 40f, perSecond = 6f, duration = 4f, auraVfx = "heal_aura" });
@@ -503,6 +509,7 @@ namespace RPG.EditorTools
                 Ability("shield", "Khiên Thánh", "sk_shield", AbilityTags.Holy | AbilityTags.Support, 16f, 16f, "cast", 0.3f,
                     "Tạo lá chắn thánh giảm 60% sát thương nhận vào và miễn choáng trong 5 giây.", a =>
                     {
+                        a.commitTime = 0.1f;
                         a.castSfx = "sfx_shield";
                         a.targeting = AbilityTargeting.Self;
                         a.effects.Add(new BuffEffect
@@ -519,6 +526,7 @@ namespace RPG.EditorTools
                 Ability("bladestorm", "Bão Kiếm", "sk_bladestorm", AbilityTags.Physical | AbilityTags.Wind | AbilityTags.Channel, 10f, 20f, "attack", 0.2f,
                     "Kiếm ảnh xoay quanh bản thân trong 3 giây, chém mọi kẻ địch lại gần.", a =>
                     {
+                        a.commitTime = 0.1f;
                         a.moveWhileCasting = 0.9f;
                         a.targeting = AbilityTargeting.Self;
                         a.effects.Add(new BuffEffect { buff = new BuffSpec { id = "bladestorm", displayName = "Bão Kiếm", icon = ArtImporter.S("sk_bladestorm"), duration = 3f, speedMultiplier = 0.85f } });
@@ -574,13 +582,16 @@ namespace RPG.EditorTools
 
         // ------------------------------------------------------------------ progression
         /// <summary>Assets/Data/Progression.asset with the default numbers of plan §05.</summary>
-        static ProgressionConfig CreateProgression()
+        static ProgressionConfig CreateProgression() => CreateConfig<ProgressionConfig>("Progression");
+
+        /// <summary>A config asset in Assets/Data with the defaults of its class (Progression, Combat).</summary>
+        static T CreateConfig<T>(string name) where T : ScriptableObject
         {
-            string path = DataFolder + "/Progression.asset";
-            var c = AssetDatabase.LoadAssetAtPath<ProgressionConfig>(path);
+            string path = $"{DataFolder}/{name}.asset";
+            var c = AssetDatabase.LoadAssetAtPath<T>(path);
             if (EditorUtil.Keep(c)) return c;
             EditorUtil.Written++;
-            var fresh = ScriptableObject.CreateInstance<ProgressionConfig>();
+            var fresh = ScriptableObject.CreateInstance<T>();
             if (c == null)
             {
                 AssetDatabase.CreateAsset(fresh, path);
@@ -720,7 +731,8 @@ namespace RPG.EditorTools
         }
 
         // ------------------------------------------------------------------ database
-        static void CreateDatabase(List<ItemDef> items, List<AbilityDef> abilities, ProgressionConfig progression, List<QuestDef> quests, List<ZoneDef> zones)
+        static void CreateDatabase(List<ItemDef> items, List<AbilityDef> abilities, ProgressionConfig progression, CombatConfig combat,
+                                   List<QuestDef> quests, List<ZoneDef> zones)
         {
             string path = DataFolder + "/GameDatabase.asset";
             var db = AssetDatabase.LoadAssetAtPath<GameDatabase>(path);
@@ -733,6 +745,7 @@ namespace RPG.EditorTools
             db.items = Merge(db.items, items);
             db.abilities = Merge(db.abilities, abilities);
             EditorUtil.Assign(ref db.progression, progression);
+            EditorUtil.Assign(ref db.combat, combat);
             db.quests = Merge(db.quests, quests);
             db.zones = Merge(db.zones, zones);
             EditorUtil.Assign(ref db.startZone, zones.Count > 0 ? zones[0] : null);

@@ -60,7 +60,7 @@ namespace RPG
         public static readonly List<BossBear> All = new List<BossBear>();
         PlayerController Player => GameManager.I != null ? GameManager.I.player : null;
         Vector2 Pos => transform.position;
-        float CdMul => enraged ? 0.65f : 1f;
+        float CdMul => (enraged ? 0.65f : 1f) / Mathf.Max(0.1f, status != null ? status.AttackSpeedMultiplier : 1f);   // Lạnh slows its attacks
 
         void Awake()
         {
@@ -376,7 +376,7 @@ namespace RPG
                 ScreenFX.Impact(0.6f, 0.4f);
                 TimeFX.HitStop(0.06f);
                 var d = DamageInfo.Make(stompDamage, Team.Enemy, gameObject, Pos, Vector2.down, DamageType.Physical, 8f);
-                d.stun = stompStun;
+                d.status.stun = stompStun;
                 d.skillName = "Dậm Đất";
                 Combat.DamageCircle(Pos, radius, d);
                 yield return new WaitForSeconds(0.55f);

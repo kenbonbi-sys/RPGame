@@ -22,6 +22,7 @@ MonoBehaviour:
   targeting: 2
   maxRange: 12
   lockTime: 0.3
+  commitTime: 0.1
   animBase: cast
   moveWhileCasting: 0.25
   castSfx: sfx_shield

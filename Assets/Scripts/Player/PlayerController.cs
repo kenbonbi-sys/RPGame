@@ -32,6 +32,7 @@ namespace RPG
         public SpriteRenderer body;
         public PlayerSkills skills;
         public PlayerStats stats;
+        public PerfectDodge perfectDodge;
 
         [Header("Stats")]
         public float maxEnergy = 63f;
@@ -71,6 +72,7 @@ namespace RPG
             if (skills == null) skills = GetComponent<PlayerSkills>();
             if (stats == null) stats = GetComponent<PlayerStats>();
             if (stats == null) stats = gameObject.AddComponent<PlayerStats>();   // prefabs made before stats existed
+            if (perfectDodge == null) perfectDodge = gameObject.GetOrAdd<PerfectDodge>();
             health.Damaged += OnDamaged;
             health.Died += OnDied;
             if (anim != null) anim.FrameChanged += OnFrame;
@@ -184,6 +186,8 @@ namespace RPG
         }
 
         public bool IsActing => Time.time < actionUntil;
+        /// <summary>Seconds left in the current attack / cast pose.</summary>
+        public float ActionRemaining => Mathf.Max(0f, actionUntil - Time.time);
 
         void Update()
         {
@@ -431,6 +435,12 @@ namespace RPG
         // ------------------------------------------------------------------ damage
         void OnDamaged(DamageInfo d, float amount)
         {
+            if (d.dot)
+            {
+                // Bỏng / Độc ticks: a light flash, no shake or hurt sound every half second
+                if (flash != null) flash.Flash(new Color(1f, 0.3f, 0.3f), 0.4f, 0.1f);
+                return;
+            }
             if (flash != null) flash.Flash(new Color(1f, 0.3f, 0.3f), 0.9f, 0.18f);
             if (amount >= 12f) hurtAnimUntil = Time.time + 0.18f;
             CameraRig.Shake(Mathf.Clamp(amount / 60f, 0.1f, 0.45f));

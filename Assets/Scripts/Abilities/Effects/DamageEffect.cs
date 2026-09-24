@@ -15,26 +15,15 @@ namespace RPG
         [Tooltip("Thanh Trấn Áp damage per target.")]
         public float poise;
         public float hitStop;
-        public float stun;
-        [Range(0, 1)] public float slow;
-        public float slowDuration = 2f;
-        [Tooltip("Burn per second as a share of Attack (0 = none).")]
-        public float burnPower;
-        public float burnDuration = 3f;
+        [Tooltip("Statuses of plan §04 the hit applies.")]
+        public StatusHit status;
 
         public DamageInfo Make(AbilityContext ctx, Vector2 at, Vector2 dir)
         {
             var d = ctx.MakeDamage(power, type, at, dir, knockback);
             d.poise = poise;
             d.hitStop = hitStop;
-            d.stun = stun;
-            d.slow = slow;
-            d.slowDuration = slowDuration;
-            if (burnPower > 0)
-            {
-                d.burnDps = burnPower * ctx.HitScale(type);
-                d.burnDuration = burnDuration;
-            }
+            d.status = status;
             return d;
         }
     }
@@ -106,11 +95,7 @@ namespace RPG
             p.critChance = hit.critChance;
             p.knockback = hit.knockback;
             p.poise = hit.poise;
-            p.stun = hit.stun;
-            p.slow = hit.slow;
-            p.slowDuration = hit.slowDuration;
-            p.burnDps = hit.burnPower > 0 ? hit.burnPower * ctx.HitScale(hit.type) : 0f;
-            p.burnDuration = hit.burnDuration;
+            p.status = hit.status;
             p.speed = speed;
             p.explodeRadius = explodeRadius;
             p.pierce = pierce;

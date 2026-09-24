@@ -27,6 +27,8 @@ namespace RPG
         public event Action<DamageInfo, float> Damaged;
         public event Action<DamageInfo> Died;
         public event Action<float> Healed;
+        /// <summary>A hostile hit that invulnerability blocked (a dash's i-frames); Lướt Hoàn Hảo listens.</summary>
+        public event Action<DamageInfo> Evaded;
 
         /// <summary>Source of the random damage spread (0..1). Tests pin it to 0.5 for exact numbers.</summary>
         public static Func<float> SpreadRoll = () => UnityEngine.Random.value;
@@ -37,10 +39,20 @@ namespace RPG
         public Vector3 HeadPosition => head != null ? head.position : transform.position + Vector3.up * 1.2f;
 
         StatusEffects status;
+        bool statusLooked;
 
-        void Awake()
+        /// <summary>The character's statuses (looked up on first use, so tests can build targets without Play Mode).</summary>
+        public StatusEffects Status
         {
-            status = GetComponent<StatusEffects>();
+            get
+            {
+                if (!statusLooked)
+                {
+                    status = GetComponent<StatusEffects>();
+                    statusLooked = true;
+                }
+                return status;
+            }
         }
 
         public void ResetHealth(float max = -1)
@@ -65,28 +77,34 @@ namespace RPG
             return Mathf.Clamp(r, c.resistMin, c.resistMax);
         }
 
-        /// <summary>Applies damage (armor, resistance and the random spread of plan §04). Returns the amount actually dealt.</summary>
+        /// <summary>
+        /// Applies damage (armor, resistance and the random spread of plan §04) and the statuses the
+        /// hit carries. Returns the amount actually dealt.
+        /// </summary>
         public float TakeDamage(DamageInfo d)
         {
-            if (IsDead || invulnerable || !CanBeDamagedBy(d.sourceTeam)) return 0f;
-            float raw = d.amount;
+            if (IsDead || !CanBeDamagedBy(d.sourceTeam)) return 0f;
+            if (invulnerable)
+            {
+                Evaded?.Invoke(d);
+                return 0f;
+            }
+            var st = Status;
+            float dealt = d.amount;   // the attacker's side: Bỏng and Tích Điện scale with it
+            float raw = dealt;
             if (!d.pure)
             {
-                raw *= damageTakenMultiplier;
                 // older damage sources carry flat numbers: scale them by the hero's Attack here, once
-                if (d.sourceTeam == Team.Player && !d.attackScaled && PlayerStats.I != null) raw *= PlayerStats.I.DamageScale(d.type);
+                if (d.sourceTeam == Team.Player && !d.attackScaled && PlayerStats.I != null) dealt *= PlayerStats.I.DamageScale(d.type);
+                dealt *= AttackerDealt(d);   // Nguyền on the attacker
+                raw = dealt * damageTakenMultiplier * (st != null ? st.DamageTakenMultiplier : 1f);
                 raw = ProgressionConfig.Current.Mitigate(raw, armor, armor > 0 ? AttackerLevel(d) : 1, Resistance(d.type), SpreadRoll());
             }
             float amount = Mathf.Max(1f, Mathf.Round(raw));
             hp = Mathf.Max(0f, hp - amount);
             LastDamageTime = Time.time;
 
-            if (status != null)
-            {
-                if (d.stun > 0) status.Stun(d.stun);
-                if (d.slow > 0) status.Slow(d.slow, d.slowDuration > 0 ? d.slowDuration : 2f);
-                if (d.burnDps > 0) status.Burn(d.burnDps, d.burnDuration > 0 ? d.burnDuration : 3f, d.sourceTeam, d.attackScaled);
-            }
+            if (st != null && hp > 0f && d.status.Any) st.Apply(d, dealt);
 
             Damaged?.Invoke(d, amount);
             GameEvents.RaiseDamaged(this, d, amount);
@@ -98,6 +116,14 @@ namespace RPG
                 GameEvents.RaiseDied(this);
             }
             return amount;
+        }
+
+        /// <summary>The attacker's own damage multiplier from its statuses (Nguyền: −20%).</summary>
+        static float AttackerDealt(DamageInfo d)
+        {
+            if (d.source == null) return 1f;
+            var s = d.source.GetComponentInParent<StatusEffects>();
+            return s != null ? s.DamageDealtMultiplier : 1f;
         }
 
         int AttackerLevel(DamageInfo d)

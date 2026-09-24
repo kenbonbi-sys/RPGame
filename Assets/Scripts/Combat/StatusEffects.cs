@@ -1,111 +1,494 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPG
 {
-    /// <summary>Stun / slow / burn on a character, with visuals.</summary>
+    /// <summary>The statuses one hit applies (plan §04). Stacks add up to each status's cap.</summary>
+    [Serializable]
+    public struct StatusHit
+    {
+        [Tooltip("Bỏng stacks: each burns 30% of the hit's damage per second for 3 s (up to 3, a new stack refreshes them).")]
+        public int burn;
+        [Tooltip("Lạnh stacks: −12% move and attack speed each for 4 s; the 4th freezes (Đóng Băng).")]
+        public int chill;
+        [Tooltip("Tích Điện stacks for 5 s; the 3rd discharges 80% of the hit to 3 enemies nearby.")]
+        public int charge;
+        [Tooltip("Độc stacks: 1.5% of max HP per second each for 6 s (up to 5).")]
+        public int poison;
+        [Tooltip("Choáng seconds: cannot act.")]
+        public float stun;
+        [Tooltip("Trói seconds: cannot move, can still attack and cast.")]
+        public float root;
+        [Tooltip("Làm Chậm: share of move speed lost (0.3 = −30%).")]
+        [Range(0, 1)] public float slow;
+        [Tooltip("Làm Chậm seconds (0 = the default of the combat config).")]
+        public float slowDuration;
+        [Tooltip("Nguyền seconds: +15% damage taken, −20% damage dealt.")]
+        public float curse;
+        [Tooltip("Phán Xét seconds: +20% damage taken from every source.")]
+        public float judgment;
+
+        public bool Any => burn > 0 || chill > 0 || charge > 0 || poison > 0 || stun > 0 || root > 0 || slow > 0 || curse > 0 || judgment > 0;
+    }
+
+    /// <summary>
+    /// The ten statuses of plan §04 on a character: Bỏng, Lạnh → Đóng Băng, Tích Điện, Độc, Choáng,
+    /// Trói, Làm Chậm, Đẩy Lùi (a knockback into a wall stuns), Nguyền and Phán Xét, with stacks,
+    /// damage ticks and visuals. Hard crowd control (Choáng, Đóng Băng, Trói) lasts 40% less each
+    /// time it lands again within 6 s, and a boss or elite (whoever has a Thanh Trấn Áp) shrugs it
+    /// off for 4 s after a stun or freeze ends. The numbers are in <see cref="CombatConfig"/>.
+    /// </summary>
     public class StatusEffects : MonoBehaviour
     {
-        [Tooltip("Resist stuns entirely (e.g. while shielded).")]
+        [Tooltip("Immune to hard crowd control: Choáng, Đóng Băng, Trói (e.g. while shielded).")]
         public bool stunImmune;
         [Tooltip("Multiplier applied to stun durations (bosses resist).")]
         public float stunResist = 1f;
 
-        public float StunRemaining => Mathf.Max(0, stunUntil - Time.time);
-        public bool IsStunned => Time.time < stunUntil;
-        public bool IsSlowed => Time.time < slowUntil;
-        public bool IsBurning => Time.time < burnUntil;
-        public float SpeedMultiplier => IsSlowed ? 1f - slowAmount : 1f;
+        /// <summary>The clock of every status; tests pin it.</summary>
+        public static Func<float> Clock = () => Time.time;
 
-        float stunUntil, slowUntil, burnUntil;
-        float slowAmount;
-        float burnDps;
-        float burnTick;
-        Team burnTeam;
-        bool burnScaled;
-        Health health;
-        HitFlash flash;
-        GameObject stunFx, burnFx;
+        float Now => Clock();
 
-        void Awake()
+        // ------------------------------------------------------------------ state for movers, AI and UI
+        /// <summary>Cannot act: stunned or frozen.</summary>
+        public bool IsStunned => Now < stunUntil || IsFrozen;
+        public bool IsFrozen => Now < freezeUntil;
+        public bool IsRooted => Now < rootUntil;
+        public bool IsSlowed => Now < slowUntil;
+        public bool IsBurning => burnStacks.Count > 0 && Now < burnUntil;
+        public bool IsPoisoned => poisonStacks > 0 && Now < poisonUntil;
+        public bool IsCursed => Now < curseUntil;
+        public bool IsJudged => Now < judgmentUntil;
+        public int BurnStacks => IsBurning ? burnStacks.Count : 0;
+        public int ChillStacks => Now < chillUntil ? chillStacks : 0;
+        public int ChargeStacks => Now < chargeUntil ? chargeStacks : 0;
+        public int PoisonStacks => IsPoisoned ? poisonStacks : 0;
+        public float StunRemaining => Mathf.Max(0f, Mathf.Max(stunUntil, freezeUntil) - Now);
+        /// <summary>A boss or elite: shorter freezes, crowd-control immunity after a stun.</summary>
+        public bool IsHeavy => Poise != null;
+        /// <summary>A boss or elite shrugging off crowd control after a stun or freeze.</summary>
+        public bool CrowdControlImmune => IsHeavy && Now < ccImmuneUntil;
+
+        /// <summary>Burn damage per second of all stacks.</summary>
+        public float BurnDps
         {
-            health = GetComponent<Health>();
-            flash = GetComponentInChildren<HitFlash>();
+            get
+            {
+                if (!IsBurning) return 0f;
+                float sum = 0f;
+                foreach (var s in burnStacks) sum += s;
+                return sum;
+            }
         }
 
+        float ChillMultiplier => 1f - CombatConfig.Current.chillSlowPerStack * ChillStacks;
+
+        /// <summary>Movement: 0 while frozen or rooted, lowered by Làm Chậm and Lạnh.</summary>
+        public float SpeedMultiplier => IsFrozen || IsRooted ? 0f : (IsSlowed ? 1f - slowAmount : 1f) * ChillMultiplier;
+        /// <summary>Attack speed: lowered by Lạnh (enemies' attack cooldowns, the hero's basic attack).</summary>
+        public float AttackSpeedMultiplier => ChillMultiplier;
+        /// <summary>Damage this character takes: Nguyền +15%, Phán Xét +20%.</summary>
+        public float DamageTakenMultiplier
+        {
+            get
+            {
+                var c = CombatConfig.Current;
+                return 1f + (IsCursed ? c.curseDamageTaken : 0f) + (IsJudged ? c.judgmentDamageTaken : 0f);
+            }
+        }
+        /// <summary>Damage this character deals: Nguyền −20%.</summary>
+        public float DamageDealtMultiplier => IsCursed ? 1f - CombatConfig.Current.curseDamageDealt : 1f;
+
+        float stunUntil, freezeUntil, rootUntil, slowUntil, curseUntil, judgmentUntil;
+        float slowAmount;
+        readonly List<float> burnStacks = new List<float>(3);   // damage per second of each stack
+        float burnUntil, nextBurnTick;
+        Team burnTeam;
+        int poisonStacks;
+        float poisonUntil, nextPoisonTick;
+        Team poisonTeam;
+        int chillStacks, chargeStacks;
+        float chillUntil, chargeUntil;
+        int ccRepeats;
+        float ccRepeatUntil, ccImmuneUntil;
+
+        Health health;
+        Poise poise;
+        HitFlash flash;
+        SpriteAnimator anim;
+        CharacterMotor motor;
+        bool ready;
+        GameObject stunFx, burnFx;
+        float animSpeedBeforeFreeze = 1f;
+        bool animFrozen, wasFrozen;
+        static readonly List<Health> Nearby = new List<Health>(16);
+
+        Poise Poise
+        {
+            get
+            {
+                Ready();
+                return poise;
+            }
+        }
+
+        void Awake() => Ready();
+
+        /// <summary>Finds the neighbour components (in Awake, or on first use when made in a test).</summary>
+        void Ready()
+        {
+            if (ready) return;
+            ready = true;
+            health = GetComponent<Health>();
+            poise = GetComponent<Poise>();
+            flash = GetComponentInChildren<HitFlash>();
+            anim = GetComponentInChildren<SpriteAnimator>();
+            motor = GetComponent<CharacterMotor>();
+            if (motor != null) motor.WallSlammed += OnWallSlam;
+        }
+
+        void OnDestroy()
+        {
+            if (motor != null) motor.WallSlammed -= OnWallSlam;
+        }
+
+        // ------------------------------------------------------------------ applying
+        /// <summary>
+        /// Applies what a hit carries. <paramref name="dealt"/> is the hit's damage on the attacker's
+        /// side, before this character's armor and resistances: Bỏng and Tích Điện scale with it.
+        /// </summary>
+        public void Apply(DamageInfo d, float dealt)
+        {
+            var s = d.status;
+            var c = CombatConfig.Current;
+            if (s.burn > 0) Burn(s.burn, dealt * c.burnShare, d.sourceTeam);
+            if (s.chill > 0) Chill(s.chill);
+            if (s.poison > 0) Poison(s.poison, d.sourceTeam);
+            if (s.stun > 0) Stun(s.stun);
+            if (s.root > 0) Root(s.root);
+            if (s.slow > 0) Slow(s.slow, s.slowDuration > 0 ? s.slowDuration : c.slowSeconds);
+            if (s.curse > 0) Curse(s.curse);
+            if (s.judgment > 0) Judge(s.judgment);
+            if (s.charge > 0) Charge(s.charge, dealt, d.sourceTeam, d.source);   // last: a discharge hits others
+        }
+
+        /// <summary>Bỏng: <paramref name="stacks"/> stacks of <paramref name="dpsPerStack"/>; when full, a stronger stack replaces the weakest. Refreshes the timer.</summary>
+        public void Burn(int stacks, float dpsPerStack, Team team)
+        {
+            Ready();
+            if (stacks <= 0 || dpsPerStack <= 0f) return;
+            var c = CombatConfig.Current;
+            if (!IsBurning)
+            {
+                burnStacks.Clear();
+                nextBurnTick = Now + c.tickInterval;
+            }
+            for (int i = 0; i < stacks; i++)
+            {
+                if (burnStacks.Count < c.burnMaxStacks)
+                {
+                    burnStacks.Add(dpsPerStack);
+                    continue;
+                }
+                int weakest = 0;
+                for (int k = 1; k < burnStacks.Count; k++)
+                    if (burnStacks[k] < burnStacks[weakest]) weakest = k;
+                if (burnStacks[weakest] < dpsPerStack) burnStacks[weakest] = dpsPerStack;
+            }
+            burnUntil = Now + c.burnSeconds;
+            burnTeam = team;
+        }
+
+        /// <summary>Lạnh: adds stacks and refreshes them; the 4th stack turns into Đóng Băng.</summary>
+        public void Chill(int stacks)
+        {
+            Ready();
+            if (stacks <= 0) return;
+            var c = CombatConfig.Current;
+            int have = ChillStacks + stacks;
+            chillUntil = Now + c.chillSeconds;
+            if (have < c.chillMaxStacks)
+            {
+                chillStacks = have;
+                return;
+            }
+            chillStacks = 0;
+            chillUntil = 0f;
+            Freeze();
+        }
+
+        void Freeze()
+        {
+            var c = CombatConfig.Current;
+            if (IsHeavy) poise.AddPoise(c.heavyFreezePoise);   // plan: boss 0.6 s + 60 Trấn Áp
+            if (stunImmune) return;
+            float seconds = CrowdControl(IsHeavy ? c.heavyFreezeSeconds : c.freezeSeconds);
+            if (seconds <= 0f) return;
+            freezeUntil = Mathf.Max(freezeUntil, Now + seconds);
+            if (IsHeavy) ccImmuneUntil = Mathf.Max(ccImmuneUntil, freezeUntil + c.heavyCrowdControlImmunity);
+            if (health != null) GameEvents.RaiseWorldText("Đóng Băng!", health.HeadPosition + Vector3.up * 0.3f, Palette.Ice);
+            VFX.Spawn("ice_spike", transform.position, Quaternion.identity, 0.9f);
+            AudioManager.Play("sfx_ice_cast", 0.6f, 0.05f, transform.position);
+        }
+
+        /// <summary>Tích Điện: adds stacks; the 3rd discharges <c>dischargeShare</c> of <paramref name="dealt"/> to the nearest others.</summary>
+        public void Charge(int stacks, float dealt, Team team, GameObject source)
+        {
+            Ready();
+            if (stacks <= 0) return;
+            var c = CombatConfig.Current;
+            int have = ChargeStacks + stacks;
+            chargeUntil = Now + c.chargeSeconds;
+            if (have < c.chargeMaxStacks)
+            {
+                chargeStacks = have;
+                return;
+            }
+            chargeStacks = 0;
+            chargeUntil = 0f;
+            Discharge(dealt * c.dischargeShare, team, source);
+        }
+
+        void Discharge(float amount, Team team, GameObject source)
+        {
+            var c = CombatConfig.Current;
+            Vector2 at = transform.position;
+            VFX.Spawn("hit_lightning", (Vector3)at + Vector3.up * 0.5f, Quaternion.identity, 1.4f);
+            AudioManager.Play("sfx_thunder", 0.5f, 0.1f, at);
+            if (health != null) GameEvents.RaiseWorldText("Phóng Điện!", health.HeadPosition + Vector3.up * 0.3f, Palette.Lightning);
+            if (amount <= 0f) return;
+            Util.HealthsInCircle(at, c.dischargeRadius, team, Nearby);
+            Nearby.Remove(health);
+            Nearby.Sort((a, b) => ((Vector2)a.transform.position - at).sqrMagnitude.CompareTo(((Vector2)b.transform.position - at).sqrMagnitude));
+            int n = Mathf.Min(c.dischargeTargets, Nearby.Count);
+            for (int i = 0; i < n; i++)
+            {
+                var h = Nearby[i];
+                if (h == null || h.IsDead) continue;
+                Vector2 p = h.transform.position;
+                var hit = DamageInfo.Make(amount, team, source, p, p - at, DamageType.Lightning, 1.5f);
+                hit.attackScaled = true;
+                hit.skillName = "Phóng Điện";
+                VFX.Spawn("lightning_strike", p, Quaternion.identity, 0.6f);
+                if (h.TakeDamage(hit) > 0) Combat.OnHitFeedback(h, hit);
+            }
+        }
+
+        /// <summary>Độc: adds stacks (up to 5) and refreshes them.</summary>
+        public void Poison(int stacks, Team team)
+        {
+            Ready();
+            if (stacks <= 0) return;
+            var c = CombatConfig.Current;
+            if (!IsPoisoned)
+            {
+                poisonStacks = 0;
+                nextPoisonTick = Now + c.tickInterval;
+                VFX.Spawn("spore_puff", transform.position + Vector3.up * 0.6f, Quaternion.identity, 0.8f);
+            }
+            poisonStacks = Mathf.Min(c.poisonMaxStacks, poisonStacks + stacks);
+            poisonUntil = Now + c.poisonSeconds;
+            poisonTeam = team;
+        }
+
+        /// <summary>Choáng, with resistance, immunity and diminishing returns.</summary>
         public void Stun(float seconds)
         {
-            if (stunImmune || seconds <= 0) return;
-            seconds *= stunResist;
-            bool wasStunned = IsStunned;
-            stunUntil = Mathf.Max(stunUntil, Time.time + seconds);
-            if (!wasStunned && health != null)
+            Ready();
+            if (stunImmune || seconds <= 0f) return;
+            seconds = CrowdControl(seconds * stunResist);
+            if (seconds > 0f) ApplyStun(seconds);
+        }
+
+        /// <summary>A stun that ignores resistance, immunity and diminishing returns (poise breaks, crashing into a boulder).</summary>
+        public void ForceStun(float seconds)
+        {
+            Ready();
+            if (seconds > 0f) ApplyStun(seconds);
+        }
+
+        void ApplyStun(float seconds)
+        {
+            bool was = Now < stunUntil;
+            stunUntil = Mathf.Max(stunUntil, Now + seconds);
+            if (IsHeavy) ccImmuneUntil = Mathf.Max(ccImmuneUntil, stunUntil + CombatConfig.Current.heavyCrowdControlImmunity);
+            if (!was && health != null)
             {
                 GameEvents.RaiseWorldText("Choáng!", health.HeadPosition + Vector3.up * 0.3f, Palette.Status);
                 AudioManager.Play("sfx_stun", 0.7f, 0.05f, transform.position);
             }
         }
 
-        /// <summary>A stun that ignores resistance and immunity (poise breaks, crashing into a boulder).</summary>
-        public void ForceStun(float seconds)
+        /// <summary>Ends a stun or freeze in progress (Khiên Thánh).</summary>
+        public void ClearStun() => stunUntil = freezeUntil = 0f;
+
+        /// <summary>Trói: cannot move (no dashes either), can still attack and cast.</summary>
+        public void Root(float seconds)
         {
-            float resist = stunResist;
-            bool immune = stunImmune;
-            stunResist = 1f;
-            stunImmune = false;
-            Stun(seconds);
-            stunResist = resist;
-            stunImmune = immune;
+            Ready();
+            if (stunImmune || seconds <= 0f) return;
+            seconds = CrowdControl(seconds);
+            if (seconds <= 0f) return;
+            bool was = IsRooted;
+            rootUntil = Mathf.Max(rootUntil, Now + seconds);
+            if (was) return;
+            if (health != null) GameEvents.RaiseWorldText("Trói!", health.HeadPosition + Vector3.up * 0.3f, Palette.Status);
+            VFX.Spawn("step_dust", transform.position, Quaternion.identity, 1.6f);
         }
 
-        public void ClearStun() => stunUntil = 0;
-
+        /// <summary>Làm Chậm: the strongest slow wins; the longest lasts.</summary>
         public void Slow(float amount, float seconds)
         {
+            Ready();
             slowAmount = Mathf.Max(IsSlowed ? slowAmount : 0f, Mathf.Clamp01(amount));
-            slowUntil = Mathf.Max(slowUntil, Time.time + seconds);
+            slowUntil = Mathf.Max(slowUntil, Now + seconds);
         }
 
-        public void Burn(float dps, float seconds, Team team, bool attackScaled = false)
+        /// <summary>Nguyền: +15% damage taken, −20% damage dealt.</summary>
+        public void Curse(float seconds)
         {
-            burnScaled = attackScaled;
-            burnDps = Mathf.Max(IsBurning ? burnDps : 0f, dps);
-            burnUntil = Mathf.Max(burnUntil, Time.time + seconds);
-            burnTeam = team;
+            Ready();
+            if (seconds <= 0f) return;
+            bool was = IsCursed;
+            curseUntil = Mathf.Max(curseUntil, Now + seconds);
+            if (!was && health != null) GameEvents.RaiseWorldText("Nguyền!", health.HeadPosition + Vector3.up * 0.3f, Palette.Dark);
         }
 
+        /// <summary>Phán Xét: +20% damage taken from every source.</summary>
+        public void Judge(float seconds)
+        {
+            Ready();
+            if (seconds <= 0f) return;
+            bool was = IsJudged;
+            judgmentUntil = Mathf.Max(judgmentUntil, Now + seconds);
+            if (!was && health != null) GameEvents.RaiseWorldText("Phán Xét!", health.HeadPosition + Vector3.up * 0.3f, Palette.Holy);
+        }
+
+        /// <summary>Removes every status (Thuốc Thảo Mộc, respawn).</summary>
         public void Cleanse()
         {
-            stunUntil = slowUntil = burnUntil = 0;
+            stunUntil = freezeUntil = rootUntil = slowUntil = curseUntil = judgmentUntil = 0f;
+            burnUntil = poisonUntil = chillUntil = chargeUntil = 0f;
+            burnStacks.Clear();
+            poisonStacks = chillStacks = chargeStacks = 0;
         }
 
-        void Update()
+        /// <summary>
+        /// The duration hard crowd control really gets: 40% less for each earlier one within the
+        /// last 6 s, none while a boss or elite is immune.
+        /// </summary>
+        float CrowdControl(float seconds)
         {
+            var c = CombatConfig.Current;
+            if (seconds <= 0f || CrowdControlImmune) return 0f;
+            ccRepeats = Now < ccRepeatUntil ? ccRepeats + 1 : 0;
+            ccRepeatUntil = Now + c.crowdControlRepeatWindow;
+            return seconds * Mathf.Pow(c.crowdControlRepeatFactor, ccRepeats);
+        }
+
+        /// <summary>Đẩy Lùi into a wall (the motor reports it): a short stun and a puff of dust.</summary>
+        void OnWallSlam(Vector2 point)
+        {
+            if (health != null && health.IsDead) return;
+            VFX.Spawn("rock_chips", point, Quaternion.identity);
+            VFX.Spawn("step_dust", point, Quaternion.identity, 1.4f);
+            AudioManager.Play("sfx_hit_heavy", 0.6f, 0.1f, point);
+            CameraRig.Shake(0.12f);
+            Stun(CombatConfig.Current.wallSlamStun);
+        }
+
+        // ------------------------------------------------------------------ ticking
+        void Update() => Tick();
+
+        /// <summary>Damage ticks, expiry and visuals. Called every frame (tests call it after moving the clock).</summary>
+        public void Tick()
+        {
+            Ready();
             if (health != null && health.IsDead)
             {
+                // nothing carries over to a revived enemy or a respawned hero
+                Cleanse();
                 SetFx(ref stunFx, "stun_stars", false);
                 SetFx(ref burnFx, "burning", false);
+                SetAnimFrozen(false);
+                wasFrozen = false;
+                if (motor != null) motor.Rooted = false;
                 return;
             }
-            // burn damage ticks
-            if (IsBurning && health != null)
+            var c = CombatConfig.Current;
+            float now = Now;
+            // Bỏng: every tick until the timer, the last one included
+            while (burnStacks.Count > 0 && nextBurnTick <= now && nextBurnTick <= burnUntil + 0.001f && !Dead)
             {
-                burnTick -= Time.deltaTime;
-                if (burnTick <= 0)
-                {
-                    burnTick = 0.5f;
-                    var d = DamageInfo.Make(burnDps * 0.5f, burnTeam, null, transform.position, Vector2.up, DamageType.Fire);
-                    d.attackScaled = burnScaled;
-                    health.TakeDamage(d);
-                }
+                DotTick(BurnDpsRaw() * c.tickInterval, DamageType.Fire, burnTeam);
+                nextBurnTick += c.tickInterval;
             }
-            SetFx(ref stunFx, "stun_stars", IsStunned);
+            if (burnStacks.Count > 0 && now >= burnUntil) burnStacks.Clear();
+            // Độc: a share of max HP per stack
+            while (poisonStacks > 0 && nextPoisonTick <= now && nextPoisonTick <= poisonUntil + 0.001f && !Dead)
+            {
+                float maxHp = health != null ? health.maxHp : 0f;
+                DotTick(maxHp * c.poisonMaxHpPerSecond * poisonStacks * c.tickInterval, DamageType.Poison, poisonTeam);
+                nextPoisonTick += c.tickInterval;
+            }
+            if (poisonStacks > 0 && now >= poisonUntil) poisonStacks = 0;
+
+            bool frozen = IsFrozen;
+            if (wasFrozen && !frozen) AudioManager.Play("sfx_ice_shatter", 0.5f, 0.1f, transform.position);
+            wasFrozen = frozen;
+            if (motor != null) motor.Rooted = IsRooted || frozen;
+            SetFx(ref stunFx, "stun_stars", now < stunUntil);
             SetFx(ref burnFx, "burning", IsBurning);
-            if (flash != null)
+            SetAnimFrozen(frozen);
+            Tint(now);
+        }
+
+        bool Dead => health != null && health.IsDead;
+
+        float BurnDpsRaw()
+        {
+            float sum = 0f;
+            foreach (var s in burnStacks) sum += s;
+            return sum;
+        }
+
+        void DotTick(float amount, DamageType type, Team team)
+        {
+            if (amount <= 0f || health == null) return;
+            var d = DamageInfo.Make(amount, team, null, transform.position, Vector2.up, type);
+            d.attackScaled = true;   // already worked out from a hit or from max HP
+            d.dot = true;
+            health.TakeDamage(d);
+        }
+
+        /// <summary>One tint at a time, the most telling first: frozen, burning, poisoned, chilled or slowed, cursed, judged.</summary>
+        void Tint(float now)
+        {
+            if (flash == null) return;
+            if (IsFrozen) flash.SetTint(Palette.Ice, 0.6f);
+            else if (IsBurning) flash.SetTint(Palette.Fire, 0.18f + 0.1f * Mathf.Sin(now * 18f));
+            else if (IsPoisoned) flash.SetTint(Palette.Poison, 0.2f + 0.08f * Mathf.Sin(now * 6f));
+            else if (ChillStacks > 0) flash.SetTint(Palette.Ice, 0.12f + 0.08f * ChillStacks);
+            else if (IsSlowed) flash.SetTint(Palette.Ice, 0.35f);
+            else if (ChargeStacks > 0) flash.SetTint(Palette.Lightning, 0.12f + 0.12f * Mathf.Abs(Mathf.Sin(now * 25f)));
+            else if (IsCursed) flash.SetTint(Palette.Dark, 0.25f);
+            else if (IsJudged) flash.SetTint(Palette.Holy, 0.25f);
+            else flash.SetTint(Color.white, 0f);
+        }
+
+        /// <summary>A frozen character holds its pose.</summary>
+        void SetAnimFrozen(bool on)
+        {
+            if (anim == null || on == animFrozen) return;
+            animFrozen = on;
+            if (on)
             {
-                if (IsSlowed) flash.SetTint(Palette.Ice, 0.35f);
-                else if (IsBurning) flash.SetTint(Palette.Fire, 0.18f + 0.1f * Mathf.Sin(Time.time * 18f));
-                else flash.SetTint(Color.white, 0f);
+                animSpeedBeforeFreeze = anim.speed;
+                anim.speed = 0f;
             }
+            else anim.speed = animSpeedBeforeFreeze;
         }
 
         void SetFx(ref GameObject fx, string id, bool on)
@@ -127,6 +510,8 @@ namespace RPG
         {
             if (stunFx != null) { VFX.Release(stunFx); stunFx = null; }
             if (burnFx != null) { VFX.Release(burnFx); burnFx = null; }
+            SetAnimFrozen(false);
+            if (motor != null) motor.Rooted = false;
         }
     }
 }

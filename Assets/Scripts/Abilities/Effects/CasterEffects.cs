@@ -16,6 +16,8 @@ namespace RPG
         public string startVfx = "dash_burst";
         public string endVfx = "step_dust";
         public float endVfxScale = 1.5f;
+        [Tooltip("An attack dodged right after the start is a Lướt Hoàn Hảo (casters with a PerfectDodge: the hero).")]
+        public bool perfectDodge = true;
 
         public override void Run(AbilityContext ctx)
         {
@@ -27,6 +29,11 @@ namespace RPG
             if (!string.IsNullOrEmpty(startVfx))
                 VFX.Spawn(startVfx, (Vector3)ctx.CasterPosition + Vector3.up * 0.3f, Quaternion.Euler(0, 0, Util.Angle(dir)));
             ctx.Start(Invulnerable(ctx));
+            if (perfectDodge)
+            {
+                var pd = ctx.caster.Runner.GetComponent<PerfectDodge>();
+                if (pd != null) pd.Open(ctx.ability.icon);
+            }
         }
 
         IEnumerator Invulnerable(AbilityContext ctx)

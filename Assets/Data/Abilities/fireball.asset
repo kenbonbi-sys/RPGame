@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
   id: fireball
   displayName: "C\u1EA7u L\u1EEDa"
-  description: "Ph\xF3ng c\u1EA7u l\u1EEDa n\u1ED5 tung khi tr\xFAng m\u1EE5c ti\xEAu, thi\xEAu \u0111\u1ED1t k\u1EBB \u0111\u1ECBch trong 3 gi\xE2y."
+  description: "Ph\xF3ng c\u1EA7u l\u1EEDa n\u1ED5 tung khi tr\xFAng m\u1EE5c ti\xEAu, g\xE2y 1 t\u1EA7ng B\u1ECFng: \u0111\u1ED1t 30% s\xE1t th\u01B0\u01A1ng m\u1ED7i gi\xE2y trong 3 gi\xE2y."
   icon: {fileID: -675067362, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
   tags: 2050
   cooldown: 3
@@ -22,6 +22,7 @@ MonoBehaviour:
   targeting: 0
   maxRange: 12
   lockTime: 0.3
+  commitTime: 0.15
   animBase: cast
   moveWhileCasting: 0.25
   castSfx: sfx_fireball_cast
@@ -77,11 +78,17 @@ MonoBehaviour:
           knockback: 3
           poise: 12
           hitStop: 0
-          stun: 0
-          slow: 0
-          slowDuration: 2
-          burnPower: 0.33
-          burnDuration: 3
+          status:
+            burn: 1
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
         hitVfx: fire_explosion
         hitSfx: sfx_fireball_explode
         hitShake: 0.28

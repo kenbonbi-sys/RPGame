@@ -184,11 +184,17 @@ MonoBehaviour:
   damageType: 0
   explodeRadius: 0
   knockback: 3
-  stun: 0
-  slow: 0
-  slowDuration: 0
-  burnDps: 0
-  burnDuration: 0
+  status:
+    burn: 0
+    chill: 0
+    charge: 0
+    poison: 0
+    stun: 0
+    root: 0
+    slow: 0
+    slowDuration: 0
+    curse: 0
+    judgment: 0
   critChance: 0.1
   hitVfx: hit_spark
   hitSfx: sfx_hit

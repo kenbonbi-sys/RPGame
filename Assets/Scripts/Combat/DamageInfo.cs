@@ -12,17 +12,15 @@ namespace RPG
         public Vector2 direction;
         public float knockback;
         public bool crit;
-        public float stun;
-        public float slow;        // 0..1 speed reduction
-        public float slowDuration;
-        public float burnDps;
-        public float burnDuration;
+        public StatusHit status;   // Bỏng, Lạnh, Tích Điện, Độc, Choáng, Trói, Làm Chậm, Nguyền, Phán Xét
         public float hitStop;
         public float poise;        // Thanh Trấn Áp damage (bosses, elites)
         public string skillName;   // shown in logs
         public int sourceLevel;    // attacker level for armor; 0 = read it from the source's Health
         public bool attackScaled;  // amount already includes the attacker's Attack (abilities)
         public bool pure;          // skips armor, resistances, damage-taken multipliers and the random spread (Kill, scripts)
+        public bool contact;       // bumping into an enemy's body, not an attack: Lướt Hoàn Hảo ignores it
+        public bool dot;           // a damage-over-time tick (Bỏng, Độc), not an attack either
 
         public static DamageInfo Make(float amount, Team team, GameObject source, Vector2 point, Vector2 dir,
                                       DamageType type = DamageType.Physical, float knockback = 0f)
