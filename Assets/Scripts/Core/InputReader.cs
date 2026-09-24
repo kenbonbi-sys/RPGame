@@ -64,6 +64,7 @@ namespace RPG
         public static bool ToggleQuest => Pressed(Key.Tab);
         public static bool ToggleHelp => Pressed(Key.F1) || Pressed(Key.H);
         public static bool ToggleJournal => Pressed(Key.J);
+        public static bool ToggleCharacter => Pressed(Key.C);
         public static bool Cancel => Pressed(Key.Escape);
         public static bool Advance => Pressed(Key.F) || Pressed(Key.Space) || Pressed(Key.Enter) || LeftPressed;
 

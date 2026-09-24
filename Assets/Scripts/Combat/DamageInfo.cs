@@ -19,6 +19,7 @@ namespace RPG
         public float burnDuration;
         public float hitStop;
         public string skillName;   // shown in logs
+        public int sourceLevel;    // attacker level for armor; 0 = read it from the source's Health
 
         public static DamageInfo Make(float amount, Team team, GameObject source, Vector2 point, Vector2 dir,
                                       DamageType type = DamageType.Physical, float knockback = 0f)
@@ -35,13 +36,23 @@ namespace RPG
             };
         }
 
-        /// <summary>Rolls a crit (x1.8) with the given chance.</summary>
+        /// <summary>
+        /// Rolls a crit. The hero adds the Agility bonus to the skill's chance and uses the
+        /// crit multiplier from the stats; everyone else crits for ×1.8.
+        /// </summary>
         public DamageInfo RollCrit(float chance)
         {
-            if (Random.value < chance)
+            float mult = 1.8f;
+            var stats = sourceTeam == Team.Player ? PlayerStats.I : null;
+            if (stats != null)
+            {
+                chance = stats.CritChance(chance);
+                mult = stats.CritMultiplier;
+            }
+            if (chance > 0 && Random.value < chance)
             {
                 crit = true;
-                amount *= 1.8f;
+                amount *= mult;
             }
             return this;
         }

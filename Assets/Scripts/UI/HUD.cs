@@ -25,6 +25,8 @@ namespace RPG
         public PauseMenuUI pause;
         public DeathScreenUI death;
         public JournalUI journal;
+        public CharacterUI character;
+        public XpBarUI xpBar;
 
         [Header("World-anchored UI")]
         public RectTransform worldLayer;

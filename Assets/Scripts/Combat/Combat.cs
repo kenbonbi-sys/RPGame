@@ -19,7 +19,7 @@ namespace RPG
                 d.point = h.transform.position;
                 Vector2 away = (Vector2)h.transform.position - center;
                 d.direction = away.sqrMagnitude > 0.001f ? away.normalized : template.direction;
-                if (critChance > 0) d = d.RollCrit(critChance);
+                d = d.RollCrit(critChance);
                 if (h.TakeDamage(d) > 0)
                 {
                     n++;
@@ -38,7 +38,7 @@ namespace RPG
                 var d = template;
                 d.point = h.transform.position;
                 d.direction = ((Vector2)h.transform.position - origin).normalized;
-                if (critChance > 0) d = d.RollCrit(critChance);
+                d = d.RollCrit(critChance);
                 if (h.TakeDamage(d) > 0)
                 {
                     n++;

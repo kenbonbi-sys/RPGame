@@ -524,7 +524,7 @@ namespace RPG
             yield return new WaitForSecondsRealtime(1.2f);
             Loot.Roll(loot, Pos);
             Loot.DropCoins(Pos, 12);
-            GameEvents.RaiseEnemyKilled(bossId);
+            GameEvents.RaiseEnemyKilled(new KillInfo { id = bossId, name = displayName, level = level, rank = EnemyRank.Boss, position = Pos });
             Bestiary.RecordKill(bossId, displayName);
             if (HUD.I != null)
             {

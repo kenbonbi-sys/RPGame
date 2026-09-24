@@ -22,6 +22,12 @@ namespace RPG
         public int slimeGoal = 4, shroomGoal = 2, capGoal = 3;
         public int slimes, shrooms;
 
+        [Header("XP rewards")]
+        public int xpTalkToChief = 20;
+        public int xpClearForest = 120;
+        public int xpSlayBoss = 400;
+        public int xpMushrooms = 80;
+
         /// <summary>Which tracked quest is shown first in the HUD (Tab cycles).</summary>
         public int focus;
 
@@ -194,7 +200,7 @@ namespace RPG
             {
                 if (main == Main.TalkToChief)
                 {
-                    Complete("Lời Nhờ Của Trưởng Làng");
+                    Complete("Lời Nhờ Của Trưởng Làng", xpTalkToChief);
                     Inventory.I.Add(db.Item("potion_red"), 2);
                     Inventory.I.Add(db.Item("potion_blue"), 1);
                     main = Main.ClearForest;
@@ -202,7 +208,7 @@ namespace RPG
                 }
                 else if (main == Main.ReportBack)
                 {
-                    Complete("Gấu Ma Rừng Già");
+                    Complete("Gấu Ma Rừng Già", xpSlayBoss);
                     Inventory.I.Add(db.Item("gold"), 1);
                     Inventory.I.Add(db.Item("ring"), 1);
                     Inventory.I.Add(db.Item("potion_red"), 3);
@@ -223,21 +229,22 @@ namespace RPG
                     Inventory.I.Remove(db.Item("shroom_cap"), capGoal);
                     Inventory.I.Add(db.Item("potion_green"), 3);
                     side = Side.Done;
-                    Complete("Nấm Cho Bé Mai");
+                    Complete("Nấm Cho Bé Mai", xpMushrooms);
                 }
             }
             GameEvents.RaiseQuestChanged();
         }
 
-        void OnKilled(string id)
+        void OnKilled(KillInfo k)
         {
+            string id = k.id;
             if (main == Main.ClearForest)
             {
                 if (id == "slime") slimes++;
                 if (id == "shroom") shrooms++;
                 if (slimes >= slimeGoal && shrooms >= shroomGoal)
                 {
-                    Complete("Dọn Dẹp Rừng Thì Thầm");
+                    Complete("Dọn Dẹp Rừng Thì Thầm", xpClearForest);
                     main = Main.SlayBoss;
                     Begin("Gấu Ma Rừng Già");
                 }
@@ -263,9 +270,10 @@ namespace RPG
             AudioManager.Play("sfx_quest", 0.8f, 0f);
         }
 
-        void Complete(string title)
+        void Complete(string title, int xp)
         {
-            GameEvents.RaiseLog($"Hoàn thành: {title}", Palette.LogQuest);
+            GameEvents.RaiseLog(xp > 0 ? $"Hoàn thành: {title} (+{xp} XP)" : $"Hoàn thành: {title}", Palette.LogQuest);
+            if (PlayerStats.I != null) PlayerStats.I.AddXp(xp);
             AudioManager.Play("sfx_levelup", 0.7f, 0f);
             var p = GameManager.I.player;
             if (p != null) VFX.Spawn("quest_complete", p.transform.position, Quaternion.identity, 1f, p.transform);

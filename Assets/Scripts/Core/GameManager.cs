@@ -92,6 +92,7 @@ namespace RPG
             {
                 if (hud.inventory != null && hud.inventory.IsOpen) hud.inventory.Close();
                 else if (hud.journal != null && hud.journal.IsOpen) hud.journal.Close();
+                else if (hud.character != null && hud.character.IsOpen) hud.character.Close();
                 else if (hud.help != null && hud.help.IsOpen) hud.help.Close();
                 else if (!dialogue && hud.pause != null) hud.pause.Toggle();
             }
@@ -99,6 +100,7 @@ namespace RPG
             if (InputReader.ToggleHelp && hud.help != null) hud.help.Toggle();
             if (InputReader.ToggleBag && hud.inventory != null) hud.inventory.Toggle();
             if (InputReader.ToggleJournal && hud.journal != null) hud.journal.Toggle();
+            if (InputReader.ToggleCharacter && hud.character != null) hud.character.Toggle();
             if (InputReader.ToggleQuest && QuestSystem.I != null) QuestSystem.I.CycleFocus();
         }
 

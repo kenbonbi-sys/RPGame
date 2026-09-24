@@ -34,7 +34,8 @@ namespace RPG.EditorTools
             ConfigureAudio();
             var items = CreateItems();
             var skills = CreateSkills();
-            CreateDatabase(items, skills);
+            var progression = CreateProgression();
+            CreateDatabase(items, skills, progression);
             CreateAudioLibrary();
             AssetDatabase.SaveAssets();
         }
@@ -382,8 +383,28 @@ namespace RPG.EditorTools
             };
         }
 
+        // ------------------------------------------------------------------ progression
+        /// <summary>Assets/Data/Progression.asset with the default numbers of plan §05.</summary>
+        static ProgressionConfig CreateProgression()
+        {
+            string path = DataFolder + "/Progression.asset";
+            var c = AssetDatabase.LoadAssetAtPath<ProgressionConfig>(path);
+            if (EditorUtil.Keep(c)) return c;
+            EditorUtil.Written++;
+            var fresh = ScriptableObject.CreateInstance<ProgressionConfig>();
+            if (c == null)
+            {
+                AssetDatabase.CreateAsset(fresh, path);
+                return fresh;
+            }
+            EditorUtility.CopySerialized(fresh, c);
+            Object.DestroyImmediate(fresh);
+            EditorUtility.SetDirty(c);
+            return c;
+        }
+
         // ------------------------------------------------------------------ database
-        static void CreateDatabase(List<ItemDef> items, List<SkillDef> skills)
+        static void CreateDatabase(List<ItemDef> items, List<SkillDef> skills, ProgressionConfig progression)
         {
             string path = DataFolder + "/GameDatabase.asset";
             var db = AssetDatabase.LoadAssetAtPath<GameDatabase>(path);
@@ -395,6 +416,7 @@ namespace RPG.EditorTools
             // authoring mode appends missing entries and keeps whatever was added or re-pointed by hand
             db.items = Merge(db.items, items);
             db.skills = Merge(db.skills, skills);
+            EditorUtil.Assign(ref db.progression, progression);
             EditorUtil.Assign(ref db.shadowSprite, ArtImporter.S("shadow"));
             EditorUtil.Assign(ref db.whiteSprite, ArtImporter.S("white"));
             EditorUtil.Assign(ref db.starIcon, ArtImporter.S("icon_star"));

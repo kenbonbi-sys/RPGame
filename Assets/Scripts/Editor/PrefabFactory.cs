@@ -33,11 +33,24 @@ namespace RPG.EditorTools
             Boulder = BuildBoulder();
             Loot = BuildLoot();
             BuildProps();
+            UpgradePrefabs();
             var db = AssetFactory.Database;
             EditorUtil.Assign(ref db.boulderPrefab, Boulder);
             EditorUtil.Assign(ref db.lootPrefab, Loot);
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>Adds components introduced after the prefabs were first generated, keeping hand edits.</summary>
+        static void UpgradePrefabs()
+        {
+            EditorUtil.UpgradePrefab($"{CharFolder}/Player.prefab", root =>
+            {
+                var pc = root.GetComponent<PlayerController>();
+                if (pc == null || root.GetComponent<PlayerStats>() != null) return false;
+                pc.stats = root.AddComponent<PlayerStats>();
+                return true;
+            });
         }
 
         /// <summary>Loads the generated prefabs from disk (used when only the scene is rebuilt).</summary>

@@ -15,6 +15,7 @@ namespace RPG
         public event Action<int, string> SkillFailed;
 
         readonly float[] readyAt = new float[8];
+        readonly float[] cooldownOf = new float[8];   // cooldown the slot was started with (after stats)
         float gcdUntil;
         PlayerController pc;
         float lastFailMsg;
@@ -26,8 +27,9 @@ namespace RPG
         public float Fraction(int i)
         {
             var s = slots[i];
-            if (s == null || s.cooldown <= 0) return 0;
-            return Mathf.Clamp01(Remaining(i) / s.cooldown);
+            float cd = cooldownOf[i] > 0 ? cooldownOf[i] : s != null ? s.cooldown : 0;
+            if (cd <= 0) return 0;
+            return Mathf.Clamp01(Remaining(i) / cd);
         }
 
         public bool CanAfford(int i) => slots[i] != null && pc.energy >= slots[i].energyCost;
@@ -65,7 +67,8 @@ namespace RPG
                 team = Team.Player
             };
             pc.energy -= s.energyCost;
-            readyAt[i] = Time.time + s.cooldown;
+            cooldownOf[i] = s.cooldown * (PlayerStats.I != null ? PlayerStats.I.CooldownMultiplier(i, s) : 1f);
+            readyAt[i] = Time.time + cooldownOf[i];
             gcdUntil = Time.time + globalCooldown;
             pc.BeginAction(s.animBase, ctx.dir, s.lockTime, s.moveWhileCasting);
             if (!string.IsNullOrEmpty(s.castSfx)) AudioManager.Play(s.castSfx, 0.9f, 0.06f);

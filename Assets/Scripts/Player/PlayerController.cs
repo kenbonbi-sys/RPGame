@@ -28,6 +28,7 @@ namespace RPG
         public AfterImageSpawner afterImages;
         public SpriteRenderer body;
         public PlayerSkills skills;
+        public PlayerStats stats;
 
         [Header("Stats")]
         public float maxEnergy = 63f;
@@ -65,6 +66,8 @@ namespace RPG
             if (health == null) health = GetComponent<Health>();
             if (status == null) status = GetComponent<StatusEffects>();
             if (skills == null) skills = GetComponent<PlayerSkills>();
+            if (stats == null) stats = GetComponent<PlayerStats>();
+            if (stats == null) stats = gameObject.AddComponent<PlayerStats>();   // prefabs made before stats existed
             health.Damaged += OnDamaged;
             health.Died += OnDied;
             if (anim != null) anim.FrameChanged += OnFrame;

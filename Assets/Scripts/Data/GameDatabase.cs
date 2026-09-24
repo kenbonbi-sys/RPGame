@@ -9,6 +9,7 @@ namespace RPG
     {
         public List<ItemDef> items = new List<ItemDef>();
         public List<SkillDef> skills = new List<SkillDef>();
+        public ProgressionConfig progression;
 
         [Header("Shared sprites")]
         public Sprite shadowSprite;

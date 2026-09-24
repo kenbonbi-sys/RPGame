@@ -11,6 +11,7 @@ namespace RPG
         public string enemyId = "slime";
         public string displayName = "Slime Rêu";
         public int level = 2;
+        public EnemyRank rank = EnemyRank.Normal;
 
         [Header("Stats")]
         public float maxHp = 60f;
@@ -222,7 +223,7 @@ namespace RPG
             foreach (var c in colliders) c.enabled = false;
             if (anim != null) anim.Play("dead", true);
             Loot.Roll(loot, transform.position);
-            GameEvents.RaiseEnemyKilled(enemyId);
+            GameEvents.RaiseEnemyKilled(new KillInfo { id = enemyId, name = displayName, level = level, rank = rank, position = transform.position });
             Bestiary.RecordKill(enemyId, displayName);
             VFX.Spawn("enemy_death", transform.position + Vector3.up * 0.4f, Quaternion.identity);
             if (plate != null)

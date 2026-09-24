@@ -92,6 +92,30 @@ namespace RPG.EditorTools
             return prefab;
         }
 
+        /// <summary>
+        /// Opens an existing prefab, lets <paramref name="upgrade"/> add what newer code needs
+        /// (returns true when it changed something) and saves it. Works in both modes, so prefabs
+        /// kept by authoring mode still pick up new components.
+        /// </summary>
+        public static void UpgradePrefab(string path, System.Func<GameObject, bool> upgrade)
+        {
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null) return;
+            var root = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                if (upgrade(root))
+                {
+                    PrefabUtility.SaveAsPrefabAsset(root, path);
+                    Written++;
+                    Debug.Log("[RPG] Upgraded prefab " + path);
+                }
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
         public static GameObject Child(GameObject parent, string name, Vector3 localPos = default)
         {
             var go = new GameObject(name);

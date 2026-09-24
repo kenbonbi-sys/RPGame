@@ -15,6 +15,10 @@ namespace RPG
         public Transform head;
         [Tooltip("Multiplies incoming damage (shields lower it).")]
         public float damageTakenMultiplier = 1f;
+        [Tooltip("Reduces incoming damage: armor / (armor + 50 + 5 × attacker level).")]
+        public float armor;
+        [Tooltip("0..0.75 — reduces every non-physical damage type.")]
+        public float elementalResist;
         public bool invulnerable;
         public bool showDamageNumbers = true;
 
@@ -52,7 +56,12 @@ namespace RPG
         public float TakeDamage(DamageInfo d)
         {
             if (IsDead || invulnerable || !CanBeDamagedBy(d.sourceTeam)) return 0f;
-            float amount = Mathf.Max(1f, Mathf.Round(d.amount * damageTakenMultiplier));
+            float raw = d.amount * damageTakenMultiplier;
+            // the hero's attributes scale every damage instance it deals exactly once, here
+            if (d.sourceTeam == Team.Player && PlayerStats.I != null) raw *= PlayerStats.I.DamageScale(d.type);
+            if (armor > 0) raw *= 1f - ProgressionConfig.Current.ArmorReduction(armor, AttackerLevel(d));
+            if (elementalResist > 0 && d.type != DamageType.Physical) raw *= 1f - elementalResist;
+            float amount = Mathf.Max(1f, Mathf.Round(raw));
             hp = Mathf.Max(0f, hp - amount);
             LastDamageTime = Time.time;
 
@@ -73,6 +82,13 @@ namespace RPG
                 GameEvents.RaiseDied(this);
             }
             return amount;
+        }
+
+        int AttackerLevel(DamageInfo d)
+        {
+            if (d.sourceLevel > 0) return d.sourceLevel;
+            var src = d.source != null ? d.source.GetComponentInParent<Health>() : null;
+            return src != null ? src.level : level;
         }
 
         public void Heal(float amount, bool showText = true)

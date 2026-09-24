@@ -17,7 +17,7 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 | **Space** | Lướt (bất tử trong chốc lát, dùng để né vòng đỏ) |
 | **1 2 3** | Bình Máu · Bình Năng Lượng · Thuốc Thảo Mộc |
 | **F** | Nói chuyện với NPC |
-| **B / I** · **J** · **Tab** | Túi đồ · Bách Khoa Trùm · Đổi nhiệm vụ đang theo dõi |
+| **B / I** · **C** · **J** · **Tab** | Túi đồ · Nhân vật (phân bổ điểm) · Bách Khoa Trùm · Đổi nhiệm vụ đang theo dõi |
 | **F1** · **Esc** | Hướng dẫn · Tạm dừng |
 | **F5–F9** (cheat) | Hồi đầy · Tua giờ · Tới boss · Về làng · Hạ quái gần |
 
@@ -25,6 +25,7 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 
 - **Bản đồ** 100×64 tile: Làng Lá Xanh → Rừng Thì Thầm (đường đất, cỏ rậm, 5 bãi quái) → đấu trường Rừng Già Cổ Thụ (cột đá cổ, Tảng Đá Lớn). Có vùng + tên khu vực, minimap, chu kỳ ngày/đêm (đèn 2D: lửa trại, đèn lồng, cửa sổ nhà, ánh sáng quanh nhân vật).
 - **Người chơi:** 4 hướng, animation idle/walk/attack/cast/dash/hurt/dead, 8 skill có VFX riêng, combo chém 3 đòn, crit, hit-stop, rung màn hình.
+- **Cấp độ & chỉ số:** cấp 1–40, XP từ quái (theo cấp và bậc quái) và nhiệm vụ; mỗi cấp +3 điểm chỉ số cho Sức Mạnh, Trí Tuệ, Nhanh Nhẹn, Thể Chất (bảng C). Mọi con số nằm trong `Assets/Data/Progression.asset`.
 - **Quái:** Slime Rêu (nhảy lao tới), Nấm Độc (bắn bào tử làm chậm). Có AI tuần tra / đuổi / quay về, rớt đồ, hồi sinh theo bãi.
 - **Boss Gấu Ma Rừng Già (Cấp 6):** Vồ, **Dậm Đất** (choáng), **Ném Đá Lớn** (đá rơi xuống thành *★ Tảng Đá Lớn* phá được), **Chụp Quăng** (nhảy vồ; đáp trúng Tảng Đá Lớn thì boss bị **Choáng!**), **Cuồng Nộ** khi dưới 50% máu. Mỗi chiêu có vòng cảnh báo trên đất và hiện "Kỹ năng: …" trên đầu boss.
 - **Bách Khoa Trùm:** tự ghi lại quái và kỹ năng boss lần đầu gặp (hiện ở log bên trái, xem đầy đủ bằng phím J).
