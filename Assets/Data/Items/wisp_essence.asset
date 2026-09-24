@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: wisp_essence
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: wisp_essence
+  displayName: "Tinh Ch\u1EA5t Ma Tr\u01A1i"
+  description: "M\u1ED9t \u0111\u1ED1m l\u1EEDa l\u1EA1nh nh\u1ED1t trong b\xECnh, kh\xF4ng bao gi\u1EDD t\u1EAFt."
+  icon: {fileID: 768498548, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 1
+  maxStack: 99
+  value: 18
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: watersnake
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: -1821526862, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: -1585646467, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: 1148279867, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    fps: 4
+    loop: 1
+  - name: move
+    frames:
+    - {fileID: -857215851, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: 758520963, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: 2096599164, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: -1374516210, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    fps: 8
+    loop: 1
+  - name: windup
+    frames:
+    - {fileID: -660096804, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: -1386123247, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    fps: 8
+    loop: 1
+  - name: attack
+    frames:
+    - {fileID: -548782999, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: -1628310793, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    fps: 10
+    loop: 0
+  - name: hidden
+    frames:
+    - {fileID: 2098175573, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: -1470883222, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    fps: 3
+    loop: 1
+  - name: hurt
+    frames:
+    - {fileID: 1691758317, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: 572763778, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    - {fileID: 212032664, guid: d92859ba264b5004c9ce777dff6bf469, type: 3}
+    fps: 5
+    loop: 0

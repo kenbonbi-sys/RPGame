@@ -9,7 +9,7 @@ namespace RPG
     /// <summary>
     /// Top-right minimap. The map texture is generated from the tilemaps at start (the world map,
     /// M, shows the same texture whole); markers (player, NPCs, enemies, boss, woken Đá Truyền
-    /// Tống, quest objective) are UI images.
+    /// Tống, quest objective) are UI images. In the swamp's mist it shows less around the hero.
     /// </summary>
     public class MinimapUI : MonoBehaviour
     {
@@ -50,6 +50,9 @@ namespace RPG
         readonly List<(Transform t, MarkerKind k, RectTransform icon)> markers = new List<(Transform, MarkerKind, RectTransform)>();
         RectTransform objectiveMarker;
         Texture2D tex;
+
+        /// <summary>How much of the full view the map shows in a mist of 0–1 (a thick mist: about 60%).</summary>
+        public static float ViewScale(float mist) => 1f - Mathf.Clamp01(mist) * 0.45f;
 
         public static void Register(Transform t, MarkerKind kind)
         {
@@ -173,7 +176,9 @@ namespace RPG
             var p = Players.Local;
             if (p == null || map == null) return;
             Vector2 pp = p.transform.position;
-            float vx = viewTiles.x, vy = viewTiles.y;
+            // the swamp's mist closes in around the hero: the map shows less (plan §10)
+            float view = ViewScale(DayNightCycle.Mist);
+            float vx = viewTiles.x * view, vy = viewTiles.y * view;
             float ox = Mathf.Clamp(pp.x - vx * 0.5f, 0, worldSize.x - vx);
             float oy = Mathf.Clamp(pp.y - vy * 0.5f, 0, worldSize.y - vy);
             map.uvRect = new Rect(ox / worldSize.x, oy / worldSize.y, vx / worldSize.x, vy / worldSize.y);

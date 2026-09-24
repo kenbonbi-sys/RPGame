@@ -755,9 +755,69 @@ def icon_lotus():
     return _done(cv)
 
 
+def icon_wsnake_skin():
+    """Da Rắn Nước: a shed skin, a pale olive coil with dark bands."""
+    cv = _icon()
+    g = ramp("#1f3616", "#2c4a1c", "#3e6224", "#557c2e", "#72983c", "#9ab86a")
+    for i in range(34):
+        t = i / 33
+        ang = t * math.tau * 1.25
+        rr = 5.8 - t * 3.2
+        x = 8 + math.cos(ang) * rr
+        y = 8.5 + math.sin(ang) * rr * 0.8
+        w = 1.6 - t * 0.6
+        shaded_ellipse(cv, x, y, w, w, g, dither=0.25, bias=0.1)
+        if i % 5 == 2:
+            cv.px(int(x), int(y), hx("#101810"))
+    cv.px(8, 8, hx("#d6ba5e"))
+    return _done(cv)
+
+
+def icon_dragonfly_wing():
+    """Cánh Chuồn Chuồn: a long clear wing with a lacework of veins."""
+    cv = _icon()
+    ax, ay, bx, by = 2.5, 12.5, 13.5, 3.0
+    vx, vy = bx - ax, by - ay
+    L2 = vx * vx + vy * vy
+    L = math.sqrt(L2)
+    for y in range(16):
+        for x in range(16):
+            px_, py_ = x + 0.5, y + 0.5
+            t = ((px_ - ax) * vx + (py_ - ay) * vy) / L2
+            if t < 0 or t > 1:
+                continue
+            d = ((px_ - ax) * vy - (py_ - ay) * vx) / L
+            half = 3.2 * math.sin(math.pi * min(1.0, t * 1.05)) ** 0.5
+            if abs(d) > half:
+                continue
+            if abs(d) < 0.55 or (x + y) % 4 == 0 and abs(d) < half - 0.6:
+                cv.px(x, y, hx("#6a94b4"))
+            else:
+                cv.px(x, y, hx("#d8f0ff") if d < 0 else hx("#b0d6ee"))
+    cv.px(12, 4, hx("#1c3a5a"))
+    cv.px(3, 12, hx("#1f74a4")); cv.px(2, 13, hx("#1f74a4"))
+    return _done(cv)
+
+
+def icon_wisp_essence():
+    """Tinh Chất Ma Trơi: a stoppered phial holding a cold blue flame."""
+    cv = _icon()
+    glass = ramp("#141c34", "#243a5c", "#46688c", "#9cc4de")
+    shaded_ellipse(cv, 8, 10, 4.6, 4.4, glass, dither=0.2, bias=-0.1)
+    w = ramp("#1f64b4", "#26a0d4", "#5ad6e8", "#b4f6f2", "#ffffff")
+    shaded_ellipse(cv, 8, 11, 2.6, 2.3, w, dither=0.2, bias=0.1)
+    cv.px(8, 8, w[2]); cv.px(8, 7, w[1]); cv.px(9, 9, w[3]); cv.px(7, 9, w[2])
+    for x in range(7, 10):
+        cv.px(x, 4, hx("#7a5234")); cv.px(x, 3, hx("#a0704a"))
+        cv.px(x, 5, glass[1])
+    cv.px(6, 8, glass[3])
+    return _done(cv)
+
+
 def icons():
     return [
         ("toad_skin", icon_toad_skin()), ("poison_gland", icon_poison_gland()), ("leech_tooth", icon_leech_tooth()),
         ("mud_core", icon_mud_core()), ("toad_crown", icon_toad_crown()), ("snake_scale", icon_snake_scale()),
         ("snake_fang", icon_snake_fang()), ("venom_sac", icon_venom_sac()), ("lotus", icon_lotus()),
+        ("wsnake_skin", icon_wsnake_skin()), ("dragonfly_wing", icon_dragonfly_wing()), ("wisp_essence", icon_wisp_essence()),
     ]

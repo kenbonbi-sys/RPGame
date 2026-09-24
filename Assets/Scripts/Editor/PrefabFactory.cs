@@ -18,7 +18,7 @@ namespace RPG.EditorTools
 
         public static GameObject Player, NetHero, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
         // Đầm Lầy Sương Mù
-        public static GameObject Toad, Leech, MudMan, Mudling, ToadKing, Snake;
+        public static GameObject Toad, Leech, MudMan, Mudling, ToadKing, Snake, WaterSnake, Dragonfly, Wisp;
 
         /// <summary>Abilities on Q W E R A S D Space.</summary>
         static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
@@ -41,6 +41,9 @@ namespace RPG.EditorTools
             Mudling = BuildMudling();
             ToadKing = BuildToadKing();
             Snake = BuildSnake();
+            WaterSnake = BuildWaterSnake();
+            Dragonfly = BuildDragonfly();
+            Wisp = BuildWisp();
             Boulder = BuildBoulder();
             Loot = BuildLoot();
             BuildProps();
@@ -217,6 +220,9 @@ namespace RPG.EditorTools
             Mudling = L($"{CharFolder}/Mudling");
             ToadKing = L($"{CharFolder}/BossToadKing");
             Snake = L($"{CharFolder}/BossSnakeMother");
+            WaterSnake = L($"{CharFolder}/WaterSnake");
+            Dragonfly = L($"{CharFolder}/Dragonfly");
+            Wisp = L($"{CharFolder}/Wisp");
             Boulder = L($"{GameplayFolder}/TangDaLon");
             Loot = L($"{GameplayFolder}/Loot");
             Props.Clear();
@@ -659,6 +665,116 @@ namespace RPG.EditorTools
             ai.aggroRange = 7f;
             ai.loot = new List<LootEntry> { Drop("coin", 0.5f, 1, 2) };
             return EditorUtil.SavePrefab(root, $"{CharFolder}/Mudling.prefab");
+        }
+
+        static GameObject BuildWaterSnake()
+        {
+            // no shadow: it lives in the water
+            var (root, body) = Creature("WaterSnake", "watersnake_idle_0", 0.7f, 0.34f, 0.2f, 3.4f, true, 0f);
+            var ai = root.AddComponent<WaterSnakeAI>();
+            EnemyCommon(root, ai, body, "watersnake", 1f, 110f);
+            root.GetComponent<Health>().resistances.poison = 0.5f;
+            ai.style = Style(root, body);
+            ai.enemyId = "watersnake";
+            ai.displayName = "Rắn Nước";
+            ai.level = 10;
+            ai.contactDamage = 0f;
+            ai.attackRange = 1f;
+            ai.attackCooldown = 2.6f;
+            ai.aggroRange = 5.5f;
+            ai.leashRange = 9f;
+            ai.wanderRadius = 1.2f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("wsnake_skin", 0.5f), Drop("venom_sac", 0.08f), Drop("coin", 0.85f, 2, 5), Drop("potion_green", 0.05f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/WaterSnake.prefab");
+        }
+
+        /// <summary>
+        /// A flying or floating creature: its body is a trigger (hit by attacks, in nobody's way,
+        /// over water and reeds) and its sprite hangs above the ground on a bobbing child.
+        /// </summary>
+        static (GameObject root, SpriteRenderer body, GameObject air) Flyer(string name, string firstFrame, float mass, float radius, float colliderY,
+                                                                          float speed, float height, float bob, float bobSpeed, float shadow, Material mat)
+        {
+            var root = new GameObject(name);
+            root.layer = Layers.Enemy;
+            Group(root);
+            Body(root, mass);
+            var col = root.AddComponent<CircleCollider2D>();
+            col.radius = radius;
+            col.offset = new Vector2(0, colliderY);
+            col.isTrigger = true;
+            var motor = root.AddComponent<CharacterMotor>();
+            motor.moveSpeed = speed;
+            motor.slowedByWater = false;
+            root.AddComponent<Health>();
+            root.AddComponent<StatusEffects>();
+            if (shadow > 0f) Shadow(root, shadow);
+            var air = EditorUtil.Child(root, "Air", new Vector3(0, height, 0));
+            var b = air.AddComponent<Bobber>();
+            b.amplitude = bob;
+            b.speed = bobSpeed;
+            var body = Sprite(air, "Body", firstFrame, mat);
+            return (root, body, air);
+        }
+
+        static GameObject BuildDragonfly()
+        {
+            var (root, body, air) = Flyer("Dragonfly", "dragonfly_idle_0", 0.3f, 0.42f, 0.75f, 4.2f, 0.55f, 0.1f, 6f, 0.6f, AssetFactory.SpriteLit);
+            root.GetComponent<CharacterMotor>().acceleration = 60f;
+            var ai = root.AddComponent<DragonflyAI>();
+            EnemyCommon(root, ai, body, "dragonfly", 1.7f, 80f);
+            ai.flight = air.transform;
+            ai.style = Style(root, body);
+            ai.enemyId = "dragonfly";
+            ai.displayName = "Chuồn Chuồn Kim";
+            ai.level = 9;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 2.2f;
+            ai.aggroRange = 7f;
+            ai.leashRange = 14f;
+            ai.wanderRadius = 3f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("dragonfly_wing", 0.55f), Drop("coin", 0.8f, 2, 4), Drop("potion_blue", 0.06f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Dragonfly.prefab");
+        }
+
+        static GameObject BuildWisp()
+        {
+            // unlit: a light of its own in the dark swamp night
+            var (root, body, air) = Flyer("Wisp", "wisp_idle_0", 0.2f, 0.4f, 0.8f, 3.6f, 0.25f, 0.12f, 2.4f, 0f, AssetFactory.SpriteUnlit);
+            air.GetComponent<Bobber>().pulse = 0.03f;
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.5f;
+            var ai = root.AddComponent<WispAI>();
+            EnemyCommon(root, ai, body, "wisp", 1.9f, 70f);
+            var h = root.GetComponent<Health>();
+            h.resistances.physical = 0.25f;   // a flame: blades pass half through it
+            h.resistances.ice = 0.5f;
+            h.resistances.holy = -0.3f;
+            ai.glow = PointLight(air, new Color(0.45f, 0.85f, 1f), 3.2f, 1.2f, new Vector3(0, 0.6f, 0));
+            var nl = ai.glow.gameObject.AddComponent<NightLight>();
+            nl.target = ai.glow;
+            nl.dayIntensity = 0.5f;
+            nl.nightIntensity = 1.3f;
+            nl.flicker = 0.25f;
+            nl.flickerSpeed = 5f;
+            ai.enemyId = "wisp";
+            ai.displayName = "Ma Trơi";
+            ai.level = 11;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 1.5f;
+            ai.aggroRange = 7f;
+            ai.leashRange = 13f;
+            ai.wanderRadius = 2.5f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("wisp_essence", 0.6f), Drop("coin", 0.9f, 3, 6), Drop("potion_blue", 0.1f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Wisp.prefab");
         }
 
         /// <summary>The frame every boss shares (the bear's own builder predates it).</summary>

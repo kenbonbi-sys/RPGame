@@ -179,6 +179,21 @@ namespace RPG
             TakeDamage(d);
         }
 
+        /// <summary>
+        /// Falls without a hit (a Ma Trơi bursting by itself): no damage number, nobody hit it.
+        /// Online the players' screens learn it from the snapshot, like any fall.
+        /// </summary>
+        public void Expire()
+        {
+            if (IsDead || !GameSession.IsAuthority) return;
+            hp = 0f;
+            IsDead = true;
+            var d = DamageInfo.Make(0f, team == Team.Player ? Team.Enemy : Team.Player, null, transform.position, Vector2.down);
+            d.pure = true;
+            Died?.Invoke(d);
+            GameEvents.RaiseDied(this);
+        }
+
         // ------------------------------------------------------------------ a client's copy (online)
         /// <summary>The server's numbers for this character.</summary>
         public void SetRemote(float newHp, float newMaxHp)

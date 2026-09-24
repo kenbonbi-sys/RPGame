@@ -121,6 +121,10 @@ MonoBehaviour:
     prefab: {fileID: 6663901745170001128, guid: 40bb39b51562fea4cbefaf35f244464b, type: 3}
   - id: waystone_wake
     prefab: {fileID: 8938891605868857582, guid: de743daf95a504341b17f41b37ad458a, type: 3}
+  - id: wisp_blink
+    prefab: {fileID: 2291047203352431237, guid: 0078d0e1958932942ae7720c4bc47a5d, type: 3}
+  - id: wisp_burst
+    prefab: {fileID: 1083068082431602035, guid: 868a5a2adb1ff8f48a1acb17320352e1, type: 3}
   particleBudget: 150
   lightBudget: 1
   ultimateIds:

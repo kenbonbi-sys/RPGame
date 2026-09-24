@@ -216,6 +216,9 @@ namespace RPG.EditorTools
             Spot("mudfield", res.mudField);
             Spot("toadpond", res.toadPond);
             Spot("snakelair", res.snakeLair);
+            Spot("snakepools", res.snakePools);
+            Spot("dragonflies", res.dragonflies);
+            Spot("wisps", res.wisps);
             root.ground = res.ground;
             root.tallGrass = res.tall;
             root.dirt = res.dirt;

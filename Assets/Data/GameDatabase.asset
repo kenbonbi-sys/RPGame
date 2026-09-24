@@ -43,6 +43,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d78efac9d0e0e054db5f6c9f7786c0b4, type: 2}
   - {fileID: 11400000, guid: 75c6f56d45e63894f916b3ba04c00bd9, type: 2}
   - {fileID: 11400000, guid: 909a88e7f37958a429e4807da41bf5bd, type: 2}
+  - {fileID: 11400000, guid: 213338fe08ca3a74097fcf1fcc00d13a, type: 2}
+  - {fileID: 11400000, guid: 37aa63d51a490d34e8c023f9c9ec4ae1, type: 2}
+  - {fileID: 11400000, guid: fc9959f914778894eab44764ec753088, type: 2}
   abilities:
   - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
   - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}
@@ -64,6 +67,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7e87a3d8e8243434d93ecfe4dcde8932, type: 2}
   - {fileID: 11400000, guid: 89eec7b663e4108418968ec6fe31009f, type: 2}
   - {fileID: 11400000, guid: b9b514017c7c8b34e8da788930f75a12, type: 2}
+  - {fileID: 11400000, guid: 53cbc7b013e50c44988302eb6c9f4654, type: 2}
+  - {fileID: 11400000, guid: d9b2a6761f18fa443b8f9ec58e659a66, type: 2}
   zones:
   - {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
   startZone: {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}

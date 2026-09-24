@@ -6106,6 +6106,778 @@
    ]
   },
   {
+   "path": "Assets/Art/Characters/watersnake.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "watersnake_idle_0",
+     "x": 0,
+     "y": 144,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_idle_1",
+     "x": 32,
+     "y": 144,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_idle_2",
+     "x": 64,
+     "y": 144,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_move_0",
+     "x": 0,
+     "y": 120,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_move_1",
+     "x": 32,
+     "y": 120,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_move_2",
+     "x": 64,
+     "y": 120,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_move_3",
+     "x": 96,
+     "y": 120,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_windup_0",
+     "x": 0,
+     "y": 96,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_windup_1",
+     "x": 32,
+     "y": 96,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_attack_0",
+     "x": 0,
+     "y": 72,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_attack_1",
+     "x": 32,
+     "y": 72,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_hidden_0",
+     "x": 0,
+     "y": 48,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_hidden_1",
+     "x": 32,
+     "y": 48,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_hurt_0",
+     "x": 0,
+     "y": 24,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "watersnake_dead_1",
+     "x": 32,
+     "y": 0,
+     "w": 32,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "path": "Assets/Art/Characters/dragonfly.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "dragonfly_idle_0",
+     "x": 0,
+     "y": 120,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_idle_1",
+     "x": 24,
+     "y": 120,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_idle_2",
+     "x": 48,
+     "y": 120,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_move_0",
+     "x": 0,
+     "y": 96,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_move_1",
+     "x": 24,
+     "y": 96,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_move_2",
+     "x": 48,
+     "y": 96,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_windup_0",
+     "x": 0,
+     "y": 72,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_windup_1",
+     "x": 24,
+     "y": 72,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_attack_0",
+     "x": 0,
+     "y": 48,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_attack_1",
+     "x": 24,
+     "y": 48,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_hurt_0",
+     "x": 0,
+     "y": 24,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_dead_1",
+     "x": 24,
+     "y": 0,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "path": "Assets/Art/Characters/wisp.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "wisp_idle_0",
+     "x": 0,
+     "y": 128,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_idle_1",
+     "x": 24,
+     "y": 128,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_idle_2",
+     "x": 48,
+     "y": 128,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_idle_3",
+     "x": 72,
+     "y": 128,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_move_0",
+     "x": 0,
+     "y": 96,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_move_1",
+     "x": 24,
+     "y": 96,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_move_2",
+     "x": 48,
+     "y": 96,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_move_3",
+     "x": 72,
+     "y": 96,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_attack_0",
+     "x": 0,
+     "y": 64,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_attack_1",
+     "x": 24,
+     "y": 64,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_attack_2",
+     "x": 48,
+     "y": 64,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_hurt_0",
+     "x": 0,
+     "y": 32,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_dead_1",
+     "x": 24,
+     "y": 0,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_dead_2",
+     "x": 48,
+     "y": 0,
+     "w": 24,
+     "h": 32,
+     "pivot": [
+      0.5,
+      0.0625
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
    "path": "Assets/Art/Icons/items.png",
    "filter": "point",
    "ppu": 16,
@@ -6114,7 +6886,7 @@
     {
      "name": "potion_red",
      "x": 0,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6131,7 +6903,7 @@
     {
      "name": "potion_blue",
      "x": 16,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6148,7 +6920,7 @@
     {
      "name": "potion_green",
      "x": 32,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6165,7 +6937,7 @@
     {
      "name": "coin",
      "x": 48,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6182,7 +6954,7 @@
     {
      "name": "gold",
      "x": 64,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6199,7 +6971,7 @@
     {
      "name": "gel",
      "x": 80,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6216,7 +6988,7 @@
     {
      "name": "shroom_cap",
      "x": 96,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6233,7 +7005,7 @@
     {
      "name": "claw",
      "x": 112,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6250,7 +7022,7 @@
     {
      "name": "pelt",
      "x": 0,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6267,7 +7039,7 @@
     {
      "name": "meat",
      "x": 16,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6284,7 +7056,7 @@
     {
      "name": "apple",
      "x": 32,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6301,7 +7073,7 @@
     {
      "name": "sword",
      "x": 48,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6318,7 +7090,7 @@
     {
      "name": "shield",
      "x": 64,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6335,7 +7107,7 @@
     {
      "name": "ring",
      "x": 80,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6352,7 +7124,7 @@
     {
      "name": "gem_red",
      "x": 96,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6369,7 +7141,7 @@
     {
      "name": "gem_blue",
      "x": 112,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6386,7 +7158,7 @@
     {
      "name": "scroll",
      "x": 0,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6403,7 +7175,7 @@
     {
      "name": "key",
      "x": 16,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6420,7 +7192,7 @@
     {
      "name": "herb",
      "x": 32,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6437,7 +7209,7 @@
     {
      "name": "bread",
      "x": 48,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6454,7 +7226,7 @@
     {
      "name": "bone",
      "x": 64,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6471,7 +7243,7 @@
     {
      "name": "toad_skin",
      "x": 80,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6488,7 +7260,7 @@
     {
      "name": "poison_gland",
      "x": 96,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6505,7 +7277,7 @@
     {
      "name": "leech_tooth",
      "x": 112,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6522,7 +7294,7 @@
     {
      "name": "mud_core",
      "x": 0,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6539,7 +7311,7 @@
     {
      "name": "toad_crown",
      "x": 16,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6556,7 +7328,7 @@
     {
      "name": "snake_scale",
      "x": 32,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6573,7 +7345,7 @@
     {
      "name": "snake_fang",
      "x": 48,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6590,7 +7362,7 @@
     {
      "name": "venom_sac",
      "x": 64,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -6607,6 +7379,57 @@
     {
      "name": "lotus",
      "x": 80,
+     "y": 16,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wsnake_skin",
+     "x": 96,
+     "y": 16,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "dragonfly_wing",
+     "x": 112,
+     "y": 16,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "wisp_essence",
+     "x": 0,
      "y": 0,
      "w": 16,
      "h": 16,
@@ -9807,6 +10630,194 @@
     "snake_dead_1"
    ],
    "fps": 3,
+   "loop": false
+  },
+  {
+   "set": "watersnake",
+   "name": "idle",
+   "frames": [
+    "watersnake_idle_0",
+    "watersnake_idle_1",
+    "watersnake_idle_2"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  {
+   "set": "watersnake",
+   "name": "move",
+   "frames": [
+    "watersnake_move_0",
+    "watersnake_move_1",
+    "watersnake_move_2",
+    "watersnake_move_3"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  {
+   "set": "watersnake",
+   "name": "windup",
+   "frames": [
+    "watersnake_windup_0",
+    "watersnake_windup_1"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  {
+   "set": "watersnake",
+   "name": "attack",
+   "frames": [
+    "watersnake_attack_0",
+    "watersnake_attack_1"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  {
+   "set": "watersnake",
+   "name": "hidden",
+   "frames": [
+    "watersnake_hidden_0",
+    "watersnake_hidden_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  {
+   "set": "watersnake",
+   "name": "hurt",
+   "frames": [
+    "watersnake_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "watersnake",
+   "name": "dead",
+   "frames": [
+    "watersnake_dead_0",
+    "watersnake_dead_1"
+   ],
+   "fps": 5,
+   "loop": false
+  },
+  {
+   "set": "dragonfly",
+   "name": "idle",
+   "frames": [
+    "dragonfly_idle_0",
+    "dragonfly_idle_1",
+    "dragonfly_idle_2"
+   ],
+   "fps": 18,
+   "loop": true
+  },
+  {
+   "set": "dragonfly",
+   "name": "move",
+   "frames": [
+    "dragonfly_move_0",
+    "dragonfly_move_1",
+    "dragonfly_move_2"
+   ],
+   "fps": 18,
+   "loop": true
+  },
+  {
+   "set": "dragonfly",
+   "name": "windup",
+   "frames": [
+    "dragonfly_windup_0",
+    "dragonfly_windup_1"
+   ],
+   "fps": 10,
+   "loop": true
+  },
+  {
+   "set": "dragonfly",
+   "name": "attack",
+   "frames": [
+    "dragonfly_attack_0",
+    "dragonfly_attack_1"
+   ],
+   "fps": 12,
+   "loop": false
+  },
+  {
+   "set": "dragonfly",
+   "name": "hurt",
+   "frames": [
+    "dragonfly_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "dragonfly",
+   "name": "dead",
+   "frames": [
+    "dragonfly_dead_0",
+    "dragonfly_dead_1"
+   ],
+   "fps": 5,
+   "loop": false
+  },
+  {
+   "set": "wisp",
+   "name": "idle",
+   "frames": [
+    "wisp_idle_0",
+    "wisp_idle_1",
+    "wisp_idle_2",
+    "wisp_idle_3"
+   ],
+   "fps": 7,
+   "loop": true
+  },
+  {
+   "set": "wisp",
+   "name": "move",
+   "frames": [
+    "wisp_move_0",
+    "wisp_move_1",
+    "wisp_move_2",
+    "wisp_move_3"
+   ],
+   "fps": 7,
+   "loop": true
+  },
+  {
+   "set": "wisp",
+   "name": "attack",
+   "frames": [
+    "wisp_attack_0",
+    "wisp_attack_1",
+    "wisp_attack_2"
+   ],
+   "fps": 6,
+   "loop": false
+  },
+  {
+   "set": "wisp",
+   "name": "hurt",
+   "frames": [
+    "wisp_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "wisp",
+   "name": "dead",
+   "frames": [
+    "wisp_dead_0",
+    "wisp_dead_1",
+    "wisp_dead_2"
+   ],
+   "fps": 9,
    "loop": false
   },
   {

@@ -101,6 +101,8 @@ namespace RPG.EditorTools
             Build("mud_splat", MudSplat, 1.2f);
             Build("tongue_lash", TongueLash, 0.4f);
             Build("waystone_wake", WaystoneWake, 2.2f);
+            Build("wisp_blink", WispBlink, 0.9f);
+            Build("wisp_burst", WispBurst, 1.4f);
             // boss
             Build("boss_roar", BossRoar, 1.6f);
             Build("enrage_burst", EnrageBurst, 1.8f);
@@ -905,6 +907,32 @@ namespace RPG.EditorTools
         static readonly Color VenomGreen = new Color(0.55f, 0.95f, 0.35f);
         static readonly Color Water = new Color(0.7f, 0.93f, 1f);
         static readonly Color Mud = new Color(0.45f, 0.34f, 0.22f);
+        static readonly Color WispBlue = new Color(0.45f, 0.85f, 1f);
+        static readonly Color WispPale = new Color(0.78f, 1f, 1f);
+
+        /// <summary>A Ma Trơi guttering out or flaring up: a cold puff and a few rising motes.</summary>
+        static void WispBlink(GameObject r)
+        {
+            PS(r, "Flare", Mat("smoke", true, 1.6f)).Burst(6).Life(0.3f, 0.55f).Speed(0.3f, 1f).Size(0.5f, 0.9f)
+                .Col(A(WispBlue, 0.8f), A(WispPale, 0.6f)).Circle(0.2f).SizeLife(0, 0.4f, 1, 1.3f).Rot().Fade();
+            PS(r, "Motes", Mat("spark4", true, 2f)).Burst(10).Life(0.4f, 0.8f).Speed(0.5f, 1.8f).Size(0.1f, 0.2f)
+                .Col(Color.white, WispBlue).Circle(0.3f).Vel(0, 0, 0.3f, 1f).Fade();
+            Light(r, WispBlue, 2.5f, 1.2f, 0.5f);
+        }
+
+        /// <summary>A Ma Trơi bursting (radius 2.4 at scale 1): a cold ring, blue flames and frost.</summary>
+        static void WispBurst(GameObject r)
+        {
+            Ring(r, "Ring", WispBlue, 0.3f, 4.8f, 0.5f, "ring_thick");
+            Ring(r, "Ground", A(WispPale, 0.7f), 0.3f, 4.6f, 0.7f, "ring", SortingLayerNames.Decal, 0.55f);
+            PS(r, "Flames", Mat("smoke", true, 1.8f)).Burst(22).Life(0.45f, 0.9f).Speed(2.5f, 6f).Size(0.7f, 1.2f)
+                .Col(WispBlue, WispPale).Circle(0.4f).Drag(3f).Rot().Fade();
+            PS(r, "Sparks", Mat("spark4", true, 2.4f)).Burst(24).Life(0.5f, 1.1f).Speed(3f, 7f).Size(0.12f, 0.24f)
+                .Col(Color.white, WispBlue).Circle(0.3f).Drag(2f).Fade();
+            PS(r, "Frost", Mat("px_square", true, 2f)).Burst(20).Life(0.6f, 1.2f).Speed(1f, 3f).Size(0.06f, 0.12f)
+                .Col(Color.white, WispPale).Circle(1f).Grav(-0.3f).Fade();
+            Light(r, WispBlue, 7f, 3f, 0.7f);
+        }
 
         static void VenomPuff(GameObject r)
         {

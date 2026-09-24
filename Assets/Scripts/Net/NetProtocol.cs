@@ -6,11 +6,13 @@ namespace RPG
     /// <summary>
     /// Every message of an online session besides FishNet's own (hero spawns and positions).
     /// Online phases 2–3, Docs/KeHoach-Online.md. The server decides and tells; a client asks.
-    /// Bump <see cref="Version"/> when a message changes: an older game cannot join a newer server.
+    /// Bump <see cref="Version"/> when a message changes, and when the world scene gains or loses
+    /// enemies, bosses or rocks (they are numbered in scene order on every machine): an older game
+    /// cannot join a newer server.
     /// </summary>
     public static class NetProtocol
     {
-        public const int Version = 4;
+        public const int Version = 5;
 
         /// <summary>First id of the replicated objects of a zone (enemies, boss, rocks); heroes use their NetworkObject id, below it.</summary>
         public const int SceneIdBase = 1000000;

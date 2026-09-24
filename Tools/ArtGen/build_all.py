@@ -155,6 +155,17 @@ def build_chars():
     grid_sheet("snake", gen_swamp_creatures.build_snake(),
                ["idle", "walk", "windup", "bite", "tail", "spit", "submerge", "emerge", "roar", "hurt", "dead"],
                72, 64, (36, 60), os.path.join(ART, "Characters", "snake.png"), sfps)
+    wfps = lambda k: {"idle": (4, True), "move": (8, True), "windup": (8, True), "attack": (10, False), "hidden": (3, True),
+                      "hurt": (1, False), "dead": (5, False)}[k]
+    grid_sheet("watersnake", gen_swamp_creatures.build_water_snake(), ["idle", "move", "windup", "attack", "hidden", "hurt", "dead"],
+               32, 24, (16, 22), os.path.join(ART, "Characters", "watersnake.png"), wfps)
+    dfps = lambda k: {"idle": (18, True), "move": (18, True), "windup": (10, True), "attack": (12, False), "hurt": (1, False),
+                      "dead": (5, False)}[k]
+    grid_sheet("dragonfly", gen_swamp_creatures.build_dragonfly(), ["idle", "move", "windup", "attack", "hurt", "dead"],
+               24, 24, (12, 22), os.path.join(ART, "Characters", "dragonfly.png"), dfps)
+    ofps = lambda k: {"idle": (7, True), "move": (7, True), "attack": (6, False), "hurt": (1, False), "dead": (9, False)}[k]
+    grid_sheet("wisp", gen_swamp_creatures.build_wisp(), ["idle", "move", "attack", "hurt", "dead"],
+               24, 32, (12, 30), os.path.join(ART, "Characters", "wisp.png"), ofps)
 
 
 def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):

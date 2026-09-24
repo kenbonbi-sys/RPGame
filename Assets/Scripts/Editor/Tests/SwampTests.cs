@@ -10,7 +10,8 @@ namespace RPG.EditorTools.Tests
     /// <summary>
     /// Đầm Lầy Sương Mù in the real world scene (plays it offline, like <see cref="GameSmokeTests"/>):
     /// the region east of the forest, wading, the Đá Truyền Tống, the mud men's split, poison
-    /// pools, both swamp bosses' attacks, and a boss's fight showing on an offline screen.
+    /// pools, both swamp bosses' attacks, a boss's fight showing on an offline screen, the water
+    /// snakes, dragonflies and wisps, and the camps that only come out by day or at night.
     /// </summary>
     public class SwampTests
     {
@@ -91,10 +92,10 @@ namespace RPG.EditorTools.Tests
             foreach (var id in new[] { "bear", "toadking", "snake" }) Assert.NotNull(BossBase.Find(id), id);
             Assert.AreEqual(EnemyRank.MiniBoss, BossBase.Find("toadking").rank);
             Assert.AreEqual(EnemyRank.Boss, BossBase.Find("snake").rank);
-            foreach (var id in new[] { "toad", "leech", "mudman" })
+            foreach (var id in new[] { "toad", "leech", "mudman", "watersnake", "dragonfly" })
                 Assert.IsTrue(EnemyBase.All.Exists(e => e.enemyId == id), id + " camps");
             Assert.GreaterOrEqual(Waystone.All.Count, 5, "Đá Truyền Tống in the village, the forest and the swamp");
-            foreach (var spot in new[] { "outpost", "swamp", "mudfield", "toadpond", "snakelair" })
+            foreach (var spot in new[] { "outpost", "swamp", "mudfield", "toadpond", "snakelair", "snakepools", "dragonflies", "wisps" })
                 Assert.NotNull(zone.SpotOf(spot), spot + " spot for quests");
             Assert.IsTrue(zone.IsWater(OpenWater(zone)));
             Assert.IsFalse(zone.IsWater(GameManager.I.respawnPoint.position), "the village is dry");
@@ -219,11 +220,136 @@ namespace RPG.EditorTools.Tests
                     Assert.IsTrue(boss.DebugForce(attack), id + ": " + attack);
                     yield return GameSmokeTests.GameSeconds(attack == "dive" ? 5f : 3.2f);
                 }
+                // between the forced attacks it fights on its own: a dive of its own ends above the water
+                float surfaceBy = Time.time + 6f;
+                while (boss.health.invulnerable && Time.time < surfaceBy) yield return null;
                 Assert.IsFalse(boss.health.invulnerable, id + " is not left under water");
                 boss.health.Kill();
                 yield return GameSmokeTests.GameSeconds(1.5f);
                 Assert.IsTrue(boss.health.IsDead);
             }
+        }
+
+        static int Out(string id)
+        {
+            int n = 0;
+            foreach (var e in EnemyBase.All)
+                if (e.enemyId == id && !e.IsDead) n++;
+            return n;
+        }
+
+        /// <summary>A spot next to <paramref name="from"/> with a clear line to it (a strike from there is not stopped by a tree).</summary>
+        static Vector2 ClearSpotBeside(Vector2 from, float distance)
+        {
+            foreach (var dir in new[] { Vector2.left, Vector2.right, Vector2.down, Vector2.up, new Vector2(1, 1).normalized, new Vector2(-1, -1).normalized })
+            {
+                Vector2 p = from + dir * distance;
+                if (!Util.LineBlocked(from, p) && Physics2D.OverlapCircle(p, 0.4f, Layers.ObstacleMask) == null) return p;
+            }
+            return from + Vector2.left * distance;
+        }
+
+        [UnityTest]
+        public IEnumerator WaterSnakesHideThenStrikeFromThePool()
+        {
+            var hero = Players.Local;
+            WaterSnakeAI snake = null;
+            foreach (var e in EnemyBase.All)
+                if (e is WaterSnakeAI w && w.Submerged && !w.IsDead) snake = w;
+            Assert.NotNull(snake, "water snakes wait under the water of their pools");
+            Assert.IsFalse(snake.motor.slowedByWater, "it swims");
+            Vector2 at = snake.transform.position;
+            var poke = DamageInfo.Make(50f, Team.Player, hero.gameObject, at, Vector2.up);
+            Assert.AreEqual(0, Combat.DamageCircle(at, 1.2f, poke), "nothing reaches it under the water");
+
+            hero.motor.Teleport(ClearSpotBeside(at, 2.6f));
+            yield return GameSmokeTests.GameSeconds(1f);   // enemies with nobody near sleep: it wakes first
+            float hp = hero.health.hp;
+            snake.DebugStrike(hero);
+            Assert.IsFalse(snake.Submerged, "it rises to strike");
+            yield return GameSmokeTests.GameSeconds(snake.windup + snake.lungeSeconds + 0.15f);
+            Assert.Less(hero.health.hp, hp, "the lunge bites");
+            Assert.Greater(hero.status.PoisonStacks, 0, "and poisons");
+            Assert.IsFalse(snake.Submerged, "in the open after a strike");
+            Assert.Greater(Combat.DamageCircle(snake.transform.position, 1.2f, poke), 0, "the moment to hit back");
+        }
+
+        [UnityTest]
+        public IEnumerator ADragonflyDartsThroughAndFliesOff()
+        {
+            var hero = Players.Local;
+            var fly = EnemyBase.All.Find(e => e.enemyId == "dragonfly" && !e.IsDead) as DragonflyAI;
+            Assert.NotNull(fly, "dragonflies are out by day");
+            Assert.IsTrue(fly.GetComponent<Collider2D>().isTrigger, "it flies over water, reeds and heroes");
+            Assert.IsFalse(fly.motor.slowedByWater);
+            hero.motor.Teleport((Vector2)fly.transform.position + new Vector2(-2.4f, 0f));
+            yield return GameSmokeTests.GameSeconds(1f);   // it wakes and starts circling
+            float hp = hero.health.hp;
+            fly.DebugDart(hero);
+            yield return GameSmokeTests.GameSeconds(fly.windup + fly.dartSeconds + 0.1f);
+            Assert.Less(hero.health.hp, hp, "stung as it shoots through");
+            yield return GameSmokeTests.GameSeconds(fly.retreatSeconds * 0.9f);
+            Assert.Greater(Vector2.Distance(fly.transform.position, hero.transform.position), 2f, "and off before anyone can answer");
+        }
+
+        [UnityTest]
+        public IEnumerator DragonfliesComeByDayAndWispsByNight()
+        {
+            var dn = DayNightCycle.I;
+            dn.dayLength = 0f;
+            var hero = Players.Local;
+            hero.health.invulnerable = true;
+            hero.motor.Teleport(GameManager.I.respawnPoint.position);   // far away: the creatures come and go unseen
+            dn.time = 0.45f;
+            yield return GameSmokeTests.GameSeconds(1.5f);
+            Assert.Greater(Out("dragonfly"), 0, "dragonflies by day");
+            Assert.AreEqual(0, Out("wisp"), "no wisps by day");
+
+            dn.time = 0.02f;
+            yield return GameSmokeTests.GameSeconds(8f);   // they come one by one over a few seconds
+            Assert.Greater(Out("wisp"), 0, "Ma Trơi at night");
+            Assert.AreEqual(0, Out("dragonfly"), "the dragonflies have gone");
+            Assert.Greater(Out("toad"), 0, "most of the swamp is out day and night");
+
+            dn.time = 0.45f;
+            yield return GameSmokeTests.GameSeconds(8f);
+            Assert.AreEqual(0, Out("wisp"), "the wisps fade with the day");
+            Assert.Greater(Out("dragonfly"), 0, "and the dragonflies are back");
+        }
+
+        [UnityTest]
+        public IEnumerator AWispThatBurstsEarnsNothing()
+        {
+            var dn = DayNightCycle.I;
+            dn.dayLength = 0f;
+            dn.time = 0.02f;
+            var hero = Players.Local;
+            hero.motor.Teleport(GameManager.I.respawnPoint.position);
+            WispAI wisp = null;
+            float deadline = Time.time + 10f;
+            while (wisp == null && Time.time < deadline)
+            {
+                yield return GameSmokeTests.GameSeconds(0.25f);
+                wisp = EnemyBase.All.Find(e => e.enemyId == "wisp" && !e.IsDead) as WispAI;
+            }
+            Assert.NotNull(wisp, "a wisp came out at night");
+            Assert.IsTrue(wisp.GetComponent<Collider2D>().isTrigger, "it floats through the reeds");
+
+            int kills = 0;
+            GameEvents.EnemyKilled += k => { if (k.id == "wisp") kills++; };
+            int xp = hero.stats.xp, level = hero.stats.level;
+            hero.motor.Teleport((Vector2)wisp.transform.position + new Vector2(-3f, 0f));
+            yield return GameSmokeTests.GameSeconds(1f);   // it wakes and starts leading the hero away
+            hero.motor.Teleport((Vector2)wisp.transform.position + new Vector2(-0.8f, 0f));
+            float hp = hero.health.hp;
+            wisp.DebugSwell(hero);
+            yield return GameSmokeTests.GameSeconds(wisp.swellSeconds + 0.2f);
+            Assert.IsTrue(wisp.IsDead, "it burst");
+            Assert.Less(hero.health.hp, hp, "the burst hurts whoever is in the ring");
+            Assert.IsTrue(hero.status.IsCursed, "and curses");
+            Assert.AreEqual(0, kills, "a wisp that bursts is nobody's kill");
+            Assert.AreEqual(level, hero.stats.level, "no XP for it");
+            Assert.AreEqual(xp, hero.stats.xp, "no XP for it");
         }
     }
 
@@ -293,6 +419,25 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(0, again.Known.Count, "an empty section");
             Assert.AreEqual("", again.Last);
             Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void TheMistNarrowsTheMinimap()
+        {
+            Assert.AreEqual(1f, MinimapUI.ViewScale(0f), 1e-4f, "clear air: the whole view");
+            Assert.Less(MinimapUI.ViewScale(0.85f), 0.7f, "the swamp's mist hides the far side");
+            Assert.Greater(MinimapUI.ViewScale(1f), 0.5f, "but the map still shows the hero's surroundings");
+        }
+
+        [Test]
+        public void CampsKnowTheirTimeOfDay()
+        {
+            Assert.IsTrue(EnemySpawner.IsSeason(DayPart.Always, false));
+            Assert.IsTrue(EnemySpawner.IsSeason(DayPart.Always, true));
+            Assert.IsTrue(EnemySpawner.IsSeason(DayPart.Day, false));
+            Assert.IsFalse(EnemySpawner.IsSeason(DayPart.Day, true), "dragonflies rest at night");
+            Assert.IsTrue(EnemySpawner.IsSeason(DayPart.Night, true));
+            Assert.IsFalse(EnemySpawner.IsSeason(DayPart.Night, false), "wisps only come out at night");
         }
     }
 }

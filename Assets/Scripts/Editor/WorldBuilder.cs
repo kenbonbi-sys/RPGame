@@ -10,7 +10,8 @@ namespace RPG.EditorTools
     /// Generates the world as one seamless map (plan §10: new regions join the same map): in the
     /// west the village (Làng Lá Xanh), the forest paths with enemy camps and the bear's arena
     /// (Rừng Già Cổ Thụ); in the east Đầm Lầy Sương Mù — water that slows whoever wades through
-    /// it, mud trails, dead trees and willows, toad, leech and mud-man camps, Cóc Tía's pond and
+    /// it, mud trails, dead trees and willows, toad, leech, mud-man and water-snake camps (dragonflies
+    /// by day, wisps at night), Cóc Tía's pond and
     /// Xà Mẫu's lake with its four mounds — reached by a road through the forest's eastern edge
     /// to a stilt-hut outpost. Đá Truyền Tống stand in the village, at the arena's gate and around
     /// the swamp. Tiles are painted into Tilemaps, props are prefab instances — everything can be
@@ -28,7 +29,7 @@ namespace RPG.EditorTools
             public Tilemap ground, tall, dirt, mud, water, details;
             public Transform props;
             public Transform playerSpawn, chief, girl, forestSpot, bossSpot;
-            public Transform outpost, swampSpot, mudField, toadPond, snakeLair;
+            public Transform outpost, swampSpot, mudField, toadPond, snakeLair, snakePools, dragonflies, wisps;
             public BossBear boss;
             /// <summary>Per grid corner: <see cref="ZoneRoot.Water"/>, <see cref="ZoneRoot.Mud"/>.</summary>
             public byte[] terrain;
@@ -91,7 +92,10 @@ namespace RPG.EditorTools
             public Vector2 at;
             public float radius;
             public int count;
-            public string kind;   // toad, leech, mud
+            public string kind;   // toad, leech, mud, watersnake, dragonfly, wisp
+            public DayPart when = DayPart.Always;
+            /// <summary>Flying or floating: the water around it is kept (dragonflies over the pools, wisps over the mire).</summary>
+            public bool flies;
         }
 
         static readonly SwampCamp[] SwampCamps =
@@ -105,6 +109,16 @@ namespace RPG.EditorTools
             new SwampCamp { name = "LeechPool_Deep", at = new Vector2(175, 44), radius = 1.4f, count = 2, kind = "leech" },
             new SwampCamp { name = "MudCamp_Field", at = MudField, radius = 2f, count = 2, kind = "mud" },
             new SwampCamp { name = "MudCamp_North", at = new Vector2(163, 45), radius = 2f, count = 2, kind = "mud" },
+            // water snakes in the two pools nobody else lives in
+            new SwampCamp { name = "SnakePool_Reeds", at = new Vector2(133, 35.5f), radius = 1.6f, count = 2, kind = "watersnake" },
+            new SwampCamp { name = "SnakePool_South", at = new Vector2(146, 15), radius = 1.4f, count = 2, kind = "watersnake" },
+            // by day dragonflies over the open mire; at night wisps, near the leech pools they lure heroes into
+            new SwampCamp { name = "Dragonflies_Reeds", at = new Vector2(139, 29), radius = 3f, count = 3, kind = "dragonfly", when = DayPart.Day, flies = true },
+            new SwampCamp { name = "Dragonflies_East", at = new Vector2(165, 25), radius = 3f, count = 3, kind = "dragonfly", when = DayPart.Day, flies = true },
+            new SwampCamp { name = "Dragonflies_West", at = new Vector2(116, 42), radius = 2.5f, count = 2, kind = "dragonfly", when = DayPart.Day, flies = true },
+            new SwampCamp { name = "Wisps_Middle", at = new Vector2(147, 40), radius = 2.5f, count = 2, kind = "wisp", when = DayPart.Night, flies = true },
+            new SwampCamp { name = "Wisps_Deep", at = new Vector2(168, 52), radius = 2.5f, count = 2, kind = "wisp", when = DayPart.Night, flies = true },
+            new SwampCamp { name = "Wisps_South", at = new Vector2(126, 11), radius = 2.5f, count = 2, kind = "wisp", when = DayPart.Night, flies = true },
         };
 
         /// <summary>Đá Truyền Tống: id, name, where.</summary>
@@ -204,10 +218,10 @@ namespace RPG.EditorTools
             return Noise(p.x, p.y, 0.11f) > 0.57f;
         }
 
-        static bool NearSwampCamp(Vector2 p, float extra)
+        static bool NearSwampCamp(Vector2 p, float extra, bool groundOnly = false)
         {
             foreach (var c in SwampCamps)
-                if (Vector2.Distance(p, c.at) < c.radius + extra) return true;
+                if ((!groundOnly || !c.flies) && Vector2.Distance(p, c.at) < c.radius + extra) return true;
             return false;
         }
 
@@ -229,7 +243,7 @@ namespace RPG.EditorTools
             }
             // scattered puddles and channels, away from the camps, the arenas and the edges of the map
             if (p.y < 5f || p.y > H - 5f || p.x > W - 5f) return false;
-            if (NearSwampCamp(p, 2.5f) || Vector2.Distance(p, ToadPond) < 11f || Vector2.Distance(p, SnakeLair) < 14.5f) return false;
+            if (NearSwampCamp(p, 2.5f, true) || Vector2.Distance(p, ToadPond) < 11f || Vector2.Distance(p, SnakeLair) < 14.5f) return false;
             if (DistToTrails(p) < 3f) return false;
             return Noise(p.x + 400f, p.y, 0.09f) > 0.67f;
         }
@@ -779,12 +793,15 @@ namespace RPG.EditorTools
             Camp("ShroomCamp_Path", PrefabFactory.Shroom, Camps[4], 2, 1.8f);
             res.forestSpot = camps.Find("SlimeCamp_Clearing");
 
-            // the swamp's camps; each mud man camp keeps its Bùn Con in a brood beside it
+            // the swamp's camps (some only by day or at night); each mud man camp keeps its Bùn Con in a brood beside it
             foreach (var c in SwampCamps)
             {
-                var prefab = c.kind == "toad" ? PrefabFactory.Toad : c.kind == "leech" ? PrefabFactory.Leech : PrefabFactory.MudMan;
+                var prefab = c.kind == "toad" ? PrefabFactory.Toad : c.kind == "leech" ? PrefabFactory.Leech
+                           : c.kind == "watersnake" ? PrefabFactory.WaterSnake : c.kind == "dragonfly" ? PrefabFactory.Dragonfly
+                           : c.kind == "wisp" ? PrefabFactory.Wisp : PrefabFactory.MudMan;
                 if (prefab == null) continue;
                 var go = Camp(c.name, prefab, c.at, c.count, c.radius);
+                go.GetComponent<EnemySpawner>().activeAt = c.when;
                 if (c.kind != "mud" || PrefabFactory.Mudling == null) continue;
                 var brood = MakeBrood(camps, c.name + "_Brood", PrefabFactory.Mudling, c.count * 2, c.at);
                 foreach (var m in go.GetComponentsInChildren<MudManAI>(true))
@@ -795,6 +812,9 @@ namespace RPG.EditorTools
             }
             res.swampSpot = camps.Find("ToadCamp_Edge");
             res.mudField = camps.Find("MudCamp_Field");
+            res.snakePools = camps.Find("SnakePool_Reeds");
+            res.dragonflies = camps.Find("Dragonflies_Reeds");
+            res.wisps = camps.Find("Wisps_Middle");
 
             var arena = new GameObject("BossArena").transform;
             arena.SetParent(root, false);

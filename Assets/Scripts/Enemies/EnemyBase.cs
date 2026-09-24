@@ -59,6 +59,10 @@ namespace RPG
         Collider2D[] colliders;
         float nextWakeCheck;
         bool asleep;
+        /// <summary>Going out without a kill: no loot, XP or quest progress (<see cref="DieUncredited"/>).</summary>
+        bool uncredited;
+        readonly List<Telegraph> warnings = new List<Telegraph>();
+        bool warned;
 
         /// <summary>Beyond every hero's view (<see cref="ServerPlayers.ViewRadius"/>): nobody sees it stand still.</summary>
         public const float SleepRadius = 40f;
@@ -68,6 +72,8 @@ namespace RPG
 
         /// <summary>The hero this enemy is after, if any.</summary>
         public PlayerController Target => target;
+        /// <summary>Chasing or attacking someone (a camp leaving at the turn of the day waits for it).</summary>
+        public bool Busy => state == State.Chase || state == State.Attack;
         protected Vector2 Pos => transform.position;
         /// <summary>Attack speed from statuses (Lạnh lowers it): attack cooldowns are divided by it.</summary>
         protected float AttackSpeed => status != null ? Mathf.Max(0.1f, status.AttackSpeedMultiplier) : 1f;
@@ -90,9 +96,11 @@ namespace RPG
             health.displayName = displayName;
             health.level = level;
             health.ResetHealth(maxHp);
+            health.invulnerable = false;
             home = transform.position;
             threat.Clear();
             target = null;
+            uncredited = false;
             SetState(State.Idle);
             foreach (var c in colliders) c.enabled = true;
             if (body != null) body.color = Color.white;
@@ -130,6 +138,8 @@ namespace RPG
             if (status != null && status.IsStunned)
             {
                 motor.Stop();
+                ClearWarnings();   // the attack it was winding up will not come
+                if (state == State.Attack) OnAttackInterrupted();
                 if (anim != null) anim.Play("hurt");
                 return;
             }
@@ -206,8 +216,73 @@ namespace RPG
                 if (c != null) c.isTrigger = on;
         }
 
+        /// <summary>Its body can be hit at all (off while it hides: under the water, …). Online the players' copies follow.</summary>
+        protected void SetHittable(bool on)
+        {
+            foreach (var c in colliders)
+                if (c != null) c.enabled = on;
+            health.invulnerable = !on;
+        }
+
+        /// <summary>A ground warning of this enemy's attack (<see cref="NetCues.Circle"/>), taken back if it is stunned or falls first.</summary>
+        protected Telegraph Warn(Telegraph t)
+        {
+            warned = true;
+            if (t != null) warnings.Add(t);
+            return t;
+        }
+
+        /// <summary>Takes back the warnings of an attack that will not come (here and on the players' screens).</summary>
+        protected void ClearWarnings()
+        {
+            if (!warned) return;
+            warned = false;
+            foreach (var t in warnings)
+                if (t != null && t.gameObject.activeInHierarchy) t.Cancel();
+            warnings.Clear();
+            if (GameSession.IsAuthority) NetCues.CancelTelegraphs(this);
+        }
+
+        /// <summary>
+        /// Stunned in the middle of an attack (every frame of the stun): an enemy whose attack must
+        /// not land late, without its warning, calls it off here.
+        /// </summary>
+        protected virtual void OnAttackInterrupted() { }
+
+        /// <summary>The warnings of an attack that has landed: they fade out by themselves.</summary>
+        protected void ForgetWarnings()
+        {
+            warned = false;
+            warnings.Clear();
+        }
+
+        /// <summary>
+        /// Falls without anyone earning it (a Ma Trơi bursting on its own): no loot, XP, quest
+        /// progress or Bách Khoa Trùm entry. Where the rules run.
+        /// </summary>
+        protected void DieUncredited()
+        {
+            if (!GameSession.IsAuthority || state == State.Dead) return;
+            uncredited = true;
+            health.ForgetAttackers();
+            health.Expire();
+        }
+
+        /// <summary>
+        /// Leaves the world quietly (a camp that only comes out at night, at dawn): no fall, no loot.
+        /// <see cref="EnemySpawner"/> brings it back with <see cref="Revive"/>. Where the rules run.
+        /// </summary>
+        public virtual void Retire(bool quietly = false)
+        {
+            if (!GameSession.IsAuthority || state == State.Dead) return;
+            ClearWarnings();
+            if (!quietly) NetCues.Vfx("enemy_death", transform.position + Vector3.up * 0.4f, 0f, 0.7f);
+            motor.HardStop();
+            gameObject.SetActive(false);
+        }
+
         /// <summary>A hero walked into the aggro range: they are the first target.</summary>
-        bool Notice()
+        protected bool Notice()
         {
             var p = Players.Nearest(Pos, aggroRange);
             if (p == null) return false;
@@ -321,9 +396,10 @@ namespace RPG
         {
             SetState(State.Dead);
             motor.HardStop();
+            ClearWarnings();
             foreach (var c in colliders) c.enabled = false;
             if (anim != null) anim.Play("dead", true);
-            if (GameSession.IsAuthority)
+            if (GameSession.IsAuthority && !uncredited)
             {
                 // every hero who helped gets the kill; online each of them rolls their own loot
                 var credited = new List<PlayerController>(health.Attackers);
@@ -366,5 +442,14 @@ namespace RPG
             transform.position = at;
             gameObject.SetActive(true);
         }
+
+        /// <summary>Comes out for its time of day, just revived (a wisp flares up out of nothing). Where the rules run.</summary>
+        public virtual void Arrive() { }
+
+        /// <summary>
+        /// Whether it may come and go at the turn of the day in front of a hero (a wisp fading into
+        /// the dawn); other creatures leave and arrive only out of everyone's sight.
+        /// </summary>
+        public virtual bool FadesInView => false;
     }
 }

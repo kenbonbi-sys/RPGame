@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: swamp_hunters
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: swamp_hunters
+  title: "Truy N\xE3: R\u1EAFn N\u01B0\u1EDBc V\xE0 Chu\u1ED3n Chu\u1ED3n Kim"
+  kind: 2
+  summary: "R\u1EAFn N\u01B0\u1EDBc r\xECnh d\u01B0\u1EDBi c\xE1c v\u0169ng n\u01B0\u1EDBc, ban ng\xE0y Chu\u1ED3n Chu\u1ED3n Kim l\u01B0\u1EE3n tr\xEAn m\u1EB7t \u0111\u1EA7m. Ng\u01B0 d\xE2n kh\xF4ng d\xE1m ra l\u01B0\u1EDBi."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: f60cbc3b5692ec248abf695b3649174d, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: watersnake
+    count: 3
+    text: "H\u1EA1 R\u1EAFn N\u01B0\u1EDBc"
+    countPrevious: 0
+    marker: snakepools
+  - kind: 1
+    target: dragonfly
+    count: 4
+    text: "H\u1EA1 Chu\u1ED3n Chu\u1ED3n Kim (ban ng\xE0y)"
+    countPrevious: 0
+    marker: dragonflies
+  xp: 360
+  gold: 45
+  items:
+  - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
+    count: 2
+  setFlags: []
+  followUps: []

@@ -133,8 +133,8 @@ namespace RPG
 
         /// <summary>
         /// Đầm Lầy Sương Mù: the road in, the outpost and its Đá Truyền Tống, the world map, wading,
-        /// leeches, toads, a mud man's split, Cóc Tía's and Xà Mẫu's attacks, the swamp at night,
-        /// and the trip home through the stones.
+        /// leeches, toads, a mud man's split, a water snake's strike, a dragonfly's dart, Cóc Tía's
+        /// and Xà Mẫu's attacks, the wisps that come out at night, and the trip home through the stones.
         /// </summary>
         IEnumerator Swamp(PlayerController p, DayNightCycle dn)
         {
@@ -197,6 +197,38 @@ namespace RPG
                 yield return Wait(0.9f);
                 yield return Shot("mudman_split");
                 yield return Wait(0.5f);
+            }
+
+            // a water snake rising from its pool to strike
+            var pools = Spot("snakepools");
+            var ws = FindEnemy("watersnake", pools != null ? (Vector2)pools.position : new Vector2(133f, 35.5f)) as WaterSnakeAI;
+            if (ws != null)
+            {
+                Place(p, (Vector2)ws.transform.position + new Vector2(-3.4f, -1f));
+                yield return Wait(1.2f);
+                yield return Shot("watersnake_hidden");
+                ws.DebugStrike(p);
+                yield return Wait(0.35f);
+                yield return Shot("watersnake_windup");
+                yield return Wait(0.4f);
+                yield return Shot("watersnake_lunge");
+                yield return Wait(1.6f);
+            }
+
+            // dragonflies over the mire by day: one darts through the hero
+            var flies = Spot("dragonflies");
+            var fly = FindEnemy("dragonfly", flies != null ? (Vector2)flies.position : new Vector2(139f, 29f)) as DragonflyAI;
+            if (fly != null)
+            {
+                Place(p, (Vector2)fly.transform.position + new Vector2(-2.8f, -1.2f));
+                yield return Wait(1.4f);
+                yield return Shot("dragonflies");
+                fly.DebugDart(p);
+                yield return Wait(0.3f);
+                yield return Shot("dragonfly_windup");
+                yield return Wait(0.3f);
+                yield return Shot("dragonfly_dart");
+                yield return Wait(1f);
             }
 
             // Cóc Tía
@@ -280,8 +312,33 @@ namespace RPG
                 yield return Wait(1.5f);
             }
 
-            // the swamp at night, and home through the stones
+            // the swamp at night: the dragonflies are gone and Ma Trơi come out
             if (dn != null) dn.time = 0.02f;
+            var haunt = Spot("wisps");
+            Vector2 hauntAt = haunt != null ? (Vector2)haunt.position : new Vector2(147f, 40f);
+            Place(p, hauntAt + new Vector2(-5.5f, -1.5f));
+            WispAI wisp = null;
+            for (float waited = 0f; waited < 10f && wisp == null; waited += 0.25f)
+            {
+                yield return Wait(0.25f);
+                wisp = FindEnemy("wisp", hauntAt) as WispAI;
+            }
+            if (wisp != null)
+            {
+                yield return Wait(1.2f);
+                yield return Shot("wisps_at_night");
+                Place(p, (Vector2)wisp.transform.position + new Vector2(-3f, -0.6f));
+                yield return Wait(1.6f);
+                yield return Shot("wisp_lure");
+                wisp.DebugSwell(p);
+                yield return Wait(0.5f);
+                yield return Shot("wisp_swell");
+                yield return Wait(0.5f);
+                yield return Shot("wisp_burst");
+                yield return Wait(1f);
+            }
+
+            // home through the stones
             if (outpost != null)
             {
                 Place(p, outpost.Arrival + new Vector2(0.6f, 0f));

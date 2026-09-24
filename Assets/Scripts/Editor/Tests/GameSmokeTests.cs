@@ -376,7 +376,8 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator ChargeDischargesIntoEnemiesNearby()
         {
-            var enemies = EnemyBase.All.FindAll(e => !e.IsDead);
+            // three that can be hit (a water snake under the water cannot)
+            var enemies = EnemyBase.All.FindAll(e => !e.IsDead && !e.health.invulnerable);
             Assert.GreaterOrEqual(enemies.Count, 3, "three enemies in the zone");
             Vector2 at = new Vector2(500f, 500f);   // an empty spot outside the map
             enemies[0].motor.Teleport(at);

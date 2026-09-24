@@ -938,6 +938,48 @@ def _tongue(rng):
     return y
 
 
+@sfx("sfx_buzz")
+def _buzz(rng):
+    """A dragonfly darting past: a papery wing whirr that swells and passes."""
+    n = ns(0.45)
+    t = tvec(n)
+    f = 95 + 40 * np.sin(np.pi * np.clip(t / 0.45, 0, 1))
+    ph, _ = phase(f, n)
+    flap = 0.5 + 0.5 * np.sin(TAU * ph)
+    whirr = rmsn(bp(white(n, rng), 2400 + 900 * np.sin(np.pi * t / 0.45), 1.6)) * flap ** 2
+    body = rmsn(lp(osc("saw", f * 2, n), 900, 0.9)) * 0.35
+    return (whirr + body) * env_hump(n, 0.45, 1.6, 1.8)
+
+
+@sfx("sfx_wisp")
+def _wisp(rng):
+    """Ma Trơi slipping away: a breathy cold whoosh and a few glassy chimes that bend down."""
+    n = ns(0.9)
+    t = tvec(n)
+    breath = whoosh(n, rng, [(0, 900), (0.4, 2600), (1, 700)], q=1.4, peak=0.4, rise=1.5, fall=2.2)
+    y = 0.7 * breath
+    for i, name in enumerate(("E6", "B5", "G5")):
+        m = ns(0.6)
+        bend = 2 ** (-0.18 * tvec(m) / 0.6)
+        ph, _ = phase(nf(name) * bend, m)
+        tone = np.sin(TAU * ph) * np.exp(-tvec(m) / 0.22) * ramp_in(m, 0.01)
+        place(y, 0.35 * tone, (0.05 + i * 0.12) * SR)
+    return reverb(y, 0.4, 1.4, seed=71)
+
+
+@sfx("sfx_wisp_burst")
+def _wisp_burst(rng):
+    """Ma Trơi bursting: a hollow cold pop, a rush of air and scattering glassy sparks."""
+    n = ns(1.1)
+    t = tvec(n)
+    pop = thump(n, 260, 70, 0.09, 0.02)
+    rush = rmsn(bp(white(n, rng), 3200 * np.exp(-t / 0.25) + 500, 0.9)) * env_perc(n, 0.004, 0.22)
+    hollow = rmsn(bp(pink(n, rng), 700, 5.0)) * env_perc(n, 0.002, 0.15)
+    glass = sparkles(n, rng, 18, 0.02, 0.6, 2500, 6500, tau=0.05, shape=1.6)
+    y = 0.9 * pop + 0.7 * rush + 0.5 * hollow + 0.35 * glass
+    return reverb(y, 0.35, 1.5, seed=73)
+
+
 @sfx("sfx_waystone")
 def _waystone(rng):
     """A standing stone waking: a soft bell chord with a rising shimmer."""
@@ -1900,6 +1942,7 @@ SFX_NAMES = [
     "sfx_telegraph", "sfx_stun", "sfx_step", "sfx_denied", "sfx_levelup", "sfx_enrage",
     "sfx_boulder_break", "sfx_lightning_charge",
     "sfx_croak", "sfx_splash", "sfx_wade", "sfx_hiss", "sfx_spit", "sfx_splat", "sfx_mud_slam", "sfx_tongue", "sfx_waystone",
+    "sfx_buzz", "sfx_wisp", "sfx_wisp_burst",
 ]
 # name, builder, allowed duration range (s), target peak dBFS
 MUSIC = [

@@ -341,6 +341,9 @@ namespace RPG.EditorTools
                 Item("toad_crown", "Vương Miện Cóc Tía", M, ItemRarity.Rare, "Chiếc vương miện vàng méo mó của Cóc Tía, dính đầy nhựa độc.", 150),
                 Item("snake_scale", "Vảy Xà Mẫu", M, ItemRarity.Rare, "Vảy lục thẫm cứng hơn thép, phản chiếu ánh sương.", 160),
                 Item("snake_fang", "Nanh Xà Mẫu", M, ItemRarity.Epic, "Chiếc nanh dài của Xà Mẫu Đầm Lầy, nọc vẫn còn nhỏ giọt.", 320),
+                Item("wsnake_skin", "Da Rắn Nước", M, ItemRarity.Common, "Lớp da lột xanh ô liu, còn nguyên những khoanh vằn sẫm.", 6),
+                Item("dragonfly_wing", "Cánh Chuồn Chuồn", M, ItemRarity.Common, "Cánh mỏng như sương, gân xanh chằng chịt. Chạm nhẹ là rung.", 5),
+                Item("wisp_essence", "Tinh Chất Ma Trơi", M, ItemRarity.Uncommon, "Một đốm lửa lạnh nhốt trong bình, không bao giờ tắt.", 18),
             };
         }
 
@@ -743,6 +746,25 @@ namespace RPG.EditorTools
                 q.gold = 50;
                 q.items.Add(Reward("potion_red", 3));
             });
+            var swampHunters = Quest("swamp_hunters", "Truy Nã: Rắn Nước Và Chuồn Chuồn Kim", QuestKind.Bounty, q =>
+            {
+                q.summary = "Rắn Nước rình dưới các vũng nước, ban ngày Chuồn Chuồn Kim lượn trên mặt đầm. Ngư dân không dám ra lưới.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "watersnake", 3, "Hạ Rắn Nước", "snakepools"));
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "dragonfly", 4, "Hạ Chuồn Chuồn Kim (ban ngày)", "dragonflies"));
+                q.xp = 360;
+                q.gold = 45;
+                q.items.Add(Reward("potion_blue", 2));
+            });
+            var swampWisps = Quest("swamp_wisps", "Ánh Lửa Ma Trơi", QuestKind.Bounty, q =>
+            {
+                q.summary = "Đêm xuống, Ma Trơi dụ người đi lạc vào giữa đầm rồi nổ tung. Hạ chúng trước khi chúng kịp nổ: con nào tự nổ thì không tính.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "wisp", 3, "Hạ Ma Trơi (chỉ có ban đêm)", "wisps"));
+                q.xp = 420;
+                q.gold = 60;
+                q.items.Add(Reward("lotus", 2));
+            });
             var toadKing = Quest("slay_toadking", "Cóc Tía Ao Độc", QuestKind.Bounty, q =>
             {
                 q.summary = "Cóc Tía ngự giữa Ao Cóc Tía phía bắc đầm. Lưỡi nó kéo người vào vũng độc.";
@@ -792,7 +814,9 @@ namespace RPG.EditorTools
             Link(toadKing, swampToads, null);
             Link(snake, swampMud, null);
             Link(snake, toadKing, null);
-            return new List<QuestDef> { talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake };
+            Link(swampHunters, swampRoad, null);
+            Link(swampWisps, swampRoad, null);
+            return new List<QuestDef> { talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake, swampHunters, swampWisps };
         }
 
         // ------------------------------------------------------------------ database

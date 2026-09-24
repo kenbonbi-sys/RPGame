@@ -537,12 +537,373 @@ def build_snake():
     return A
 
 
+# ============================================================================
+# Rắn Nước: an olive water snake that waits under the water and lunges out
+# ============================================================================
+
+WSW, WSH, WSB = 32, 24, 21
+
+C["wsnake"] = ramp("#0b140c", "#142410", "#1f3616", "#2c4a1c", "#3e6224", "#557c2e", "#72983c")
+C["wsnake_belly"] = ramp("#4e4018", "#7c682a", "#aa9040", "#d6ba5e")
+C["wsnake_band"] = ramp("#070a08", "#0f1610", "#182216")
+RIPPLE = (hx("#9ccab8", 210), hx("#5a9282", 170))
+
+
+def water_snake(phase=0.0, neck=1.0, coil=0.0, stretch=0.0, mouth=0, eyes="open", hidden=0.0, ripple=0.0, dead=0.0):
+    """Facing right, tail to the left. neck: the head raised (0..1); coil: drawn back in an S
+    before a lunge; stretch: straightened out in the lunge; hidden: under the water, only the top
+    of the head, the eyes and rings on the water show; dead: lying limp with the belly up."""
+    cv = Canvas(WSW, WSH)
+    sk, bl, bnd = C["wsnake"], C["wsnake_belly"], C["wsnake_band"]
+    if hidden > 0:
+        # the body a dark shape under the surface, the head just breaking it
+        wy = WSB - 2
+        under = layer(WSW, WSH)
+        for i in range(9):
+            t = i / 8
+            x = 6 + t * 16
+            y = wy + 0.5 + math.sin(t * 5.5 + phase) * 0.9
+            under.ellipse(x, y, 1.8, 1.0, (10, 34, 28, 95))
+        cv.blit(under, 0, 0)
+        hx0, hy0 = 20.5, wy - 0.2 + (1 - hidden) * -1.5
+        hd = layer(WSW, WSH)
+        shaded_ellipse(hd, hx0, hy0, 3.0, 2.3, sk[2:], dither=0.25, bias=0.08)
+        shaded_ellipse(hd, hx0 + 2.2, hy0 + 0.4, 1.8, 1.5, sk[2:], dither=0.25, bias=0.08)
+        for y in range(int(wy) + 1, WSH):
+            for x in range(WSW):
+                hd.clear(x, y)
+        comp(cv, hd, OUT)
+        # two watchful eyes just above the surface
+        ex, ey = int(hx0 - 0.4), int(hy0 - 1.2)
+        for dx in (0, 2):
+            cv.px(ex + dx, ey, hx("#ffe36a"))
+            cv.px(ex + dx, ey + 1, hx("#c89a2a"))
+            cv.px(ex + dx + 1, ey, OUTLINE)
+        # rings spreading on the water
+        for k, rr in enumerate((2.5 + ripple * 3.5, 5.0 + ripple * 3.5)):
+            if rr > 9.0:
+                continue
+            col = RIPPLE[k % 2]
+            for a in range(56):
+                ang = a / 56 * math.tau
+                x = hx0 - 1 + math.cos(ang) * rr
+                y = wy + 0.8 + math.sin(ang) * rr * 0.34
+                if not hd.opaque(int(x), int(y)):
+                    cv.px(int(x), int(y), col)
+        return cv
+
+    L = 17.0 + stretch * 7.0 - coil * 5.0
+    x0 = 14.0 - L / 2 - 2.0 + stretch * 2.0 - coil * 1.0
+    amp = (1.4 + coil * 1.9) * (1 - stretch * 0.85) * (1 - dead * 0.6)
+    lift = neck * (1 - stretch * 0.6) * (1 - dead)
+    spine = []
+    n = 16
+    for i in range(n + 1):
+        t = i / n
+        x = x0 + t * L
+        y = WSB - 2.3 + amp * math.sin(t * math.pi * (2.3 + coil * 1.4) + phase) * (0.35 + 0.65 * (1 - t))
+        if t > 0.66:
+            k = (t - 0.66) / 0.34
+            y -= lift * 6.5 * k ** 1.4
+            x -= coil * 2.5 * k
+        r = 0.65 + 1.45 * math.sin(math.pi * min(1.0, t * 0.9 + 0.08)) ** 0.55
+        spine.append((x, y, r))
+    body = layer(WSW, WSH)
+    for (ax, ay, ar), (bx, by, br) in zip(spine, spine[1:]):
+        shaded_capsule(body, ax, ay, bx, by, (ar + br) / 2, bl if dead > 0.5 else sk, dither=0.3, bias=0.03)
+    if dead <= 0.5:
+        # the pale belly along the underside, the dark bands across the back
+        for x in range(WSW):
+            for y in range(WSH - 1, -1, -1):
+                if body.opaque(x, y):
+                    body.px(x, y, bl[1])
+                    if body.opaque(x, y - 1):
+                        body.px(x, y - 1, bl[2] if x % 2 else bl[1])
+                    break
+        for i in range(3, n - 3, 4):
+            bx, by, br = spine[i]
+            for dy in range(-int(br) - 1, int(br) + 1):
+                px_, py_ = int(bx), int(by + dy)
+                if body.opaque(px_, py_) and body.get(px_, py_)[:3] not in (bl[1][:3], bl[2][:3]):
+                    body.px(px_, py_, bnd[1] if dy < 0 else bnd[2])
+    comp(cv, body, OUT)
+    # the head at the end of the neck: broad at the back, a narrow snout
+    hx0, hy0, hr = spine[-1]
+    hx0 += 1.8 + stretch * 1.2
+    hy0 += 0.2 + (1.5 if dead > 0.5 else 0)
+    hd = layer(WSW, WSH)
+    shaded_ellipse(hd, hx0, hy0, 2.8, 2.1, sk[1:], dither=0.25, bias=0.06)
+    shaded_ellipse(hd, hx0 + 2.1, hy0 + 0.4, 1.7, 1.35, sk[1:], dither=0.25, bias=0.06)
+    comp(cv, hd, OUT)
+    ex, ey = int(hx0 + 0.6), int(hy0 - 0.9)
+    if eyes == "open":
+        cv.px(ex, ey, hx("#f4d84a"))
+        cv.px(ex + 1, ey, OUTLINE)
+    elif eyes == "angry":
+        cv.px(ex, ey, hx("#ff7a3a"))
+        cv.px(ex + 1, ey, OUTLINE)
+        cv.px(ex - 1, ey - 1, sk[0])
+        cv.px(ex, ey - 1, sk[0])
+    else:
+        cv.px(ex, ey - 1, OUTLINE); cv.px(ex + 1, ey, OUTLINE); cv.px(ex, ey + 1, OUTLINE)
+    my = int(hy0 + 1)
+    if mouth > 0:
+        # jaws apart: a dark red gape and two white fangs
+        for k in range(mouth + 1):
+            for x in range(int(hx0 + 1), int(hx0 + 4 - k * 0.5) + 1):
+                cv.px(x, my + k, hx("#5a1020") if k else hx("#1e0610"))
+        cv.px(int(hx0 + 3), my + 1, P["bone"][3])
+        cv.px(int(hx0 + 1), my + 1, P["bone"][3])
+        cv.px(int(hx0 + 2), my + mouth + 1, sk[2])
+        cv.px(int(hx0 + 3), my + mouth + 1, sk[3])
+    else:
+        for x in range(int(hx0 + 1), int(hx0 + 4)):
+            cv.px(x, my, sk[0])
+        if phase > 3.5 and dead == 0:
+            # the forked tongue flicks out now and then
+            cv.px(int(hx0 + 4), my, hx("#e0506a"))
+            cv.px(int(hx0 + 5), my - 1, hx("#e0506a"))
+            cv.px(int(hx0 + 5), my + 1, hx("#e0506a"))
+    return cv
+
+
+def build_water_snake():
+    A = {}
+    A["idle"] = [water_snake(phase=0.0), water_snake(phase=1.3, neck=0.9), water_snake(phase=4.0, neck=1.0)]
+    A["move"] = [water_snake(phase=p, neck=0.45) for p in (0.0, 1.57, 3.14, 4.71)]
+    A["windup"] = [water_snake(coil=0.7, neck=1.1, eyes="angry"), water_snake(coil=1.0, neck=1.2, mouth=1, eyes="angry")]
+    A["attack"] = [water_snake(stretch=1.0, neck=0.4, mouth=3, eyes="angry"), water_snake(stretch=0.6, neck=0.6, mouth=1)]
+    A["hidden"] = [water_snake(hidden=1.0, ripple=0.0, phase=0.0), water_snake(hidden=1.0, ripple=0.5, phase=1.6)]
+    A["hurt"] = [water_snake(neck=0.5, coil=0.4, eyes="x")]
+    A["dead"] = [water_snake(neck=0.2, eyes="x", dead=0.4), water_snake(neck=0.0, eyes="x", dead=1.0)]
+    return A
+
+
+# ============================================================================
+# Chuồn Chuồn Kim: a needle-thin dragonfly that darts in, stings and flies off
+# ============================================================================
+
+C["dfly"] = ramp("#07162a", "#0e2e52", "#15507c", "#1f74a4", "#3a9cc8", "#6cc6e4")
+C["dfly_eye"] = ramp("#0a2418", "#12583a", "#22945a", "#58d890", "#b8ffd6")
+C["dfly_thorax"] = ramp("#0a1c1c", "#123a36", "#1c5c4c", "#2a8466", "#48ae82")
+WING = (hx("#e6f6ff", 125), hx("#b4d8ee", 95), hx("#7aa6c4", 165), hx("#ffffff", 190))
+
+
+def _wing(cv, ax, ay, bx, by, w, flap=1.0):
+    """A long translucent wing from its root (a) to its tip (b), a vein along it."""
+    vx, vy = bx - ax, by - ay
+    L2 = vx * vx + vy * vy + 1e-6
+    L = math.sqrt(L2)
+    for y in range(int(min(ay, by) - w - 1), int(max(ay, by) + w + 2)):
+        for x in range(int(min(ax, bx) - w - 1), int(max(ax, bx) + w + 2)):
+            px_, py_ = x + 0.5, y + 0.5
+            t = ((px_ - ax) * vx + (py_ - ay) * vy) / L2
+            if t < 0 or t > 1:
+                continue
+            d = abs((px_ - ax) * vy - (py_ - ay) * vx) / L
+            half = w * 0.5 * math.sin(math.pi * min(1.0, t * 1.08)) ** 0.55 * flap + 0.35
+            if d > half:
+                continue
+            if d > half - 0.8:
+                cv.px(x, y, WING[2])
+            elif d < 0.5 and t < 0.85:
+                cv.px(x, y, WING[1])
+            else:
+                cv.px(x, y, WING[0])
+    cv.px(int(bx), int(by), WING[3])
+
+
+def dragonfly(wing=0, tilt=0.0, curl=0.0, stretch=0.0, eyes="open", dead=0.0, streak=False):
+    """Seen from the side and a little above, facing right, drawn in the middle of its frame (the
+    prefab lifts it off the ground). wing 0/1/2: up, level, down; curl: the tail lifted to aim;
+    stretch: straightened in a dart; dead: tumbling down, wings folded."""
+    FW, FH = 24, 24
+    cv = Canvas(FW, FH)
+    by = 13.0 + tilt
+    tx, ty = 15.0 + stretch * 1.5, by - 0.5            # thorax
+    hx0, hy0 = tx + 3.4 + stretch, by - 1.2 + tilt * 0.5 # head
+    # wings behind the body first (the far pair)
+    wings = layer(FW, FH)
+    if dead < 0.5:
+        if streak:
+            tips = [(tx - 9, ty - 3), (tx - 10, ty - 1)]
+        else:
+            tips = [(tx - 3, ty - 9), (tx - 8, ty - 6)] if wing == 0 else \
+                   [(tx - 8, ty - 3), (tx - 10, ty - 1.5)] if wing == 1 else [(tx - 5, ty + 5), (tx - 8, ty + 3)]
+        for i, (bx_, by_) in enumerate(tips):
+            _wing(wings, tx - 0.5 - i, ty - 1, bx_, by_, 3.2 if i == 0 else 2.8, 0.7 if streak else 1.0)
+    else:
+        _wing(wings, tx, ty - 1, tx - 7, ty - 2, 2.0, 0.6)
+    cv.blit(wings, 0, 0)
+    # the abdomen: a thin needle, blue with black rings
+    ab = layer(FW, FH)
+    L = 11.0 + stretch * 2.5
+    segs = 12
+    prev = None
+    for i in range(segs + 1):
+        t = i / segs
+        x = tx - 1.5 - t * L
+        y = ty + 0.3 - curl * 5.0 * t ** 2 + tilt * t * 0.8 + dead * 3.0 * t ** 2
+        if prev is not None:
+            shaded_capsule(ab, prev[0], prev[1], x, y, 1.05 - t * 0.35, C["dfly"], dither=0.2, bias=0.05)
+        prev = (x, y)
+    for i in range(1, segs, 2):
+        t = i / segs
+        x = int(tx - 1.5 - t * L)
+        y = ty + 0.3 - curl * 5.0 * t ** 2 + tilt * t * 0.8 + dead * 3.0 * t ** 2
+        for dy in (-1, 0, 1):
+            if ab.opaque(x, int(y + dy)):
+                ab.px(x, int(y + dy), C["dfly"][0])
+    comp(cv, ab, OUT)
+    # thorax, legs and the big head of eyes
+    th = layer(FW, FH)
+    shaded_ellipse(th, tx, ty, 2.6, 2.2, C["dfly_thorax"], dither=0.25, bias=0.04)
+    comp(cv, th, OUT)
+    for k in range(3):
+        lx = int(tx - 1 + k)
+        cv.px(lx, int(ty + 2.5), OUTLINE)
+        cv.px(lx + (1 if k == 2 else 0), int(ty + 3.4), OUTLINE)
+    hd = layer(FW, FH)
+    shaded_ellipse(hd, hx0, hy0, 2.3, 2.3, C["dfly_eye"], dither=0.25, bias=0.08)
+    comp(cv, hd, OUT)
+    if eyes == "open":
+        cv.px(int(hx0), int(hy0 - 1), C["dfly_eye"][4])
+        cv.px(int(hx0 + 1), int(hy0 - 1), hx("#ffffff"))
+    elif eyes == "x":
+        cv.px(int(hx0), int(hy0), OUTLINE)
+        cv.px(int(hx0 + 1), int(hy0 - 1), OUTLINE)
+        cv.px(int(hx0 + 1), int(hy0 + 1), OUTLINE)
+    cv.px(int(hx0 + 1.5), int(hy0 + 1.6), hx("#3a1a10"))
+    # the near pair of wings over the body
+    near = layer(FW, FH)
+    if dead < 0.5:
+        if streak:
+            tips = [(tx - 8, ty - 5), (tx - 11, ty - 2.5)]
+        else:
+            tips = [(tx - 1, ty - 10), (tx - 6, ty - 8)] if wing == 0 else \
+                   [(tx - 9, ty - 4.5), (tx - 11, ty - 3)] if wing == 1 else [(tx - 3, ty + 6), (tx - 7, ty + 4.5)]
+        for i, (bx_, by_) in enumerate(tips):
+            _wing(near, tx + 0.5 - i, ty - 1.5, bx_, by_, 3.4 if i == 0 else 3.0, 0.7 if streak else 1.0)
+    cv.blit(near, 0, 0)
+    if streak:
+        # a pale trail behind a dart
+        for k in range(6):
+            cv.px(int(tx - 12 - k), int(ty + (k % 2)), (200, 240, 255, 150 - k * 22))
+    return cv
+
+
+def build_dragonfly():
+    A = {}
+    A["idle"] = [dragonfly(wing=0), dragonfly(wing=1), dragonfly(wing=2)]
+    A["move"] = [dragonfly(wing=0, tilt=1.0), dragonfly(wing=1, tilt=1.0), dragonfly(wing=2, tilt=1.0)]
+    A["windup"] = [dragonfly(wing=1, curl=0.6), dragonfly(wing=2, curl=1.0, tilt=-0.5)]
+    A["attack"] = [dragonfly(stretch=1.0, streak=True, tilt=0.5), dragonfly(stretch=0.6, wing=1)]
+    A["hurt"] = [dragonfly(wing=2, curl=0.4, eyes="x")]
+    A["dead"] = [dragonfly(eyes="x", dead=0.6, tilt=2.0), dragonfly(eyes="x", dead=1.0, tilt=4.0)]
+    return A
+
+
+# ============================================================================
+# Ma Trơi: a floating ghost-fire that lures heroes astray, then bursts
+# ============================================================================
+
+C["wisp"] = ramp("#1a1450", "#20368a", "#1f64b4", "#26a0d4", "#5ad6e8", "#b4f6f2", "#ffffff")
+
+
+def wisp(flick=0, swell=0.0, lean=0.0, eyes="open", burst=0.0, dim=0.0):
+    """A teardrop of cold blue fire with a white heart and two hollow eyes, floating in the
+    middle of its frame. flick: which flicker of the flame's tips; swell: puffing up before it
+    bursts; lean: trailing behind as it drifts; burst: breaking apart into sparks."""
+    FW, FH = 24, 32
+    cv = Canvas(FW, FH)
+    w = C["wisp"]
+    cx, cy = 12.0, 20.0
+    r = 4.6 * (1 + swell * 0.45) * (1 - burst * 0.4)
+    if burst > 0:
+        rnd = random.Random(11 + int(burst * 10))
+        for i in range(int(10 + burst * 8)):
+            ang = rnd.uniform(0, math.tau)
+            dist = r * 0.3 + burst * rnd.uniform(5, 10)
+            x, y = cx + math.cos(ang) * dist, cy - 2 + math.sin(ang) * dist * 0.8
+            cv.px(int(x), int(y), w[rnd.randint(4, 6)])
+            if burst < 0.7:
+                cv.px(int(x) + 1, int(y), w[4])
+        if burst >= 0.7:
+            return cv
+    fl = layer(FW, FH)
+    rnd = random.Random(40 + flick)
+    # the flame: a round belly narrowing into flickering tongues that trail up and back
+    for y in range(FH):
+        for x in range(FW):
+            px_, py_ = x + 0.5, y + 0.5
+            dy = py_ - cy
+            up = max(0.0, -dy)
+            sway = math.sin(up * 0.55 + flick * 1.7) * (0.6 + up * 0.18) - lean * up * 0.35
+            dx = px_ - (cx + sway)
+            if dy >= 0:
+                inside = (dx / r) ** 2 + (dy / (r * 0.95)) ** 2 <= 1.0
+                heat = 1 - math.sqrt((dx / r) ** 2 + (dy / r) ** 2)
+            else:
+                half = r * max(0.0, 1 - (up / (r * 2.4 + flick % 2)) ** 0.8)
+                inside = abs(dx) <= half
+                heat = (1 - abs(dx) / max(half, 0.01)) * max(0.0, 1 - up / (r * 2.6))
+            if not inside:
+                continue
+            heat = heat * (1 - dim * 0.5) + swell * 0.25
+            idx = shade_index(heat * 2 - 1, len(w) - 1, x, y, 0.35, 0.05) + (1 if heat > 0.55 else 0)
+            fl.px(x, y, w[min(len(w) - 1, idx)])
+    # a few loose sparks rising off the tips
+    for i in range(3):
+        sx = cx + rnd.uniform(-2.5, 2.5) - lean * 2
+        sy = cy - r * 2.2 - rnd.uniform(0, 4)
+        fl.px(int(sx), int(sy), w[4 + (i % 2)])
+    cv.blit(fl, 0, 0)
+    # a thin dark rim only where it meets nothing, so it reads at night and by day
+    rim = cv.copy()
+    rim.a[:, :, :] = 0
+    m = cv.mask()
+    for y in range(FH):
+        for x in range(FW):
+            if m[y, x]:
+                continue
+            near = any(0 <= y + dy < FH and 0 <= x + dx < FW and m[y + dy, x + dx] for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+            if near:
+                rim.px(x, y, (16, 20, 60, 150))
+    cv.blit(rim, 0, 0)
+    # hollow eyes and a small round mouth
+    ey = int(cy - 0.5)
+    for sgn in (-1, 1):
+        ex = int(cx + sgn * 1.8 - (1 if sgn > 0 else 0) + lean * -0.5)
+        if eyes == "open":
+            cv.px(ex, ey, w[0]); cv.px(ex, ey + 1, w[0])
+        elif eyes == "angry":
+            cv.px(ex, ey, w[0]); cv.px(ex, ey + 1, w[0]); cv.px(ex + sgn, ey - 1, w[0])
+        else:
+            cv.px(ex, ey, w[1])
+    if eyes == "angry" or swell > 0.5:
+        cv.px(int(cx), ey + 3, w[0]); cv.px(int(cx) - 1, ey + 3, w[0]); cv.px(int(cx), ey + 4, w[0]); cv.px(int(cx) - 1, ey + 4, w[0])
+    else:
+        cv.px(int(cx) - (1 if lean > 0 else 0), ey + 3, w[1])
+    return cv
+
+
+def build_wisp():
+    A = {}
+    A["idle"] = [wisp(flick=k) for k in range(4)]
+    A["move"] = [wisp(flick=k, lean=1.0) for k in range(4)]
+    A["attack"] = [wisp(flick=0, swell=0.4, eyes="angry"), wisp(flick=1, swell=0.8, eyes="angry"), wisp(flick=2, swell=1.1, eyes="angry")]
+    A["hurt"] = [wisp(flick=1, dim=1.0, eyes="x")]
+    A["dead"] = [wisp(flick=0, burst=0.3, eyes="x"), wisp(flick=1, burst=0.6, eyes="x"), wisp(flick=2, burst=0.9)]
+    return A
+
+
 if __name__ == "__main__":
     import os, sys
     from pixelkit import preview, pack_grid
     out = sys.argv[1] if len(sys.argv) > 1 else "."
     for name, fn in (("toad", build_toad), ("leech", build_leech), ("mudman", build_mudman), ("mudling", build_mudling),
-                     ("toadking", build_toad_king), ("snake", build_snake)):
+                     ("toadking", build_toad_king), ("snake", build_snake), ("watersnake", build_water_snake),
+                     ("dragonfly", build_dragonfly), ("wisp", build_wisp)):
         A = fn()
         frames = [f for k in A for f in A[k]]
         sheet = pack_grid(frames, 8)
