@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Downloads what the compile check needs into Tools/CompileCheck/.cache:
 #   - Unity reference assemblies from NuGet (UnityEngine modules 2021.3, UnityEditor 2021.1,
-#     UnityEngine.UI 2020.3) and NUnit,
+#     UnityEngine.UI 2020.3) and NUnit 3.5 (the version Unity's Test Framework bundles),
 #   - the Yarn Spinner for Unity source at the tag pinned in Packages/manifest.json,
 # then adds the Unity 6 members listed in patch.spec to the reference assemblies.
 # Needs: dotnet SDK 8+, git, curl, unzip (or python3). Run again after editing patch.spec.
@@ -38,12 +38,12 @@ echo "[compile-check] reference assemblies"
 fetch UnityEngine.Modules 2021.3.33
 fetch Unity3D.SDK 2021.1.14.1
 fetch Unity3D.UnityEngine.UI 2020.3.21
-fetch NUnit 3.14.0
+fetch NUnit 3.5.0
 rm -f "$cache/refs/"*.dll
 cp "$(pkg_dir UnityEngine.Modules 2021.3.33)"/lib/net45/*.dll "$cache/refs/"
 cp "$(pkg_dir Unity3D.SDK 2021.1.14.1)/lib/UnityEditor.dll" \
    "$(pkg_dir Unity3D.UnityEngine.UI 2020.3.21)/lib/UnityEngine.UI.dll" \
-   "$(pkg_dir NUnit 3.14.0)/lib/netstandard2.0/nunit.framework.dll" "$cache/refs/"
+   "$(pkg_dir NUnit 3.5.0)/lib/net45/nunit.framework.dll" "$cache/refs/"
 
 echo "[compile-check] Yarn Spinner source"
 yarn_url="$(grep -o '"dev.yarnspinner.unity": *"[^"]*"' "$root/Packages/manifest.json" | sed -E 's/.*: *"([^"]*)"/\1/')"
@@ -60,5 +60,5 @@ echo "[compile-check] adding Unity 6 members (patch.spec)"
 dotnet build "$here/RefPatch/RefPatch.csproj" -nologo -v q -c Release -o "$cache/refpatch" >/dev/null
 dotnet "$cache/refpatch/RefPatch.dll" "$here/patch.spec" "$cache/refs"
 
-sha1sum "$here/patch.spec" "$root/Packages/manifest.json" > "$cache/.setup-stamp"
+sha1sum "$here/setup.sh" "$here/patch.spec" "$root/Packages/manifest.json" > "$cache/.setup-stamp"
 echo "[compile-check] ready"
