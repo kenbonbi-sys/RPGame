@@ -8,8 +8,9 @@ namespace RPG
         /// <summary>
         /// Casts toward <paramref name="aim"/> (already clamped to range by the caller).
         /// Costs and cooldowns are the caller's business (PlayerSkills for the hero).
+        /// <paramref name="damageMultiplier"/> scales every hit of this cast.
         /// </summary>
-        public static AbilityContext Cast(AbilityDef ability, IAbilityCaster caster, Vector2 aim, int level = 1)
+        public static AbilityContext Cast(AbilityDef ability, IAbilityCaster caster, Vector2 aim, int level = 1, float damageMultiplier = 1f)
         {
             if (ability == null || caster == null) return null;
             Vector2 origin = caster.Runner.transform.position;
@@ -25,7 +26,8 @@ namespace RPG
                 origin = origin,
                 aim = aim,
                 dir = dir,
-                point = aim
+                point = aim,
+                damageMultiplier = damageMultiplier
             };
             caster.BeginAction(ability.animBase, dir, ability.lockTime, ability.moveWhileCasting);
             if (!string.IsNullOrEmpty(ability.castSfx)) AudioManager.Play(ability.castSfx, 0.9f, 0.06f);

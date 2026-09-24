@@ -213,8 +213,10 @@ namespace RPG
                 yield return Shot("blade_storm");
                 Prep(p);
                 p.skills.TryCast(5, p.transform.position);
+                yield return Wait(p.ActionRemaining + 0.02f);   // Hồi Phục waits for the Khiên Thánh pose to end
+                Prep(p);
                 p.skills.TryCast(4, p.transform.position);
-                yield return Wait(0.5f);
+                yield return Wait(0.2f);
                 yield return Shot("shield_heal");
                 yield return Wait(2.5f);
             }

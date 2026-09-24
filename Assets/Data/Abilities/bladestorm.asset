@@ -22,6 +22,7 @@ MonoBehaviour:
   targeting: 2
   maxRange: 12
   lockTime: 0.2
+  commitTime: 0.1
   animBase: attack
   moveWhileCasting: 0.9
   castSfx: 
@@ -82,11 +83,17 @@ MonoBehaviour:
           knockback: 1.2
           poise: 2
           hitStop: 0
-          stun: 0
-          slow: 0
-          slowDuration: 2
-          burnPower: 0
-          burnDuration: 3
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
         onAnyHit:
         - rid: 8556425323349540887
     - rid: 8556425323349540887

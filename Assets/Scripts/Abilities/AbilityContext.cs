@@ -45,6 +45,8 @@ namespace RPG
         public Health target;
         /// <summary>Size multiplier handed down by Line blocks (growing spikes).</summary>
         public float scale = 1f;
+        /// <summary>Damage multiplier of this one cast (the skill after Lướt Hoàn Hảo: ×1.3).</summary>
+        public float damageMultiplier = 1f;
 
         public Team Team => caster.Team;
         public Transform CasterTransform => caster.Runner.transform;
@@ -62,8 +64,8 @@ namespace RPG
             return c;
         }
 
-        /// <summary>What power 1 is worth for an element: the ability's level scaling × the caster's Attack × damage bonuses.</summary>
-        public float HitScale(DamageType type) => PowerScale * caster.Attack(type) * caster.DamageDealt(ability);
+        /// <summary>What power 1 is worth for an element: the ability's level scaling × the caster's Attack × damage bonuses × this cast's multiplier.</summary>
+        public float HitScale(DamageType type) => PowerScale * caster.Attack(type) * caster.DamageDealt(ability) * damageMultiplier;
 
         /// <summary>A hit worth <paramref name="power"/> × the caster's Attack for its element.</summary>
         public DamageInfo MakeDamage(float power, DamageType type, Vector2 at, Vector2 direction, float knockback = 0f)

@@ -61,12 +61,31 @@ namespace RPG
             Vector3 p = (Vector3)d.point + Vector3.up * 0.5f;
             string fx = d.type == DamageType.Fire ? "hit_fire" : d.type == DamageType.Ice ? "hit_ice" : d.type == DamageType.Lightning ? "hit_lightning" : "hit_spark";
             VFX.Spawn(fx, p, Quaternion.Euler(0, 0, Random.Range(0, 360f)));
-            if (d.hitStop > 0) TimeFX.HitStop(d.hitStop);
+            float stop = HitStopFor(h, d);
+            if (stop > 0) TimeFX.HitStop(stop);
             if (d.crit)
             {
                 CameraRig.Shake(0.12f);
                 AudioManager.Play("sfx_crit", 0.6f, 0.05f, p);
             }
+        }
+
+        /// <summary>
+        /// Hit-stop of plan §04 in three tiers (<see cref="CombatConfig"/>): a hit keeps its own, the
+        /// light 35 ms of a swing or the heavy 70 ms of a combo finisher. The hero's crits on hits
+        /// that have a hit-stop are at least heavy. A kill is at least light, and the killing blow on
+        /// a boss or elite (whoever has a Thanh Trấn Áp) gets the 120 ms of a break. Hits without
+        /// their own hit-stop (pulses, storms) stay without one unless they kill, so they never
+        /// stutter. Enemies' hits keep their own.
+        /// </summary>
+        public static float HitStopFor(Health target, DamageInfo d)
+        {
+            float s = d.hitStop;
+            if (d.sourceTeam != Team.Player || target == null) return s;
+            var c = CombatConfig.Current;
+            if (d.crit && s > 0f) s = Mathf.Max(s, c.hitStopHeavy);
+            if (target.IsDead) s = Mathf.Max(s, target.GetComponent<Poise>() != null ? c.hitStopBreak : c.hitStopLight);
+            return s;
         }
     }
 }

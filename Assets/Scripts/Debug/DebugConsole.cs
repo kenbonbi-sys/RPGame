@@ -136,6 +136,29 @@ namespace RPG
         // ------------------------------------------------------------------ commands
         static PlayerController Hero => GameManager.I != null ? GameManager.I.player : null;
 
+        /// <summary>The live enemy or boss closest to the hero.</summary>
+        static Health NearestEnemy()
+        {
+            var hero = Hero;
+            if (hero == null) return null;
+            Vector2 p = hero.transform.position;
+            Health best = null;
+            float bestD = float.MaxValue;
+            void Consider(Health h)
+            {
+                if (h == null || h.IsDead) return;
+                float d = ((Vector2)h.transform.position - p).sqrMagnitude;
+                if (d < bestD)
+                {
+                    bestD = d;
+                    best = h;
+                }
+            }
+            foreach (var e in EnemyBase.All) Consider(e.health);
+            foreach (var b in BossBear.All) Consider(b.health);
+            return best;
+        }
+
         static int Int(string[] a, int i, int fallback) =>
             a.Length > i && int.TryParse(a[i], out int v) ? v : fallback;
 
@@ -241,6 +264,35 @@ namespace RPG
             {
                 ShowHitboxes = !ShowHitboxes;
                 Print("Hitbox: " + (ShowHitboxes ? "bật" : "tắt"));
+            });
+            Register("status", "status <bong|lanh|dien|doc|choang|troi|cham|nguyen|phanxet|sach> [số] [me] — trạng thái lên quái gần nhất (me: bản thân)", a =>
+            {
+                bool me = a.Contains("me");
+                var target = me ? Hero.health : NearestEnemy();
+                var s = target != null ? target.Status : null;
+                if (s == null || a.Length == 0)
+                {
+                    Print(s == null ? "Không có mục tiêu." : "Trạng thái: bong lanh dien doc choang troi cham nguyen phanxet sach");
+                    return;
+                }
+                Team from = me ? Team.Enemy : Team.Player;
+                int n = Int(a, 1, 1);
+                float sec = Float(a, 1, 0f);
+                switch (a[0])
+                {
+                    case "bong": s.Burn(n, Hero.Attack(DamageType.Fire) * CombatConfig.Current.burnShare, from); break;
+                    case "lanh": s.Chill(n); break;
+                    case "dien": s.Charge(n, Hero.Attack(DamageType.Lightning), from, me ? null : Hero.gameObject); break;
+                    case "doc": s.Poison(n, from); break;
+                    case "choang": s.Stun(sec > 0 ? sec : 1.5f); break;
+                    case "troi": s.Root(sec > 0 ? sec : 2f); break;
+                    case "cham": s.Slow(0.3f, sec > 0 ? sec : 3f); break;
+                    case "nguyen": s.Curse(sec > 0 ? sec : 8f); break;
+                    case "phanxet": s.Judge(sec > 0 ? sec : 5f); break;
+                    case "sach": s.Cleanse(); break;
+                    default: Print("Không rõ trạng thái: " + a[0]); return;
+                }
+                Print($"{target.displayName}: {a[0]}");
             });
             Register("ttk", "bắt đầu / dừng đo thời gian hạ quái (TTK)", a => ToggleTtk());
             Register("stats", "FPS, số quái, số đối tượng trong pool", a =>

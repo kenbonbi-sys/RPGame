@@ -10,6 +10,7 @@ namespace RPG
         public List<ItemDef> items = new List<ItemDef>();
         public List<AbilityDef> abilities = new List<AbilityDef>();
         public ProgressionConfig progression;
+        public CombatConfig combat;
         public List<QuestDef> quests = new List<QuestDef>();
         public List<ZoneDef> zones = new List<ZoneDef>();
         public ZoneDef startZone;

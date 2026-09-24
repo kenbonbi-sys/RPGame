@@ -66,6 +66,7 @@ namespace RPG
         public static readonly Color Lightning = new Color(0.8f, 0.7f, 1f);
         public static readonly Color Poison = new Color(0.6f, 0.95f, 0.3f);
         public static readonly Color Holy = new Color(1f, 0.9f, 0.5f);
+        public static readonly Color Dark = new Color(0.66f, 0.42f, 0.9f);
         public static readonly Color LogInfo = new Color(0.92f, 0.9f, 0.86f);
         public static readonly Color LogLoot = new Color(0.75f, 0.95f, 0.6f);
         public static readonly Color LogQuest = new Color(1f, 0.85f, 0.4f);

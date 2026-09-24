@@ -58,7 +58,7 @@ namespace RPG
             }
             if (stateTime > 0.75f)
             {
-                nextAttack = Time.time + attackCooldown * Random.Range(0.9f, 1.3f);
+                nextAttack = Time.time + attackCooldown * Random.Range(0.9f, 1.3f) / AttackSpeed;
                 SetState(State.Chase);
             }
         }
@@ -77,8 +77,7 @@ namespace RPG
             pr.damage = sporeDamage;
             pr.speed = sporeSpeed;
             pr.damageType = DamageType.Poison;
-            pr.slow = 0.35f;
-            pr.slowDuration = 1.8f;
+            pr.status = new StatusHit { slow = 0.35f, slowDuration = 1.8f };
             pr.hitVfx = "spore_hit";
             pr.hitSfx = "sfx_shroom_puff";
             pr.shake = 0.05f;

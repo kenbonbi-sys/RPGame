@@ -21,7 +21,7 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 | **B / I** · **C** · **J** · **Tab** | Túi đồ · Nhân vật (phân bổ điểm) · Bách Khoa Trùm · Đổi nhiệm vụ đang theo dõi |
 | **F1** · **Esc** | Hướng dẫn · Tạm dừng (Lưu game / Tải game) |
 | **F5–F9** (cheat) | Hồi đầy · Tua giờ · Tới boss · Về làng · Hạ quái gần |
-| **`** (cheat) | Bảng lệnh: `help`, `level 10`, `give potion_red 5`, `tp boss`, `zone <id>`, `quest <id> start`, `hitbox`, `ttk`, `save 1`… |
+| **`** (cheat) | Bảng lệnh: `help`, `level 10`, `give potion_red 5`, `tp boss`, `zone <id>`, `quest <id> start`, `hitbox`, `ttk`, `status lanh 4` (gây trạng thái lên quái gần nhất, thêm `me` cho bản thân), `save 1`… |
 
 ## Nội dung đã có
 
@@ -32,7 +32,10 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 - **Boss Gấu Ma Rừng Già (Cấp 6):** Vồ, **Dậm Đất** (choáng), **Ném Đá Lớn** (đá rơi xuống thành *★ Tảng Đá Lớn* phá được), **Chụp Quăng** (nhảy vồ; đáp trúng Tảng Đá Lớn thì boss bị **Choáng!**), **Cuồng Nộ** khi dưới 50% máu. Mỗi chiêu có vòng cảnh báo trên đất và hiện "Kỹ năng: …" trên đầu boss.
 - **Công thức sát thương (mục 04):** Công × lực chiêu × thưởng sát thương theo nhãn chiêu × chí mạng × giảm do giáp × (1 − kháng hệ) × ngẫu nhiên 0.95–1.05. Mỗi loài có kháng riêng từng hệ (`Health.resistances`, từ −50% là điểm yếu tới +75%); Nấm Độc yếu Lửa. Các hằng số nằm trong `Assets/Data/Progression.asset`.
 - **Thanh Trấn Áp:** Gấu Ma có thanh Trấn Áp (300) dưới thanh máu. Mỗi đòn của người chơi cộng điểm (Chém Gió 3, đòn cuối combo 9, Cầu Lửa 12, Mũi Băng 5, Lôi Phạt 8/tia, Bão Kiếm 2/nhịp; Sức Mạnh cộng thêm). Đầy thanh: choáng 3 giây, nhận thêm 50% sát thương; ngưỡng tăng 25% sau mỗi lần vỡ, không trúng đòn 2.5 giây thì thanh tụt.
-- **Input buffer 150 ms:** bấm chiêu sớm (trong 0.15 giây trước khi hồi xong) vẫn được ghi nhận và phát ngay khi sẵn sàng.
+- **Input buffer 150 ms và hủy đòn:** chiêu sau chờ tư thế của chiêu trước kết thúc; bấm sớm (trong 0.15 giây trước khi sẵn sàng) vẫn được ghi nhận và phát ngay khi được. Lướt cắt ngang tư thế sau *khung cam kết* của từng chiêu (`AbilityDef.commitTime`: Chém Gió tới khung trúng 0.05 s, Lôi Phạt 0.3 s…); Tuyệt kỹ không hủy được.
+- **Lướt Hoàn Hảo:** đòn tấn công bị Lướt né trong 0.15 giây đầu: thời gian chậm còn 35% trong 0.3 giây, +15 năng lượng, chiêu tiếp theo trong 1.5 giây +30% sát thương và đòn trúng đầu tiên của nó cộng 25 Trấn Áp, hiện chữ “Hoàn Hảo!”. Va vào thân quái không tính.
+- **Trạng thái (mục 04):** Bỏng (30% sát thương đòn gốc mỗi giây, 3 tầng, 3 giây), Lạnh (−12% tốc chạy và tốc đánh mỗi tầng; tầng 4 thành Đóng Băng 1.5 giây, boss 0.6 giây + 60 Trấn Áp), Tích Điện (tầng 3 phóng điện 80% sang 3 kẻ gần), Độc (1.5% máu tối đa mỗi giây mỗi tầng, 5 tầng, 6 giây), Choáng, Trói, Làm Chậm, Đẩy Lùi (va tường thì Choáng 0.5 giây), Nguyền, Phán Xét. Khống chế lặp lại trong 6 giây ngắn đi 40% mỗi lần; boss miễn khống chế 4 giây sau khi hết Choáng. Cầu Lửa gây 1 tầng Bỏng, Mũi Băng 2 tầng Lạnh mỗi gai.
+- **Hit-stop 3 mức:** 35 ms đòn thường · 70 ms chí mạng và đòn cuối combo · 120 ms vỡ Trấn Áp và đòn kết liễu boss hoặc Tinh Anh (hạ quái thường: ít nhất 35 ms). Số của Lướt Hoàn Hảo, hit-stop và trạng thái nằm trong `Assets/Data/Combat.asset`.
 - **Bách Khoa Trùm:** tự ghi lại quái và kỹ năng boss lần đầu gặp (hiện ở log bên trái, xem đầy đủ bằng phím J).
 - **Lưu game:** 3 ô + tự động lưu (sau boss, khi xong nhiệm vụ, 5 phút một lần khi ngoài chiến đấu). File JSON có số phiên bản trong `%USERPROFILE%\AppData\LocalLow\<công ty>\<game>\saves`, bản cũ giữ dạng `.bak`.
 - **Nhiệm vụ (QuestDef):** mỗi nhiệm vụ là một asset trong `Assets/Data/Quests` (người giao, điều kiện mở, 9 loại mục tiêu, phần thưởng, cờ, nhiệm vụ tiếp theo). Chuỗi chính với Trưởng Làng + nhiệm vụ phụ của Bé Mai; tracker "(+1 · Tab)", dấu ! / ? trên đầu NPC (vàng: chính, bạc: phụ).
