@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Assets/**/*.cs outside Editor folders, compiled as the Unity editor does (UNITY_EDITOR). -->
+  <PropertyGroup>
+    <AssemblyName>Assembly-CSharp</AssemblyName>
+    <DefineConstants>$(UnityDefines);UNITY_EDITOR;UNITY_EDITOR_WIN</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(ProjectRoot)Assets/**/*.cs" Exclude="$(ProjectRoot)Assets/**/Editor/**/*.cs" />
+    <Reference Include="$(CacheDir)yarn/Runtime/DLLs/*.dll" Private="false" />
+    <Reference Include="$(RefsDir)UnityEditor.dll" Private="false" />
+    <ProjectReference Include="../../Stubs/RuntimeStubs.csproj" Private="false" />
+    <ProjectReference Include="../../Yarn/YarnSpinner.Unity.csproj" Private="false" />
+  </ItemGroup>
+</Project>

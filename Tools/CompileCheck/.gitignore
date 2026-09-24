@@ -1,0 +1,4 @@
+# downloads, build output
+.cache/
+# the root .gitignore drops Unity's generated *.csproj; these are hand-written
+!*.csproj

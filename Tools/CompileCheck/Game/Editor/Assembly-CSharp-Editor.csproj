@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Assets/**/Editor/**/*.cs: editor tools and the EditMode tests. -->
+  <PropertyGroup>
+    <AssemblyName>Assembly-CSharp-Editor</AssemblyName>
+    <DefineConstants>$(UnityDefines);UNITY_EDITOR;UNITY_EDITOR_WIN;UNITY_INCLUDE_TESTS</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(ProjectRoot)Assets/**/Editor/**/*.cs" />
+    <Reference Include="$(CacheDir)yarn/Runtime/DLLs/*.dll" Private="false" />
+    <Reference Include="$(RefsDir)UnityEditor.dll" Private="false" />
+    <Reference Include="$(RefsDir)nunit.framework.dll" Private="false" />
+    <ProjectReference Include="../../Stubs/RuntimeStubs.csproj" Private="false" />
+    <ProjectReference Include="../../EditorStubs/EditorStubs.csproj" Private="false" />
+    <ProjectReference Include="../../Yarn/YarnSpinner.Unity.csproj" Private="false" />
+    <ProjectReference Include="../Runtime/Assembly-CSharp.csproj" Private="false" />
+  </ItemGroup>
+</Project>

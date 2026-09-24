@@ -52,6 +52,7 @@ Assets/
 Tools/
   ArtGen/   python build_all.py  → vẽ lại toàn bộ pixel art
   AudioGen/ python gen_audio.py  → tổng hợp lại âm thanh
+  CompileCheck/ ./check.sh       → biên dịch thử toàn bộ C# không cần Unity (Linux, CI)
 ```
 
 ## Menu Tools/RPG trong Unity
