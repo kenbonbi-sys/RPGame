@@ -68,6 +68,7 @@ Tools/
 
 ## Mở rộng
 
+- **Quy trình làm việc:** sprint 2 tuần, bảng việc, nhánh, Definition of Done và cách làm với Claude trên máy hay trên cloud: `Docs/QuyTrinh.md`. Kế hoạch tổng: `Docs/KeHoach-RungThiTham.md`.
 - **Chỉnh VFX:** mở `Assets/Prefabs/VFX/<tên>.prefab`. Mỗi hiệu ứng là Particle System + sprite flipbook + Light2D. Tăng `_Intensity` của material để glow (Bloom) mạnh hơn.
 - **Thêm chiêu:** chỉ cần dữ liệu. Tạo asset *Create → RPG → Ability*, ghép các khối (Damage, Projectile, Dash, Heal, Buff, Cue, Line, Burst, Pulse, Combo) trong Inspector, rồi gán vào `PlayerSkills.slots` trên prefab Player. Hướng dẫn: `Docs/ThemChieu.md`.
 - **Thay art:** thay PNG trong `Assets/Art` (giữ kích thước frame), hoặc kéo sprite mới vào các `SpriteAnimSet` trong `Assets/Data/Anims`.
