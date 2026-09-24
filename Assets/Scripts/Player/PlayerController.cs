@@ -71,6 +71,7 @@ namespace RPG
             health.Damaged += OnDamaged;
             health.Died += OnDied;
             if (anim != null) anim.FrameChanged += OnFrame;
+            skills.BufferedCast += OnKeySkillCast;
         }
 
         // ------------------------------------------------------------------ buffs
@@ -166,11 +167,7 @@ namespace RPG
             for (int i = 0; i < 8; i++)
             {
                 if (!InputReader.SkillPressed(i)) continue;
-                if (skills.TryCast(i, InputReader.MouseWorld))
-                {
-                    hasMoveTarget = false;
-                    attackTarget = null;
-                }
+                if (skills.Request(i, InputReader.MouseWorld)) OnKeySkillCast(i);
             }
             // auto basic attack on a clicked enemy
             if (attackTarget != null)
@@ -186,6 +183,13 @@ namespace RPG
                         skills.TryCast(0, attackTarget.transform.position);
                 }
             }
+        }
+
+        /// <summary>A key-pressed skill fired (now or from the input buffer): stop walking / auto-attacking.</summary>
+        void OnKeySkillCast(int slot)
+        {
+            hasMoveTarget = false;
+            attackTarget = null;
         }
 
         void HandlePotions()

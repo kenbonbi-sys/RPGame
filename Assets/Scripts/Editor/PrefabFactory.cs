@@ -51,6 +51,14 @@ namespace RPG.EditorTools
                 pc.stats = root.AddComponent<PlayerStats>();
                 return true;
             });
+            EditorUtil.UpgradePrefab($"{CharFolder}/BossBear.prefab", root =>
+            {
+                var boss = root.GetComponent<BossBear>();
+                if (boss == null || root.GetComponent<Poise>() != null) return false;
+                boss.poise = root.AddComponent<Poise>();
+                boss.poise.maxPoise = 300f;
+                return true;
+            });
         }
 
         /// <summary>Loads the generated prefabs from disk (used when only the scene is rebuilt).</summary>

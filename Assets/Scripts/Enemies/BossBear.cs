@@ -33,6 +33,7 @@ namespace RPG
         public Transform bodyRoot;
         public SpriteRenderer body;
         public AfterImageSpawner afterImages;
+        public Poise poise;
 
         [Header("Tuning")]
         public float walkSpeed = 2.3f;
@@ -64,6 +65,13 @@ namespace RPG
             if (status == null) status = GetComponent<StatusEffects>();
             health.Damaged += OnDamaged;
             health.Died += OnDied;
+            if (poise == null) poise = GetComponent<Poise>();
+            if (poise != null) poise.Broken += OnPoiseBroken;
+        }
+
+        void OnPoiseBroken()
+        {
+            if (state == State.Chase || state == State.Busy) EnterStun();
         }
 
         void Start()
@@ -130,6 +138,7 @@ namespace RPG
             if (auraFx != null) { VFX.Release(auraFx); auraFx = null; }
             if (flash != null) flash.SetTint(Color.white, 0);
             health.ResetHealth(maxHp);
+            if (poise != null) poise.ResetPoise();
             state = State.Returning;
             if (HUD.I != null) HUD.I.bossBar.Hide();
             CameraRig.SetZoom(1f);
@@ -229,6 +238,8 @@ namespace RPG
             if (routine != null) StopCoroutine(routine);
             ClearTelegraphs();
             if (bodyRoot != null) bodyRoot.localPosition = Vector3.zero;
+            // an interrupted leap leaves the colliders off
+            foreach (var c in GetComponentsInChildren<Collider2D>()) c.enabled = true;
             state = State.Stunned;
         }
 
@@ -462,10 +473,7 @@ namespace RPG
             if (rock != null)
             {
                 rock.Shatter(false);
-                float resist = status.stunResist;
-                status.stunResist = 1f;
-                status.Stun(2.8f);
-                status.stunResist = resist;
+                status.ForceStun(2.8f);
                 GameEvents.RaiseLog($"{displayName} đâm sầm vào Tảng Đá Lớn và bị choáng!", Palette.Status);
                 EnterStun();
                 yield break;

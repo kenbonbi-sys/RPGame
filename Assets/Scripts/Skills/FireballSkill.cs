@@ -12,6 +12,8 @@ namespace RPG
         public float burnDps = 8f;
         public float burnDuration = 3f;
         public float critChance = 0.12f;
+        [Tooltip("Trấn Áp per target hit by the explosion.")]
+        public float poise = 12f;
 
         public override void Execute(SkillContext ctx)
         {
@@ -29,6 +31,7 @@ namespace RPG
             p.burnDps = burnDps;
             p.burnDuration = burnDuration;
             p.critChance = critChance;
+            p.poise = poise;
             p.damageType = DamageType.Fire;
             p.hitVfx = "fire_explosion";
             p.hitSfx = "sfx_fireball_explode";

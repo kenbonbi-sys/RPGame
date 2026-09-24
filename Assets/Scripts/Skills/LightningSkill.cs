@@ -15,6 +15,8 @@ namespace RPG
         public float stun = 0.8f;
         public float chargeTime = 0.4f;
         public float interval = 0.14f;
+        [Tooltip("Trấn Áp per bolt hit.")]
+        public float poise = 8f;
 
         readonly List<Health> buffer = new List<Health>();
 
@@ -53,6 +55,7 @@ namespace RPG
             ScreenFX.Flash(new Color(0.85f, 0.85f, 1f), 0.12f, 0.12f);
             var d = DamageInfo.Make(damage, Team.Player, ctx.caster.gameObject, p, Vector2.down, DamageType.Lightning, 2f);
             d.stun = stun;
+            d.poise = poise;
             d.skillName = displayName;
             Combat.DamageCircle(p, boltRadius, d, 0.15f);
         }

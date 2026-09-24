@@ -255,6 +255,18 @@ namespace RPG.EditorTools
             Img(frame, "frame_boss", Color.white, Image.Type.Sliced);
             ui.hpText = Txt(frame, "HP", "6825 / 6825", 22, Color.white, TextAlignmentOptions.Center, C, C, new Vector2(0, 1), new Vector2(400, 30));
             ui.hpText.textWrappingMode = TextWrappingModes.NoWrap;
+            // Thanh Trấn Áp under the frame
+            var poise = Rect(shake, "Poise", C, C, new Vector2(0, -64), new Vector2(560, 22));
+            ui.poiseRoot = poise.gameObject;
+            var ptrack = Rect(poise, "Track", C, C, new Vector2(40, 0), new Vector2(460, 9));
+            Img(ptrack, "white", new Color(0.08f, 0.05f, 0.06f, 0.9f));
+            var pfill = Stretch(ptrack, "Fill", 1);
+            ui.poiseFill = Img(pfill, "white", new Color(0.95f, 0.8f, 0.4f), Image.Type.Filled);
+            ui.poiseFill.fillMethod = Image.FillMethod.Horizontal;
+            ui.poiseFill.fillAmount = 0;
+            ui.poiseLabel = Txt(poise, "Label", "Trấn Áp", 17, new Color(0.8f, 0.76f, 0.7f), TextAlignmentOptions.MidlineRight,
+                                C, new Vector2(1f, 0.5f), new Vector2(-196, 0), new Vector2(170, 22));
+            ui.poiseLabel.textWrappingMode = TextWrappingModes.NoWrap;
             hud.bossBar = ui;
         }
 

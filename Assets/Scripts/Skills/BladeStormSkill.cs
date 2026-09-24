@@ -11,6 +11,8 @@ namespace RPG
         public float radius = 2.2f;
         public float tick = 0.25f;
         public float damagePerTick = 11f;
+        [Tooltip("Trấn Áp per tick.")]
+        public float poise = 2f;
 
         public override void Execute(SkillContext ctx)
         {
@@ -32,6 +34,7 @@ namespace RPG
                     Vector2 c = (Vector2)pc.transform.position + Vector2.up * 0.4f;
                     var d = DamageInfo.Make(damagePerTick, Team.Player, pc.gameObject, c, Vector2.zero, DamageType.Physical, 1.2f);
                     d.skillName = displayName;
+                    d.poise = poise;
                     if (Combat.DamageCircle(c, radius, d, 0.1f) > 0) AudioManager.Play("sfx_hit", 0.35f, 0.2f, null, 0.05f);
                 }
                 if (Time.time >= nextSfx)

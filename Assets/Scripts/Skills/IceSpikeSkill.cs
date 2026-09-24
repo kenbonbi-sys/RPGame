@@ -15,6 +15,8 @@ namespace RPG
         public float hitRadius = 0.95f;
         public float slow = 0.5f;
         public float slowDuration = 2.5f;
+        [Tooltip("Trấn Áp per spike hit.")]
+        public float poise = 5f;
 
         public override void Execute(SkillContext ctx)
         {
@@ -33,6 +35,7 @@ namespace RPG
                 var d = DamageInfo.Make(damage, Team.Player, ctx.caster.gameObject, p, ctx.dir, DamageType.Ice, 1.5f);
                 d.slow = slow;
                 d.slowDuration = slowDuration;
+                d.poise = poise;
                 d.skillName = displayName;
                 if (Combat.DamageCircle(p, hitRadius, d, 0.1f) > 0) CameraRig.Shake(0.05f);
                 yield return new WaitForSeconds(delay);

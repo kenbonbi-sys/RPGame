@@ -23,6 +23,9 @@ namespace RPG
             }
         }
 
+        /// <summary>The root existed but was destroyed: its scene is being unloaded.</summary>
+        static bool RootLost => !ReferenceEquals(_root, null) && _root == null;
+
         public static void ClearAll()
         {
             Free.Clear();
@@ -59,7 +62,8 @@ namespace RPG
         {
             if (go == null) return;
             var tag = go.GetComponent<PoolTag>();
-            if (tag == null || tag.prefab == null)
+            // releasing while the scene unloads (OnDisable of a dying object) must not create a new root
+            if (tag == null || tag.prefab == null || RootLost)
             {
                 Object.Destroy(go);
                 return;

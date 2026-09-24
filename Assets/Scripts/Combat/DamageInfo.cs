@@ -18,6 +18,7 @@ namespace RPG
         public float burnDps;
         public float burnDuration;
         public float hitStop;
+        public float poise;        // Thanh Trấn Áp damage (bosses, elites)
         public string skillName;   // shown in logs
         public int sourceLevel;    // attacker level for armor; 0 = read it from the source's Health
 

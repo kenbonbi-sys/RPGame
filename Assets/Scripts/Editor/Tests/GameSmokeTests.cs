@@ -24,6 +24,8 @@ namespace RPG.EditorTools.Tests
             EditorSceneManager.OpenScene(SceneBuilder.ScenePath);
             yield return new EnterPlayMode();
             yield return Frames(3);
+            if (HUD.I != null && HUD.I.help != null) HUD.I.help.Close();   // the start-up help panel blocks input
+            yield return null;
         }
 
         [UnityTearDown]
@@ -37,6 +39,13 @@ namespace RPG.EditorTools.Tests
         static IEnumerator Frames(int n)
         {
             for (int i = 0; i < n; i++) yield return null;
+        }
+
+        /// <summary>WaitForSeconds does not wait in EditMode-driven tests; count game time instead.</summary>
+        static IEnumerator GameSeconds(float seconds)
+        {
+            float end = Time.time + seconds;
+            while (Time.time < end) yield return null;
         }
 
         [UnityTest]
@@ -110,6 +119,64 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(4, QuestSystem.I.slimes);
             Assert.Less(Vector2.Distance(p.transform.position, spot), 0.05f);
             Assert.AreEqual(0.8f, DayNightCycle.I.time, 0.02f);
+        }
+
+        [UnityTest]
+        public IEnumerator BossPoiseBreaksStunsAndRecovers()
+        {
+            var boss = Object.FindAnyObjectByType<BossBear>();
+            Assert.NotNull(boss, "boss in the scene");
+            var poise = boss.poise;
+            Assert.NotNull(poise, "boss prefab has a Poise component");
+            Assert.AreEqual(300f, poise.Threshold);
+            var hero = GameManager.I.player.gameObject;
+            float baseMul = boss.health.damageTakenMultiplier;
+
+            var d = DamageInfo.Make(1, Team.Player, hero, boss.transform.position, Vector2.up);
+            d.poise = 100f;
+            boss.health.TakeDamage(d);
+            Assert.IsFalse(poise.IsBroken);
+            Assert.Greater(poise.Current, 100f, "Strength adds poise");
+
+            d.poise = 250f;
+            boss.health.TakeDamage(d);
+            Assert.IsTrue(poise.IsBroken, "full bar breaks");
+            Assert.IsTrue(boss.status.IsStunned);
+            Assert.AreEqual(1, poise.Breaks);
+            Assert.AreEqual(375f, poise.Threshold, 0.01f, "+25% after a break");
+            Assert.AreEqual(baseMul * 1.5f, boss.health.damageTakenMultiplier, 1e-4f, "+50% damage taken");
+
+            yield return GameSeconds(poise.breakStun + 0.3f);
+            Assert.IsFalse(poise.IsBroken);
+            Assert.AreEqual(baseMul, boss.health.damageTakenMultiplier, 1e-4f, "bonus removed");
+
+            d.poise = 50f;
+            boss.health.TakeDamage(d);
+            float filled = poise.Current;
+            yield return GameSeconds(poise.decayDelay + 0.5f);
+            Assert.Less(poise.Current, filled, "drains when not hit");
+        }
+
+        [UnityTest]
+        public IEnumerator EarlyKeyPressIsBuffered()
+        {
+            var p = GameManager.I.player;
+            var sk = p.skills;
+            Vector2 aim = (Vector2)p.transform.position + Vector2.right * 3f;
+            int casts = 0;
+            sk.SkillCast += _ => casts++;
+
+            Assert.IsTrue(sk.Request(0, aim), "first press fires");
+            Assert.AreEqual(1, casts);
+            Assert.IsFalse(sk.Request(0, aim), "pressed far too early");
+            Assert.IsFalse(sk.HasBuffered, "outside the 150 ms window: not buffered");
+
+            yield return GameSeconds(sk.ReadyIn(0) - 0.08f);
+            Assert.IsFalse(sk.Request(0, aim), "not ready yet");
+            Assert.IsTrue(sk.HasBuffered, "inside the window: buffered");
+            yield return GameSeconds(0.2f);
+            Assert.AreEqual(2, casts, "buffered press fired once");
+            Assert.IsFalse(sk.HasBuffered);
         }
 
         [UnityTest]

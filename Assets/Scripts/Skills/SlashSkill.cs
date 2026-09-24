@@ -14,6 +14,8 @@ namespace RPG
         public float critChance = 0.15f;
         public float comboWindow = 0.9f;
         public float finisherMultiplier = 1.7f;
+        [Tooltip("Trấn Áp per hit; the finisher deals 3×.")]
+        public float poise = 3f;
 
         [System.NonSerialized] int combo;
         [System.NonSerialized] float lastCast = -99f;
@@ -43,6 +45,7 @@ namespace RPG
             var d = DamageInfo.Make(damage * (finisher ? finisherMultiplier : 1f), Team.Player, pc.gameObject, origin, ctx.dir,
                                     DamageType.Physical, knockback * (finisher ? 2f : 1f));
             d.hitStop = finisher ? 0.07f : 0.035f;
+            d.poise = finisher ? poise * 3f : poise;
             d.skillName = displayName;
             int hits = Combat.DamageCone(origin, ctx.dir, radius * (finisher ? 1.2f : 1f), angle, d, critChance);
             if (hits > 0)

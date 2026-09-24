@@ -44,6 +44,18 @@ namespace RPG
             }
         }
 
+        /// <summary>A stun that ignores resistance and immunity (poise breaks, crashing into a boulder).</summary>
+        public void ForceStun(float seconds)
+        {
+            float resist = stunResist;
+            bool immune = stunImmune;
+            stunResist = 1f;
+            stunImmune = false;
+            Stun(seconds);
+            stunResist = resist;
+            stunImmune = immune;
+        }
+
         public void ClearStun() => stunUntil = 0;
 
         public void Slow(float amount, float seconds)

@@ -28,6 +28,8 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 - **Cấp độ & chỉ số:** cấp 1–40, XP từ quái (theo cấp và bậc quái) và nhiệm vụ; mỗi cấp +3 điểm chỉ số cho Sức Mạnh, Trí Tuệ, Nhanh Nhẹn, Thể Chất (bảng C). Mọi con số nằm trong `Assets/Data/Progression.asset`.
 - **Quái:** Slime Rêu (nhảy lao tới), Nấm Độc (bắn bào tử làm chậm). Có AI tuần tra / đuổi / quay về, rớt đồ, hồi sinh theo bãi.
 - **Boss Gấu Ma Rừng Già (Cấp 6):** Vồ, **Dậm Đất** (choáng), **Ném Đá Lớn** (đá rơi xuống thành *★ Tảng Đá Lớn* phá được), **Chụp Quăng** (nhảy vồ; đáp trúng Tảng Đá Lớn thì boss bị **Choáng!**), **Cuồng Nộ** khi dưới 50% máu. Mỗi chiêu có vòng cảnh báo trên đất và hiện "Kỹ năng: …" trên đầu boss.
+- **Thanh Trấn Áp:** Gấu Ma có thanh Trấn Áp (300) dưới thanh máu. Mỗi đòn của người chơi cộng điểm (Chém Gió 3, đòn cuối combo 9, Cầu Lửa 12, Mũi Băng 5, Lôi Phạt 8/tia, Bão Kiếm 2/nhịp; Sức Mạnh cộng thêm). Đầy thanh: choáng 3 giây, nhận thêm 50% sát thương; ngưỡng tăng 25% sau mỗi lần vỡ, không trúng đòn 2.5 giây thì thanh tụt.
+- **Input buffer 150 ms:** bấm chiêu sớm (trong 0.15 giây trước khi hồi xong) vẫn được ghi nhận và phát ngay khi sẵn sàng.
 - **Bách Khoa Trùm:** tự ghi lại quái và kỹ năng boss lần đầu gặp (hiện ở log bên trái, xem đầy đủ bằng phím J).
 - **Lưu game:** 3 ô + tự động lưu (sau boss, khi xong nhiệm vụ, 5 phút một lần khi ngoài chiến đấu). File JSON có số phiên bản trong `%USERPROFILE%\AppData\LocalLow\<công ty>\<game>\saves`, bản cũ giữ dạng `.bak`.
 - **Nhiệm vụ:** chuỗi chính với Trưởng Làng + nhiệm vụ phụ của Bé Mai (hiện "(+1 · Tab)" như bản tham khảo).
