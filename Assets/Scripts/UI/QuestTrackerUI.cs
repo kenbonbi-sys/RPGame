@@ -31,7 +31,8 @@ namespace RPG
 
         void Refresh()
         {
-            var q = QuestSystem.I;
+            var me = Players.Local;
+            var q = me != null ? me.quests : null;
             if (q == null || text == null) return;
             var list = q.Tracked();
             string s;

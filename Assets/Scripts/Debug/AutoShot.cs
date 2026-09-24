@@ -122,7 +122,7 @@ namespace RPG
         IEnumerator Run()
         {
             var gm = GameManager.I;
-            var p = gm.player;
+            var p = Players.Local;
             var dn = DayNightCycle.I;
             if (dn != null)
             {
@@ -249,9 +249,9 @@ namespace RPG
             yield return Wait(0.4f);
 
             // --- level up, character sheet, save window (opened only, AutoShot never writes saves)
-            if (PlayerStats.I != null)
+            if (p.stats != null)
             {
-                PlayerStats.I.AddXp(PlayerStats.I.XpToNext + 20);
+                p.stats.AddXp(p.stats.XpToNext + 20);
                 yield return Wait(0.5f);
                 yield return Shot("level_up");
                 if (HUD.I.character != null)

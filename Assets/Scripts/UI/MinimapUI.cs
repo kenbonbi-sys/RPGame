@@ -144,7 +144,7 @@ namespace RPG
 
         void LateUpdate()
         {
-            var p = GameManager.I != null ? GameManager.I.player : null;
+            var p = Players.Local;
             if (p == null || map == null) return;
             Vector2 pp = p.transform.position;
             float vx = viewTiles.x, vy = viewTiles.y;
@@ -177,9 +177,9 @@ namespace RPG
                 m.icon.gameObject.SetActive(alive && Inside(ui));
                 m.icon.anchoredPosition = ui;
             }
-            if (objectiveMarker != null && QuestSystem.I != null)
+            if (objectiveMarker != null && p.quests != null)
             {
-                var obj = QuestSystem.I.ObjectivePosition();
+                var obj = p.quests.ObjectivePosition();
                 if (obj.HasValue)
                 {
                     Vector2 ui = ToUI(obj.Value);

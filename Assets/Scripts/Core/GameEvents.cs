@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPG
@@ -11,6 +12,14 @@ namespace RPG
         public int level;
         public EnemyRank rank;
         public Vector3 position;
+        /// <summary>
+        /// Heroes who share the kill: everyone who hurt the enemy. Empty for a kill made by a
+        /// script or a cheat, which counts for every hero.
+        /// </summary>
+        public List<PlayerController> credited;
+
+        /// <summary>Whether <paramref name="p"/> gets the XP, quest progress and Bách Khoa Trùm entry of this kill.</summary>
+        public bool Credits(PlayerController p) => credited == null || credited.Count == 0 || credited.Contains(p);
     }
 
     public enum BannerKind

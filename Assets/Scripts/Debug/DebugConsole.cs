@@ -134,7 +134,8 @@ namespace RPG
         }
 
         // ------------------------------------------------------------------ commands
-        static PlayerController Hero => GameManager.I != null ? GameManager.I.player : null;
+        /// <summary>The hero on this screen: cheats act on them.</summary>
+        static PlayerController Hero => Players.Local;
 
         /// <summary>The live enemy or boss closest to the hero.</summary>
         static Health NearestEnemy()
@@ -186,18 +187,18 @@ namespace RPG
                 h.invulnerable = !h.invulnerable;
                 Print("Bất tử: " + (h.invulnerable ? "bật" : "tắt"));
             });
-            Register("xp", "xp <n> — cộng kinh nghiệm", a => PlayerStats.I.AddXp(Int(a, 0, 100)));
+            Register("xp", "xp <n> — cộng kinh nghiệm", a => Hero.stats.AddXp(Int(a, 0, 100)));
             Register("level", "level <n> — đặt cấp", a =>
             {
-                var s = PlayerStats.I;
+                var s = Hero.stats;
                 int target = Mathf.Clamp(Int(a, 0, s.level + 1), 1, s.Config.maxLevel);
                 while (s.level < target) s.AddXp(s.XpToNext - s.xp);
                 Print($"Cấp {s.level}.");
             });
             Register("gold", "gold <n> — cộng vàng", a =>
             {
-                Inventory.I.gold += Int(a, 0, 100);
-                Print($"Vàng: {Inventory.I.gold}");
+                Hero.inventory.gold += Int(a, 0, 100);
+                Print($"Vàng: {Hero.inventory.gold}");
             });
             Register("give", "give <item_id> [n] — thêm vật phẩm", a =>
             {
@@ -207,7 +208,7 @@ namespace RPG
                     Print("Vật phẩm: " + string.Join(", ", GameManager.I.db.items.Where(i => i != null).Select(i => i.id)));
                     return;
                 }
-                Inventory.I.Add(item, Int(a, 1, 1));
+                Hero.inventory.Add(item, Int(a, 1, 1));
             });
             Register("kill", "kill [bán kính] — hạ quái quanh mình (mặc định 12)", a =>
             {
@@ -243,7 +244,7 @@ namespace RPG
             Register("time", "time <0..1> — giờ trong ngày (0.5 = trưa)", a => DayNightCycle.I.time = Mathf.Repeat(Float(a, 0, 0.5f), 1f));
             Register("quest", "quest <id> start|complete|status", a =>
             {
-                var q = QuestSystem.I;
+                var q = Hero.quests;
                 if (a.Length < 1)
                 {
                     foreach (var s in GameManager.I.db.quests.Where(d => d != null)) Print($"  {s.id}: {q.Status(s.id)}");
@@ -256,7 +257,7 @@ namespace RPG
             });
             Register("flag", "flag <tên> — đặt cờ nhiệm vụ", a =>
             {
-                if (a.Length > 0) QuestSystem.I.SetFlag(a[0]);
+                if (a.Length > 0) Hero.quests.SetFlag(a[0]);
             });
             Register("save", "save <1-3> — lưu", a => Print(SaveManager.I.Save(Int(a, 0, 1)) ? "Đã lưu." : "Không lưu được."));
             Register("load", "load <0-3> — tải (0 = tự động lưu)", a => SaveManager.I.Load(Int(a, 0, 1)));

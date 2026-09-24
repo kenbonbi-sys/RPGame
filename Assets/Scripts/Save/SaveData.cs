@@ -15,6 +15,16 @@ namespace RPG
         void RestoreState(string json);
     }
 
+    /// <summary>
+    /// A saveable that belongs to one hero (stats, bag, quests, Bách Khoa Trùm…) rather than to
+    /// the world. The offline save file keeps the local hero's sections next to the world's;
+    /// online, each character's sections are stored on their own (Docs/KeHoach-Online.md).
+    /// </summary>
+    public interface ICharacterSaveable : ISaveable
+    {
+        PlayerController Owner { get; }
+    }
+
     [Serializable]
     public class SaveSection
     {

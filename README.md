@@ -64,9 +64,9 @@ Tools/
 
 - **Build Everything (create missing only)** — chế độ authoring: import art → data → VFX → prefab → scene, nhưng **chỉ tạo những gì còn thiếu**. Prefab, material, item, skill, VFX library và scene đã có được giữ nguyên, nên chỉnh tay không bị mất. Texture chỉ được cắt lại khi `art_manifest.json` đổi mục của nó.
 - **Force Rebuild Everything (overwrite)** — hành vi cũ: sinh lại toàn bộ và ghi đè (có hộp thoại xác nhận).
-- **Steps/1–6** — chạy từng bước, cũng theo chế độ authoring. **Steps/6. Rebuild Scenes** luôn dựng lại Core và các scene vùng từ các prefab đang có.
-- Batchmode: `-executeMethod RPG.EditorTools.Batch.BuildAll` (authoring), `Batch.ForceBuildAll`, `Batch.RebuildScene`.
-- **Build Windows Player** — xuất `Builds/Windows/RungThiTham.exe`.
+- **Steps/1–7** — chạy từng bước, cũng theo chế độ authoring. **Steps/6. Rebuild Scenes** luôn dựng lại Core và các scene vùng từ các prefab đang có. **Steps/7** chuyển túi đồ và sổ nhiệm vụ của scene Core cũ sang prefab Player (Build Everything tự chạy bước này).
+- Batchmode: `-executeMethod RPG.EditorTools.Batch.BuildAll` (authoring), `Batch.ForceBuildAll`, `Batch.RebuildScene`, `Batch.MoveHeroState`.
+- **Build Windows Player** — xuất `Builds/Windows/RungThiTham.exe` (batchmode: `Batch.BuildPlayer`, thêm `-buildPath "D:\out\RungThiTham.exe"` để xuất nơi khác).
 - **VFX Gallery** — mở scene `Assets/Scenes/Tools/VFXGallery.unity` (tự tạo nếu chưa có) và bấm Play: mọi hiệu ứng xếp lưới 3×3 theo trang, mỗi ô ghi số hạt cao nhất và số Light2D so với ngân sách (150 hạt, 1 Light2D; Tuyệt kỹ gấp đôi, chỉnh trong `Assets/Data/VFXLibrary.asset`). Phím: 1–9 phát một ô · Space cả trang · ←/→ đổi trang · B bật/tắt Bloom · L lặp · M đo tất cả rồi in báo cáo · Tab bảng tổng.
 - **VFX Budget Report** — đo mọi hiệu ứng ngay trong Editor (không cần Play) và in báo cáo ngân sách ra Console.
 - **Pixel Font Test** — tạo font asset TextMeshPro cho font pixel Galmuri7 (8 px) và Galmuri11 (12 px) rồi mở scene thử chữ tiếng Việt ở ×1/×2/×3 cạnh Inter. File font lấy bằng `python Tools/FontGen/make_pixel_fonts.py`; kết quả so sánh font: `Docs/FontPixelTiengViet.md`.
@@ -80,6 +80,7 @@ Tools/
 - **Phím điều khiển:** mọi phím định nghĩa một chỗ trong `Assets/Scripts/Core/GameControls.cs` (Input System actions). Đổi phím lúc chạy: `InputReader.Asset` + `InputReader.SaveBindingOverrides()` (lưu trong PlayerPrefs); nhãn phím trên skill bar tự cập nhật.
 - **Thêm nhiệm vụ / hội thoại:** tạo asset qua *Create → RPG → Quest*, thêm vào `GameDatabase.quests`; viết node trong một file `.yarn` ở `Assets/Dialogue` và đặt tên node vào `NPC.yarnNode`.
 - **Thêm quái:** kế thừa `EnemyBase` (xem `SlimeAI`, `ShroomAI`), boss tham khảo `BossBear`.
+- **Nhiều người chơi (chuẩn bị online):** code không còn giả định chỉ có một nhân vật. Logic game dùng nhân vật cụ thể hoặc `Players.All`; `Players.Local` chỉ dành cho HUD, camera và phím bấm. Dữ liệu của nhân vật (chỉ số, túi đồ, nhiệm vụ, Bách Khoa Trùm) nằm trên nhân vật. Kế hoạch và quy tắc: `Docs/KeHoach-Online.md`.
 - **Chạy test tự động:** `RungThiTham.exe -autoshot -autoshotDir "D:\shots"` sẽ tự chơi một vòng, chụp màn hình rồi thoát. Mã thoát 0 là sạch, 1 là có lỗi trong log, 2 là quá thời hạn (`-autoshotTimeout`, mặc định 300 giây).
 - **CI (GitHub Actions):** mỗi lần push đều biên dịch thử C#; test Unity, bản build Windows mỗi đêm và AutoShot chạy khi repo có secret giấy phép Unity. Xem `Docs/CI.md`.
 

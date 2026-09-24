@@ -243,6 +243,11 @@ namespace RPG.EditorTools
             pc.perfectDodge = root.AddComponent<PerfectDodge>();
             pc.energy = 50;
             pc.maxEnergy = 63;
+            // the hero carries its own bag (the prefab's is a new character's kit), quest log and bestiary
+            pc.inventory = root.AddComponent<Inventory>();
+            StartingKit(pc.inventory);
+            pc.quests = root.AddComponent<QuestSystem>();
+            pc.bestiary = root.AddComponent<Bestiary>();
             // a soft personal light so the hero is readable at night
             var l = PointLight(root, new Color(1f, 0.85f, 0.65f), 4.5f, 0.4f, new Vector3(0, 0.6f, 0));
             var nl = l.gameObject.AddComponent<NightLight>();
@@ -251,6 +256,19 @@ namespace RPG.EditorTools
             nl.nightIntensity = 0.75f;
             nl.flicker = 0.03f;
             return EditorUtil.SavePrefab(root, $"{CharFolder}/Player.prefab");
+        }
+
+        /// <summary>What a new character starts with: 25 gold, potions, a sword and apples.</summary>
+        public static void StartingKit(Inventory bag)
+        {
+            var db = AssetFactory.Database;
+            bag.gold = 25;
+            bag.stacks.Clear();
+            bag.stacks.Add(new Inventory.Stack { item = db.Item("potion_red"), count = 4 });
+            bag.stacks.Add(new Inventory.Stack { item = db.Item("potion_blue"), count = 4 });
+            bag.stacks.Add(new Inventory.Stack { item = db.Item("potion_green"), count = 2 });
+            bag.stacks.Add(new Inventory.Stack { item = db.Item("sword"), count = 1 });
+            bag.stacks.Add(new Inventory.Stack { item = db.Item("apple"), count = 3 });
         }
 
         static GameObject BuildNPC(string file, string id, string display, string idle, string talk, string portraitSprite)

@@ -3,17 +3,18 @@ using TMPro;
 
 namespace RPG
 {
-    /// <summary>"Bách Khoa Trùm" window (J): creatures met, kills and recorded skills.</summary>
+    /// <summary>"Bách Khoa Trùm" window (J) of the hero on this screen: creatures met, kills and recorded skills.</summary>
     public class JournalUI : UIPanel
     {
         public TextMeshProUGUI body;
 
         protected override void OnShow()
         {
-            if (body == null) return;
+            var book = Players.Local != null ? Players.Local.bestiary : null;
+            if (body == null || book == null) return;
             var sb = new StringBuilder();
             bool any = false;
-            foreach (var e in Bestiary.All)
+            foreach (var e in book.All)
             {
                 any = true;
                 sb.Append($"<color=#ffe07a><b>{e.name}</b></color>   <color=#9a93a8>đã hạ: {e.kills}</color>\n");

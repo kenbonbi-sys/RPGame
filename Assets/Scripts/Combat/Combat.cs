@@ -62,7 +62,7 @@ namespace RPG
             string fx = d.type == DamageType.Fire ? "hit_fire" : d.type == DamageType.Ice ? "hit_ice" : d.type == DamageType.Lightning ? "hit_lightning" : "hit_spark";
             VFX.Spawn(fx, p, Quaternion.Euler(0, 0, Random.Range(0, 360f)));
             float stop = HitStopFor(h, d);
-            if (stop > 0) TimeFX.HitStop(stop);
+            if (stop > 0) TimeFX.HitStop(stop, h.gameObject, d.source);
             if (d.crit)
             {
                 CameraRig.Shake(0.12f);

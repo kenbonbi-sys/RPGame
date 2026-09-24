@@ -3,8 +3,8 @@ using UnityEngine;
 namespace RPG
 {
     /// <summary>
-    /// An item lying in the world: pops out in an arc, bobs with a rarity glow,
-    /// then gets magnetised to the player and picked up.
+    /// An item lying in the world: pops out in an arc, bobs with a rarity glow, then gets
+    /// magnetised to the nearest hero and goes into their bag.
     /// </summary>
     public class LootPickup : MonoBehaviour
     {
@@ -59,23 +59,23 @@ namespace RPG
                 float bob = 0.35f + Mathf.Sin(age * 4f) * 0.07f;
                 icon.transform.localPosition = new Vector3(0, Mathf.Round(bob * 16f) / 16f, 0);
             }
-            var player = GameManager.I != null ? GameManager.I.player : null;
-            if (player == null || player.IsDead) return;
+            var player = Players.Nearest(transform.position, magnetRadius);
+            if (player == null) return;
             Vector2 to = (Vector2)player.transform.position - (Vector2)transform.position;
             float d = to.magnitude;
-            if (d < magnetRadius && age > 0.7f)
+            if (age > 0.7f)
             {
                 speed = Mathf.Min(speed + Time.deltaTime * 30f, 14f);
                 transform.position += (Vector3)(to.normalized * Mathf.Min(d, speed * Time.deltaTime));
             }
-            if (d < pickupRadius) Collect();
+            if (d < pickupRadius) Collect(player);
         }
 
-        void Collect()
+        void Collect(PlayerController by)
         {
-            if (Inventory.I != null) Inventory.I.Add(item, count);
+            if (by.inventory != null) by.inventory.Add(item, count);
             VFX.Spawn(item.kind == ItemKind.Currency ? "pickup_coin" : "pickup_item", transform.position + Vector3.up * 0.4f, Quaternion.identity);
-            AudioManager.Play(item.kind == ItemKind.Currency ? "sfx_pickup" : "sfx_pickup_item", 0.7f, 0.08f);
+            AudioManager.Play(item.kind == ItemKind.Currency ? "sfx_pickup" : "sfx_pickup_item", 0.7f, 0.08f, by.IsLocal ? (Vector3?)null : transform.position);
             Pool.Release(gameObject);
         }
     }

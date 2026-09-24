@@ -26,10 +26,16 @@ namespace RPG
         float timer;
         bool finished;
         Action onComplete;
+        float holdUntil;
 
         public string Current => clipName;
         public bool Finished => finished;
         public int Frame => frame;
+        /// <summary>The frame is being held (a hit-stop felt by this character only).</summary>
+        public bool Held => Time.unscaledTime < holdUntil;
+
+        /// <summary>Holds the current frame for <paramref name="seconds"/> of real time.</summary>
+        public void Hold(float seconds) => holdUntil = Mathf.Max(holdUntil, Time.unscaledTime + seconds);
 
         void Awake()
         {
@@ -91,7 +97,7 @@ namespace RPG
 
         void Update()
         {
-            if (clip == null || finished) return;
+            if (clip == null || finished || Held) return;
             float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
             timer += dt * speed * clip.fps;
             while (timer >= 1f)

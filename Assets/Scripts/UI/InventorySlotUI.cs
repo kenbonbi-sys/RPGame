@@ -50,7 +50,7 @@ namespace RPG
         public void OnPointerClick(PointerEventData e)
         {
             if (stack == null || stack.item == null || e.button != PointerEventData.InputButton.Right) return;
-            var p = GameManager.I != null ? GameManager.I.player : null;
+            var p = Players.Local;
             if (p == null) return;
             int idx = System.Array.IndexOf(p.potionIds, stack.item.id);
             if (idx >= 0) p.UsePotion(idx);

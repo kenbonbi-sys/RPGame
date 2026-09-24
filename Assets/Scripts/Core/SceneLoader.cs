@@ -115,7 +115,6 @@ namespace RPG
             Zone = root;
             // things spawned while playing (loot, boulders) belong to the zone and leave with it
             SceneManager.SetActiveScene(root.Scene);
-            var gm = GameManager.I;
             var def = root.def;
             if (CameraRig.I != null) CameraRig.I.worldBounds = root.bounds;
             if (HUD.I != null && HUD.I.minimap != null) HUD.I.minimap.SetWorld(root);
@@ -124,10 +123,11 @@ namespace RPG
                 if (!string.IsNullOrEmpty(def.music)) AudioManager.PlayMusic(def.music, 2f);
                 if (!string.IsNullOrEmpty(def.ambience)) AudioManager.PlayAmbience(def.ambience);
             }
-            if (placeHero && gm != null && gm.player != null)
+            var hero = Players.Local;
+            if (placeHero && hero != null)
             {
                 var at = root.SpotOf(!string.IsNullOrEmpty(entry) ? entry : def != null ? def.defaultEntry : "spawn") ?? root.SpotOf("spawn");
-                if (at != null) gm.player.motor.Teleport(at.position);
+                if (at != null) hero.motor.Teleport(at.position);
             }
             if (CameraRig.I != null) CameraRig.I.SnapToTarget();
             Busy = false;

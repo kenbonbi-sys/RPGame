@@ -22,6 +22,12 @@ namespace RPG
         public bool contact;       // bumping into an enemy's body, not an attack: Lướt Hoàn Hảo ignores it
         public bool dot;           // a damage-over-time tick (Bỏng, Độc), not an attack either
 
+        /// <summary>The hero behind the hit (its caster, or the owner of its projectile), or null.</summary>
+        public PlayerController SourcePlayer => source != null ? source.GetComponentInParent<PlayerController>() : null;
+
+        /// <summary>The stats of the hero behind the hit (Attack, crit and Trấn Áp bonuses), or null.</summary>
+        public PlayerStats SourceStats => source != null ? source.GetComponentInParent<PlayerStats>() : null;
+
         public static DamageInfo Make(float amount, Team team, GameObject source, Vector2 point, Vector2 dir,
                                       DamageType type = DamageType.Physical, float knockback = 0f)
         {
@@ -38,13 +44,13 @@ namespace RPG
         }
 
         /// <summary>
-        /// Rolls a crit. The hero adds the Agility bonus to the skill's chance and uses the
-        /// crit multiplier from the stats; everyone else crits for ×1.8.
+        /// Rolls a crit. A hero adds their Agility bonus to the skill's chance and uses the
+        /// crit multiplier from their stats; everyone else crits for ×1.8.
         /// </summary>
         public DamageInfo RollCrit(float chance)
         {
             float mult = 1.8f;
-            var stats = sourceTeam == Team.Player ? PlayerStats.I : null;
+            var stats = sourceTeam == Team.Player ? SourceStats : null;
             if (stats != null)
             {
                 chance = stats.CritChance(chance);

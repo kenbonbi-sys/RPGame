@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RPG
 {
@@ -20,7 +21,11 @@ namespace RPG
 
         public GameDatabase db;
         public VFXLibrary vfx;
-        public PlayerController player;
+        /// <summary>
+        /// The hero placed in the Core scene: the one this machine controls when playing offline.
+        /// It only seeds <see cref="Players.Local"/>; code asks <see cref="Players"/> for heroes.
+        /// </summary>
+        [FormerlySerializedAs("player")] public PlayerController localPlayer;
 
         [Header("Start")]
         public bool showHelpOnStart = true;
@@ -49,7 +54,9 @@ namespace RPG
         {
             I = this;
             GameEvents.Reset();
-            Bestiary.Reset();
+            Players.Reset();
+            ZoneArea.Reset();
+            if (localPlayer != null) Players.SetLocal(localPlayer);
             Pool.ClearAll();
             SetupPhysics();
             Pool.SetHome(gameObject.scene);   // pooled objects outlive zone changes
@@ -81,7 +88,7 @@ namespace RPG
 
         void Update()
         {
-            if (player != null) ZoneArea.Tick(player.transform.position);
+            foreach (var p in Players.All) ZoneArea.Tick(p);
             HandleHotkeys();
             UpdateCursor();
         }
@@ -109,7 +116,8 @@ namespace RPG
             if (InputReader.ToggleBag && hud.inventory != null) hud.inventory.Toggle();
             if (InputReader.ToggleJournal && hud.journal != null) hud.journal.Toggle();
             if (InputReader.ToggleCharacter && hud.character != null) hud.character.Toggle();
-            if (InputReader.ToggleQuest && QuestSystem.I != null) QuestSystem.I.CycleFocus();
+            var me = Players.Local;
+            if (InputReader.ToggleQuest && me != null && me.quests != null) me.quests.CycleFocus();
         }
 
         static readonly Color EnemyOutline = new Color(1.8f, 0.45f, 0.35f, 1f);
@@ -160,29 +168,36 @@ namespace RPG
         }
         public void SetCinematic(bool on) => cinematic = on;
 
+        /// <summary>A menu opens or closes. Only a game that owns its clock (offline) stops time for it.</summary>
         public void SetMenu(bool on, bool pauseTime)
         {
             menu = on;
-            TimeFX.Paused = on && pauseTime;
+            TimeFX.Paused = on && pauseTime && GameSession.OwnsTime;
         }
 
-        public void OnPlayerDied()
+        /// <summary>A hero fell: they get up at the zone's spawn a few seconds later. The local one also sees the death screen.</summary>
+        public void OnPlayerDied(PlayerController p)
         {
-            if (dead) return;
-            dead = true;
-            StartCoroutine(RespawnRoutine());
+            if (p == null) return;
+            if (p.IsLocal)
+            {
+                if (dead) return;
+                dead = true;
+            }
+            StartCoroutine(RespawnRoutine(p, p.IsLocal));
         }
 
-        IEnumerator RespawnRoutine()
+        IEnumerator RespawnRoutine(PlayerController p, bool local)
         {
             yield return new WaitForSecondsRealtime(1.2f);
-            GameEvents.RaisePlayerDowned(4f);
+            if (local) GameEvents.RaisePlayerDowned(4f);
             yield return new WaitForSecondsRealtime(4f);
-            if (player != null && respawnPoint != null)
+            if (p != null && respawnPoint != null)
             {
-                player.Respawn(respawnPoint.position);
-                if (CameraRig.I != null) CameraRig.I.SnapToTarget();
+                p.Respawn(respawnPoint.position);
+                if (local && CameraRig.I != null) CameraRig.I.SnapToTarget();
             }
+            if (!local) yield break;
             GameEvents.RaisePlayerRespawned();
             dead = false;
             GameEvents.RaiseLog("Bạn đã hồi sinh tại Làng Lá Xanh.", Palette.LogInfo);

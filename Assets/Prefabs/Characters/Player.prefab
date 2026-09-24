@@ -331,6 +331,9 @@ GameObject:
   - component: {fileID: 643970248523519829}
   - component: {fileID: 5092187769054046583}
   - component: {fileID: 4542000038076635593}
+  - component: {fileID: 7653062301060653840}
+  - component: {fileID: 8719649478814836203}
+  - component: {fileID: 6181002921241023267}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -470,6 +473,13 @@ MonoBehaviour:
   damageTakenMultiplier: 1
   armor: 0
   elementalResist: 0
+  resistances:
+    physical: 0
+    fire: 0
+    ice: 0
+    lightning: 0
+    poison: 0
+    holy: 0
   invulnerable: 0
   showDamageNumbers: 1
 --- !u!114 &3182219701949421862
@@ -547,6 +557,10 @@ MonoBehaviour:
   body: {fileID: 4195032967514037715}
   skills: {fileID: 643970248523519829}
   stats: {fileID: 4542000038076635593}
+  perfectDodge: {fileID: 0}
+  inventory: {fileID: 7653062301060653840}
+  quests: {fileID: 8719649478814836203}
+  bestiary: {fileID: 6181002921241023267}
   maxEnergy: 63
   energy: 50
   energyRegen: 3.5
@@ -578,6 +592,57 @@ MonoBehaviour:
   statPoints: 0
   talentPoints: 0
   skillPoints: 0
+--- !u!114 &7653062301060653840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3700953153124468682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe09febb89a54794d82f67b1f05c3d2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.Inventory
+  gold: 25
+  capacity: 20
+  stacks:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 4
+  - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
+    count: 4
+  - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
+    count: 2
+  - item: {fileID: 11400000, guid: 40972aa092910ac4b9f614dac3ea426a, type: 2}
+    count: 1
+  - item: {fileID: 11400000, guid: 57d6c33cf17daf449bbe470104bbd9d8, type: 2}
+    count: 3
+--- !u!114 &8719649478814836203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3700953153124468682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d2eded03525d944d904b8cdd55fe202, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestSystem
+  quests: []
+  focus: 0
+--- !u!114 &6181002921241023267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3700953153124468682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b7fefdddc552ba42b030d343c139fdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.Bestiary
 --- !u!1 &8470633948553409350
 GameObject:
   m_ObjectHideFlags: 0

@@ -10,9 +10,12 @@ namespace RPG
 {
     /// <summary>
     /// Save v1 (plan §16): 3 manual slots + 1 autosave, JSON with a version number, written
-    /// atomically with a .bak of the previous file. Every <see cref="ISaveable"/> in the scene
-    /// contributes one section. Loading reloads the scene and restores the sections once every
-    /// object has started.
+    /// atomically with a .bak of the previous file. Every <see cref="ISaveable"/> contributes one
+    /// section: the world's (bosses, day/night, world objects) and the local hero's
+    /// (<see cref="ICharacterSaveable"/>: stats, bag, quests, Bách Khoa Trùm, Yarn variables).
+    /// <see cref="CaptureCharacter"/> / <see cref="RestoreCharacter"/> handle one hero on their
+    /// own, which is what an online server keeps per character. Loading reloads the scene and
+    /// restores the sections once every object has started.
     /// Autosave: after a boss or mini-boss, after finishing a quest and every few minutes, but
     /// only out of combat.
     /// </summary>
@@ -37,7 +40,7 @@ namespace RPG
 
         public float PlayTime { get; private set; }
 
-        static readonly List<ISaveable> StaticSaveables = new List<ISaveable> { new Bestiary.Saveable(), new WorldStateStore() };
+        static readonly List<ISaveable> StaticSaveables = new List<ISaveable> { new WorldStateStore() };
 
         float nextAutosave;
         float lastCombat = -999f;
@@ -124,8 +127,9 @@ namespace RPG
         {
             reason = null;
             var gm = GameManager.I;
-            if (gm == null || gm.player == null) reason = "Chưa thể lưu lúc này.";
-            else if (gm.player.IsDead || gm.State == GameState.Dead) reason = "Không thể lưu khi đã gục.";
+            var me = Players.Local;
+            if (gm == null || me == null) reason = "Chưa thể lưu lúc này.";
+            else if (me.IsDead || gm.State == GameState.Dead) reason = "Không thể lưu khi đã gục.";
             else if (gm.State == GameState.Dialogue || gm.State == GameState.Cinematic) reason = "Không thể lưu lúc này.";
             return reason == null;
         }
@@ -138,20 +142,18 @@ namespace RPG
                 GameEvents.RaiseLog(why, new Color(1f, 0.6f, 0.5f));
                 return false;
             }
+            var me = Players.Local;
             var f = new SaveFile
             {
                 savedAt = DateTime.Now.ToString("o"),
                 playTime = PlayTime,
-                level = PlayerStats.I != null ? PlayerStats.I.level : 1,
+                level = me.stats != null ? me.stats.level : 1,
                 zone = ZoneArea.Current != null ? ZoneArea.Current.zoneName : "",
                 zoneId = ZoneRoot.Current != null && ZoneRoot.Current.def != null ? ZoneRoot.Current.def.id : "",
-                quest = CurrentQuestTitle()
+                quest = CurrentQuestTitle(me)
             };
-            foreach (var s in Saveables())
-            {
-                try { f.Set(s.SaveKey, s.CaptureState()); }
-                catch (Exception e) { Debug.LogException(e); }
-            }
+            foreach (var s in CaptureWorld()) f.Set(s.key, s.json);
+            foreach (var s in CaptureCharacter(me)) f.Set(s.key, s.json);
             try
             {
                 Write(PathFor(slot), JsonUtility.ToJson(f, true));
@@ -165,9 +167,9 @@ namespace RPG
             }
         }
 
-        static string CurrentQuestTitle()
+        static string CurrentQuestTitle(PlayerController hero)
         {
-            var q = QuestSystem.I;
+            var q = hero != null ? hero.quests : null;
             if (q == null) return "";
             var list = q.Tracked();
             return list.Count > 0 ? list[0].title : "";
@@ -251,22 +253,73 @@ namespace RPG
         void Apply(SaveFile f)
         {
             PlayTime = f.playTime;
-            foreach (var s in Saveables())
-            {
-                string json = f.Get(s.SaveKey);
-                if (json == null) continue;
-                try { s.RestoreState(json); }
-                catch (Exception e) { Debug.LogException(e); }
-            }
+            RestoreWorld(f.sections);
+            RestoreCharacter(Players.Local, f.sections);
             if (CameraRig.I != null) CameraRig.I.SnapToTarget();
             GameEvents.RaiseQuestChanged();
             GameEvents.RaiseLog("Đã tải game.", Palette.LogQuest);
         }
 
-        static IEnumerable<ISaveable> Saveables()
+        // ------------------------------------------------------------------ world and characters
+        /// <summary>The world's sections: bosses, day and night, world objects (online: the zone server's).</summary>
+        public static List<SaveSection> CaptureWorld()
         {
-            foreach (var s in new List<ISaveable>(SaveRegistry.Items)) yield return s;
+            var sections = new List<SaveSection>();
+            foreach (var s in WorldSaveables()) Capture(s, sections);
+            return sections;
+        }
+
+        /// <summary>One hero's sections: stats, bag, quests, Bách Khoa Trùm, Yarn variables (online: stored per character).</summary>
+        public static List<SaveSection> CaptureCharacter(PlayerController hero)
+        {
+            var sections = new List<SaveSection>();
+            foreach (var s in CharacterSaveables(hero)) Capture(s, sections);
+            return sections;
+        }
+
+        /// <summary>Puts the world's sections back; sections of heroes are skipped.</summary>
+        public static void RestoreWorld(List<SaveSection> sections)
+        {
+            foreach (var s in WorldSaveables()) Restore(s, sections);
+        }
+
+        /// <summary>Puts one hero's sections back (the hero's own section first: stats set max HP and quest unlocks).</summary>
+        public static void RestoreCharacter(PlayerController hero, List<SaveSection> sections)
+        {
+            foreach (var s in CharacterSaveables(hero)) Restore(s, sections);
+        }
+
+        static void Capture(ISaveable s, List<SaveSection> into)
+        {
+            try { into.Add(new SaveSection { key = s.SaveKey, json = s.CaptureState() }); }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        static void Restore(ISaveable s, List<SaveSection> sections)
+        {
+            string json = null;
+            foreach (var section in sections)
+                if (section.key == s.SaveKey) json = section.json;
+            if (json == null) return;
+            try { s.RestoreState(json); }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        static IEnumerable<ISaveable> WorldSaveables()
+        {
+            foreach (var s in new List<ISaveable>(SaveRegistry.Items))
+                if (!(s is ICharacterSaveable)) yield return s;
             foreach (var s in StaticSaveables) yield return s;
+        }
+
+        static List<ISaveable> CharacterSaveables(PlayerController hero)
+        {
+            var list = new List<ISaveable>();
+            if (hero == null) return list;
+            list.Add(hero);
+            foreach (var s in SaveRegistry.Items)
+                if (s is ICharacterSaveable c && c.Owner == hero && !ReferenceEquals(s, hero)) list.Add(s);
+            return list;
         }
     }
 }

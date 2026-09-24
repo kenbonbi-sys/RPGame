@@ -8,7 +8,8 @@ namespace RPG
     /// Gấu Ma Rừng Già — the forest boss.
     /// Patterns: Vồ (claw swipe), Dậm Đất (ground stomp, stuns), Ném Đá Lớn (throws a boulder
     /// that stays on the field), Chụp Quăng (leap slam; landing on a boulder stuns the bear).
-    /// Enrages at 50% HP.
+    /// Enrages at 50% HP. Wakes for any hero, fights the one it has the most threat on and resets
+    /// once every hero is down or has left the arena.
     /// </summary>
     public class BossBear : MonoBehaviour, ISaveable
     {
@@ -53,13 +54,18 @@ namespace RPG
         Coroutine routine;
         GameObject auraFx;
         Vector2 home;
+        PlayerController target;
+        readonly ThreatTable threat = new ThreatTable();
 
         public bool Engaged => state != State.Dormant && state != State.Dead && state != State.Returning;
+        /// <summary>The hero the bear is fighting (null while dormant).</summary>
+        public PlayerController Target => target;
 
         /// <summary>Every boss in the loaded scenes, alive or defeated.</summary>
         public static readonly List<BossBear> All = new List<BossBear>();
-        PlayerController Player => GameManager.I != null ? GameManager.I.player : null;
         Vector2 Pos => transform.position;
+        /// <summary>Heroes this far from the arena centre have left the fight.</summary>
+        float LeashRadius => arenaRadius + 7f;
         float CdMul => (enraged ? 0.65f : 1f) / Mathf.Max(0.1f, status != null ? status.AttackSpeedMultiplier : 1f);   // Lạnh slows its attacks
 
         void Awake()
@@ -100,19 +106,27 @@ namespace RPG
         // ================================================================= loop
         void Update()
         {
-            var p = Player;
             switch (state)
             {
                 case State.Dormant:
                     motor.Stop();
                     anim.Play("idle");
-                    if (p != null && !p.IsDead && Vector2.Distance(p.transform.position, home) < wakeRadius)
+                    var waker = Players.Nearest(home, wakeRadius);
+                    if (waker != null)
+                    {
+                        threat.Add(waker, 1f);
                         routine = StartCoroutine(Intro());
+                    }
                     break;
                 case State.Chase:
-                    if (CheckLeash(p)) break;
+                    target = PickTarget();
+                    if (target == null)
+                    {
+                        ResetFight();
+                        break;
+                    }
                     if (status.IsStunned) { EnterStun(); break; }
-                    ChaseAndDecide(p);
+                    ChaseAndDecide(target);
                     break;
                 case State.Stunned:
                     motor.Stop();
@@ -135,18 +149,27 @@ namespace RPG
             if (body != null && Mathf.Abs(motor.Velocity.x) > 0.2f && state == State.Chase) body.flipX = motor.Velocity.x < 0;
         }
 
-        bool CheckLeash(PlayerController p)
+        /// <summary>
+        /// The living hero in the fight (near the arena) the bear has the most threat on; the one
+        /// nearest the arena when nobody has threat yet. Null: everyone is down or gone.
+        /// </summary>
+        PlayerController PickTarget()
         {
-            bool lost = p == null || p.IsDead || Vector2.Distance(p.transform.position, home) > arenaRadius + 7f;
-            if (!lost) return false;
-            ResetFight();
-            return true;
+            var p = threat.Top(h => Vector2.Distance(h.transform.position, home) <= LeashRadius);
+            if (p == null)
+            {
+                p = Players.Nearest(home, LeashRadius);
+                if (p != null) threat.Add(p, 1f);
+            }
+            return p;
         }
 
         void ResetFight()
         {
             if (routine != null) StopCoroutine(routine);
             ClearTelegraphs();
+            threat.Clear();
+            target = null;
             enraged = false;
             if (auraFx != null) { VFX.Release(auraFx); auraFx = null; }
             if (flash != null) flash.SetTint(Color.white, 0);
@@ -267,7 +290,7 @@ namespace RPG
         void Announce(string skill)
         {
             GameEvents.RaiseSkillAnnounced(health, "Kỹ năng: " + skill);
-            Bestiary.RecordSkill(displayName, skill);
+            Bestiary.ForWitnesses(Pos, b => b.RecordSkill(displayName, skill));
         }
 
         Telegraph Warn(Telegraph t)
@@ -288,7 +311,8 @@ namespace RPG
         {
             state = State.Intro;
             motor.Stop();
-            Face(Player.transform.position);
+            var waker = PickTarget();
+            if (waker != null) Face(waker.transform.position);
             if (GameManager.I != null) GameManager.I.SetCinematic(true);
             CameraRig.SetZoom(0.8f);
             CameraRig.SetFocus(transform, 0.35f);
@@ -301,7 +325,7 @@ namespace RPG
             GameEvents.RaiseBanner(BannerKind.Title, displayName, title, new Color(1f, 0.45f, 0.4f));
             GameEvents.RaiseBossEngaged(health, displayName, level);
             AudioManager.PlayMusic("music_boss", 0.8f);
-            Bestiary.RecordSeen(bossId, displayName);
+            Bestiary.ForWitnesses(Pos, b => b.RecordSeen(bossId, displayName));
             yield return new WaitForSeconds(1.6f);
             if (GameManager.I != null) GameManager.I.SetCinematic(false);
             anim.Play("idle", true);
@@ -349,10 +373,11 @@ namespace RPG
             Combat.DamageCone(Pos + Vector2.up * 0.3f, dir, swipeRange + 0.3f, 100f, d);
             CameraRig.Shake(0.2f);
             yield return new WaitForSeconds(0.45f);
-            if (enraged && Random.value < 0.5f && Player != null)
+            if (enraged && Random.value < 0.5f)
             {
-                // quick second swipe
-                yield return Swipe(Player);
+                // quick second swipe, at whoever it is angriest with now
+                var next = PickTarget();
+                if (next != null) yield return Swipe(next);
             }
         }
 
@@ -374,7 +399,7 @@ namespace RPG
                 VFX.Spawn("stomp_shockwave", Pos + Vector2.up * 0.1f, Quaternion.identity, radius / 4.2f);
                 CameraRig.Shake(0.65f);
                 ScreenFX.Impact(0.6f, 0.4f);
-                TimeFX.HitStop(0.06f);
+                TimeFX.HitStop(0.06f, gameObject);
                 var d = DamageInfo.Make(stompDamage, Team.Enemy, gameObject, Pos, Vector2.down, DamageType.Physical, 8f);
                 d.status.stun = stompStun;
                 d.skillName = "Dậm Đất";
@@ -497,7 +522,7 @@ namespace RPG
         /// <summary>Forces an attack (used by AutoShot / debugging).</summary>
         public void DebugForce(string attack)
         {
-            var p = Player;
+            var p = PickTarget() ?? Players.Local;
             if (p == null || state == State.Dead) return;
             if (state == State.Dormant) state = State.Chase;
             if (routine != null) StopCoroutine(routine);
@@ -516,6 +541,7 @@ namespace RPG
         void OnDamaged(DamageInfo d, float amount)
         {
             if (flash != null) flash.Flash(Color.white, 0.85f, 0.1f);
+            if (state != State.Dead) threat.Add(d.SourcePlayer, amount);
             if (state == State.Dormant && d.sourceTeam == Team.Player) routine = StartCoroutine(Intro());
             if (state == State.Chase && status.IsStunned) EnterStun();
         }
@@ -545,8 +571,13 @@ namespace RPG
             yield return new WaitForSecondsRealtime(1.2f);
             Loot.Roll(loot, Pos);
             Loot.DropCoins(Pos, 12);
-            GameEvents.RaiseEnemyKilled(new KillInfo { id = bossId, name = displayName, level = level, rank = EnemyRank.Boss, position = Pos });
-            Bestiary.RecordKill(bossId, displayName);
+            GameEvents.RaiseEnemyKilled(new KillInfo
+            {
+                id = bossId, name = displayName, level = level, rank = EnemyRank.Boss, position = Pos,
+                credited = new List<PlayerController>(health.Attackers)
+            });
+            threat.Clear();
+            target = null;
             GameEvents.RaiseBanner(BannerKind.Victory, "CHIẾN THẮNG!", $"Đã đánh bại {displayName}");
             GameEvents.RaiseBossDisengaged(1.5f);
             AudioManager.Play("sfx_victory", 1f, 0f);

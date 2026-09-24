@@ -62,10 +62,11 @@ namespace RPG
             return best;
         }
 
+        /// <summary>Hero <paramref name="p"/> talks to this NPC (the conversation runs on that hero's screen).</summary>
         public void Interact(PlayerController p)
         {
             if (talking || DialogueDirector.I == null) return;
-            bool started = DialogueDirector.I.Talk(this, () =>
+            bool started = DialogueDirector.I.Talk(this, p, () =>
             {
                 talking = false;
                 if (anim != null) anim.Play(idleClip);
@@ -78,9 +79,12 @@ namespace RPG
 
         void Update()
         {
-            if (questMarker != null && QuestSystem.I != null)
+            // the marker and the prompt are for the hero on this screen
+            var me = Players.Local;
+            var quests = me != null ? me.quests : null;
+            if (questMarker != null && quests != null)
             {
-                var m = QuestSystem.I.MarkerFor(npcId, out var kind);
+                var m = quests.MarkerFor(npcId, out var kind);
                 questMarker.gameObject.SetActive(m != QuestSystem.Marker.None && !talking);
                 if (m != QuestSystem.Marker.None)
                 {
@@ -92,10 +96,10 @@ namespace RPG
             }
             // created lazily: a zone opened on its own in the editor starts before the Core UI
             if (plate == null && HUD.I != null) plate = HUD.I.CreateNameplate(transform, displayName, false, Color.white, null, 1.42f);
-            if (plate != null && GameManager.I != null && GameManager.I.player != null)
+            if (plate != null && me != null)
             {
-                float d = Vector2.Distance(GameManager.I.player.transform.position, transform.position);
-                plate.SetPrompt(d < GameManager.I.player.interactRadius && !talking ? "[F] Nói chuyện" : null);
+                float d = Vector2.Distance(me.transform.position, transform.position);
+                plate.SetPrompt(d < me.interactRadius && !talking ? "[F] Nói chuyện" : null);
             }
         }
     }

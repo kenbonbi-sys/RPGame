@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace RPG
 {
-    /// <summary>Keeps a camp of enemies alive; respawns them while the player is away.</summary>
+    /// <summary>Keeps a camp of enemies alive; respawns them while no hero is near.</summary>
     public class EnemySpawner : MonoBehaviour
     {
         public GameObject prefab;
@@ -41,11 +41,13 @@ namespace RPG
         void Update()
         {
             if (dead.Count == 0) return;
-            var p = GameManager.I != null ? GameManager.I.player : null;
+            bool watched = false;   // a hero nearby, even one lying dead, sees the camp
+            foreach (var p in Players.All)
+                if (p != null && Vector2.Distance(p.transform.position, transform.position) < minPlayerDistance) watched = true;
             for (int i = dead.Count - 1; i >= 0; i--)
             {
                 if (Time.time < dead[i].at) continue;
-                if (p != null && Vector2.Distance(p.transform.position, transform.position) < minPlayerDistance) continue;
+                if (watched) continue;
                 var e = dead[i].e;
                 dead.RemoveAt(i);
                 if (e == null) continue;

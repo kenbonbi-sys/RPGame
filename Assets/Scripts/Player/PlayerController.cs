@@ -17,10 +17,13 @@ namespace RPG
     }
 
     /// <summary>
-    /// The hero. Mouse (hold left/right button) or arrow keys to move, click an enemy to
-    /// attack it, Q W E R A S D Space for skills, 1 2 3 potions, F to talk.
+    /// A hero. The one this machine controls (<see cref="Players.Local"/>) turns the mouse (hold
+    /// left/right button) or arrow keys, a click on an enemy (attack it) or an NPC (talk), Q W E R
+    /// A S D Space (skills), 1 2 3 (potions) and F (talk) into a <see cref="PlayerIntent"/>. Every
+    /// hero acts on its intent the same way, wherever it comes from (online: the network).
+    /// The hero carries its own stats, bag, quest log and Bách Khoa Trùm.
     /// </summary>
-    public class PlayerController : MonoBehaviour, ISaveable, IAbilityCaster
+    public class PlayerController : MonoBehaviour, ICharacterSaveable, IAbilityCaster
     {
         [Header("Refs")]
         public CharacterMotor motor;
@@ -33,6 +36,9 @@ namespace RPG
         public PlayerSkills skills;
         public PlayerStats stats;
         public PerfectDodge perfectDodge;
+        public Inventory inventory;
+        public QuestSystem quests;
+        public Bestiary bestiary;
 
         [Header("Stats")]
         public float maxEnergy = 63f;
@@ -48,6 +54,8 @@ namespace RPG
         public float potionCooldown = 1f;
 
         public bool IsDead => health != null && health.IsDead;
+        /// <summary>The hero this machine shows and controls: HUD, camera, input and screen effects follow it.</summary>
+        public bool IsLocal => Players.Local == this;
         public readonly List<Buff> buffs = new List<Buff>();
         public float PotionReadyIn => Mathf.Max(0, potionReadyAt - Time.time);
 
@@ -55,13 +63,15 @@ namespace RPG
         float actionMoveMul = 1f;
         Vector2 actionDir;
         string actionAnim;
+        float potionReadyAt;
+        float hurtAnimUntil;
+        float regenFraction;
+        PlayerIntent intent;
+        // where this machine's clicks sent the hero (input only)
         Vector2 moveTarget;
         bool hasMoveTarget;
         Health attackTarget;
         NPC npcTarget;
-        float potionReadyAt;
-        float hurtAnimUntil;
-        float regenFraction;
         readonly List<Collider2D> clickHits = new List<Collider2D>();
 
         void Awake()
@@ -73,12 +83,20 @@ namespace RPG
             if (stats == null) stats = GetComponent<PlayerStats>();
             if (stats == null) stats = gameObject.AddComponent<PlayerStats>();   // prefabs made before stats existed
             if (perfectDodge == null) perfectDodge = gameObject.GetOrAdd<PerfectDodge>();
+            // prefabs made before the hero carried its own bag, quest log and bestiary
+            if (inventory == null) inventory = gameObject.GetOrAdd<Inventory>();
+            if (quests == null) quests = gameObject.GetOrAdd<QuestSystem>();
+            if (bestiary == null) bestiary = gameObject.GetOrAdd<Bestiary>();
             health.Damaged += OnDamaged;
             health.Died += OnDied;
             if (anim != null) anim.FrameChanged += OnFrame;
             skills.BufferedCast += OnKeySkillCast;
             SaveRegistry.Register(this);
         }
+
+        void OnEnable() => Players.Register(this);
+
+        void OnDisable() => Players.Unregister(this);
 
         void OnDestroy() => SaveRegistry.Unregister(this);
 
@@ -189,38 +207,44 @@ namespace RPG
         /// <summary>Seconds left in the current attack / cast pose.</summary>
         public float ActionRemaining => Mathf.Max(0f, actionUntil - Time.time);
 
+        /// <summary>
+        /// What a hero controlled from elsewhere wants to do (online: the network; tests). Presses
+        /// act once; walking and aim carry on until the next intent. The local hero reads its own input.
+        /// </summary>
+        public void SetIntent(PlayerIntent i) => intent = i;
+
         void Update()
         {
             UpdateBuffs();
             if (IsDead) return;
             Regen();
+            if (IsLocal) intent = ReadLocalInput();
+            Act(intent);
+            intent = intent.Held;
+        }
 
-            var gm = GameManager.I;
-            bool playing = gm == null || gm.State == GameState.Playing;
-            if (!playing)
-            {
-                motor.Stop();
-                hasMoveTarget = false;
-                UpdateAnimation(Vector2.zero);
-                return;
-            }
+        /// <summary>Acts on an intent: potions, skills, talking, walking. The same for every hero.</summary>
+        void Act(PlayerIntent i)
+        {
             if (status != null && status.IsStunned)
             {
                 motor.Stop();
-                hasMoveTarget = false;
                 if (anim != null) anim.PlayDir("hurt", motor.Facing);
                 return;
             }
-
-            HandlePotions();
-            HandleSkills();
-            HandleInteract();
-            Vector2 move = ComputeMove();
+            for (int s = 0; s < 3; s++)
+                if (i.PotionPressed(s)) UsePotion(s);
+            for (int s = 0; s < 8; s++)
+                if (i.SkillPressed(s) && skills.Request(s, i.aim)) OnKeySkillCast(s);
+            if (i.basicAttack) skills.TryCast(0, i.basicAttackAt);
+            if (i.talkTo != null && Vector2.Distance(transform.position, i.talkTo.transform.position) <= interactRadius)
+                i.talkTo.Interact(this);
             float speedMul = (status != null ? status.SpeedMultiplier : 1f) * (IsActing ? actionMoveMul : 1f);
             speedMul *= BuffSpeed;
-            motor.Move(move, speedMul);
+            if (i.face.sqrMagnitude > 0.01f) motor.Facing = i.face;
+            motor.Move(i.move, speedMul);
             if (IsActing) motor.Facing = actionDir;
-            UpdateAnimation(move);
+            UpdateAnimation(i.move);
         }
 
         void Regen()
@@ -236,7 +260,7 @@ namespace RPG
                     health.Heal(whole, false);
                 }
             }
-            ScreenFX.SetDanger(health.Fraction < 0.3f ? 1f - health.Fraction / 0.3f : 0f);
+            if (IsLocal) ScreenFX.SetDanger(health.Fraction < 0.3f ? 1f - health.Fraction / 0.3f : 0f);
         }
 
         void UpdateBuffs()
@@ -253,55 +277,21 @@ namespace RPG
             if (changed) ApplyBuffs();
         }
 
-        // ------------------------------------------------------------------ input
-        void HandleSkills()
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                if (!InputReader.SkillPressed(i)) continue;
-                if (skills.Request(i, InputReader.MouseWorld)) OnKeySkillCast(i);
-            }
-            // auto basic attack on a clicked enemy
-            if (attackTarget != null)
-            {
-                if (attackTarget.IsDead || !attackTarget.gameObject.activeInHierarchy)
-                {
-                    attackTarget = null;
-                }
-                else
-                {
-                    float d = Vector2.Distance(transform.position, attackTarget.transform.position);
-                    if (d <= basicAttackRange && !IsActing)
-                        skills.TryCast(0, attackTarget.transform.position);
-                }
-            }
-        }
-
-        /// <summary>A key-pressed skill fired (now or from the input buffer): stop walking / auto-attacking.</summary>
-        void OnKeySkillCast(int slot)
-        {
-            hasMoveTarget = false;
-            attackTarget = null;
-        }
-
-        void HandlePotions()
-        {
-            for (int i = 0; i < 3; i++)
-                if (InputReader.PotionPressed(i)) UsePotion(i);
-        }
-
         public bool UsePotion(int slot)
         {
             if (slot < 0 || slot >= potionIds.Length || Time.time < potionReadyAt) return false;
             var db = GameManager.I != null ? GameManager.I.db : null;
             var item = db != null ? db.Item(potionIds[slot]) : null;
-            if (item == null || Inventory.I == null || Inventory.I.Count(item) <= 0)
+            if (item == null || inventory == null || inventory.Count(item) <= 0)
             {
-                GameEvents.RaiseWorldText("Hết bình!", health.HeadPosition + Vector3.up * 0.4f, new Color(0.8f, 0.8f, 0.8f));
-                AudioManager.Play("sfx_denied", 0.5f);
+                if (IsLocal)
+                {
+                    GameEvents.RaiseWorldText("Hết bình!", health.HeadPosition + Vector3.up * 0.4f, new Color(0.8f, 0.8f, 0.8f));
+                    AudioManager.Play("sfx_denied", 0.5f);
+                }
                 return false;
             }
-            Inventory.I.Remove(item, 1);
+            inventory.Remove(item, 1);
             potionReadyAt = Time.time + potionCooldown;
             if (item.healAmount > 0) health.Heal(item.healAmount);
             if (item.energyAmount > 0)
@@ -313,27 +303,62 @@ namespace RPG
             if (item.cleanse && status != null) status.Cleanse();
             string fx = slot == 0 ? "potion_red" : slot == 1 ? "potion_blue" : "potion_green";
             VFX.Spawn(fx, transform.position, Quaternion.identity, 1f, transform);
-            AudioManager.Play("sfx_potion", 0.8f);
+            AudioManager.Play("sfx_potion", 0.8f, 0.06f, IsLocal ? (Vector3?)null : transform.position);
             return true;
         }
 
-        void HandleInteract()
+        // ------------------------------------------------------------------ this machine's input
+        /// <summary>
+        /// The keyboard and mouse as an intent. Remembers where clicks sent the hero (walk there,
+        /// attack that enemy, talk to that NPC) and keeps going there on later frames.
+        /// </summary>
+        PlayerIntent ReadLocalInput()
         {
-            if (InputReader.Interact)
+            var i = new PlayerIntent();
+            var gm = GameManager.I;
+            bool playing = gm == null || gm.State == GameState.Playing;
+            if (!playing || (status != null && status.IsStunned))
             {
-                var npc = NPC.Nearest(transform.position, interactRadius);
-                if (npc != null) npc.Interact(this);
+                hasMoveTarget = false;
+                return i;
             }
+            for (int s = 0; s < 3; s++)
+                if (InputReader.PotionPressed(s)) i.potionPresses |= 1 << s;
+            for (int s = 0; s < 8; s++)
+                if (InputReader.SkillPressed(s)) i.skillPresses |= 1 << s;
+            i.aim = InputReader.MouseWorld;
+            // auto basic attack on a clicked enemy
+            if (attackTarget != null)
+            {
+                if (attackTarget.IsDead || !attackTarget.gameObject.activeInHierarchy)
+                {
+                    attackTarget = null;
+                }
+                else if (Vector2.Distance(transform.position, attackTarget.transform.position) <= basicAttackRange && !IsActing)
+                {
+                    i.basicAttack = true;
+                    i.basicAttackAt = attackTarget.transform.position;
+                }
+            }
+            if (InputReader.Interact) i.talkTo = NPC.Nearest(transform.position, interactRadius);
             if (npcTarget != null && Vector2.Distance(transform.position, npcTarget.transform.position) <= interactRadius)
             {
-                var n = npcTarget;
+                i.talkTo = npcTarget;
                 npcTarget = null;
                 hasMoveTarget = false;
-                n.Interact(this);
             }
+            i.move = ComputeMove(ref i);
+            return i;
         }
 
-        Vector2 ComputeMove()
+        /// <summary>A key-pressed skill fired (now or from the input buffer): stop walking / auto-attacking.</summary>
+        void OnKeySkillCast(int slot)
+        {
+            hasMoveTarget = false;
+            attackTarget = null;
+        }
+
+        Vector2 ComputeMove(ref PlayerIntent i)
         {
             Vector2 arrows = InputReader.ArrowMove;
             if (arrows.sqrMagnitude > 0.01f)
@@ -379,7 +404,7 @@ namespace RPG
             {
                 Vector2 to = (Vector2)attackTarget.transform.position - (Vector2)transform.position;
                 if (to.magnitude > basicAttackRange * 0.85f) return to.normalized;
-                motor.Facing = to.normalized;
+                i.face = to.normalized;
                 return Vector2.zero;
             }
             if (npcTarget != null)
@@ -427,7 +452,7 @@ namespace RPG
         {
             if (clip != null && clip.StartsWith("walk") && (frame == 0 || frame == 2))
             {
-                AudioManager.Play("sfx_step", 0.25f, 0.15f, null, 0.1f);
+                AudioManager.Play("sfx_step", 0.25f, 0.15f, IsLocal ? (Vector3?)null : transform.position, 0.1f);
                 if (Random.value < 0.6f) VFX.Spawn("step_dust", transform.position + new Vector3(Random.Range(-0.1f, 0.1f), 0.05f), Quaternion.identity);
             }
         }
@@ -443,11 +468,13 @@ namespace RPG
             }
             if (flash != null) flash.Flash(new Color(1f, 0.3f, 0.3f), 0.9f, 0.18f);
             if (amount >= 12f) hurtAnimUntil = Time.time + 0.18f;
-            CameraRig.Shake(Mathf.Clamp(amount / 60f, 0.1f, 0.45f));
-            ScreenFX.Flash(new Color(0.9f, 0.1f, 0.1f), Mathf.Clamp(amount / 80f, 0.12f, 0.35f), 0.3f);
-            AudioManager.Play("sfx_player_hurt", 0.8f);
-            var m = GetComponent<CharacterMotor>();
-            if (m != null && d.knockback > 0) m.AddKnockback(d.direction * d.knockback);
+            if (IsLocal)
+            {
+                CameraRig.Shake(Mathf.Clamp(amount / 60f, 0.1f, 0.45f));
+                ScreenFX.Flash(new Color(0.9f, 0.1f, 0.1f), Mathf.Clamp(amount / 80f, 0.12f, 0.35f), 0.3f);
+                AudioManager.Play("sfx_player_hurt", 0.8f);
+            }
+            if (motor != null && d.knockback > 0) motor.AddKnockback(d.direction * d.knockback);
         }
 
         void OnDied(DamageInfo d)
@@ -457,9 +484,13 @@ namespace RPG
             attackTarget = null;
             ClearBuffs();
             if (anim != null) anim.Play("dead", true);
-            AudioManager.Play("sfx_player_die");
-            TimeFX.SlowMo(0.3f, 1.2f);
-            if (GameManager.I != null) GameManager.I.OnPlayerDied();
+            if (IsLocal)
+            {
+                AudioManager.Play("sfx_player_die");
+                TimeFX.SlowMo(0.3f, 1.2f);
+            }
+            else AudioManager.Play("sfx_player_die", 1f, 0.06f, transform.position);
+            if (GameManager.I != null) GameManager.I.OnPlayerDied(this);
         }
 
         public void Respawn(Vector2 at)
@@ -484,6 +515,8 @@ namespace RPG
         }
 
         public string SaveKey => "player";
+
+        PlayerController ICharacterSaveable.Owner => this;
 
         public string CaptureState()
         {

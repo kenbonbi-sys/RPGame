@@ -84,7 +84,9 @@ namespace RPG
         {
             if (bufferedSlot < 0) return;
             var gm = GameManager.I;
-            bool canAct = !pc.IsDead && (gm == null || gm.State == GameState.Playing) && (pc.status == null || !pc.status.IsStunned);
+            // menus and conversations on this screen hold only the hero this screen controls
+            bool screenFree = !pc.IsLocal || gm == null || gm.State == GameState.Playing;
+            bool canAct = !pc.IsDead && screenFree && (pc.status == null || !pc.status.IsStunned);
             if (!canAct || Time.time > bufferedUntil)
             {
                 bufferedSlot = -1;
@@ -145,7 +147,7 @@ namespace RPG
             else if (to.magnitude > s.maxRange) aim = origin + to.normalized * s.maxRange;
             int level = LevelOf(i);
             pc.energy -= s.energyCost;
-            cooldownOf[i] = s.CooldownAt(level) * (PlayerStats.I != null ? PlayerStats.I.CooldownMultiplier(i, s) : 1f);
+            cooldownOf[i] = s.CooldownAt(level) * (pc.stats != null ? pc.stats.CooldownMultiplier(i, s) : 1f);
             if (i == 0 && pc.status != null) cooldownOf[i] /= Mathf.Max(0.1f, pc.status.AttackSpeedMultiplier);   // Lạnh slows the basic attack
             readyAt[i] = Time.time + cooldownOf[i];
             gcdUntil = Time.time + globalCooldown;
@@ -159,7 +161,7 @@ namespace RPG
         void Fail(int i, string reason)
         {
             SkillFailed?.Invoke(i, reason);
-            if (reason != null && Time.time - lastFailMsg > 0.8f)
+            if (reason != null && pc.IsLocal && Time.time - lastFailMsg > 0.8f)
             {
                 lastFailMsg = Time.time;
                 GameEvents.RaiseWorldText(reason, pc.health.HeadPosition + Vector3.up * 0.4f, Palette.Energy);

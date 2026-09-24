@@ -48,7 +48,7 @@ namespace RPG
 
         void Update()
         {
-            var p = GameManager.I != null ? GameManager.I.player : null;
+            var p = Players.Local;
             if (p == null || p.skills == null) return;
             var s = p.skills.slots[slot];
             if (icon != null)
@@ -87,7 +87,7 @@ namespace RPG
         public void OnPointerEnter(PointerEventData e)
         {
             hovered = true;
-            var p = GameManager.I != null ? GameManager.I.player : null;
+            var p = Players.Local;
             var s = p != null ? p.skills.slots[slot] : null;
             if (s != null && HUD.I != null && HUD.I.tooltip != null)
                 HUD.I.tooltip.Show($"{s.displayName}  <color=#b8b0c8><size=80%>[{InputReader.SkillLabel(slot)}]</size></color>", s.Tooltip(), new Color(1f, 0.88f, 0.55f));

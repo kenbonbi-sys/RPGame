@@ -4,11 +4,9 @@ using UnityEngine;
 
 namespace RPG
 {
-    /// <summary>Player bag: item stacks + gold.</summary>
-    public class Inventory : MonoBehaviour, ISaveable
+    /// <summary>A hero's bag: item stacks + gold. Lives on the hero; the prefab's contents are a new character's starting kit.</summary>
+    public class Inventory : MonoBehaviour, ICharacterSaveable
     {
-        public static Inventory I { get; private set; }
-
         [Serializable]
         public class Stack
         {
@@ -22,13 +20,19 @@ namespace RPG
 
         public event Action Changed;
 
+        /// <summary>The hero carrying the bag.</summary>
+        public PlayerController Owner { get; private set; }
+
         void Awake()
         {
-            I = this;
+            Owner = GetComponent<PlayerController>();
             SaveRegistry.Register(this);
         }
 
         void OnDestroy() => SaveRegistry.Unregister(this);
+
+        /// <summary>Messages about the bag ("Nhận được…") go to its owner's screen only.</summary>
+        bool Announces => Owner == null || Owner.IsLocal;
 
         public int Count(ItemDef item)
         {
@@ -52,7 +56,7 @@ namespace RPG
             {
                 gold += n * Mathf.Max(1, item.value);
                 Changed?.Invoke();
-                if (announce) GameEvents.RaiseItemPicked(item, n);
+                if (announce && Announces) GameEvents.RaiseItemPicked(item, n);
                 return true;
             }
             int left = n;
@@ -71,7 +75,7 @@ namespace RPG
                 left -= add;
             }
             Changed?.Invoke();
-            if (announce) GameEvents.RaiseItemPicked(item, n - left);
+            if (announce && Announces) GameEvents.RaiseItemPicked(item, n - left);
             return left == 0;
         }
 

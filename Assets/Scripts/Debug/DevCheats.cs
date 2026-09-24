@@ -16,15 +16,15 @@ namespace RPG
         {
             if (!enableCheats) return;
             var gm = GameManager.I;
-            if (gm == null || gm.player == null) return;
-            var p = gm.player;
+            var p = Players.Local;
+            if (gm == null || p == null) return;
             if (InputReader.Cheat(0))
             {
                 p.health.Heal(9999);
                 p.energy = p.maxEnergy;
                 p.skills.ResetCooldowns();
-                Inventory.I.Add(gm.db.Item("potion_red"), 3, false);
-                Inventory.I.Add(gm.db.Item("potion_blue"), 3, false);
+                p.inventory.Add(gm.db.Item("potion_red"), 3, false);
+                p.inventory.Add(gm.db.Item("potion_blue"), 3, false);
                 GameEvents.RaiseLog("[Cheat] Hồi đầy máu, năng lượng và hồi chiêu.");
             }
             if (InputReader.Cheat(1) && DayNightCycle.I != null)

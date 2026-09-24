@@ -5,15 +5,14 @@ using UnityEngine;
 namespace RPG
 {
     /// <summary>
-    /// Runs the <see cref="QuestDef"/> assets (plan §09): unlocks, objective progress from game
-    /// events, rewards, flags and follow-up quests. Dialogue (Yarn) starts and turns quests in
-    /// through <see cref="StartQuest"/> / <see cref="CompleteQuest"/>; everything else is driven
-    /// by kills, items, conversations, zones and scripted reports.
+    /// A hero's quest log: runs the <see cref="QuestDef"/> assets (plan §09) for the hero it sits
+    /// on — unlocks, objective progress, rewards, flags and follow-up quests. Dialogue (Yarn)
+    /// starts and turns quests in through <see cref="StartQuest"/> / <see cref="CompleteQuest"/>;
+    /// the rest is driven by the kills the hero shares, their bag and level, the NPCs they talk
+    /// to (<see cref="NotifyTalkStarted"/>), the places they reach and scripted reports.
     /// </summary>
-    public class QuestSystem : MonoBehaviour, ISaveable
+    public class QuestSystem : MonoBehaviour, ICharacterSaveable
     {
-        public static QuestSystem I { get; private set; }
-
         public enum Marker { None, Exclaim, Question }
 
         [Tooltip("Empty = every quest of the GameDatabase.")]
@@ -33,12 +32,21 @@ namespace RPG
         readonly Dictionary<string, State> byId = new Dictionary<string, State>();
         readonly HashSet<string> flags = new HashSet<string>();
         readonly Dictionary<string, int> kills = new Dictionary<string, int>();
-        Inventory boundInventory;
+        Inventory inventory;
+        PlayerStats stats;
         string talkingTo;   // npc in conversation right now
+
+        /// <summary>The hero whose quests these are.</summary>
+        public PlayerController Owner { get; private set; }
+
+        /// <summary>Quest messages, banners and sounds go to the owner's screen only.</summary>
+        bool Local => Owner == null || Owner.IsLocal;
 
         void Awake()
         {
-            I = this;
+            Owner = GetComponent<PlayerController>();
+            inventory = GetComponent<Inventory>();
+            stats = GetComponent<PlayerStats>();
             Build();
             SaveRegistry.Register(this);
         }
@@ -46,33 +54,27 @@ namespace RPG
         void OnDestroy()
         {
             SaveRegistry.Unregister(this);
-            if (I == this) I = null;
-            if (boundInventory != null) boundInventory.Changed -= OnInventoryChanged;
+            if (inventory != null) inventory.Changed -= OnInventoryChanged;
+            if (stats != null) stats.LevelledUp -= OnLevelUp;
         }
 
-        void OnEnable()
-        {
-            GameEvents.EnemyKilled += OnKilled;
-            GameEvents.DialogueStarted += OnDialogueStarted;
-            GameEvents.DialogueEnded += OnDialogueEnded;
-            GameEvents.ZoneEntered += OnZoneEntered;
-            GameEvents.LevelUp += OnLevelUp;
-        }
+        void OnEnable() => GameEvents.EnemyKilled += OnKilled;
 
-        void OnDisable()
-        {
-            GameEvents.EnemyKilled -= OnKilled;
-            GameEvents.DialogueStarted -= OnDialogueStarted;
-            GameEvents.DialogueEnded -= OnDialogueEnded;
-            GameEvents.ZoneEntered -= OnZoneEntered;
-            GameEvents.LevelUp -= OnLevelUp;
-        }
+        void OnDisable() => GameEvents.EnemyKilled -= OnKilled;
 
         void Start()
         {
-            boundInventory = Inventory.I;
-            if (boundInventory != null) boundInventory.Changed += OnInventoryChanged;
+            // looked up again: the hero may have been given its bag or stats after this woke up
+            if (inventory == null) inventory = GetComponent<Inventory>();
+            if (stats == null) stats = GetComponent<PlayerStats>();
+            if (inventory != null) inventory.Changed += OnInventoryChanged;
+            if (stats != null) stats.LevelledUp += OnLevelUp;
             RefreshUnlocks(false);
+        }
+
+        void RaiseChanged()
+        {
+            if (Local) GameEvents.RaiseQuestChanged();
         }
 
         void Build()
@@ -122,7 +124,7 @@ namespace RPG
             var o = s.def.objectives[i];
             if (s.status == QuestStatus.Done) return o.count;
             if (o.kind == ObjectiveKind.Collect || o.kind == ObjectiveKind.Deliver)
-                return Mathf.Min(o.count, Inventory.I != null ? Inventory.I.Count(o.target) : 0);
+                return Mathf.Min(o.count, inventory != null ? inventory.Count(o.target) : 0);
             return Mathf.Min(o.count, s.progress[i]);
         }
 
@@ -138,7 +140,7 @@ namespace RPG
         // ------------------------------------------------------------ lifecycle
         bool Unlocked(QuestDef d)
         {
-            int level = PlayerStats.I != null ? PlayerStats.I.level : 1;
+            int level = stats != null ? stats.level : 1;
             if (level < d.minLevel) return false;
             foreach (var r in d.requires)
                 if (r != null && Status(r.id) != QuestStatus.Done) return false;
@@ -158,7 +160,7 @@ namespace RPG
                 changed = true;
                 if (s.def.autoStart) Begin(s, announce);
             }
-            if (changed) GameEvents.RaiseQuestChanged();
+            if (changed) RaiseChanged();
         }
 
         /// <summary>Accepts an available quest (Yarn: &lt;&lt;quest_start id&gt;&gt;).</summary>
@@ -183,14 +185,14 @@ namespace RPG
                 var o = s.def.objectives[i];
                 s.progress[i] = o.kind == ObjectiveKind.Kill && o.countPrevious ? KillCount(o.target) : 0;
             }
-            if (announce)
+            if (announce && Local)
             {
                 GameEvents.RaiseLog($"Nhiệm vụ mới: {s.def.title}", Palette.LogQuest);
                 GameEvents.RaiseBanner(BannerKind.Quest, "Nhiệm vụ mới", s.def.title);
                 AudioManager.Play("sfx_quest", 0.8f, 0f);
             }
             Evaluate(s);
-            GameEvents.RaiseQuestChanged();
+            RaiseChanged();
         }
 
         /// <summary>Turns in a ready quest: hands over Deliver items, gives rewards, sets flags, starts follow-ups.</summary>
@@ -200,33 +202,35 @@ namespace RPG
             if (s.status != QuestStatus.Active && s.status != QuestStatus.Ready) return false;
             if (!AllDone(s)) return false;
             var db = GameManager.I != null ? GameManager.I.db : null;
-            var inv = Inventory.I;
+            var inv = inventory;
             foreach (var o in s.def.objectives)
                 if (o.kind == ObjectiveKind.Deliver && inv != null && db != null) inv.Remove(db.Item(o.target), o.count);
             s.status = QuestStatus.Done;
 
-            GameEvents.RaiseLog(s.def.xp > 0 ? $"Hoàn thành: {s.def.title} (+{s.def.xp} XP)" : $"Hoàn thành: {s.def.title}", Palette.LogQuest);
-            AudioManager.Play("sfx_levelup", 0.7f, 0f);
-            var p = GameManager.I != null ? GameManager.I.player : null;
-            if (p != null) VFX.Spawn("quest_complete", p.transform.position, Quaternion.identity, 1f, p.transform);
+            if (Local)
+            {
+                GameEvents.RaiseLog(s.def.xp > 0 ? $"Hoàn thành: {s.def.title} (+{s.def.xp} XP)" : $"Hoàn thành: {s.def.title}", Palette.LogQuest);
+                AudioManager.Play("sfx_levelup", 0.7f, 0f);
+            }
+            if (Owner != null) VFX.Spawn("quest_complete", Owner.transform.position, Quaternion.identity, 1f, Owner.transform);
             if (inv != null)
             {
                 if (s.def.gold > 0)
                 {
                     inv.gold += s.def.gold;
-                    GameEvents.RaiseLog($"Nhận được {s.def.gold} vàng", Palette.Gold);
+                    if (Local) GameEvents.RaiseLog($"Nhận được {s.def.gold} vàng", Palette.Gold);
                 }
                 foreach (var r in s.def.items)
                     if (r != null && r.item != null) inv.Add(r.item, r.count);
             }
-            if (PlayerStats.I != null) PlayerStats.I.AddXp(s.def.xp);
+            if (stats != null) stats.AddXp(s.def.xp);
             foreach (var f in s.def.setFlags) SetFlag(f, false);
-            GameEvents.RaiseQuestCompleted(s.def.title);
+            if (Local) GameEvents.RaiseQuestCompleted(s.def.title);
 
             RefreshUnlocks(true);
             foreach (var next in s.def.followUps)
                 if (next != null && Status(next.id) == QuestStatus.Available) Begin(byId[next.id], true);
-            GameEvents.RaiseQuestChanged();
+            RaiseChanged();
             return true;
         }
 
@@ -241,13 +245,13 @@ namespace RPG
                 }
                 s.status = QuestStatus.Ready;
                 // no "report to the chief" while already talking to the chief
-                if (s.def.turnIn != talkingTo) GameEvents.RaiseLog($"{s.def.title}: {TurnInText(s)}", Palette.LogQuest);
-                GameEvents.RaiseQuestChanged();
+                if (s.def.turnIn != talkingTo && Local) GameEvents.RaiseLog($"{s.def.title}: {TurnInText(s)}", Palette.LogQuest);
+                RaiseChanged();
             }
             else if (s.status == QuestStatus.Ready && !AllDone(s))
             {
                 s.status = QuestStatus.Active;   // e.g. the collected items were used up
-                GameEvents.RaiseQuestChanged();
+                RaiseChanged();
             }
         }
 
@@ -275,24 +279,24 @@ namespace RPG
                 }
                 Evaluate(s);
             }
-            if (changed) GameEvents.RaiseQuestChanged();
+            if (changed) RaiseChanged();
         }
 
         void OnKilled(KillInfo k)
         {
+            if (!k.Credits(Owner)) return;
             kills[k.id] = KillCount(k.id) + 1;
             Advance(ObjectiveKind.Kill, k.id, 1);
         }
 
-        void OnDialogueStarted(string npcId)
+        /// <summary>The hero started talking to an NPC (Talk objectives complete before the script reads them).</summary>
+        public void NotifyTalkStarted(string npcId)
         {
             talkingTo = npcId;
             Advance(ObjectiveKind.Talk, npcId, int.MaxValue / 2);
         }
 
-        void OnDialogueEnded(string npcId) => talkingTo = null;
-
-        void OnZoneEntered(string zone) => Advance(ObjectiveKind.Reach, zone, int.MaxValue / 2);
+        public void NotifyTalkEnded(string npcId) => talkingTo = null;
 
         void OnLevelUp(int level) => RefreshUnlocks(true);
 
@@ -300,10 +304,10 @@ namespace RPG
         {
             foreach (var s in states.ToArray())
                 if (s.status == QuestStatus.Active || s.status == QuestStatus.Ready) Evaluate(s);
-            GameEvents.RaiseQuestChanged();
+            RaiseChanged();
         }
 
-        /// <summary>A trigger reached a place id (Reach objectives).</summary>
+        /// <summary>The hero reached a place: a named zone area or a trigger's place id (Reach objectives).</summary>
         public void NotifyReached(string placeId) => Advance(ObjectiveKind.Reach, placeId, int.MaxValue / 2);
 
         /// <summary>The player used a world object (Interact objectives).</summary>
@@ -369,8 +373,8 @@ namespace RPG
             if (n > 1)
             {
                 focus = (focus + 1) % n;
-                GameEvents.RaiseQuestChanged();
-                AudioManager.Play("sfx_ui_click", 0.6f);
+                RaiseChanged();
+                if (Local) AudioManager.Play("sfx_ui_click", 0.6f);
             }
         }
 
@@ -488,7 +492,7 @@ namespace RPG
             }
             focus = st.focus;
             RefreshUnlocks(false);   // quests added since the save
-            GameEvents.RaiseQuestChanged();
+            RaiseChanged();
         }
     }
 }

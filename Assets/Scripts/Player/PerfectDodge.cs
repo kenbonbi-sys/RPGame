@@ -72,12 +72,18 @@ namespace RPG
             pc.energy = Mathf.Min(pc.maxEnergy, pc.energy + c.perfectEnergy);
             bonusUntil = Time.time + c.perfectBonusSeconds;
             pc.AddBuff(new BuffSpec { id = BuffId, displayName = "Hoàn Hảo", icon = icon, duration = c.perfectBonusSeconds });
-            TimeFX.SlowMo(c.perfectTimeScale, c.perfectSlowSeconds, c.perfectSlowEase);
 
             Vector3 head = health.HeadPosition;
             GameEvents.RaiseWorldText("Hoàn Hảo!", head + Vector3.up * 0.4f, Palette.Gold);
             GameEvents.RaiseWorldText($"+{c.perfectEnergy:0}", head + Vector3.right * 0.5f, Palette.Energy);
             VFX.Spawn("dash_burst", transform.position + Vector3.up * 0.4f, Quaternion.identity, 1.4f);
+            if (!pc.IsLocal)
+            {
+                AudioManager.Play("sfx_crit", 0.8f, 0.02f, transform.position);
+                return;
+            }
+            // slow motion and the flash are the dodger's own (in a shared world TimeFX keeps them on this screen)
+            TimeFX.SlowMo(c.perfectTimeScale, c.perfectSlowSeconds, c.perfectSlowEase);
             AudioManager.Play("sfx_crit", 0.8f, 0.02f);
             ScreenFX.Flash(Palette.Gold, 0.15f, 0.25f);
         }
@@ -99,7 +105,7 @@ namespace RPG
 
         void OnAnyDamaged(Health target, DamageInfo d, float amount)
         {
-            if (counterSkill == null || d.sourceTeam != Team.Player || d.skillName != counterSkill) return;
+            if (counterSkill == null || d.sourceTeam != Team.Player || d.skillName != counterSkill || d.SourcePlayer != pc) return;
             if (Time.time > counterUntil)
             {
                 counterSkill = null;

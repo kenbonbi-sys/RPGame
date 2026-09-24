@@ -6,13 +6,12 @@ namespace RPG
     /// <summary>
     /// Level, XP and the four attributes of the hero (plan §05). Owns the StatBlock that
     /// equipment, talents and buffs will add modifiers to, and pushes the derived numbers
-    /// (max HP, max energy, armor, resist) into Health and PlayerController.
+    /// (max HP, max energy, armor, resist) into Health and PlayerController. Each hero has
+    /// their own; the HUD shows <see cref="Players.Local"/>'s.
     /// </summary>
     [DefaultExecutionOrder(-50)]
     public class PlayerStats : MonoBehaviour
     {
-        public static PlayerStats I { get; private set; }
-
         [Tooltip("Leave empty to use GameDatabase.progression.")]
         public ProgressionConfig config;
 
@@ -28,6 +27,8 @@ namespace RPG
 
         /// <summary>Level, XP, points or any stat changed.</summary>
         public event Action Changed;
+        /// <summary>This hero reached a new level (their quests unlock).</summary>
+        public event Action<int> LevelledUp;
 
         public ProgressionConfig Config => config != null ? config : ProgressionConfig.Current;
         public int XpToNext => Config.XpToNext(level);
@@ -37,7 +38,6 @@ namespace RPG
 
         void Awake()
         {
-            I = this;
             pc = GetComponent<PlayerController>();
             if (allocated == null || allocated.Length != 4) allocated = new int[4];
             Stats.Changed += OnStatsChanged;
@@ -45,10 +45,7 @@ namespace RPG
             FillUp();
         }
 
-        void OnDestroy()
-        {
-            if (I == this) I = null;
-        }
+        bool IsLocal => pc == null || pc.IsLocal;
 
         void OnEnable()
         {
@@ -71,7 +68,7 @@ namespace RPG
             statPoints--;
             allocated[(int)a]++;
             Recalculate();
-            AudioManager.Play("sfx_ui_click", 0.7f);
+            if (IsLocal) AudioManager.Play("sfx_ui_click", 0.7f);
             return true;
         }
 
@@ -158,8 +155,10 @@ namespace RPG
         public float PoiseMultiplier => Stats.Get(StatId.PoiseDamage);
 
         // ------------------------------------------------------------------ XP
+        /// <summary>Every hero who shares a kill gets its full XP (PvE: helping never costs XP).</summary>
         void OnEnemyKilled(KillInfo k)
         {
+            if (!k.Credits(pc)) return;
             AddXp(Config.KillXp(k.level, k.rank, level), k.position);
         }
 
@@ -168,7 +167,7 @@ namespace RPG
         {
             if (amount <= 0 || IsMaxLevel) return;
             xp += amount;
-            if (at.HasValue) GameEvents.RaiseWorldText($"+{amount} XP", at.Value + Vector3.up * 1.4f, Palette.Xp);
+            if (at.HasValue && IsLocal) GameEvents.RaiseWorldText($"+{amount} XP", at.Value + Vector3.up * 1.4f, Palette.Xp);
             int gained = 0;
             while (!IsMaxLevel && xp >= XpToNext)
             {
@@ -188,13 +187,15 @@ namespace RPG
         {
             Recalculate();
             FillUp();
+            LevelledUp?.Invoke(level);
+            VFX.Spawn("quest_complete", transform.position, Quaternion.identity, 1.2f, transform);
+            if (pc != null && pc.health != null)
+                GameEvents.RaiseWorldText($"Cấp {level}!", pc.health.HeadPosition + Vector3.up * 0.5f, Palette.Xp);
+            if (!IsLocal) return;   // the rest is this screen's HUD
             GameEvents.RaiseLevelUp(level);
             GameEvents.RaiseLog($"Lên cấp {level}! Nhận {Config.statPointsPerLevel} điểm chỉ số — bấm C để phân bổ.", Palette.Xp);
             GameEvents.RaiseBanner(BannerKind.Quest, "Lên cấp!", $"Cấp {level}");
             AudioManager.Play("sfx_levelup", 1f, 0f);
-            VFX.Spawn("quest_complete", transform.position, Quaternion.identity, 1.2f, transform);
-            if (pc != null && pc.health != null)
-                GameEvents.RaiseWorldText($"Cấp {level}!", pc.health.HeadPosition + Vector3.up * 0.5f, Palette.Xp);
         }
 
         /// <summary>Sets level/XP/points directly (loading a save). Does not fill HP/energy.</summary>

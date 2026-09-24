@@ -14,7 +14,7 @@ namespace RPG
 
         void Update()
         {
-            var p = GameManager.I != null ? GameManager.I.player : null;
+            var p = Players.Local;
             if (p == null || iconPrefab == null) return;
             var buffs = p.buffs;
             while (pool.Count < buffs.Count)

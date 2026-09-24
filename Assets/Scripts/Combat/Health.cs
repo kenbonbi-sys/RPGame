@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RPG
@@ -40,6 +41,13 @@ namespace RPG
 
         StatusEffects status;
         bool statusLooked;
+        readonly List<PlayerController> attackers = new List<PlayerController>(4);
+
+        /// <summary>Heroes who hurt this since it last reset. They share its kill (<see cref="KillInfo.credited"/>).</summary>
+        public IReadOnlyList<PlayerController> Attackers => attackers;
+
+        /// <summary>Forgets who hurt it: the fight was reset (the enemy walked home, the boss reset).</summary>
+        public void ForgetAttackers() => attackers.Clear();
 
         /// <summary>The character's statuses (looked up on first use, so tests can build targets without Play Mode).</summary>
         public StatusEffects Status
@@ -60,6 +68,7 @@ namespace RPG
             if (max > 0) maxHp = max;
             hp = maxHp;
             IsDead = false;
+            attackers.Clear();
         }
 
         public bool CanBeDamagedBy(Team attacker)
@@ -95,7 +104,11 @@ namespace RPG
             if (!d.pure)
             {
                 // older damage sources carry flat numbers: scale them by the hero's Attack here, once
-                if (d.sourceTeam == Team.Player && !d.attackScaled && PlayerStats.I != null) dealt *= PlayerStats.I.DamageScale(d.type);
+                if (d.sourceTeam == Team.Player && !d.attackScaled)
+                {
+                    var stats = d.SourceStats;
+                    if (stats != null) dealt *= stats.DamageScale(d.type);
+                }
                 dealt *= AttackerDealt(d);   // Nguyền on the attacker
                 raw = dealt * damageTakenMultiplier * (st != null ? st.DamageTakenMultiplier : 1f);
                 raw = ProgressionConfig.Current.Mitigate(raw, armor, armor > 0 ? AttackerLevel(d) : 1, Resistance(d.type), SpreadRoll());
@@ -103,6 +116,8 @@ namespace RPG
             float amount = Mathf.Max(1f, Mathf.Round(raw));
             hp = Mathf.Max(0f, hp - amount);
             LastDamageTime = Time.time;
+            var by = d.SourcePlayer;
+            if (by != null && !attackers.Contains(by)) attackers.Add(by);
 
             if (st != null && hp > 0f && d.status.Any) st.Apply(d, dealt);
 

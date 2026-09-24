@@ -20,14 +20,15 @@ namespace RPG
 
         void Update()
         {
-            var p = GameManager.I != null ? GameManager.I.player : null;
+            var p = Players.Local;
             var db = GameManager.I != null ? GameManager.I.db : null;
-            if (p == null || db == null || Inventory.I == null) return;
+            var bag = p != null ? p.inventory : null;
+            if (p == null || db == null || bag == null) return;
             float cd = p.potionCooldown > 0 ? p.PotionReadyIn / p.potionCooldown : 0f;
             for (int i = 0; i < 3 && i < p.potionIds.Length; i++)
             {
                 var item = db.Item(p.potionIds[i]);
-                int n = Inventory.I.Count(item);
+                int n = bag.Count(item);
                 if (icons[i] != null)
                 {
                     icons[i].sprite = item != null ? item.icon : null;

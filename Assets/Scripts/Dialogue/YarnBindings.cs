@@ -12,31 +12,44 @@ namespace RPG
     ///             item_count("item_id") · has_flag("flag") · player_level() · is_night()
     /// Commands:   &lt;&lt;quest_start id&gt;&gt; · &lt;&lt;quest_complete id&gt;&gt; · &lt;&lt;set_flag flag&gt;&gt;
     ///             &lt;&lt;give_item item_id count&gt;&gt; · &lt;&lt;victory "title" "subtitle"&gt;&gt;
+    /// They read and change the hero in the conversation (<see cref="DialogueDirector.Speaker"/>).
     /// </summary>
     public static class YarnBindings
     {
+        static PlayerController Hero
+        {
+            get
+            {
+                var d = DialogueDirector.I;
+                return d != null && d.Speaker != null ? d.Speaker : Players.Local;
+            }
+        }
+
+        static QuestSystem Quests => Hero != null ? Hero.quests : null;
+        static Inventory Bag => Hero != null ? Hero.inventory : null;
+
         // ------------------------------------------------------------------ functions
         [YarnFunction("quest_status")]
         public static string QuestStatus(string id)
         {
-            var q = QuestSystem.I;
+            var q = Quests;
             return q != null ? q.Status(id).ToString().ToLowerInvariant() : "locked";
         }
 
         [YarnFunction("quest_left")]
-        public static int QuestLeft(string id, int objective) => QuestSystem.I != null ? QuestSystem.I.Remaining(id, objective) : 0;
+        public static int QuestLeft(string id, int objective) => Quests != null ? Quests.Remaining(id, objective) : 0;
 
         [YarnFunction("quest_progress")]
-        public static int QuestProgress(string id, int objective) => QuestSystem.I != null ? QuestSystem.I.Progress(id, objective) : 0;
+        public static int QuestProgress(string id, int objective) => Quests != null ? Quests.Progress(id, objective) : 0;
 
         [YarnFunction("item_count")]
-        public static int ItemCount(string itemId) => Inventory.I != null ? Inventory.I.Count(itemId) : 0;
+        public static int ItemCount(string itemId) => Bag != null ? Bag.Count(itemId) : 0;
 
         [YarnFunction("has_flag")]
-        public static bool HasFlag(string flag) => QuestSystem.I != null && QuestSystem.I.HasFlag(flag);
+        public static bool HasFlag(string flag) => Quests != null && Quests.HasFlag(flag);
 
         [YarnFunction("player_level")]
-        public static int PlayerLevel() => PlayerStats.I != null ? PlayerStats.I.level : 1;
+        public static int PlayerLevel() => Hero != null && Hero.stats != null ? Hero.stats.level : 1;
 
         [YarnFunction("is_night")]
         public static bool IsNight() => DayNightCycle.IsNight;
@@ -45,20 +58,21 @@ namespace RPG
         [YarnCommand("quest_start")]
         public static void QuestStart(string id)
         {
-            if (QuestSystem.I != null) QuestSystem.I.StartQuest(id);
+            if (Quests != null) Quests.StartQuest(id);
         }
 
         [YarnCommand("quest_complete")]
         public static void QuestComplete(string id)
         {
-            if (QuestSystem.I != null && !QuestSystem.I.CompleteQuest(id))
-                Debug.LogWarning($"[Yarn] quest_complete {id}: quest is not ready ({QuestSystem.I.Status(id)})");
+            var q = Quests;
+            if (q != null && !q.CompleteQuest(id))
+                Debug.LogWarning($"[Yarn] quest_complete {id}: quest is not ready ({q.Status(id)})");
         }
 
         [YarnCommand("set_flag")]
         public static void SetFlag(string flag)
         {
-            if (QuestSystem.I != null) QuestSystem.I.SetFlag(flag);
+            if (Quests != null) Quests.SetFlag(flag);
         }
 
         [YarnCommand("give_item")]
@@ -66,12 +80,13 @@ namespace RPG
         {
             var db = GameManager.I != null ? GameManager.I.db : null;
             var item = db != null ? db.Item(itemId) : null;
-            if (item == null || Inventory.I == null)
+            var bag = Bag;
+            if (item == null || bag == null)
             {
                 Debug.LogWarning("[Yarn] give_item: unknown item " + itemId);
                 return;
             }
-            Inventory.I.Add(item, count);
+            bag.Add(item, count);
         }
 
         [YarnCommand("victory")]
