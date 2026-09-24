@@ -620,7 +620,7 @@ namespace RPG.EditorTools
 
         static CharacterUI BuildCharacter(Transform root)
         {
-            var w = Window(root, "Character", new Vector2(640, 640), new Vector2(-360, 30), out var g, "Nhân Vật");
+            var w = Window(root, "Character", new Vector2(640, 720), new Vector2(-360, 20), out var g, "Nhân Vật");
             var ui = w.parent.gameObject.AddComponent<CharacterUI>();
             ui.group = g;
             ui.window = w;

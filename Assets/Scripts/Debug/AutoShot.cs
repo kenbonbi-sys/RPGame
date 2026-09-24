@@ -169,6 +169,30 @@ namespace RPG
             HUD.I.journal.Close();
             yield return Wait(0.4f);
 
+            // --- level up, character sheet, save window (opened only, AutoShot never writes saves)
+            if (PlayerStats.I != null)
+            {
+                PlayerStats.I.AddXp(PlayerStats.I.XpToNext + 20);
+                yield return Wait(0.5f);
+                yield return Shot("level_up");
+                if (HUD.I.character != null)
+                {
+                    HUD.I.character.Show();
+                    yield return Wait(0.6f);
+                    yield return Shot("character");
+                    HUD.I.character.Close();
+                    yield return Wait(0.3f);
+                }
+            }
+            if (HUD.I.saves != null)
+            {
+                HUD.I.saves.Open(true);
+                yield return Wait(0.6f);
+                yield return Shot("save_slots");
+                HUD.I.saves.Close();
+                yield return Wait(0.3f);
+            }
+
             // --- boss
             var boss = FindAnyObjectByType<BossBear>();
             if (boss != null)
@@ -195,6 +219,15 @@ namespace RPG
                 p.skills.TryCast(3, boss.transform.position);
                 yield return Wait(0.9f);
                 yield return Shot("storm_on_boss");
+                if (boss.poise != null)
+                {
+                    var hit = DamageInfo.Make(1, Team.Player, p.gameObject, boss.transform.position, Vector2.up);
+                    hit.poise = boss.poise.Threshold;
+                    boss.health.TakeDamage(hit);
+                    yield return Wait(0.5f);
+                    yield return Shot("poise_break");
+                    yield return Wait(1.5f);
+                }
                 boss.health.TakeDamage(DamageInfo.Make(boss.health.maxHp * 0.55f, Team.Player, p.gameObject, boss.transform.position, Vector2.up));
                 yield return Wait(1.0f);
                 yield return Shot("boss_enraged");
