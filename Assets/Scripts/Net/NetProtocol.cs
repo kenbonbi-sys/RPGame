@@ -12,7 +12,7 @@ namespace RPG
     /// </summary>
     public static class NetProtocol
     {
-        public const int Version = 6;
+        public const int Version = 7;
 
         /// <summary>First id of the replicated objects of a zone (enemies, boss, rocks); heroes use their NetworkObject id, below it.</summary>
         public const int SceneIdBase = 1000000;
@@ -137,7 +137,9 @@ namespace RPG
     public enum SpawnKind : byte
     {
         Boulder = 1,
-        Loot = 2
+        Loot = 2,
+        /// <summary>A fallen boss's treasure chest, for the hero it holds loot for.</summary>
+        Chest = 3
     }
 
     /// <summary>Server → clients: an object made while playing (a thrown rock that stays, a personal loot drop).</summary>

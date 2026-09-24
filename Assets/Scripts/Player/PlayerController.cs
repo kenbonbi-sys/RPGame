@@ -17,9 +17,10 @@ namespace RPG
     }
 
     /// <summary>
-    /// A hero. The one this machine controls (<see cref="Players.Local"/>) turns the mouse (hold
-    /// left/right button) or arrow keys, a click on an enemy (attack it) or an NPC (talk), Q W E R
-    /// A S D Space (skills), 1 2 3 (potions) and F (talk) into a <see cref="PlayerIntent"/>. Every
+    /// A hero. The one this machine controls (<see cref="Players.Local"/>) turns the right mouse
+    /// button or arrow keys (walk), the left one (attack the enemy clicked, or swing toward the
+    /// mouse), a click on an NPC (talk), Q W E R A S D Space (skills), 1 2 3 (potions), F (talk)
+    /// and T (<see cref="AutoHunt"/>) into a <see cref="PlayerIntent"/>. Every
     /// hero acts on its intent the same way, wherever it comes from (online: the network).
     /// The hero carries its own stats, bag, quest log and Bách Khoa Trùm.
     /// </summary>
@@ -80,7 +81,11 @@ namespace RPG
         bool hasMoveTarget;
         Health attackTarget;
         NPC npcTarget;
+        bool swinging;
         readonly List<Collider2D> clickHits = new List<Collider2D>();
+
+        /// <summary>Tự Động: this machine's hero hunting on its own (T).</summary>
+        public readonly AutoHunt auto = new AutoHunt();
 
         void Awake()
         {
@@ -408,19 +413,17 @@ namespace RPG
             for (int s = 0; s < 8; s++)
                 if (InputReader.SkillPressed(s)) i.skillPresses |= 1 << s;
             i.aim = InputReader.MouseWorld;
-            // auto basic attack on a clicked enemy
-            if (attackTarget != null)
+            if (InputReader.ToggleAuto) auto.Set(this, !auto.On);
+            if (auto.On)
             {
-                if (attackTarget.IsDead || !attackTarget.gameObject.activeInHierarchy)
-                {
-                    attackTarget = null;
-                }
-                else if (Vector2.Distance(transform.position, attackTarget.transform.position) <= basicAttackRange && !IsActing)
-                {
-                    i.basicAttack = true;
-                    i.basicAttackAt = attackTarget.transform.position;
-                }
+                // walking by hand takes the hero back
+                bool byHand = InputReader.ArrowMove.sqrMagnitude > 0.01f ||
+                              ((InputReader.RightPressed || InputReader.LeftPressed) && !InputReader.PointerOverUI);
+                if (!byHand) return auto.Think(this, i);
+                auto.Set(this, false);
             }
+            if (attackTarget != null && (attackTarget.IsDead || !attackTarget.gameObject.activeInHierarchy || !HasBody(attackTarget)))
+                attackTarget = null;
             if (InputReader.Interact) i.talkTo = NPC.Nearest(transform.position, interactRadius);
             if (npcTarget != null && Vector2.Distance(transform.position, npcTarget.transform.position) <= interactRadius)
             {
@@ -429,7 +432,25 @@ namespace RPG
                 hasMoveTarget = false;
             }
             i.move = ComputeMove(ref i);
+            // a clicked enemy within reach: the basic attack, again and again until it falls
+            if (attackTarget != null && Reach(transform.position, attackTarget) <= basicAttackRange && !IsActing)
+            {
+                i.basicAttack = true;
+                i.basicAttackAt = attackTarget.transform.position;
+            }
             return i;
+        }
+
+        /// <summary>
+        /// What a left click on an enemy does: walk up to it and strike it with the basic attack
+        /// again and again until it falls (or the player does something else).
+        /// </summary>
+        public void Attack(Health enemy)
+        {
+            attackTarget = enemy;
+            npcTarget = null;
+            swinging = false;
+            hasMoveTarget = false;
         }
 
         /// <summary>A key-pressed skill fired (now or from the input buffer): stop walking / auto-attacking.</summary>
@@ -451,40 +472,55 @@ namespace RPG
             }
 
             bool overUI = InputReader.PointerOverUI;
-            if ((InputReader.LeftPressed || InputReader.RightPressed) && !overUI)
+            Vector2 m = InputReader.MouseWorld;
+            Vector2 at = transform.position;
+            // right button: walk there (a click on an NPC walks over and talks)
+            if (InputReader.RightPressed && !overUI)
             {
-                Vector2 m = InputReader.MouseWorld;
                 attackTarget = null;
-                npcTarget = null;
-                if (InputReader.LeftPressed)
-                {
-                    clickHits.Clear();
-                    var filter = new ContactFilter2D();
-                    filter.SetLayerMask(Layers.EnemyMask | Layers.NPCMask | Layers.ObstacleMask);
-                    filter.useTriggers = true;
-                    Physics2D.OverlapCircle(m, 0.45f, filter, clickHits);
-                    foreach (var c in clickHits)
-                    {
-                        var npc = c.GetComponentInParent<NPC>();
-                        if (npc != null) { npcTarget = npc; break; }
-                        var h = c.GetComponentInParent<Health>();
-                        if (h != null && !h.IsDead && h.CanBeDamagedBy(Team.Player)) { attackTarget = h; break; }
-                    }
-                }
+                swinging = false;
+                npcTarget = PickNpc(m);
                 moveTarget = m;
                 hasMoveTarget = true;
-                if (npcTarget == null && attackTarget == null) VFX.Spawn("click_marker", m, Quaternion.identity);
+                if (npcTarget == null) VFX.Spawn("click_marker", m, Quaternion.identity);
             }
-            if ((InputReader.LeftHeld || InputReader.MoveHeld) && !overUI && attackTarget == null && npcTarget == null)
+            if (InputReader.RightHeld && !overUI && npcTarget == null)
             {
-                moveTarget = InputReader.MouseWorld;
+                attackTarget = null;
+                moveTarget = m;
                 hasMoveTarget = true;
+            }
+            // left button: fight (a click on an enemy goes after it; elsewhere a swing toward the mouse)
+            if (InputReader.LeftPressed && !overUI)
+            {
+                var enemy = PickEnemy(m);
+                Attack(enemy);
+                npcTarget = enemy == null ? PickNpc(m) : null;
+                swinging = enemy == null && npcTarget == null;
+            }
+            if (!InputReader.LeftHeld) swinging = false;
+            if (swinging)
+            {
+                // held over an enemy: go after that one
+                attackTarget = PickEnemy(m);
+                if (attackTarget != null) swinging = false;
+                else
+                {
+                    Vector2 dir = m - at;
+                    if (dir.sqrMagnitude > 0.01f) i.face = dir.normalized;
+                    if (!IsActing)
+                    {
+                        i.basicAttack = true;
+                        i.basicAttackAt = m;
+                    }
+                    return Vector2.zero;
+                }
             }
 
             if (attackTarget != null)
             {
-                Vector2 to = (Vector2)attackTarget.transform.position - (Vector2)transform.position;
-                if (to.magnitude > basicAttackRange * 0.85f) return to.normalized;
+                Vector2 to = (Vector2)attackTarget.transform.position - at;
+                if (Reach(at, attackTarget) > basicAttackRange * 0.7f) return to.normalized;
                 i.face = to.normalized;
                 return Vector2.zero;
             }
@@ -504,6 +540,104 @@ namespace RPG
                 return to.magnitude < 0.6f ? to / 0.6f : to.normalized;
             }
             return Vector2.zero;
+        }
+
+        // ------------------------------------------------------------------ what the mouse is on
+        static readonly List<Collider2D> Cols = new List<Collider2D>(8);
+
+        /// <summary>
+        /// The enemy under the mouse: anywhere on its body from feet to head, not only on the small
+        /// collider at its feet; the one nearest the pointer when bodies overlap. Anything else that
+        /// can be hit (a boulder) by its collider.
+        /// </summary>
+        Health PickEnemy(Vector2 m)
+        {
+            Health best = null;
+            float bestD = float.MaxValue;
+            void Consider(Health h)
+            {
+                if (h == null || h.IsDead || !h.gameObject.activeInHierarchy || !h.CanBeDamagedBy(Team.Player) || !HasBody(h)) return;
+                float d = DistToSegment(m, h.transform.position, h.HeadPosition);
+                if (d < Mathf.Max(0.45f, BodyRadius(h) + 0.2f) && d < bestD)
+                {
+                    bestD = d;
+                    best = h;
+                }
+            }
+            foreach (var e in EnemyBase.All) if (e != null) Consider(e.health);
+            foreach (var b in BossBase.All) if (b != null) Consider(b.health);
+            if (best != null) return best;
+            clickHits.Clear();
+            var filter = new ContactFilter2D();
+            filter.SetLayerMask(Layers.EnemyMask | Layers.ObstacleMask);
+            filter.useTriggers = true;
+            Physics2D.OverlapCircle(m, 0.45f, filter, clickHits);
+            foreach (var c in clickHits)
+            {
+                var h = c.GetComponentInParent<Health>();
+                if (h != null && h != health && !h.IsDead && h.CanBeDamagedBy(Team.Player)) return h;
+            }
+            return null;
+        }
+
+        /// <summary>The NPC under the mouse (anywhere on them), the nearest one when two stand together.</summary>
+        static NPC PickNpc(Vector2 m)
+        {
+            NPC best = null;
+            float bestD = 0.6f;
+            foreach (var n in NPC.All)
+            {
+                if (n == null || !n.gameObject.activeInHierarchy) continue;
+                Vector2 feet = n.transform.position;
+                float d = DistToSegment(m, feet, feet + Vector2.up * 1.4f);
+                if (d < bestD)
+                {
+                    bestD = d;
+                    best = n;
+                }
+            }
+            return best;
+        }
+
+        static float DistToSegment(Vector2 p, Vector2 a, Vector2 b)
+        {
+            Vector2 ab = b - a;
+            float t = ab.sqrMagnitude > 1e-6f ? Mathf.Clamp01(Vector2.Dot(p - a, ab) / ab.sqrMagnitude) : 0f;
+            return Vector2.Distance(p, a + ab * t);
+        }
+
+        /// <summary>
+        /// The solid colliders of a character (its trigger ones when it has only those, like a bat):
+        /// what a blow has to reach.
+        /// </summary>
+        static List<Collider2D> BodyOf(Health h)
+        {
+            Cols.Clear();
+            h.GetComponentsInChildren(false, Cols);
+            bool solid = Cols.Exists(c => c.enabled && !c.isTrigger);
+            Cols.RemoveAll(c => !c.enabled || (solid && c.isTrigger));
+            return Cols;
+        }
+
+        /// <summary>Whether a character can be hit at all now (a snake under the water, a wisp faded away cannot).</summary>
+        public static bool HasBody(Health h) => h != null && BodyOf(h).Count > 0;
+
+        static float BodyRadius(Health h)
+        {
+            float r = 0f;
+            foreach (var c in BodyOf(h)) r = Mathf.Max(r, c.bounds.extents.x);
+            return r;
+        }
+
+        /// <summary>
+        /// How far a blow from <paramref name="from"/> has to reach to touch <paramref name="h"/>: to the
+        /// edge of its body, not its middle (a big enemy's middle is out of reach of a hero pressed against it).
+        /// </summary>
+        public static float Reach(Vector2 from, Health h)
+        {
+            float best = float.MaxValue;
+            foreach (var c in BodyOf(h)) best = Mathf.Min(best, Vector2.Distance(from, c.ClosestPoint(from)));
+            return best < float.MaxValue ? best : Mathf.Max(0f, Vector2.Distance(from, h.transform.position) - 0.3f);
         }
 
         // ------------------------------------------------------------------ anim
@@ -567,6 +701,8 @@ namespace RPG
             motor.HardStop();
             hasMoveTarget = false;
             attackTarget = null;
+            swinging = false;
+            auto.Set(this, false, "gục ngã");
             ClearBuffs();
             if (anim != null) anim.Play("dead", true);
             if (IsLocal)

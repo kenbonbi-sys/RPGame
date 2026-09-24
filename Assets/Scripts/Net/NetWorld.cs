@@ -178,6 +178,7 @@ namespace RPG
             if (e.Id < NetProtocol.DynamicIdBase) w.goneSceneIds.Add(e.Id);
             var msg = new EntityGone { id = e.Id, how = how, by = by };
             if (e.Kind == NetEntityKind.Loot) ServerPlayers.SendToOwnerOf(e.Loot, msg);
+            else if (e.Kind == NetEntityKind.Chest) { if (e.Chest != null && e.Chest.owner != null) ServerPlayers.SendTo(e.Chest.owner, msg); }
             else ServerPlayers.SendToAll(msg);
         }
 
@@ -247,7 +248,7 @@ namespace RPG
             heroBuffer.Clear();
             foreach (var e in order)
             {
-                if (e == null || e.Kind == NetEntityKind.Loot) continue;
+                if (e == null || e.Kind == NetEntityKind.Loot || e.Kind == NetEntityKind.Chest) continue;
                 var s = e.Capture();
                 bool changed = full || !e.everSent || NetEntity.Differs(s, e.lastSent) || now - e.lastSentAt >= RefreshSeconds;
                 tickStates.Add((e.Id, s, changed));
@@ -367,6 +368,8 @@ namespace RPG
                     nm.ServerManager.Broadcast(to, new EntitySpawned { id = e.Id, kind = SpawnKind.Boulder, pos = e.transform.position }, true);
                 else if (e.Kind == NetEntityKind.Loot && e.Loot != null && ServerPlayers.ConnectionOf(e.Loot.owner) == to)
                     nm.ServerManager.Broadcast(to, LootMessage(e), true);
+                else if (e.Kind == NetEntityKind.Chest && e.Chest != null && !e.Chest.Opened && ServerPlayers.ConnectionOf(e.Chest.owner) == to)
+                    nm.ServerManager.Broadcast(to, new EntitySpawned { id = e.Id, kind = SpawnKind.Chest, pos = e.transform.position }, true);
             }
             foreach (var p in Players.All)
             {
@@ -486,6 +489,18 @@ namespace RPG
             else ServerPlayers.SendToAll(msg);
         }
 
+        /// <summary>A fallen boss's chest: only the screen of the hero it holds loot for shows it (loot is personal).</summary>
+        public static void ChestLeft(TreasureChest chest)
+        {
+            var w = I;
+            if (w == null || !w.serving || chest == null) return;
+            var e = NetEntity.Attach(chest.gameObject, NetEntityKind.Chest);
+            e.Id = w.nextDynamicId++;
+            w.Add(e);
+            if (chest.owner != null)
+                ServerPlayers.SendTo(chest.owner, new EntitySpawned { id = e.Id, kind = SpawnKind.Chest, pos = chest.transform.position });
+        }
+
         /// <summary>A hero's name, for every screen (sent when the hero arrives).</summary>
         public static void AnnounceHero(PlayerController hero, string name)
         {
@@ -538,6 +553,12 @@ namespace RPG
                     loot.Setup(item, m.count, m.pos, m.land, Players.Local, true);
                     e = NetEntity.Attach(lgo, NetEntityKind.Loot);
                     break;
+                case SpawnKind.Chest:
+                    if (db.chestPrefab == null) return;
+                    var cgo = Instantiate(db.chestPrefab, m.pos, Quaternion.identity, ZoneRoot.Current != null ? ZoneRoot.Current.transform : null);
+                    cgo.GetComponent<TreasureChest>().Show();
+                    e = NetEntity.Attach(cgo, NetEntityKind.Chest);
+                    break;
             }
             if (e == null) return;
             e.Id = m.id;
@@ -560,6 +581,10 @@ namespace RPG
                     break;
                 case NetEntityKind.Boulder:
                     Destroy(e.gameObject);
+                    break;
+                case NetEntityKind.Chest:
+                    if (e.Chest != null && m.how == GoneHow.Collected) e.Chest.ShowOpened();
+                    else Destroy(e.gameObject);
                     break;
                 default:
                     e.gameObject.SetActive(false);

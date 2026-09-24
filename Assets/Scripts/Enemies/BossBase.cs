@@ -12,7 +12,8 @@ namespace RPG
     /// More heroes in the fight make it tougher (<see cref="hpPerExtraHero"/>).
     /// A grinding game (Terraria-like, not a linear story): it comes back
     /// <see cref="respawnSeconds"/> after every fall, online and offline, and everyone who hurt it
-    /// gets the kill and their own loot each time. Nothing about it is saved.
+    /// gets the kill and a chest of their own loot in the middle of the arena each time
+    /// (<see cref="TreasureChest"/>). Nothing about it is saved.
     /// Online (Docs/KeHoach-Online.md, phase 3) the server fights; every screen near the arena gets
     /// its warnings, roars and effects (<see cref="NetCues"/>), its big moments
     /// (<see cref="Present"/>), and shows its bar and music while its hero is in the fight.
@@ -497,8 +498,8 @@ namespace RPG
             yield return new WaitForSecondsRealtime(1.2f);
             var credited = new List<PlayerController>(health.Attackers);
             ServerPlayers.ShareKill(credited, Pos);   // party members nearby
-            Loot.Roll(loot, Pos, credited);
-            if (coins > 0) Loot.DropCoins(Pos, coins, credited);
+            // the loot waits in a chest in the middle of the arena, one for each hero with the kill
+            TreasureChest.Leave(home, loot, coins, credited);
             GameEvents.RaiseEnemyKilled(new KillInfo
             {
                 id = bossId, name = displayName, level = level, rank = rank, position = Pos, credited = credited

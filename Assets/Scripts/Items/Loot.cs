@@ -62,10 +62,26 @@ namespace RPG
             }
         }
 
+        /// <summary>One roll of a loot table, kept instead of dropped (a boss's <see cref="TreasureChest"/> holds it).</summary>
+        public static List<(ItemDef item, int count)> RollList(List<LootEntry> table)
+        {
+            var result = new List<(ItemDef, int)>();
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            if (table == null || db == null) return result;
+            foreach (var e in table)
+            {
+                if (UnityEngine.Random.value > e.chance) continue;
+                var item = db.Item(e.itemId);
+                int n = UnityEngine.Random.Range(e.min, e.max + 1);
+                if (item != null && n > 0) result.Add((item, n));
+            }
+            return result;
+        }
+
         static readonly PlayerController[] Anyone = { null };
 
         /// <summary>Who drops are for: offline (or a kill nobody is credited with) one drop anyone takes; online one per hero.</summary>
-        static IReadOnlyList<PlayerController> Owners(IReadOnlyList<PlayerController> credited)
+        public static IReadOnlyList<PlayerController> Owners(IReadOnlyList<PlayerController> credited)
         {
             if (!GameSession.Online || credited == null || credited.Count == 0) return Anyone;
             return credited;

@@ -127,7 +127,11 @@ namespace RPG
             if (tag.inPool) return;
             tag.inPool = true;
             go.SetActive(false);
-            if (!keepParent) go.transform.SetParent(Root, false);
+            // a parent switching off (a burning slime falling) cannot give up its children yet:
+            // the object waits under it, switched off, and moves on its next use
+            var parent = go.transform.parent;
+            bool parentLeaving = parent != null && !parent.gameObject.activeInHierarchy;
+            if (!keepParent && !parentLeaving) go.transform.SetParent(Root, false);
             if (!Free.TryGetValue(tag.prefab, out var stack))
             {
                 stack = new Stack<GameObject>();

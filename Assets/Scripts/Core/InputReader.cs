@@ -15,7 +15,7 @@ namespace RPG
 
         static InputActionAsset asset;
         static InputAction[] skills, potions, choices, cheats;
-        static InputAction move, point, primary, secondary, interact;
+        static InputAction move, point, primary, secondary, interact, auto;
         static InputAction cancel, help, bag, character, journal, questCycle, advance, console, map;
 
         static InputReader() => Build();
@@ -55,6 +55,7 @@ namespace RPG
             primary = A(GameControls.Gameplay, "Primary");
             secondary = A(GameControls.Gameplay, "Secondary");
             interact = A(GameControls.Gameplay, "Interact");
+            auto = A(GameControls.Gameplay, "Auto");
             cancel = A(GameControls.Menus, "Cancel");
             help = A(GameControls.Menus, "Help");
             bag = A(GameControls.Menus, "Bag");
@@ -151,10 +152,12 @@ namespace RPG
             }
         }
 
-        public static bool MoveHeld => Hold(secondary) || (Hold(primary) && !PointerOverUI);
+        /// <summary>Left button: fight (a click on an enemy goes after it, elsewhere a swing toward the mouse).</summary>
         public static bool LeftPressed => Down(primary);
         public static bool LeftHeld => Hold(primary);
+        /// <summary>Right button: walk (click or hold; a click on an NPC walks over to talk).</summary>
         public static bool RightPressed => Down(secondary);
+        public static bool RightHeld => Hold(secondary);
 
         public static bool SkillPressed(int slot) => Down(skills[slot]);
         public static bool SkillHeld(int slot) => Hold(skills[slot]);
@@ -165,6 +168,8 @@ namespace RPG
         public static bool Cheat(int index) => index >= 0 && index < cheats.Length && Down(cheats[index]);
 
         public static bool Interact => Down(interact);
+        /// <summary>T: Tự Động on or off (<see cref="AutoHunt"/>).</summary>
+        public static bool ToggleAuto => Down(auto);
         public static bool ToggleBag => Down(bag);
         public static bool ToggleQuest => Down(questCycle);
         public static bool ToggleHelp => Down(help);

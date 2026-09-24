@@ -536,6 +536,73 @@ def barrel():
     return cv, (7, 16)
 
 
+def treasure_chest(opened=False):
+    """A boss's treasure chest: dark wood, gold bands and a lock; opened, the lid stands back and gold shines inside."""
+    W, H = 24, 24
+    cv = Canvas(W, H)
+    wd = P["wood"]
+    gd = P["gold"]
+    x0, x1 = 2, 21
+    # the box
+    top = 13
+    for y in range(top, 22):
+        for x in range(x0, x1 + 1):
+            dx = (x + 0.5 - 12) / 10
+            c = wd[shade_index(-dx * 0.7 + (0.25 if y < 15 else 0), len(wd) - 2, x, y, dither=0.25) + 1]
+            if y == 21:
+                c = wd[1]
+            cv.px(x, y, c)
+    # planks
+    for y in (16, 19):
+        cv.hline(x0 + 1, x1 - 1, y, wd[2])
+    # gold bands down the front and the corners
+    for x in (x0, x0 + 1, x1 - 1, x1, 7, 16):
+        for y in range(top, 22):
+            cv.px(x, y, gd[3] if x < 12 else gd[2])
+    if opened:
+        # inside: the back of the box, a heap of coins catching the light
+        for y in range(top - 3, top + 1):
+            for x in range(x0 + 1, x1):
+                cv.px(x, y, wd[0])
+        for x in range(x0 + 2, x1 - 1):
+            h = 2 + (1 if (x * 7) % 5 < 2 else 0)
+            for y in range(top - h + 1, top + 1):
+                cv.px(x, y, gd[5] if (x + y) % 3 == 0 else gd[4] if (x + y) % 3 == 1 else gd[3])
+        # the lid leaning back
+        for y in range(3, top - 3):
+            for x in range(x0 + 1, x1):
+                t = (y - 3) / max(1, top - 7)
+                cv.px(x, y, wd[2 + int(t * 2)])
+        cv.hline(x0 + 1, x1 - 1, 3, gd[3])
+        for x in (x0 + 1, 7, 16, x1 - 1):
+            for y in range(3, top - 3):
+                cv.px(x, y, gd[2])
+        # sparkles
+        for (sx, sy) in ((6, 7), (15, 5), (11, 9)):
+            cv.px(sx, sy, gd[5])
+    else:
+        # the domed lid
+        for y in range(6, top):
+            bulge = 0 if y >= 8 else (1 if y == 7 else 2)
+            for x in range(x0 + bulge, x1 + 1 - bulge):
+                dx = (x + 0.5 - 12) / 10
+                dy = (y - 6) / 7
+                c = wd[shade_index(-dx * 0.6 - (1 - dy) * 0.5, len(wd) - 2, x, y, dither=0.25) + 1]
+                cv.px(x, y, c)
+        cv.hline(x0, x1, top - 1, gd[2])
+        for x in (x0 + 1, 7, 16, x1 - 1):
+            for y in range(6 if x in (7, 16) else 8, top):
+                cv.px(x, y, gd[4] if x < 12 else gd[3])
+    # the lock
+    for y in range(top - 1, top + 4):
+        for x in range(10, 14):
+            cv.px(x, y, gd[4] if x < 12 else gd[3])
+    cv.px(11, top + 1, wd[0])
+    cv.px(11, top + 2, wd[0])
+    cv.outline(WOOD_OUT)
+    return cv, (12, 21)
+
+
 def ruin_pillar(seed=0):
     W, H = 18, 36
     cv = Canvas(W, H)
@@ -651,6 +718,8 @@ def build():
     c, p = signpost(); items.append(("signpost", c, p))
     c, p = crate(); items.append(("crate", c, p))
     c, p = barrel(); items.append(("barrel", c, p))
+    c, p = treasure_chest(False); items.append(("chest_closed", c, p))
+    c, p = treasure_chest(True); items.append(("chest_open", c, p))
     for i in range(2):
         c, p = ruin_pillar(i); items.append((f"pillar_{i}", c, p))
     c, p = well(); items.append(("well", c, p))

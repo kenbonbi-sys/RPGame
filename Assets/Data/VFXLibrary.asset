@@ -50,7 +50,7 @@ MonoBehaviour:
   - id: shield_cast
     prefab: {fileID: 1755492040596546271, guid: 78a9a93f6a448db4a9347071e6cb4418, type: 3}
   - id: shield_bubble
-    prefab: {fileID: 2815440624077487661, guid: 3ffae54a67ce40a4aab2b1b2485f3feb, type: 3}
+    prefab: {fileID: 4957704130744345893, guid: 3ffae54a67ce40a4aab2b1b2485f3feb, type: 3}
   - id: shield_break
     prefab: {fileID: 3517823290432375610, guid: 28d52bfa909fa78448b2bbf04b987a62, type: 3}
   - id: blade_storm
@@ -129,6 +129,10 @@ MonoBehaviour:
     prefab: {fileID: 2459234258098288384, guid: 8eba41b5249bcca47abeffcf9844b71d, type: 3}
   - id: crystal_burst
     prefab: {fileID: 5171625631370354878, guid: dffcd717df76ade40a1dee49468aeaf9, type: 3}
+  - id: chest_appear
+    prefab: {fileID: 8586377041363177420, guid: 3193bf407cb96b542b6de5ff7a5089e1, type: 3}
+  - id: chest_open
+    prefab: {fileID: 2668686716383869309, guid: 70a94228415d772438e04a26d29bd21e, type: 3}
   particleBudget: 150
   lightBudget: 1
   ultimateIds:

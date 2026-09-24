@@ -191,10 +191,10 @@ namespace RPG.EditorTools.Tests
             Assert.IsTrue(boss.health.IsDead);
             yield return GameSmokeTests.GameSeconds(2f);
             Assert.Greater(me.stats.level * 100000 + me.stats.xp, before, "the hero who hit it gets the boss's XP");
-            bool myLoot = false;
-            foreach (var l in Object.FindObjectsByType<LootPickup>(FindObjectsInactive.Exclude))
-                if (l.gameObject.activeInHierarchy && l.owner == me) myLoot = true;
-            Assert.IsTrue(myLoot, "and loot of their own");
+            bool myChest = false;
+            foreach (var c in Object.FindObjectsByType<TreasureChest>(FindObjectsInactive.Exclude))
+                if (c.owner == me && c.Contents.Count > 0) myChest = true;
+            Assert.IsTrue(myChest, "and a chest of loot of their own in the middle of the arena");
 
             deadline = Time.realtimeSinceStartup + 20f;
             while (!(boss.gameObject.activeSelf && !boss.health.IsDead) && Time.realtimeSinceStartup < deadline) yield return null;

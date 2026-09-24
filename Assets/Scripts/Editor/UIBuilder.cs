@@ -453,6 +453,17 @@ namespace RPG.EditorTools
                 ui.costText = Txt(s, "Cost", "", 15, new Color(0.55f, 0.8f, 1f), TextAlignmentOptions.TopRight, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-6, -3), new Vector2(40, 20));
                 bar.slots[i] = ui;
             }
+            // Tự Động (T): on the upper row, left of D
+            var autoSlot = Slot(rt, "Auto", new Vector2(1, 0), new Vector2(-2 * (size + gap) - size / 2, size + 14 + size / 2), size, out var autoIcon, out var autoCd, "T");
+            autoIcon.enabled = false;
+            autoCd.enabled = false;
+            var au = autoSlot.gameObject.AddComponent<AutoButtonUI>();
+            au.glow = Img(autoSlot, "Glow", "slot_highlight", Color.white, C, Vector2.zero, new Vector2(size, size), Image.Type.Sliced);
+            au.glow.enabled = false;
+            au.label = Txt(autoSlot, "Label", "TỰ\nĐỘNG", 15, Cream, TextAlignmentOptions.Center, C, C, new Vector2(0, 5), new Vector2(size, 44));
+            au.label.fontStyle = FontStyles.Bold;
+            au.button = autoSlot.gameObject.AddComponent<Button>();
+            au.button.targetGraphic = autoSlot.GetComponent<Image>();
             hud.skillBar = bar;
         }
 
@@ -673,12 +684,12 @@ namespace RPG.EditorTools
             const string K = "<color=#ffe07a>";
             const string E = "</color>";
             string left =
-                $"{K}Di chuyển{E}\n  Giữ chuột trái / phải, hoặc phím mũi tên\n\n" +
-                $"{K}Tấn công{E}\n  Nhấp vào quái vật · Q: Chém Gió\n\n" +
+                $"{K}Di chuyển{E}\n  Chuột phải (bấm hoặc giữ), hoặc phím mũi tên\n\n" +
+                $"{K}Tấn công{E}\n  Chuột trái: bấm vào quái để tới đánh,\n  giữ để chém về phía chuột · Q: Chém Gió\n\n" +
                 $"{K}Kỹ năng{E}\n  W Cầu Lửa · E Mũi Băng · R Lôi Phạt\n  A Hồi Phục · S Khiên Thánh · D Bão Kiếm\n  Space: Lướt (bất tử trong chốc lát)\n\n" +
                 $"{K}Bình thuốc{E}\n  1 Máu · 2 Năng lượng · 3 Thảo mộc";
             string right =
-                $"{K}Tương tác{E}\n  F: Nói chuyện · B: Túi đồ · C: Nhân vật\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +
+                $"{K}Tương tác{E}\n  F: Nói chuyện · B: Túi đồ · C: Nhân vật\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  T: Tự động đánh quái · M: Bản đồ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +
                 $"{K}Mẹo chiến đấu{E}\n  Vòng đỏ dưới đất = đòn sắp đánh.\n  Lướt (Space) ra ngoài vòng!\n  Gấu Ma lao vào Tảng Đá Lớn sẽ bị choáng.\n\n" +
                 $"{K}Phím thử nghiệm{E}\n  F5 hồi đầy · F6 đổi giờ · F7 tới Boss\n  F8 về làng · F9 hạ quái gần";
             Txt(w, "Left", left, 22, Cream, TextAlignmentOptions.TopLeft, new Vector2(0, 1), new Vector2(0, 1), new Vector2(50, -104), new Vector2(460, 460), false);

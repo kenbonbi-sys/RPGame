@@ -110,6 +110,7 @@ MonoBehaviour:
   venomPrefab: {fileID: 40009730964553345, guid: 4db1f30aa617ae149b088a5680f172bb, type: 3}
   venomArcPrefab: {fileID: 6563847976823840878, guid: 248b66c04de4c244781b426d6379a513, type: 3}
   webPrefab: {fileID: 6434890101799069727, guid: ec4abc17786b4684789a7ec1366994a3, type: 3}
+  chestPrefab: {fileID: 1402235809284517033, guid: 0c5855967a134f44fb7cfcff74dcbf4e, type: 3}
   mistMaterial: {fileID: 2100000, guid: 9151a6cf50d0f064183f54e52369e00a, type: 2}
   netHeroPrefab: {fileID: 4885084979465001528, guid: ae3e903ab7b28a648b5a6f37a73a1646, type: 3}
   networkManagerPrefab: {fileID: 3420617665053863353, guid: c2b98b4a3e3834f4db920baf9ec1f0d0, type: 3}

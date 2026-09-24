@@ -995,6 +995,40 @@ def _bat(rng):
     return 0.8 * y + 0.35 * flaps
 
 
+@sfx("sfx_chest_appear")
+def _chest_appear(rng):
+    """A boss's chest landing in its arena: a wooden thud and a rising shimmer."""
+    n = ns(0.9)
+    y = np.zeros(n)
+    m = ns(0.35)
+    place(y, 0.8 * thump(m, 180, 70, 0.09), 0.0)
+    place(y, 0.3 * rmsn(bp(white(m, rng), 700, 1.5)) * env_perc(m, 0.001, 0.05), 0.0)
+    y += 0.3 * sparkles(n, rng, 14, 0.1, 0.8, 3500, 8000, 0.03)
+    for i, name in enumerate(["G5", "C6", "E6"]):
+        m = ns(0.5)
+        place(y, 0.18 * chime(nf(name), m, tau=0.25), (0.12 + i * 0.07) * SR)
+    return reverb(y, 0.25, 0.9, seed=41)
+
+
+@sfx("sfx_chest_open")
+def _chest_open(rng):
+    """A chest bursting open: a creaking lid, the clack of it falling back, and a shower of golden chimes."""
+    n = ns(1.4)
+    y = np.zeros(n)
+    m = ns(0.28)
+    tt = tvec(m)
+    creak = osc("saw", 180 + 90 * np.sin(TAU * 3 * tt) + 40 * tt, m) * env_hump(m, 0.5, 1.5, 2.0)
+    place(y, 0.25 * bp(creak, 900, 3.0), 0.0)
+    m = ns(0.2)
+    place(y, 0.6 * thump(m, 260, 110, 0.05), 0.26 * SR)
+    for i, name in enumerate(["C6", "E6", "G6", "C7", "E7"]):
+        m = ns(0.7)
+        place(y, 0.22 * chime(nf(name), m, tau=0.3), (0.32 + i * 0.06) * SR)
+    y += 0.35 * sparkles(n, rng, 30, 0.32, 1.3, 3000, 9000, 0.025)
+    y = echo(y, 0.09, 0.25, 3, damp=6000)
+    return reverb(y, 0.3, 1.1, seed=42)
+
+
 @sfx("sfx_web")
 def _web(rng):
     """A spider's web ball: a sticky thwip and a soft wet smack."""
@@ -2069,6 +2103,7 @@ SFX_NAMES = [
     "sfx_boulder_break", "sfx_lightning_charge",
     "sfx_croak", "sfx_splash", "sfx_wade", "sfx_hiss", "sfx_spit", "sfx_splat", "sfx_mud_slam", "sfx_tongue", "sfx_waystone",
     "sfx_buzz", "sfx_wisp", "sfx_wisp_burst", "sfx_bat", "sfx_web",
+    "sfx_chest_appear", "sfx_chest_open",
 ]
 # name, builder, allowed duration range (s), target peak dBFS
 MUSIC = [

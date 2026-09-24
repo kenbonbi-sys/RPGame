@@ -397,7 +397,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator KnockbackIntoAWallStuns()
         {
-            var e = EnemyBase.All.Find(x => !x.IsDead);
+            var e = EnemyBase.All.Find(x => !x.IsDead && x.enemyId == "slime");   // one that walks (bats fly through walls)
             Vector2 at = new Vector2(520f, 500f);   // an empty spot outside the map
             e.motor.Teleport(at);
             var wall = new GameObject("test wall") { layer = Layers.Obstacle };

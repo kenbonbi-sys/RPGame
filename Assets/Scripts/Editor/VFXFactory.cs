@@ -106,6 +106,9 @@ namespace RPG.EditorTools
             // cave (Hang Pha Lê)
             Build("web_hit", WebHit, 1.2f);
             Build("crystal_burst", CrystalBurst, 1.2f);
+            // a fallen boss's treasure chest
+            Build("chest_appear", ChestAppear, 1.4f);
+            Build("chest_open", ChestOpen, 2f);
             // boss
             Build("boss_roar", BossRoar, 1.6f);
             Build("enrage_burst", EnrageBurst, 1.8f);
@@ -736,19 +739,12 @@ namespace RPG.EditorTools
             Light(r, Holy, 3.5f, 1.8f, 0.4f);
         }
 
+        /// <summary>Khiên Thánh while it lasts: a few holy glints on the hero, no bubble or rune circle around them (players found those in the way).</summary>
         static void ShieldBubble(GameObject r)
         {
-            var b = Spr(r, "Bubble", "bubble", Mat("bubble", true, 1.2f), A(new Color(1f, 0.92f, 0.6f), 0.75f), SortingLayerNames.VFX, 0, 1.9f, 0, 0.65f);
-            var bob = b.gameObject.AddComponent<Bobber>();
-            bob.amplitude = 0f;
-            bob.pulse = 0.03f;
-            bob.speed = 4f;
-            var hex = Spr(r, "Runes", "magic_circle", Mat("magic_circle", true, 1.2f), A(Holy, 0.5f), SortingLayerNames.Decal, 1, 0.45f);
-            hex.transform.localScale = new Vector3(0.45f, 0.22f, 1f);
-            hex.gameObject.AddComponent<Spinner>().degreesPerSecond = 60f;
-            PS(r, "Sparkles", Mat("spark4", true, 2f)).Loop().Rate(7).Life(0.4f, 0.8f).Size(0.12f, 0.22f).Col(Color.white, Holy)
-                .Circle(0.85f, 360f, 0f).Fade(0.2f).Local().At(0, 0.65f);
-            Light(r, Holy, 2.6f, 0.9f, pulse: false, flicker: 0.08f);
+            PS(r, "Sparkles", Mat("spark4", true, 2f)).Loop().Rate(5).Life(0.4f, 0.8f).Size(0.08f, 0.16f).Col(Color.white, Holy)
+                .Circle(0.35f, 360f, 0f).Fade(0.2f).Local().At(0, 0.65f);
+            Light(r, Holy, 1.6f, 0.5f, pulse: false, flicker: 0.08f);
         }
 
         static void ShieldBreak(GameObject r)
@@ -935,6 +931,29 @@ namespace RPG.EditorTools
             PS(r, "Glints", Mat("spark4", true, 2.2f)).Burst(8).Life(0.3f, 0.6f).Speed(0.5f, 1.5f).Size(0.14f, 0.26f)
                 .Col(Color.white, CrystalCyan).Circle(0.3f).Fade();
             Light(r, CrystalCyan, 3f, 1.4f, 0.5f);
+        }
+
+        /// <summary>A boss's chest appearing in the middle of its arena: a golden ring and a puff of glints.</summary>
+        static void ChestAppear(GameObject r)
+        {
+            Ring(r, "Ring", Holy, 0.3f, 1.8f, 0.6f, "ring", SortingLayerNames.Decal, 0.5f);
+            PS(r, "Glints", Mat("spark4", true, 2.2f)).Burst(14).Life(0.5f, 1f).Speed(0.6f, 2f).Size(0.14f, 0.26f)
+                .Col(Color.white, Holy).Circle(0.6f).Vel(0, 0, 0.5f, 1.2f).Fade().At(0, 0.4f);
+            PS(r, "Dust", Mat("smoke", true, 1.2f)).Burst(6).Life(0.4f, 0.7f).Speed(0.4f, 1.2f).Size(0.4f, 0.7f)
+                .Col(A(Holy, 0.5f), A(Color.white, 0.2f)).Circle(0.5f).Fade();
+            Light(r, Holy, 3.5f, 1.6f, 0.6f);
+        }
+
+        /// <summary>A chest bursting open: a column of gold light, coins of light flying up and falling.</summary>
+        static void ChestOpen(GameObject r)
+        {
+            var g = Spr(r, "Glow", "glow", Mat("glow", true, 1.8f), A(Holy, 0.85f), scale: 2.6f, y: 0.2f);
+            SFX(g, 1f, C(0, 0.4f, 0.15f, 1.2f, 1, 1f), C(0, 1, 1, 0));
+            PS(r, "Coins", Mat("spark4", true, 2.4f)).Burst(26).Life(0.7f, 1.3f).Speed(2.5f, 5f).Size(0.16f, 0.3f)
+                .Col(Color.white, Holy).ConeUp(40f, 0.2f).Grav(2.6f).Fade();
+            PS(r, "Motes", Mat("px_square", true, 2f)).Burst(20).Life(0.6f, 1.2f).Speed(0.5f, 1.6f).Size(0.05f, 0.1f)
+                .Col(Holy, Color.white).Circle(0.5f).Vel(0, 0, 0.8f, 1.8f).Fade();
+            Light(r, Holy, 5f, 2.4f, 1f);
         }
 
         /// <summary>A Ma Trơi guttering out or flaring up: a cold puff and a few rising motes.</summary>

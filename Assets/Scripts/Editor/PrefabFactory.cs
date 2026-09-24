@@ -51,11 +51,13 @@ namespace RPG.EditorTools
             Golem = BuildGolem();
             Boulder = BuildBoulder();
             Loot = BuildLoot();
+            var chest = BuildChest();
             BuildProps();
             UpgradePrefabs();
             var db = AssetFactory.Database;
             EditorUtil.Assign(ref db.boulderPrefab, Boulder);
             EditorUtil.Assign(ref db.lootPrefab, Loot);
+            EditorUtil.Assign(ref db.chestPrefab, chest);
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
             BuildOnline();
@@ -1019,6 +1021,27 @@ namespace RPG.EditorTools
             lp.beam = beam;
             lp.shadow = shadow;
             return EditorUtil.SavePrefab(root, $"{GameplayFolder}/Loot.prefab");
+        }
+
+        /// <summary>A fallen boss's treasure chest (<see cref="TreasureChest"/>): walked up to, it opens and its loot bursts out.</summary>
+        static GameObject BuildChest()
+        {
+            var root = new GameObject("TreasureChest");
+            root.layer = Layers.Pickup;
+            Group(root);
+            Shadow(root, 1.3f);
+            var glow = Sprite(root, "Glow", "glow", AssetFactory.Additive, SortingLayerNames.Default, -1);
+            glow.transform.localPosition = new Vector3(0, 0.5f, 0);
+            glow.transform.localScale = Vector3.one * 2.2f;
+            glow.color = new Color(1f, 0.8f, 0.35f, 0.6f);
+            var body = Sprite(root, "Body", "chest_closed", AssetFactory.SpriteLit);
+            PointLight(root, new Color(1f, 0.8f, 0.4f), 3f, 0.7f, new Vector3(0, 0.6f, 0));
+            var chest = root.AddComponent<TreasureChest>();
+            chest.body = body;
+            chest.glow = glow;
+            chest.closedSprite = ArtImporter.S("chest_closed");
+            chest.openSprite = ArtImporter.S("chest_open");
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/TreasureChest.prefab");
         }
 
         // ================================================================== props

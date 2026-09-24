@@ -5,8 +5,8 @@ namespace RPG
 {
     /// <summary>
     /// Every binding of the game as Input System actions (plan T17), defined once here.
-    /// Layout of the reference game: skills on Q W E R A S D + Space, potions 1 2 3, movement
-    /// with the mouse or the arrow keys. Players' remaps are stored as binding overrides
+    /// Layout of the reference game: skills on Q W E R A S D + Space, potions 1 2 3, walking with
+    /// the right mouse button or the arrow keys, fighting with the left one, T for Tự Động. Players' remaps are stored as binding overrides
     /// (see <see cref="InputReader.SaveBindingOverrides"/>), never by changing these defaults.
     /// </summary>
     public static class GameControls
@@ -33,6 +33,7 @@ namespace RPG
             for (int i = 0; i < SkillActions.Length; i++) Button(play, SkillActions[i], "<Keyboard>/" + skillKeys[i]);
             for (int i = 0; i < PotionActions.Length; i++) Button(play, PotionActions[i], $"<Keyboard>/{i + 1}");
             Button(play, "Interact", "<Keyboard>/f");
+            Button(play, "Auto", "<Keyboard>/t");
             var move = play.AddAction("Move", InputActionType.Value, expectedControlLayout: "Vector2");
             move.AddCompositeBinding("2DVector")
                 .With("Up", "<Keyboard>/upArrow", Scheme)

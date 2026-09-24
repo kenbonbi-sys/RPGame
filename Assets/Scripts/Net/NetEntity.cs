@@ -7,7 +7,8 @@ namespace RPG
         Enemy = 1,
         Boss = 2,
         Boulder = 3,
-        Loot = 4
+        Loot = 4,
+        Chest = 5
     }
 
     /// <summary>
@@ -28,6 +29,7 @@ namespace RPG
         public BossBase Boss { get; private set; }
         public Boulder Boulder { get; private set; }
         public LootPickup Loot { get; private set; }
+        public TreasureChest Chest { get; private set; }
 
         SpriteAnimator anim;
         SpriteRenderer body;
@@ -82,6 +84,7 @@ namespace RPG
             Boss = GetComponent<BossBase>();
             Boulder = GetComponent<Boulder>();
             Loot = GetComponent<LootPickup>();
+            Chest = GetComponent<TreasureChest>();
             status = GetComponent<StatusEffects>();
             poise = GetComponent<Poise>();
             if (Enemy != null)
