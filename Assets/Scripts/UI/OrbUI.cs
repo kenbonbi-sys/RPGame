@@ -24,7 +24,7 @@ namespace RPG
 
         void Update()
         {
-            var p = GameManager.I != null ? GameManager.I.player : null;
+            var p = Players.Local;
             if (p == null) return;
             float cur, max;
             if (kind == Kind.Health)

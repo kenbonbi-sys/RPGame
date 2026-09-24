@@ -21,7 +21,7 @@ Ba assembly được kiểm tra:
 
 - **Unity:** assembly tham chiếu Unity 2021.3 (module UnityEngine), UnityEditor 2021.1 và UnityEngine.UI 2020.3 lấy từ NuGet. `setup.sh` tải về `.cache/` ở lần chạy đầu.
 - **API mới của Unity 6** (ví dụ `Rigidbody2D.linearVelocity`) không có trong bản tham chiếu cũ. `RefPatch` thêm chúng vào theo danh sách trong `patch.spec` (chỉ là chữ ký hàm, thân hàm ném lỗi).
-- **Package:** Yarn Spinner được biên dịch từ mã nguồn thật, đúng tag ghi trong `Packages/manifest.json`. TextMeshPro, URP, Input System, Test Framework và 2D Sprite chỉ có phần chữ ký tự viết trong `Stubs/` và `EditorStubs/`.
+- **Package:** Yarn Spinner được biên dịch từ mã nguồn thật, đúng tag ghi trong `Packages/manifest.json`. TextMeshPro, URP, Input System, FishNet, Test Framework và 2D Sprite chỉ có phần chữ ký tự viết trong `Stubs/` và `EditorStubs/`. Chữ ký FishNet chép từ đúng phiên bản ghi trong `Packages/manifest.json`; đổi phiên bản thì so lại.
 
 ## Khi báo lỗi mà trong Unity vẫn chạy
 

@@ -27,7 +27,8 @@ namespace RPG
 
         void Update()
         {
-            var s = PlayerStats.I;
+            var me = Players.Local;
+            var s = me != null ? me.stats : null;
             if (s == null) return;
             int next = s.XpToNext;
             float frac = next > 0 ? Mathf.Clamp01((float)s.xp / next) : 1f;

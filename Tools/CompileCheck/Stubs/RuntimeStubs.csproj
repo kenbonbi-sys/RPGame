@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Signatures of the package APIs the game uses (TextMeshPro, URP, Input System). -->
+  <!-- Signatures of the package APIs the game uses (TextMeshPro, URP, Input System, FishNet). -->
   <PropertyGroup>
     <AssemblyName>RuntimeStubs</AssemblyName>
     <DefineConstants>$(UnityDefines);UNITY_EDITOR</DefineConstants>

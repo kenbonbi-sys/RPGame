@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace RPG
 {
-    /// <summary>Character sheet (C): level, XP, the four attributes with + buttons and the derived stats.</summary>
+    /// <summary>Character sheet (C) of the hero on this screen: level, XP, the four attributes with + buttons and the derived stats.</summary>
     public class CharacterUI : UIPanel
     {
         public TextMeshProUGUI header;
@@ -16,12 +16,14 @@ namespace RPG
 
         PlayerStats bound;
 
+        static PlayerStats LocalStats => Players.Local != null ? Players.Local.stats : null;
+
         void Start()
         {
             for (int i = 0; i < plusButtons.Length; i++)
             {
                 int k = i;
-                if (plusButtons[i] != null) plusButtons[i].onClick.AddListener(() => { if (PlayerStats.I != null) PlayerStats.I.Spend((CoreStat)k); });
+                if (plusButtons[i] != null) plusButtons[i].onClick.AddListener(() => { if (LocalStats != null) LocalStats.Spend((CoreStat)k); });
             }
         }
 
@@ -30,10 +32,11 @@ namespace RPG
         protected override void Update()
         {
             base.Update();
-            if (bound != PlayerStats.I)
+            var stats = LocalStats;
+            if (bound != stats)
             {
                 if (bound != null) bound.Changed -= Refresh;
-                bound = PlayerStats.I;
+                bound = stats;
                 if (bound != null) bound.Changed += Refresh;
             }
         }
@@ -45,7 +48,7 @@ namespace RPG
 
         void Refresh()
         {
-            var s = PlayerStats.I;
+            var s = LocalStats;
             if (s == null || !IsOpen) return;
             var c = s.Config;
             if (header != null)

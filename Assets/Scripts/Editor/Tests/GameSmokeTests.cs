@@ -46,7 +46,7 @@ namespace RPG.EditorTools.Tests
         }
 
         /// <summary>Waits <paramref name="n"/> game frames (not editor updates; see TalkThrough).</summary>
-        static IEnumerator Frames(int n)
+        internal static IEnumerator Frames(int n)
         {
             int target = Time.frameCount + n;
             float deadline = Time.realtimeSinceStartup + 10f;
@@ -58,7 +58,7 @@ namespace RPG.EditorTools.Tests
         /// The guard is real time: here each yield is one editor update, and many of those can pass
         /// within a single (frame-rate capped) game frame.
         /// </summary>
-        static IEnumerator TalkThrough(string npcId, int choice = 0)
+        internal static IEnumerator TalkThrough(string npcId, int choice = 0)
         {
             var npc = NPC.All.Find(n => n.npcId == npcId);
             Assert.NotNull(npc, "npc " + npcId);
@@ -94,7 +94,7 @@ namespace RPG.EditorTools.Tests
         }
 
         /// <summary>WaitForSeconds does not wait in EditMode-driven tests; count game time instead.</summary>
-        static IEnumerator GameSeconds(float seconds)
+        internal static IEnumerator GameSeconds(float seconds)
         {
             float end = Time.time + seconds;
             while (Time.time < end) yield return null;
@@ -103,8 +103,8 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator HeroStartsAtLevel1AndLevelsUp()
         {
-            var s = PlayerStats.I;
-            var p = GameManager.I.player;
+            var s = Players.Local.stats;
+            var p = Players.Local;
             Assert.NotNull(s, "PlayerStats on the hero");
             Assert.AreEqual(1, s.level);
             Assert.AreEqual(104f, p.health.maxHp, "55 + 9×1 + 10×4");
@@ -129,10 +129,10 @@ namespace RPG.EditorTools.Tests
             foreach (var e in Object.FindObjectsByType<EnemyBase>(FindObjectsInactive.Exclude))
                 if (!e.IsDead) { enemy = e; break; }
             Assert.NotNull(enemy, "an enemy in the scene");
-            int before = PlayerStats.I.xp + PlayerStats.I.level * 100000;
+            int before = Players.Local.stats.xp + Players.Local.stats.level * 100000;
             enemy.health.Kill();
             yield return null;
-            int after = PlayerStats.I.xp + PlayerStats.I.level * 100000;
+            int after = Players.Local.stats.xp + Players.Local.stats.level * 100000;
             Assert.Greater(after, before);
         }
 
@@ -142,11 +142,11 @@ namespace RPG.EditorTools.Tests
             var gm = GameManager.I;
             yield return TalkThrough("chief");                      // talk_chief done, clear_forest active
             KillEnemy("slime");                                      // 1/4 slimes
-            QuestSystem.I.SetFlag("test_flag");
-            PlayerStats.I.SetState(3, 42, new[] { 1, 0, 2, 3 }, 0, 2, 2);
-            Inventory.I.gold = 777;
+            Players.Local.quests.SetFlag("test_flag");
+            Players.Local.stats.SetState(3, 42, new[] { 1, 0, 2, 3 }, 0, 2, 2);
+            Players.Local.inventory.gold = 777;
             Vector2 spot = (Vector2)gm.respawnPoint.position + new Vector2(3f, 1f);
-            gm.player.motor.Teleport(spot);
+            Players.Local.motor.Teleport(spot);
             DayNightCycle.I.time = 0.8f;
             yield return null;
 
@@ -167,15 +167,15 @@ namespace RPG.EditorTools.Tests
                 yield return null;
             yield return Frames(2);
 
-            var p = GameManager.I.player;
-            Assert.AreEqual(3, PlayerStats.I.level);
-            Assert.AreEqual(42, PlayerStats.I.xp);
-            Assert.AreEqual(3, PlayerStats.I.Allocated(CoreStat.Vitality));
-            Assert.AreEqual(777, Inventory.I.gold);
-            Assert.AreEqual(QuestStatus.Done, QuestSystem.I.Status("talk_chief"));
-            Assert.AreEqual(QuestStatus.Active, QuestSystem.I.Status("clear_forest"));
-            Assert.AreEqual(1, QuestSystem.I.Progress("clear_forest", 0));
-            Assert.IsTrue(QuestSystem.I.HasFlag("test_flag"));
+            var p = Players.Local;
+            Assert.AreEqual(3, Players.Local.stats.level);
+            Assert.AreEqual(42, Players.Local.stats.xp);
+            Assert.AreEqual(3, Players.Local.stats.Allocated(CoreStat.Vitality));
+            Assert.AreEqual(777, Players.Local.inventory.gold);
+            Assert.AreEqual(QuestStatus.Done, Players.Local.quests.Status("talk_chief"));
+            Assert.AreEqual(QuestStatus.Active, Players.Local.quests.Status("clear_forest"));
+            Assert.AreEqual(1, Players.Local.quests.Progress("clear_forest", 0));
+            Assert.IsTrue(Players.Local.quests.HasFlag("test_flag"));
             Assert.Less(Vector2.Distance(p.transform.position, spot), 0.05f);
             Assert.AreEqual(0.8f, DayNightCycle.I.time, 0.02f);
         }
@@ -188,7 +188,7 @@ namespace RPG.EditorTools.Tests
             var poise = boss.poise;
             Assert.NotNull(poise, "boss prefab has a Poise component");
             Assert.AreEqual(300f, poise.Threshold);
-            var hero = GameManager.I.player.gameObject;
+            var hero = Players.Local.gameObject;
             float baseMul = boss.health.damageTakenMultiplier;
 
             var d = DamageInfo.Make(1, Team.Player, hero, boss.transform.position, Vector2.up);
@@ -219,7 +219,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator EarlyKeyPressIsBuffered()
         {
-            var p = GameManager.I.player;
+            var p = Players.Local;
             var sk = p.skills;
             Vector2 aim = (Vector2)p.transform.position + Vector2.right * 3f;
             int casts = 0;
@@ -241,7 +241,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator DashCancelsAPoseOnlyAfterItsCommitWindow()
         {
-            var hero = GameManager.I.player;
+            var hero = Players.Local;
             var sk = hero.skills;
             hero.energy = hero.maxEnergy;
             Vector2 aim = (Vector2)hero.transform.position + Vector2.right * 3f;
@@ -283,7 +283,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator PerfectDodgeSlowsTimeAndPowersTheNextSkill()
         {
-            var hero = GameManager.I.player;
+            var hero = Players.Local;
             var sk = hero.skills;
             var pd = hero.perfectDodge;
             Assert.NotNull(pd, "PerfectDodge on the hero");
@@ -357,7 +357,7 @@ namespace RPG.EditorTools.Tests
             enemies[2].motor.Teleport(at + Vector2.left * 1.2f);
             yield return Frames(2);
             float hp1 = enemies[1].health.hp, hp2 = enemies[2].health.hp;
-            var d = DamageInfo.Make(10f, Team.Player, GameManager.I.player.gameObject, at, Vector2.up, DamageType.Lightning);
+            var d = DamageInfo.Make(10f, Team.Player, Players.Local.gameObject, at, Vector2.up, DamageType.Lightning);
             d.attackScaled = true;
             d.status.charge = 3;
             enemies[0].health.TakeDamage(d);
@@ -388,7 +388,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator RootedHeroCannotDashButCanCast()
         {
-            var hero = GameManager.I.player;
+            var hero = Players.Local;
             var sk = hero.skills;
             hero.energy = hero.maxEnergy;
             Vector2 aim = (Vector2)hero.transform.position + Vector2.right * 3f;
@@ -405,11 +405,11 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator ChiefIntroFinishesFirstQuestAndOpensTheForest()
         {
-            var q = QuestSystem.I;
+            var q = Players.Local.quests;
             Assert.AreEqual(QuestStatus.Active, q.Status("talk_chief"), "auto-started at boot");
             Assert.AreEqual(QuestSystem.Marker.Exclaim, q.MarkerFor("chief"));
             Assert.AreEqual(QuestStatus.Locked, q.Status("mushrooms"));
-            int red = Inventory.I.Count("potion_red");
+            int red = Players.Local.inventory.Count("potion_red");
 
             yield return TalkThrough("chief");
 
@@ -417,15 +417,15 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(QuestStatus.Active, q.Status("clear_forest"), "follow-up started");
             Assert.AreEqual(QuestStatus.Available, q.Status("mushrooms"), "side quest unlocked");
             Assert.AreEqual(QuestSystem.Marker.Exclaim, q.MarkerFor("girl"));
-            Assert.AreEqual(red + 2, Inventory.I.Count("potion_red"), "reward");
-            Assert.AreEqual(20, PlayerStats.I.xp);
+            Assert.AreEqual(red + 2, Players.Local.inventory.Count("potion_red"), "reward");
+            Assert.AreEqual(20, Players.Local.stats.xp);
             Assert.AreEqual("clear_forest", q.Tracked()[0].id);
         }
 
         [UnityTest]
         public IEnumerator MaiChoiceAcceptsAndDeliveryTurnsIn()
         {
-            var q = QuestSystem.I;
+            var q = Players.Local.quests;
             yield return TalkThrough("chief");
             yield return TalkThrough("girl", 1);                     // "Để sau nhé"
             Assert.AreEqual(QuestStatus.Available, q.Status("mushrooms"), "declining keeps it available");
@@ -433,22 +433,22 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(QuestStatus.Active, q.Status("mushrooms"));
 
             var cap = GameManager.I.db.Item("shroom_cap");
-            Inventory.I.Add(cap, 3);
+            Players.Local.inventory.Add(cap, 3);
             yield return null;
             Assert.AreEqual(QuestStatus.Ready, q.Status("mushrooms"));
             Assert.AreEqual(QuestSystem.Marker.Question, q.MarkerFor("girl"));
 
-            int green = Inventory.I.Count("potion_green");
+            int green = Players.Local.inventory.Count("potion_green");
             yield return TalkThrough("girl");
             Assert.AreEqual(QuestStatus.Done, q.Status("mushrooms"));
-            Assert.AreEqual(0, Inventory.I.Count("shroom_cap"), "delivered");
-            Assert.AreEqual(green + 3, Inventory.I.Count("potion_green"));
+            Assert.AreEqual(0, Players.Local.inventory.Count("shroom_cap"), "delivered");
+            Assert.AreEqual(green + 3, Players.Local.inventory.Count("potion_green"));
         }
 
         [UnityTest]
         public IEnumerator KillsDriveTheMainQuestChain()
         {
-            var q = QuestSystem.I;
+            var q = Players.Local.quests;
             yield return TalkThrough("chief");
             // the bear dies early: slay_bear counts earlier kills
             GameEvents.RaiseEnemyKilled(new KillInfo { id = "bear", name = "Gấu Ma", level = 6, rank = EnemyRank.Boss });
@@ -479,7 +479,7 @@ namespace RPG.EditorTools.Tests
         {
             var enemy = EnemyBase.All.Find(e => !e.IsDead);
             Assert.NotNull(enemy);
-            var hero = GameManager.I.player.gameObject;
+            var hero = Players.Local.gameObject;
             enemy.health.TakeDamage(DamageInfo.Make(1, Team.Player, hero, enemy.transform.position, Vector2.up));
             yield return null;
             var layer = HUD.I.worldLayer;
@@ -535,7 +535,7 @@ namespace RPG.EditorTools.Tests
             try
             {
                 int casts = 0;
-                GameManager.I.player.skills.SkillCast += slot => { if (slot == 0) casts++; };
+                Players.Local.skills.SkillCast += slot => { if (slot == 0) casts++; };
                 InputSystem.QueueStateEvent(kb, new KeyboardState(Key.Q));
                 yield return Frames(2);
                 var skill1 = InputReader.Asset.FindAction("Gameplay/Skill1", true);
@@ -556,7 +556,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator PortedAbilitiesHitLikeThePrototype()
         {
-            var hero = GameManager.I.player;
+            var hero = Players.Local;
             var db = GameManager.I.db;
             float Hit(string ability, System.Func<AbilityDef, HitSpec> pick)
             {
@@ -579,7 +579,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator DamageBonusAndWeaknessReachRealHits()
         {
-            var hero = GameManager.I.player;
+            var hero = Players.Local;
             var fireball = GameManager.I.db.Ability("fireball");
             var ctx = new AbilityContext { ability = fireball, caster = hero, level = 1, origin = hero.transform.position };
             var hit = ((ProjectileEffect)fireball.effects[1]).hit;
@@ -601,7 +601,7 @@ namespace RPG.EditorTools.Tests
             yield return null;
         }
 
-        static IEnumerator RealSeconds(float seconds)
+        internal static IEnumerator RealSeconds(float seconds)
         {
             float end = Time.realtimeSinceStartup + seconds;
             while (Time.realtimeSinceStartup < end) yield return null;
@@ -648,7 +648,7 @@ namespace RPG.EditorTools.Tests
             nova.effects.Add(new CueEffect { at = new Anchor(Anchor.From.Caster), vfx = "fire_explosion" });
             nova.effects.Add(new DamageEffect { at = new Anchor(Anchor.From.Caster), radius = 3f, hit = new HitSpec { power = 2f, type = DamageType.Fire } });
 
-            var hero = GameManager.I.player;
+            var hero = Players.Local;
             var enemy = EnemyBase.All.Find(e => !e.IsDead);
             Assert.NotNull(enemy);
             hero.motor.Teleport((Vector2)enemy.transform.position + Vector2.left);
@@ -665,7 +665,7 @@ namespace RPG.EditorTools.Tests
         [UnityTest]
         public IEnumerator ShieldBuffCutsDamageThenExpires()
         {
-            var hero = GameManager.I.player;
+            var hero = Players.Local;
             Assert.IsTrue(hero.skills.TryCast(5, hero.transform.position), "Khiên Thánh");
             yield return Frames(1);
             Assert.IsTrue(hero.HasBuff("shield"));
@@ -685,7 +685,7 @@ namespace RPG.EditorTools.Tests
         public IEnumerator CoreAndZoneAreSeparateScenes()
         {
             Assert.AreEqual("Core", GameManager.I.gameObject.scene.name);
-            Assert.AreEqual("Core", GameManager.I.player.gameObject.scene.name, "the hero lives in Core");
+            Assert.AreEqual("Core", Players.Local.gameObject.scene.name, "the hero lives in Core");
             var zone = ZoneRoot.Current;
             Assert.AreEqual("RungThiTham", zone.gameObject.scene.name);
             Assert.AreEqual(zone.gameObject.scene, UnityEngine.SceneManagement.SceneManager.GetActiveScene(), "zone is the active scene");
@@ -708,7 +708,7 @@ namespace RPG.EditorTools.Tests
             yield return Frames(2);
             Assert.NotNull(ZoneRoot.Current);
             var boss = GameManager.I.bossSpot;
-            Assert.Less(Vector2.Distance(GameManager.I.player.transform.position, boss.position), 0.1f, "entered at the boss spot");
+            Assert.Less(Vector2.Distance(Players.Local.transform.position, boss.position), 0.1f, "entered at the boss spot");
             Assert.AreEqual(1, BossBear.All.Count, "old zone unloaded, new one loaded");
             Assert.IsNotNull(VFX.Spawn("hit_spark", Vector3.zero, Quaternion.identity), "pool still works after the swap");
         }
@@ -735,19 +735,19 @@ namespace RPG.EditorTools.Tests
             var c = DebugConsole.I;
             Assert.NotNull(c, "console on the game manager");
             c.Execute("level 4");
-            Assert.AreEqual(4, PlayerStats.I.level);
-            int red = Inventory.I.Count("potion_red");
+            Assert.AreEqual(4, Players.Local.stats.level);
+            int red = Players.Local.inventory.Count("potion_red");
             c.Execute("give potion_red 2");
-            Assert.AreEqual(red + 2, Inventory.I.Count("potion_red"));
+            Assert.AreEqual(red + 2, Players.Local.inventory.Count("potion_red"));
             c.Execute("tp boss");
-            Assert.Less(Vector2.Distance(GameManager.I.player.transform.position, GameManager.I.bossSpot.position), 0.1f);
+            Assert.Less(Vector2.Distance(Players.Local.transform.position, GameManager.I.bossSpot.position), 0.1f);
             c.Execute("tp spawn");
             c.Execute("quest talk_chief status");
             c.Execute("no_such_command");
 
             c.Execute("ttk");
             var enemy = EnemyBase.All.Find(e => !e.IsDead);
-            var hero = GameManager.I.player.gameObject;
+            var hero = Players.Local.gameObject;
             enemy.health.TakeDamage(DamageInfo.Make(1, Team.Player, hero, enemy.transform.position, Vector2.up));
             yield return GameSeconds(0.2f);
             enemy.health.Kill();
@@ -757,18 +757,18 @@ namespace RPG.EditorTools.Tests
             Assert.IsTrue(c.ShowHitboxes);
             c.Execute("hitbox");
             c.Execute("status troi 2 me");
-            Assert.IsTrue(GameManager.I.player.status.IsRooted, "status troi me");
+            Assert.IsTrue(Players.Local.status.IsRooted, "status troi me");
             c.Execute("status sach me");
-            Assert.IsFalse(GameManager.I.player.status.IsRooted, "status sach me");
+            Assert.IsFalse(Players.Local.status.IsRooted, "status sach me");
             yield return null;
         }
 
         [UnityTest]
         public IEnumerator DamagedSaveFallsBackToBackup()
         {
-            Inventory.I.gold = 123;
+            Players.Local.inventory.gold = 123;
             Assert.IsTrue(SaveManager.I.Save(2));
-            Inventory.I.gold = 456;
+            Players.Local.inventory.gold = 456;
             Assert.IsTrue(SaveManager.I.Save(2));
             File.WriteAllText(SaveManager.PathFor(2), "{ not json");
             var f = SaveManager.Read(2);

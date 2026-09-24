@@ -18,7 +18,8 @@ namespace RPG
 
         void Update()
         {
-            var p = GameManager.I != null && GameManager.I.player != null ? GameManager.I.player.transform.position : Vector3.one * 9999f;
+            var me = Players.Local;
+            var p = me != null ? me.transform.position : Vector3.one * 9999f;
             Vector2 c = (Vector2)transform.position + areaOffset;
             bool behind = Mathf.Abs(p.x - c.x) < areaSize.x * 0.5f && Mathf.Abs(p.y - c.y) < areaSize.y * 0.5f && p.y > transform.position.y;
             float goal = behind ? fadedAlpha : 1f;

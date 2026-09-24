@@ -4,7 +4,10 @@ using UnityEngine;
 
 namespace RPG
 {
-    /// <summary>Shared enemy logic: idle/wander, aggro + leash, hurt stagger, death + loot.</summary>
+    /// <summary>
+    /// Shared enemy logic: idle/wander, aggro + leash, hurt stagger, death + loot. With several
+    /// heroes around it chases the one it has the most threat on (<see cref="ThreatTable"/>).
+    /// </summary>
     public class EnemyBase : MonoBehaviour
     {
         [Header("Identity")]
@@ -45,10 +48,17 @@ namespace RPG
         protected float nextAttack;
         protected float staggerUntil;
         protected NameplateUI plate;
+        /// <summary>The hero being chased or attacked (null while idle).</summary>
+        protected PlayerController target;
+        protected readonly ThreatTable threat = new ThreatTable();
         float nextContact;
         Collider2D[] colliders;
 
-        protected PlayerController Player => GameManager.I != null ? GameManager.I.player : null;
+        /// <summary>Threat a hero gets for walking into the aggro range (damage adds what it dealt).</summary>
+        const float NoticeThreat = 1f;
+
+        /// <summary>The hero this enemy is after, if any.</summary>
+        public PlayerController Target => target;
         protected Vector2 Pos => transform.position;
         /// <summary>Attack speed from statuses (Lạnh lowers it): attack cooldowns are divided by it.</summary>
         protected float AttackSpeed => status != null ? Mathf.Max(0.1f, status.AttackSpeedMultiplier) : 1f;
@@ -72,6 +82,8 @@ namespace RPG
             health.level = level;
             health.ResetHealth(maxHp);
             home = transform.position;
+            threat.Clear();
+            target = null;
             SetState(State.Idle);
             foreach (var c in colliders) c.enabled = true;
             if (body != null) body.color = Color.white;
@@ -116,14 +128,12 @@ namespace RPG
 
         protected virtual void Think()
         {
-            var p = Player;
-            float dp = p != null && !p.IsDead ? Vector2.Distance(Pos, p.transform.position) : 999f;
             switch (state)
             {
                 case State.Idle:
                     motor.Stop();
                     PlayIdle();
-                    if (dp < aggroRange) SetState(State.Chase);
+                    if (Notice()) SetState(State.Chase);
                     else if (stateTime > Random.Range(1.5f, 3.5f))
                     {
                         wanderTarget = home + Util.RandomInCircle(wanderRadius);
@@ -131,24 +141,61 @@ namespace RPG
                     }
                     break;
                 case State.Wander:
-                    if (dp < aggroRange) { SetState(State.Chase); break; }
+                    if (Notice()) { SetState(State.Chase); break; }
                     if (MoveTo(wanderTarget, 0.45f) || stateTime > 4f) SetState(State.Idle);
                     break;
                 case State.Chase:
-                    if (dp > aggroRange * 1.8f || Vector2.Distance(Pos, home) > leashRange) { SetState(State.Return); break; }
-                    ChaseBehaviour(p, dp);
+                    target = PickTarget();
+                    if (target == null || Vector2.Distance(Pos, home) > leashRange) { GiveUp(); break; }
+                    ChaseBehaviour(target, DistanceTo(target));
                     break;
                 case State.Attack:
-                    AttackBehaviour(p, dp);
+                    AttackBehaviour(target, target != null && !target.IsDead ? DistanceTo(target) : 999f);
                     break;
                 case State.Return:
                     if (MoveTo(home, 1f) || stateTime > 6f)
                     {
                         health.Heal(health.maxHp, false);
+                        health.ForgetAttackers();
                         SetState(State.Idle);
                     }
                     break;
             }
+        }
+
+        float DistanceTo(PlayerController p) => Vector2.Distance(Pos, p.transform.position);
+
+        /// <summary>A hero walked into the aggro range: they are the first target.</summary>
+        bool Notice()
+        {
+            var p = Players.Nearest(Pos, aggroRange);
+            if (p == null) return false;
+            threat.Add(p, NoticeThreat);
+            return true;
+        }
+
+        /// <summary>
+        /// The hero with the most threat who is still alive and within 1.8 × the aggro range; the
+        /// nearest one in that range when nobody has threat yet (hit by a script or a trap).
+        /// </summary>
+        PlayerController PickTarget()
+        {
+            float range = aggroRange * 1.8f;
+            var p = threat.Top(h => DistanceTo(h) <= range);
+            if (p == null)
+            {
+                p = Players.Nearest(Pos, range);
+                if (p != null) threat.Add(p, NoticeThreat);
+            }
+            return p;
+        }
+
+        /// <summary>Everyone is gone, dead or too far, or the enemy strayed past its leash: walk home.</summary>
+        void GiveUp()
+        {
+            threat.Clear();
+            target = null;
+            SetState(State.Return);
         }
 
         /// <summary>Default chase: walk to the player, attack in range.</summary>
@@ -200,24 +247,23 @@ namespace RPG
             if (Mathf.Abs(v.x) > 0.1f) body.flipX = v.x < 0;
         }
 
+        /// <summary>Bumping into the enemy's body hurts whichever hero is touching it.</summary>
         void ContactDamage()
         {
             if (contactDamage <= 0 || Time.time < nextContact) return;
-            var p = Player;
-            if (p == null || p.IsDead) return;
-            if (Vector2.Distance(Pos, p.transform.position) < 0.55f)
-            {
-                nextContact = Time.time + 1f;
-                var d = DamageInfo.Make(contactDamage, Team.Enemy, gameObject, p.transform.position,
-                                        (Vector2)p.transform.position - Pos, DamageType.Physical, 4f);
-                d.contact = true;
-                p.health.TakeDamage(d);
-            }
+            var p = Players.Nearest(Pos, 0.55f);
+            if (p == null) return;
+            nextContact = Time.time + 1f;
+            var d = DamageInfo.Make(contactDamage, Team.Enemy, gameObject, p.transform.position,
+                                    (Vector2)p.transform.position - Pos, DamageType.Physical, 4f);
+            d.contact = true;
+            p.health.TakeDamage(d);
         }
 
         protected virtual void OnDamaged(DamageInfo d, float amount)
         {
             if (state == State.Dead) return;
+            threat.Add(d.SourcePlayer, amount);
             if (state == State.Idle || state == State.Wander || state == State.Return) SetState(State.Chase);
             if (d.dot) return;   // Bỏng / Độc ticks do not stagger
             staggerUntil = Time.time + 0.12f;
@@ -234,8 +280,13 @@ namespace RPG
             foreach (var c in colliders) c.enabled = false;
             if (anim != null) anim.Play("dead", true);
             Loot.Roll(loot, transform.position);
-            GameEvents.RaiseEnemyKilled(new KillInfo { id = enemyId, name = displayName, level = level, rank = rank, position = transform.position });
-            Bestiary.RecordKill(enemyId, displayName);
+            GameEvents.RaiseEnemyKilled(new KillInfo
+            {
+                id = enemyId, name = displayName, level = level, rank = rank, position = transform.position,
+                credited = new List<PlayerController>(health.Attackers)
+            });
+            threat.Clear();
+            target = null;
             VFX.Spawn("enemy_death", transform.position + Vector3.up * 0.4f, Quaternion.identity);
             if (plate != null)
             {

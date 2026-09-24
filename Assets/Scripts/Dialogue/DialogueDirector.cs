@@ -7,13 +7,13 @@ using Yarn.Unity;
 namespace RPG
 {
     /// <summary>
-    /// Runs conversations (plan §09: Yarn Spinner, one .yarn file per NPC). Owns a Yarn
-    /// DialogueRunner built at start-up from GameDatabase.dialogue, shows it through
-    /// <see cref="YarnDialoguePresenter"/> and saves the Yarn variables with the game.
+    /// Runs the conversations of the hero on this screen (plan §09: Yarn Spinner, one .yarn file
+    /// per NPC). Owns a Yarn DialogueRunner built at start-up from GameDatabase.dialogue, shows it
+    /// through <see cref="YarnDialoguePresenter"/> and saves the Yarn variables with that hero.
     /// NPCs without a Yarn node fall back to their plain line list.
     /// </summary>
     [DefaultExecutionOrder(-80)]
-    public class DialogueDirector : MonoBehaviour, ISaveable
+    public class DialogueDirector : MonoBehaviour, ICharacterSaveable
     {
         public static DialogueDirector I { get; private set; }
 
@@ -24,6 +24,8 @@ namespace RPG
 
         public bool IsRunning => current != null;
         public DialogueRunner Runner => runner;
+        /// <summary>The hero in the conversation: Yarn functions and commands read and change their quests and bag.</summary>
+        public PlayerController Speaker { get; private set; }
 
         DialogueRunner runner;
         YarnDialoguePresenter presenter;
@@ -63,15 +65,25 @@ namespace RPG
 
         public bool HasNode(string node) => runner != null && !string.IsNullOrEmpty(node) && Array.IndexOf(project.NodeNames, node) >= 0;
 
-        /// <summary>Starts a conversation with an NPC. <paramref name="done"/> runs when it ends.</summary>
-        public bool Talk(NPC npc, Action done = null)
+        /// <summary>The hero on this screen starts a conversation with an NPC. <paramref name="done"/> runs when it ends.</summary>
+        public bool Talk(NPC npc, Action done = null) => Talk(npc, Players.Local, done);
+
+        /// <summary>
+        /// <paramref name="speaker"/> starts a conversation with an NPC. Only the hero on this
+        /// screen can: another hero's conversation runs on their own screen.
+        /// </summary>
+        public bool Talk(NPC npc, PlayerController speaker, Action done = null)
         {
             if (IsRunning || npc == null || DialogueUI.I == null) return false;
+            if (speaker != null && !speaker.IsLocal) return false;
             bool yarn = HasNode(npc.yarnNode);
             if (!yarn && npc.fallbackLines.Count == 0) return false;
             current = npc;
+            Speaker = speaker;
             onDone = done;
-            GameEvents.RaiseDialogueStarted(npc.npcId);   // Talk objectives complete here, before the script reads them
+            // Talk objectives complete here, before the script reads them
+            if (speaker != null && speaker.quests != null) speaker.quests.NotifyTalkStarted(npc.npcId);
+            GameEvents.RaiseDialogueStarted(npc.npcId);
             DialogueUI.I.Begin(npc);
             if (yarn) StartCoroutine(StartWhenIdle(npc.yarnNode));
             else fallback = StartCoroutine(PlayFallback(npc.fallbackLines));
@@ -107,9 +119,12 @@ namespace RPG
             if (current == null) return;
             var npc = current;
             var cb = onDone;
+            var speaker = Speaker;
             current = null;
+            Speaker = null;
             onDone = null;
             if (DialogueUI.I != null) DialogueUI.I.End();
+            if (speaker != null && speaker.quests != null) speaker.quests.NotifyTalkEnded(npc.npcId);
             GameEvents.RaiseDialogueEnded(npc.npcId);
             cb?.Invoke();
         }
@@ -149,6 +164,9 @@ namespace RPG
         }
 
         public string SaveKey => "dialogue";
+
+        /// <summary>The Yarn variables ($talked_to_chief…) are the local hero's.</summary>
+        public PlayerController Owner => Players.Local;
 
         public string CaptureState()
         {

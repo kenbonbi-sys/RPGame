@@ -5651,11 +5651,9 @@ GameObject:
   - component: {fileID: 294316021}
   - component: {fileID: 294316020}
   - component: {fileID: 294316019}
-  - component: {fileID: 294316018}
   - component: {fileID: 294316017}
   - component: {fileID: 294316016}
   - component: {fileID: 294316015}
-  - component: {fileID: 294316014}
   - component: {fileID: 294316013}
   - component: {fileID: 294316012}
   - component: {fileID: 294316011}
@@ -5706,31 +5704,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RPG.DevCheats
   enableCheats: 1
---- !u!114 &294316014
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 294316010}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe09febb89a54794d82f67b1f05c3d2b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RPG.Inventory
-  gold: 25
-  capacity: 20
-  stacks:
-  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
-    count: 4
-  - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
-    count: 4
-  - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
-    count: 2
-  - item: {fileID: 11400000, guid: 40972aa092910ac4b9f614dac3ea426a, type: 2}
-    count: 1
-  - item: {fileID: 11400000, guid: 57d6c33cf17daf449bbe470104bbd9d8, type: 2}
-    count: 3
 --- !u!114 &294316015
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5775,20 +5748,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.SaveManager
   autosaveInterval: 300
   outOfCombatDelay: 10
---- !u!114 &294316018
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 294316010}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d2eded03525d944d904b8cdd55fe202, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestSystem
-  quests: []
-  focus: 0
 --- !u!114 &294316019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5817,6 +5776,11 @@ MonoBehaviour:
   sfxVolume: 0.8
   musicVolume: 0.45
   ambienceVolume: 0.5
+  mixer: {fileID: 0}
+  dialogueDuck: 0.45
+  skillDuck: 0.7
+  skillDuckSeconds: 0.9
+  duckFade: 0.3
 --- !u!114 &294316021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5831,7 +5795,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.GameManager
   db: {fileID: 11400000, guid: 0f7c669271d298d4e9c51af14ae72501, type: 2}
   vfx: {fileID: 11400000, guid: 629e2b338f23b0c45881520a192bebf0, type: 2}
-  player: {fileID: 1709670144}
+  localPlayer: {fileID: 1709670144}
   showHelpOnStart: 1
 --- !u!4 &294316022
 Transform:

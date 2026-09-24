@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RPG
 {
-    /// <summary>"Túi Đồ" — the bag window (B / I).</summary>
+    /// <summary>"Túi Đồ" — the bag window (B / I) of the hero on this screen.</summary>
     public class InventoryUI : UIPanel
     {
         public RectTransform grid;
@@ -13,28 +13,30 @@ namespace RPG
         public TextMeshProUGUI countText;
 
         readonly List<InventorySlotUI> slots = new List<InventorySlotUI>();
-        bool hooked;
+        Inventory bound;
+
+        static Inventory LocalBag => Players.Local != null ? Players.Local.inventory : null;
 
         protected override void OnShow() => Refresh();
 
         protected override void Update()
         {
             base.Update();
-            if (!hooked && Inventory.I != null)
-            {
-                hooked = true;
-                Inventory.I.Changed += Refresh;
-            }
+            var bag = LocalBag;
+            if (bag == bound) return;
+            if (bound != null) bound.Changed -= Refresh;
+            bound = bag;
+            if (bound != null) bound.Changed += Refresh;
         }
 
         void OnDestroy()
         {
-            if (hooked && Inventory.I != null) Inventory.I.Changed -= Refresh;
+            if (bound != null) bound.Changed -= Refresh;
         }
 
         void Refresh()
         {
-            var inv = Inventory.I;
+            var inv = LocalBag;
             if (inv == null || slotPrefab == null || grid == null) return;
             while (slots.Count < inv.capacity)
             {

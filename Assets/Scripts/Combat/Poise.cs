@@ -62,7 +62,8 @@ namespace RPG
         void OnDamaged(DamageInfo d, float amount)
         {
             if (d.sourceTeam != Team.Player || d.poise <= 0f) return;
-            AddPoise(d.poise * (PlayerStats.I != null ? PlayerStats.I.PoiseMultiplier : 1f));
+            var stats = d.SourceStats;   // the hitter's Strength adds more
+            AddPoise(d.poise * (stats != null ? stats.PoiseMultiplier : 1f));
         }
 
         /// <summary>Fills the bar (the hero's hits, the counter after Lướt Hoàn Hảo); breaks it when full.</summary>
@@ -94,7 +95,7 @@ namespace RPG
             VFX.Spawn("boulder_break", transform.position + Vector3.up * 0.8f, Quaternion.identity, 1.3f);
             AudioManager.Play("sfx_boulder_break", 1f, 0.03f, transform.position);
             AudioManager.Play("sfx_crit", 0.8f, 0.02f);
-            TimeFX.HitStop(CombatConfig.Current.hitStopBreak);
+            TimeFX.HitStop(CombatConfig.Current.hitStopBreak, gameObject);
             CameraRig.Shake(0.5f);
             ScreenFX.Impact(0.6f, 0.4f);
             Broken?.Invoke();

@@ -43,6 +43,7 @@ namespace RPG.EditorTools
         {
             EditorUtil.ResetStats();
             RunSteps();
+            MoveHeroStateOntoPlayer();
             BuildScenes(false);
             Debug.Log($"[RPG] Build Everything done ({EditorUtil.Stats}) → " + string.Join(", ", AllScenePaths()));
         }
@@ -74,6 +75,59 @@ namespace RPG.EditorTools
             VFXFactory.BuildAll();
             PrefabFactory.BuildAll();
             AssetFactory.LinkLateReferences();
+        }
+
+        /// <summary>
+        /// Online phase 0 (Docs/KeHoach-Online.md): the bag, the quest log and the Bách Khoa Trùm
+        /// belong to each hero, not to the game. Moves the Inventory (with its starting kit) and
+        /// the QuestSystem of an older Core scene's [Game] object onto the Player prefab and gives
+        /// the prefab a Bestiary. Does nothing once done.
+        /// </summary>
+        [MenuItem("Tools/RPG/Steps/7. Move Hero State onto the Player Prefab", priority = 107)]
+        public static void MoveHeroStateOntoPlayer()
+        {
+            const string playerPath = PrefabFactory.CharFolder + "/Player.prefab";
+            bool haveCore = AssetDatabase.LoadAssetAtPath<SceneAsset>(CoreScenePath) != null;
+            if (haveCore && !Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = haveCore ? EditorSceneManager.OpenScene(CoreScenePath, OpenSceneMode.Single) : default;
+            var gm = haveCore ? Object.FindAnyObjectByType<GameManager>() : null;
+            var oldBag = gm != null ? gm.GetComponent<Inventory>() : null;
+            var oldQuests = gm != null ? gm.GetComponent<QuestSystem>() : null;
+
+            EditorUtil.UpgradePrefab(playerPath, root =>
+            {
+                var pc = root.GetComponent<PlayerController>();
+                if (pc == null) return false;
+                bool changed = false;
+                if (root.GetComponent<Inventory>() == null)
+                {
+                    pc.inventory = root.AddComponent<Inventory>();
+                    if (oldBag != null) EditorUtility.CopySerialized(oldBag, pc.inventory);   // keeps a hand-edited kit
+                    else PrefabFactory.StartingKit(pc.inventory);
+                    changed = true;
+                }
+                if (root.GetComponent<QuestSystem>() == null)
+                {
+                    pc.quests = root.AddComponent<QuestSystem>();
+                    if (oldQuests != null) EditorUtility.CopySerialized(oldQuests, pc.quests);
+                    changed = true;
+                }
+                if (root.GetComponent<Bestiary>() == null)
+                {
+                    pc.bestiary = root.AddComponent<Bestiary>();
+                    changed = true;
+                }
+                return changed;
+            });
+
+            if (oldBag == null && oldQuests == null) return;
+            if (oldBag != null) Object.DestroyImmediate(oldBag);
+            if (oldQuests != null) Object.DestroyImmediate(oldQuests);
+            EditorUtility.SetDirty(gm);   // also writes the hero reference under its new name (localPlayer)
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            EditorUtil.Written++;
+            Debug.Log("[RPG] Moved the bag and the quest log from [Game] onto the Player prefab");
         }
 
         [MenuItem("Tools/RPG/Steps/6. Rebuild Scenes (keeps prefabs)", priority = 106)]
@@ -150,18 +204,10 @@ namespace RPG.EditorTools
             var audio = game.AddComponent<AudioManager>();
             audio.library = AssetDatabase.LoadAssetAtPath<AudioLibrary>("Assets/Data/AudioLibrary.asset");
             game.AddComponent<TimeFX>();
-            game.AddComponent<QuestSystem>();
             game.AddComponent<SaveManager>();
             game.AddComponent<DialogueDirector>();
             var loader = game.AddComponent<SceneLoader>();
             loader.startZone = db.startZone;
-            var inv = game.AddComponent<Inventory>();
-            inv.gold = 25;
-            inv.stacks.Add(new Inventory.Stack { item = db.Item("potion_red"), count = 4 });
-            inv.stacks.Add(new Inventory.Stack { item = db.Item("potion_blue"), count = 4 });
-            inv.stacks.Add(new Inventory.Stack { item = db.Item("potion_green"), count = 2 });
-            inv.stacks.Add(new Inventory.Stack { item = db.Item("sword"), count = 1 });
-            inv.stacks.Add(new Inventory.Stack { item = db.Item("apple"), count = 3 });
             game.AddComponent<DevCheats>();
             game.AddComponent<AutoShot>();
             var screenFx = game.AddComponent<ScreenFX>();
@@ -170,7 +216,7 @@ namespace RPG.EditorTools
             var playerGo = (GameObject)PrefabUtility.InstantiatePrefab(PrefabFactory.Player);
             playerGo.name = "Player";
             playerGo.transform.position = spawn;
-            gm.player = playerGo.GetComponent<PlayerController>();
+            gm.localPlayer = playerGo.GetComponent<PlayerController>();
 
             // ---------------------------------------------------------------- lighting
             var lightGo = new GameObject("Global Light 2D");

@@ -3,8 +3,9 @@ using UnityEngine;
 namespace RPG
 {
     /// <summary>
-    /// Follows the player with a little mouse look-ahead, keeps an integer pixel zoom
-    /// (crisp pixel art at any resolution) and provides trauma-based screen shake.
+    /// Follows the hero on this screen (<see cref="Players.Local"/>) with a little mouse
+    /// look-ahead, keeps an integer pixel zoom (crisp pixel art at any resolution) and provides
+    /// trauma-based screen shake.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class CameraRig : MonoBehaviour
@@ -76,6 +77,7 @@ namespace RPG
 
         public void SnapToTarget()
         {
+            FollowLocalHero();
             if (target == null) return;
             basePos = new Vector3(target.position.x, target.position.y, transform.position.z);
             transform.position = basePos;
@@ -83,8 +85,15 @@ namespace RPG
 
         int PixelScale => Mathf.Max(1, Mathf.RoundToInt(Screen.height / referenceHeight));
 
+        void FollowLocalHero()
+        {
+            var me = Players.Local;
+            if (me != null) target = me.transform;
+        }
+
         void LateUpdate()
         {
+            FollowLocalHero();
             float dt = Time.unscaledDeltaTime;
             zoomMul = Mathf.MoveTowards(zoomMul, zoomMulTarget, dt * 0.6f);
             float scale = PixelScale * zoomMul;

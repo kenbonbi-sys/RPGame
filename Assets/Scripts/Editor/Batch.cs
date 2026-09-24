@@ -9,6 +9,8 @@ namespace RPG.EditorTools
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildAll
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.ForceBuildAll
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildScene
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.MoveHeroState
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildOnline
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildPlayer
     /// </summary>
     public static class Batch
@@ -38,13 +40,31 @@ namespace RPG.EditorTools
             SceneBuilder.RebuildSceneOnly();
         }
 
+        /// <summary>Builds the NetHero prefab and links the network prefabs into the GameDatabase (online phase 1).</summary>
+        public static void BuildOnline()
+        {
+            PrefabFactory.BuildOnline();
+            Debug.Log("[RPG] Batch.BuildOnline done");
+        }
+
+        /// <summary>Moves the bag and the quest log of an older Core scene onto the Player prefab (online phase 0).</summary>
+        public static void MoveHeroState()
+        {
+            SceneBuilder.MoveHeroStateOntoPlayer();
+            AssetDatabase.SaveAssets();
+            Debug.Log("[RPG] Batch.MoveHeroState done");
+        }
+
+        /// <summary>Builds Builds/Windows/RungThiTham.exe; from the command line, -buildPath "D:\out\RungThiTham.exe" builds elsewhere.</summary>
         [MenuItem("Tools/RPG/Build Windows Player", priority = 40)]
         public static void BuildPlayer()
         {
+            var args = System.Environment.GetCommandLineArgs();
+            int at = System.Array.IndexOf(args, "-buildPath");
             var opts = new BuildPlayerOptions
             {
                 scenes = SceneBuilder.AllScenePaths(),
-                locationPathName = "Builds/Windows/RungThiTham.exe",
+                locationPathName = at >= 0 && at + 1 < args.Length ? args[at + 1] : "Builds/Windows/RungThiTham.exe",
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.None
             };
