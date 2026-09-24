@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: eye_lens
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: eye_lens
+  displayName: "Th\u1EE7y Tinh Th\u1EC3 M\u1EAFt Hang"
+  description: "Th\u1EA5u k\xEDnh trong v\u1EAFt c\u1EE7a M\u1EAFt Hang. Nh\xECn qua n\xF3, b\xF3ng t\u1ED1i nh\u01B0 s\xE1ng l\xEAn."
+  icon: {fileID: -1256186054, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 1
+  maxStack: 99
+  value: 22
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

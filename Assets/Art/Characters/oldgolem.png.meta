@@ -1,0 +1,730 @@
+fileFormatVersion: 2
+guid: 7f22fd5af6c02d049bbd3e0c9220681c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8170262088947224686
+    second: oldgolem_0
+  - first:
+      213: 2086776420232445289
+    second: oldgolem_1
+  - first:
+      213: 3018899511926027268
+    second: oldgolem_2
+  - first:
+      213: -1856536979647493689
+    second: oldgolem_3
+  - first:
+      213: -7212943584855437523
+    second: oldgolem_4
+  - first:
+      213: 7061071659058767507
+    second: oldgolem_5
+  - first:
+      213: 7664897748161243393
+    second: oldgolem_6
+  - first:
+      213: -2039198282153277042
+    second: oldgolem_7
+  - first:
+      213: -550214972939900445
+    second: oldgolem_8
+  - first:
+      213: -7182470528333106718
+    second: oldgolem_9
+  - first:
+      213: -339971784946369306
+    second: oldgolem_10
+  - first:
+      213: 729083189624883839
+    second: oldgolem_11
+  - first:
+      213: -3322088921923797836
+    second: oldgolem_12
+  - first:
+      213: 6981875471681646286
+    second: oldgolem_13
+  - first:
+      213: -1885163174311836327
+    second: oldgolem_14
+  - first:
+      213: -2374708081315746531
+    second: oldgolem_15
+  - first:
+      213: 5097958139226103729
+    second: oldgolem_16
+  - first:
+      213: 1270815768338710065
+    second: oldgolem_17
+  - first:
+      213: 3115281861545262927
+    second: oldgolem_18
+  - first:
+      213: -5678287367813162374
+    second: oldgolem_19
+  - first:
+      213: -2202584970592421556
+    second: oldgolem_20
+  - first:
+      213: 984002873568026631
+    second: oldgolem_21
+  - first:
+      213: 195000301202696135
+    second: oldgolem_22
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: oldgolem_idle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 448
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1220429e170e2eb1031e1c96a8139a23
+      internalID: 9018982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_idle_1
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 448
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aaaa158ac3a05b169efb3681fc020376
+      internalID: 250362220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_walk_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 392
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec24c9e9402a0f5292d524b16320e427
+      internalID: -1840175055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_walk_1
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 392
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cc0101b36db69d32f1b45c56dabf80c1
+      internalID: -871053996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_walk_2
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 392
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de046f0edfe93ff4d42b90055e13f33b
+      internalID: 253432304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_walk_3
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 392
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e710a15a9976b2e79c5e5cedcaa9d3f2
+      internalID: 542223838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_windup_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 336
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e18215ff7a96fdc050ab5d6ce90923bc
+      internalID: -344597866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_windup_1
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 336
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a8ed98c48e43b797dff1fed34e422dbc
+      internalID: -1032970761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_slam_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 280
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d5cbde707254b77caabc2259d4e63007
+      internalID: -1119767951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_slam_1
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 280
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 613f48aa538d92fff4a8952bec120e72
+      internalID: 38624686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_spin_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 224
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e1339cb2017e230e270251dafb5a7779
+      internalID: 1041244739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_spin_1
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 224
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee8264c881b69d08286c7d73521b57fd
+      internalID: -101383039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_spin_2
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 224
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 938a9ab821c62b23954966df10abbe01
+      internalID: 1628520363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_spin_3
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 224
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 606e9a1e306b46f79b66bd7e5a5a5f7e
+      internalID: 969709877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_spin_4
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 224
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9d462dfbf2911f113d0781d675be6185
+      internalID: -2065296278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_spin_5
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 224
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87728c16bc6dc47e4bb986566fc12efa
+      internalID: -1129119535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_cast_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 168
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 49c927ca5b3c87ae19937f6825e8b305
+      internalID: -545927890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_cast_1
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 168
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d2789147cb2c0f8d1d6cbefbf93603c
+      internalID: 1358917001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_roar_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 112
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fb9a0557df47fb057ebaae15d7055883
+      internalID: 1638917024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_roar_1
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 112
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35fb017c2b2758b641cb50542e73eaec
+      internalID: -145218125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_hurt_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 56
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8828dc6c260115e7b0b7a600603ef40d
+      internalID: 57209331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_dead_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4545de9aab1576462300ba9b5281ac75
+      internalID: 784233697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oldgolem_dead_1
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 0
+        width: 56
+        height: 56
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05357}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 252c85c640cc3d427c47a7d6e9042b7d
+      internalID: -1133880253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 50818fc6fd0ea2d47ab0d4f2e009bf80
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      oldgolem_cast_0: -545927890
+      oldgolem_cast_1: 1358917001
+      oldgolem_dead_0: 784233697
+      oldgolem_dead_1: -1133880253
+      oldgolem_hurt_0: 57209331
+      oldgolem_idle_0: 9018982
+      oldgolem_idle_1: 250362220
+      oldgolem_roar_0: 1638917024
+      oldgolem_roar_1: -145218125
+      oldgolem_slam_0: -1119767951
+      oldgolem_slam_1: 38624686
+      oldgolem_spin_0: 1041244739
+      oldgolem_spin_1: -101383039
+      oldgolem_spin_2: 1628520363
+      oldgolem_spin_3: 969709877
+      oldgolem_spin_4: -2065296278
+      oldgolem_spin_5: -1129119535
+      oldgolem_walk_0: -1840175055
+      oldgolem_walk_1: -871053996
+      oldgolem_walk_2: 253432304
+      oldgolem_walk_3: 542223838
+      oldgolem_windup_0: -344597866
+      oldgolem_windup_1: -1032970761
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: rpg:cd05dc0f13ef335727f08ed738ab710e
+  assetBundleName: 
+  assetBundleVariant: 

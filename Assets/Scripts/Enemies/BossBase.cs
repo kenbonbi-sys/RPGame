@@ -201,7 +201,7 @@ namespace RPG
                     }
                     break;
             }
-            if (body != null && Mathf.Abs(motor.Velocity.x) > 0.2f && state == State.Chase) body.flipX = motor.Velocity.x < 0;
+            if (TurnsFreely && body != null && Mathf.Abs(motor.Velocity.x) > 0.2f && state == State.Chase) body.flipX = motor.Velocity.x < 0;
         }
 
         /// <summary>
@@ -296,6 +296,12 @@ namespace RPG
             if (Decide(p, dist)) return;
             Approach(p);
         }
+
+        /// <summary>
+        /// Whether it turns to face the way it walks at once; a boss with a weak back (the old
+        /// crystal golem) turns on its own, slowly.
+        /// </summary>
+        protected virtual bool TurnsFreely => true;
 
         /// <summary>Picks and starts an attack on <paramref name="p"/> (<see cref="Run"/>); false: nothing ready, walk on.</summary>
         protected abstract bool Decide(PlayerController p, float dist);

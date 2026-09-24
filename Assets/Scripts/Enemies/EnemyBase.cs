@@ -356,7 +356,8 @@ namespace RPG
             if (anim != null) anim.Play("move");
         }
 
-        void FaceMovement()
+        /// <summary>Turns the body the way it moves (a creature with an armoured front turns slowly).</summary>
+        protected virtual void FaceMovement()
         {
             if (body == null) return;
             var v = motor.Velocity;

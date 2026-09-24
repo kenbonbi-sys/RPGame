@@ -31,7 +31,8 @@ namespace RPG
             Arc = 13,
             Log = 14,
             Banner = 15,
-            Boss = 16
+            Boss = 16,
+            Beam = 17
         }
 
         /// <summary>How far from a screen effect a hero still feels it.</summary>
@@ -140,6 +141,13 @@ namespace RPG
             if (!GameSession.Serving) return;
             NetWorld.SendCue(new CueMsg { kind = (byte)Kind.Arc, id = prefabKey, pos = from, pos2 = to, a = time });
         }
+
+        /// <summary>
+        /// A beam of light from <paramref name="from"/> to <paramref name="to"/> (Mắt Hang, the spider
+        /// queen's Tia Pha Lê): every screen near it draws it for <paramref name="duration"/> seconds.
+        /// </summary>
+        public static void Beam(Vector2 from, Vector2 to, float width, float duration, Color color) =>
+            Send(new CueMsg { kind = (byte)Kind.Beam, pos = from, pos2 = to, a = width, b = duration, color = color });
 
         /// <summary>A boss's moment (intro, rage, fall, reset): screens near it run the boss's own presentation.</summary>
         public static void Boss(BossBase boss, BossBase.Moment moment)
@@ -257,6 +265,9 @@ namespace RPG
                     break;
                 case Kind.Arc:
                     NetWorld.ShowArc(m);
+                    break;
+                case Kind.Beam:
+                    BeamFX.Show(m.pos, m.pos2, m.a, m.b, m.color);
                     break;
                 case Kind.Boss:
                 {

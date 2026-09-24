@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: ancient_core
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: ancient_core
+  displayName: "L\xF5i Pha L\xEA C\u1ED5"
+  description: "Tr\xE1i tim h\u1ED5 ph\xE1ch c\u1EE7a Golem Pha L\xEA C\u1ED5, v\u1EABn c\xF2n \u1EA5m v\xE0 ph\xE1t s\xE1ng."
+  icon: {fileID: -1034016631, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 2
+  maxStack: 99
+  value: 180
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

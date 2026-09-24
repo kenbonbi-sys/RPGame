@@ -106,6 +106,11 @@ namespace RPG.EditorTools
             // cave (Hang Pha Lê)
             Build("web_hit", WebHit, 1.2f);
             Build("crystal_burst", CrystalBurst, 1.2f);
+            Build("crystal_hit", CrystalHit, 0.8f);
+            Build("crystal_shatter", CrystalShatter, 1.6f);
+            Build("crystal_beam", CrystalBeam, 0f);
+            Build("dig_dust", DigDust, 1.8f);
+            Build("coin_burst", CoinBurst, 1.4f);
             // a fallen boss's treasure chest
             Build("chest_appear", ChestAppear, 1.4f);
             Build("chest_open", ChestOpen, 2f);
@@ -139,6 +144,7 @@ namespace RPG.EditorTools
             EditorUtil.Assign(ref db.venomPrefab, BuildVenom());
             EditorUtil.Assign(ref db.venomArcPrefab, BuildVenomGlob());
             EditorUtil.Assign(ref db.webPrefab, BuildWebShot());
+            EditorUtil.Assign(ref db.shardPrefab, BuildShardShot());
             // the classes' projectiles (the abilities find them by path)
             BuildBolt("Arrow", "proj_arrow", false, Color.white, new Color(1f, 0.9f, 0.7f), 1f, true, 0f, 0f);
             BuildBolt("ThrownKnife", "proj_knife", false, Color.white, new Color(0.85f, 0.9f, 1f), 1f, true, 0f, 0f);
@@ -952,6 +958,89 @@ namespace RPG.EditorTools
             PS(r, "Glints", Mat("spark4", true, 2.2f)).Burst(8).Life(0.3f, 0.6f).Speed(0.5f, 1.5f).Size(0.14f, 0.26f)
                 .Col(Color.white, CrystalCyan).Circle(0.3f).Fade();
             Light(r, CrystalCyan, 3f, 1.4f, 0.5f);
+        }
+
+        /// <summary>A shot glancing off crystal, a pillar struck: a spray of bright splinters.</summary>
+        static void CrystalHit(GameObject r)
+        {
+            PS(r, "Splinters", Mat("px_square", true, 2f)).Burst(10).Life(0.2f, 0.45f).Speed(2.5f, 5.5f).Size(0.05f, 0.1f)
+                .Col(Color.white, CrystalCyan).Circle(0.15f).Drag(3f).Stretch(1.4f, 0.03f).Fade();
+            var g = Spr(r, "Glint", "spark4", Mat("spark4", true, 2.4f), CrystalCyan, scale: 0.9f);
+            SFX(g, 0.25f, C(0, 0.4f, 0.3f, 1.2f, 1, 0.6f), C(0, 1, 1, 0));
+            Light(r, CrystalCyan, 2f, 1.2f, 0.25f);
+        }
+
+        /// <summary>A crystal pillar (or a crystal slime) shattering: big shards thrown out and falling.</summary>
+        static void CrystalShatter(GameObject r)
+        {
+            PS(r, "Shards", Mat("ice_shard", true, 1.8f)).Burst(16).Life(0.5f, 1f).Speed(3f, 7f).Size(0.25f, 0.5f)
+                .Col(Color.white, CrystalCyan).ConeUp(75f, 0.4f).Grav(2.6f).Rot().Spin(-500, 500).Fade();
+            PS(r, "Dust", Mat("px_square", true, 1.8f)).Burst(22).Life(0.4f, 0.9f).Speed(1f, 3.5f).Size(0.05f, 0.1f)
+                .Col(Color.white, CrystalCyan).Circle(0.5f).Drag(2f).Fade();
+            var flash = Spr(r, "Flash", "glow_hard", Mat("glow_hard", true, 2.4f), CrystalCyan, scale: 3f);
+            SFX(flash, 0.3f, C(0, 1.1f, 1, 0.8f), C(0, 1, 1, 0));
+            Light(r, CrystalCyan, 4.5f, 2.2f, 0.5f);
+        }
+
+        /// <summary>Something digging into the ground or bursting out of it (Mimic Tham Lam): clods and a cloud of dust.</summary>
+        static void DigDust(GameObject r)
+        {
+            PS(r, "Clods", Mat("debris_0", false, 1f)).Burst(12).Life(0.4f, 0.8f).Speed(2f, 4.5f).Size(0.18f, 0.32f)
+                .ConeUp(70f, 0.4f).Grav(2.6f).Rot().Spin(-300, 300).Fade();
+            PS(r, "Dust", Mat("smoke", false, 1f)).Burst(7).Life(0.6f, 1.1f).Speed(0.4f, 1.3f).Size(0.7f, 1.2f)
+                .Col(new Color(0.35f, 0.33f, 0.4f, 0.7f)).Circle(0.5f).Fade();
+            var crack = Spr(r, "Crack", "crack", Mat("crack", false, 1f), new Color(0.15f, 0.14f, 0.2f, 0.9f), SortingLayerNames.Decal, 0, 0.9f);
+            SFX(crack, 1.6f, C(0, 1, 1, 1), C(0, 1, 0.6f, 1, 1, 0));
+        }
+
+        /// <summary>Gold taken or given back: coins of light bursting up and falling.</summary>
+        static void CoinBurst(GameObject r)
+        {
+            PS(r, "Coins", Mat("spark4", true, 2.4f)).Burst(18).Life(0.6f, 1.1f).Speed(2f, 4.5f).Size(0.14f, 0.26f)
+                .Col(Color.white, Holy).ConeUp(45f, 0.2f).Grav(2.6f).Fade();
+            Light(r, Holy, 2.5f, 1.2f, 0.5f);
+        }
+
+        /// <summary>A beam of light between two points (Mắt Hang, Tia Pha Lê): LineRenderers set up by <see cref="BeamFX"/>.</summary>
+        static void CrystalBeam(GameObject r)
+        {
+            var beam = r.AddComponent<BeamFX>();
+            LineRenderer Line(string name, Color c, int order)
+            {
+                var go = EditorUtil.Child(r, name);
+                var lr = go.AddComponent<LineRenderer>();
+                lr.useWorldSpace = true;
+                lr.positionCount = 2;
+                lr.widthMultiplier = 0.3f;
+                lr.startColor = c;
+                lr.endColor = c;
+                lr.sharedMaterial = Mat("streak", true, 3f);
+                lr.textureMode = LineTextureMode.Stretch;
+                lr.numCapVertices = 4;
+                lr.sortingLayerName = SortingLayerNames.Top;
+                lr.sortingOrder = order;
+                return lr;
+            }
+            beam.glow = Line("Glow", CrystalCyan, 1);
+            beam.core = Line("Core", Color.white, 2);
+        }
+
+        /// <summary>A splinter of crystal in flight (<see cref="EnemyShots.Shard"/>).</summary>
+        static GameObject BuildShardShot()
+        {
+            var root = new GameObject("ShardShot");
+            root.layer = Layers.Projectile;
+            var fx = root.AddComponent<PooledFX>();
+            fx.lifetime = 0f;
+            fx.stopLinger = 0.4f;
+            var p = root.AddComponent<Projectile>();
+            p.rotateToDirection = true;
+            Spr(root, "Core", "proj_shard", Mat("proj_shard", false, 1f), Color.white, scale: 1f, order: 1);
+            Spr(root, "Glow", "glow", Mat("glow", true, 1.6f), A(CrystalCyan, 0.6f), scale: 0.9f, order: -1);
+            PS(root, "Trail", Mat("px_square", true, 1.8f), SortingLayerNames.VFX, -2).Loop().Rate(30).Life(0.15f, 0.3f).Size(0.04f, 0.08f)
+                .Col(A(CrystalCyan, 0.9f), A(Color.white, 0.5f)).Circle(0.05f).Fade();
+            Light(root, CrystalCyan, 1.6f, 0.8f, pulse: false);
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/ShardShot.prefab");
         }
 
         static readonly Color DarkC = new Color(0.62f, 0.35f, 1f);

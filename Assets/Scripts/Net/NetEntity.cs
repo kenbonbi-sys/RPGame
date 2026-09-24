@@ -8,7 +8,9 @@ namespace RPG
         Boss = 2,
         Boulder = 3,
         Loot = 4,
-        Chest = 5
+        Chest = 5,
+        /// <summary>A crystal pillar of the spider queen's hall: broken or whole.</summary>
+        Pillar = 6
     }
 
     /// <summary>

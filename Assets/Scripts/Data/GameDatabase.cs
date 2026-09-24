@@ -61,6 +61,8 @@ namespace RPG
         public GameObject venomArcPrefab;
         [Tooltip("A ball of sticky web that binds whoever it hits (Nhện Hang).")]
         public GameObject webPrefab;
+        [Tooltip("A splinter of crystal (Slime Pha Lê, shots turned back by crystal, the old golem).")]
+        public GameObject shardPrefab;
         [Tooltip("The treasure chest a fallen boss leaves in the middle of its arena (TreasureChest).")]
         public GameObject chestPrefab;
         [Tooltip("Soft puff for the swamp's low mist (AmbientParticles).")]

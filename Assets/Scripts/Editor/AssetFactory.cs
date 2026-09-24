@@ -357,6 +357,13 @@ namespace RPG.EditorTools
                 Item("bat_wing", "Cánh Dơi Pha Lê", M, ItemRarity.Common, "Cánh dơi mỏng, mép cánh lấm tấm những hạt pha lê.", 7),
                 Item("spider_silk", "Tơ Nhện Hang", M, ItemRarity.Uncommon, "Cuộn tơ dai như dây thừng, dính tay khó gỡ.", 12),
                 Item("golem_core", "Lõi Golem", M, ItemRarity.Uncommon, "Trái tim đá của Golem, một con mắt xanh vẫn lập lòe.", 24),
+                Item("beetle_shell", "Vỏ Bọ Giáp", M, ItemRarity.Uncommon, "Mảnh mai đá của Bọ Giáp Đá, cứng như khiên, lấm tấm pha lê.", 16),
+                Item("crystal_jelly", "Nhân Slime Pha Lê", M, ItemRarity.Common, "Giọt nhớt xanh trong, giữa lòng có một hạt pha lê nhỏ.", 9),
+                Item("eye_lens", "Thủy Tinh Thể Mắt Hang", M, ItemRarity.Uncommon, "Thấu kính trong vắt của Mắt Hang. Nhìn qua nó, bóng tối như sáng lên.", 22),
+                Item("ancient_core", "Lõi Pha Lê Cổ", M, ItemRarity.Rare, "Trái tim hổ phách của Golem Pha Lê Cổ, vẫn còn ấm và phát sáng.", 180),
+                Item("queen_eye", "Mắt Nhện Chúa", M, ItemRarity.Epic, "Con mắt đỏ rực của Nhện Chúa Pha Lê, nằm giữa một vòng pha lê.", 360),
+                Item("crystal_silk", "Tơ Pha Lê", M, ItemRarity.Rare, "Tơ của Nhện Chúa, óng ánh bụi pha lê, không lưỡi dao nào cắt đứt.", 120),
+                Item("mimic_tooth", "Răng Mimic", M, ItemRarity.Epic, "Chiếc răng cong của Mimic Tham Lam, một đồng vàng vẫn còn dính trên đó.", 300),
             };
         }
 
@@ -824,6 +831,62 @@ namespace RPG.EditorTools
                 q.gold = 90;
                 q.items.Add(Reward("potion_blue", 2));
             });
+            var caveBeetles = Quest("cave_beetles", "Truy Nã: Bọ Giáp Đá", QuestKind.Main, q =>
+            {
+                q.summary = "Trong mỏ bỏ hoang có loài bọ khoác mai đá. Đánh vào đầu nó chỉ tóe lửa: vòng ra sau lưng, hoặc dụ nó húc vào vách đá.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "beetle", 4, "Hạ Bọ Giáp Đá", "mine"));
+                q.xp = 740;
+                q.gold = 95;
+                q.items.Add(Reward("potion_red", 2));
+            });
+            var caveSlimes = Quest("cave_slimes", "Truy Nã: Slime Pha Lê", QuestKind.Main, q =>
+            {
+                q.summary = "Slime Pha Lê trong Rừng Pha Lê hắt mọi mũi tên, quả cầu phép bay ngược về người bắn. Dùng đòn cận chiến, và tránh xa khi nó vỡ tung.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "crystalslime", 4, "Hạ Slime Pha Lê", "crystalforest"));
+                q.xp = 780;
+                q.gold = 100;
+                q.items.Add(Reward("potion_blue", 2));
+            });
+            var caveEyes = Quest("cave_eyes", "Truy Nã: Mắt Hang", QuestKind.Main, q =>
+            {
+                q.summary = "Những con mắt khổng lồ mọc trong vách hang, bắn tia sáng dội qua vách đá. Mí đá của chúng rất cứng: đánh lúc mắt vừa bắn xong và còn mở.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "caveeye", 3, "Hạ Mắt Hang", "crystalforest"));
+                q.xp = 840;
+                q.gold = 110;
+                q.items.Add(Reward("potion_green", 2));
+            });
+            var crystalGolem = Quest("slay_crystalgolem", "Golem Pha Lê Cổ", QuestKind.Main, q =>
+            {
+                q.summary = "Điện Pha Lê có một Golem cổ canh giữ. Mặt trước nó hắt đạn ngược lại; lõi hổ phách ở sau lưng mới là chỗ yếu. Đừng đứng sau lưng nó quá lâu.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "crystalgolem", 1, "Đánh bại Golem Pha Lê Cổ", "crystalhall"));
+                q.xp = 1300;
+                q.gold = 160;
+                q.items.Add(Reward("potion_red", 3));
+            });
+            var spiderQueen = Quest("slay_queen", "Nhện Chúa Pha Lê", QuestKind.Main, q =>
+            {
+                q.summary = "Tận cùng Hang Pha Lê, Nhện Chúa giăng tơ giữa sáu cột pha lê. Tia sáng của nó dội qua các cột: đập vỡ cột sắp bị tia chạm vào để tia dội ngược vào nó. Xa hơn về phía tây bắc là Thảo Nguyên Gió (sắp mở).";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "spiderqueen", 1, "Đánh bại Nhện Chúa Pha Lê", "queenhall"));
+                q.xp = 2000;
+                q.gold = 240;
+                q.items.Add(Reward("potion_red", 4));
+                q.items.Add(Reward("potion_blue", 3));
+                q.setFlags.Add("cave_cleared");
+            });
+            var caveMimic = Quest("cave_mimic", "Lời Đồn: Rương Biết Cắn", QuestKind.Bounty, q =>
+            {
+                q.summary = "Thợ mỏ kể có một rương kho báu trong hang tự đổi chỗ. Kẻ nào mở nó thì mất vàng. Hạ nó trước khi nó chui xuống đất lần thứ ba để lấy lại gấp đôi.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "mimic", 1, "Tìm và hạ Mimic Tham Lam", "mine"));
+                q.xp = 1500;
+                q.gold = 200;
+                q.items.Add(Reward("gem_red", 1));
+            });
             var toadKing = Quest("slay_toadking", "Cóc Tía Ao Độc", QuestKind.Main, q =>
             {
                 q.summary = "Cóc Tía ngự giữa Ao Cóc Tía phía bắc đầm. Lưỡi nó kéo người vào vũng độc.";
@@ -879,7 +942,13 @@ namespace RPG.EditorTools
             Link(caveEnter, snake, caveBats);
             Link(caveBats, caveEnter, caveSpiders);
             Link(caveSpiders, caveBats, caveGolems);
-            Link(caveGolems, caveSpiders, null);
+            Link(caveGolems, caveSpiders, caveBeetles);
+            Link(caveBeetles, caveGolems, caveSlimes);
+            Link(caveSlimes, caveBeetles, caveEyes);
+            Link(caveEyes, caveSlimes, crystalGolem);
+            Link(crystalGolem, caveEyes, spiderQueen);
+            Link(spiderQueen, crystalGolem, null);   // the next region (Thảo Nguyên Gió) will go on from here
+            Link(caveMimic, caveEnter, null);   // a side bounty: the hidden boss
             // the level each step is for, in its summary
             void Rec(QuestDef q, int level)
             {
@@ -898,10 +967,16 @@ namespace RPG.EditorTools
             Rec(caveBats, 14);
             Rec(caveSpiders, 15);
             Rec(caveGolems, 16);
+            Rec(caveBeetles, 17);
+            Rec(caveSlimes, 17);
+            Rec(caveEyes, 18);
+            Rec(crystalGolem, 18);
+            Rec(spiderQueen, 20);
+            Rec(caveMimic, 20);
             return new List<QuestDef>
             {
                 talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake, swampHunters, swampWisps,
-                caveEnter, caveBats, caveSpiders, caveGolems,
+                caveEnter, caveBats, caveSpiders, caveGolems, caveBeetles, caveSlimes, caveEyes, crystalGolem, spiderQueen, caveMimic,
             };
         }
 

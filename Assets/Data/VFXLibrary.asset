@@ -153,6 +153,16 @@ MonoBehaviour:
     prefab: {fileID: 5913236527216023997, guid: 1eeac219a68bf8c4c90d549f9adfecf2, type: 3}
   - id: dark_aura
     prefab: {fileID: 7591929325566856652, guid: d9f4a8bdf49db8d40a6949536654156b, type: 3}
+  - id: crystal_hit
+    prefab: {fileID: 2108843247067560655, guid: 850a559aa3c33fc4c97e442b46b6e2a3, type: 3}
+  - id: crystal_shatter
+    prefab: {fileID: 5332722502670958320, guid: 7af2348a986b6da4688d5028327e5bb3, type: 3}
+  - id: crystal_beam
+    prefab: {fileID: 6713744603893126661, guid: 685ae2c0636c4f446a1da0234eb44ccd, type: 3}
+  - id: dig_dust
+    prefab: {fileID: 8963472643298870490, guid: 95d34925833ab2541bd3040cea2b6f25, type: 3}
+  - id: coin_burst
+    prefab: {fileID: 1912349664056764002, guid: dc79b363fdfd1a54ca9ef5e3c1ae5dd6, type: 3}
   particleBudget: 150
   lightBudget: 1
   ultimateIds:

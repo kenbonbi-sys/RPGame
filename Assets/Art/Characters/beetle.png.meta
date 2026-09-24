@@ -1,0 +1,470 @@
+fileFormatVersion: 2
+guid: 7b498da12dd62bf4bbc4dcbbd8f59ae6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -170131892086433782
+    second: beetle_0
+  - first:
+      213: 8955630745802493176
+    second: beetle_1
+  - first:
+      213: -850375253287257138
+    second: beetle_2
+  - first:
+      213: 8189239267110657558
+    second: beetle_3
+  - first:
+      213: 1627736798504065725
+    second: beetle_4
+  - first:
+      213: -8794018903637750445
+    second: beetle_5
+  - first:
+      213: -5789281659545866257
+    second: beetle_6
+  - first:
+      213: -2891273373120762599
+    second: beetle_7
+  - first:
+      213: -3671087696481006439
+    second: beetle_8
+  - first:
+      213: 8157625450252038264
+    second: beetle_9
+  - first:
+      213: -4813953923749070017
+    second: beetle_10
+  - first:
+      213: -472771292244068201
+    second: beetle_11
+  - first:
+      213: 3954742628904056213
+    second: beetle_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: beetle_idle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 130
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04ec88984ad4b4bb8762981ee6467a17
+      internalID: -1791381358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_idle_1
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 130
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2ee2e866632fc46b139e0f64ea6b5ae
+      internalID: -148863477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_move_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 104
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d0605e529f5ff164893875da0781d870
+      internalID: -1303561704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_move_1
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 104
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd82517af55b36fb55e04d99c4908a4d
+      internalID: 1497380723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_move_2
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 104
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 383cbd69234ae45d3036db3b29c98215
+      internalID: 1501562872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_move_3
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 104
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5e724616a0fd37fa4e15eaa10b6146d
+      internalID: -751238103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_windup_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 78
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1e06560ac467714d3cae3f6add2af8e
+      internalID: 167678968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_windup_1
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 78
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c90a615c9fe3d10c50cdcc27631b11d6
+      internalID: -1004271182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_attack_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 52
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a44af799050d6cbac70bccb5a61d9c63
+      internalID: 931316596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_attack_1
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 52
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c5ee0ca352d9612cb08ad49db263e33
+      internalID: -2027800443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_hurt_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 26
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ed8d204d5bb55e47cb15b73ecc8b1fa
+      internalID: -1977701567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_dead_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd08338b5a84d0d43c7809a9821c1e6f
+      internalID: 904307633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: beetle_dead_1
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 0
+        width: 34
+        height: 26
+      alignment: 9
+      pivot: {x: 0.5, y: 0.07692}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 730182a4f9421e8d3f2eefc23613a1e0
+      internalID: -2005167832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: f649d614a1e641e4daabc1f647f833ec
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      beetle_attack_0: 931316596
+      beetle_attack_1: -2027800443
+      beetle_dead_0: 904307633
+      beetle_dead_1: -2005167832
+      beetle_hurt_0: -1977701567
+      beetle_idle_0: -1791381358
+      beetle_idle_1: -148863477
+      beetle_move_0: -1303561704
+      beetle_move_1: 1497380723
+      beetle_move_2: 1501562872
+      beetle_move_3: -751238103
+      beetle_windup_0: 167678968
+      beetle_windup_1: -1004271182
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: rpg:68c49a69d0ac2f1cee52bbe464d3414d
+  assetBundleName: 
+  assetBundleVariant: 

@@ -14,7 +14,8 @@ namespace RPG.EditorTools.Tests
         {
             "talk_chief", "clear_forest", "slay_bear",
             "swamp_road", "swamp_toads", "swamp_hunters", "swamp_mud", "slay_toadking", "slay_snake",
-            "cave_enter", "cave_bats", "cave_spiders", "cave_golems",
+            "cave_enter", "cave_bats", "cave_spiders", "cave_golems", "cave_beetles", "cave_slimes", "cave_eyes",
+            "slay_crystalgolem", "slay_queen",
         };
 
         static int Recommended(QuestDef q)
@@ -43,6 +44,7 @@ namespace RPG.EditorTools.Tests
             Assert.AreEqual(ObjectiveKind.Reach, Q("swamp_road").objectives[0].kind, "after the bear, the road to the swamp");
             Assert.AreEqual(ObjectiveKind.Reach, Q("cave_enter").objectives[0].kind, "after the snake mother, the cave");
             Assert.AreNotEqual(QuestKind.Main, Q("swamp_wisps").kind, "the night's wisps are a side bounty, never in the way");
+            Assert.AreNotEqual(QuestKind.Main, Q("cave_mimic").kind, "the hidden mimic is a rumour, never in the way");
         }
     }
 }

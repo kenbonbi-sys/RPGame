@@ -20,7 +20,7 @@ namespace RPG.EditorTools
         // Đầm Lầy Sương Mù
         public static GameObject Toad, Leech, MudMan, Mudling, ToadKing, Snake, WaterSnake, Dragonfly, Wisp;
         // Hang Pha Lê
-        public static GameObject Bat, CaveSpider, Golem;
+        public static GameObject Bat, CaveSpider, Golem, Beetle, CrystalSlime, CaveEye, Mimic, CrystalGolem, SpiderQueen, Pillar;
 
         /// <summary>Abilities on Q W E R A S D Space.</summary>
         static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
@@ -50,10 +50,17 @@ namespace RPG.EditorTools
             Bat = BuildBat();
             CaveSpider = BuildCaveSpider();
             Golem = BuildGolem();
+            Beetle = BuildBeetle();
+            CrystalSlime = BuildCrystalSlime();
+            CaveEye = BuildCaveEye();
+            Mimic = BuildMimic();
+            CrystalGolem = BuildCrystalGolem();
+            SpiderQueen = BuildSpiderQueen();
             Boulder = BuildBoulder();
             Loot = BuildLoot();
             var chest = BuildChest();
             BuildProps();
+            Pillar = BuildCrystalPillar();
             UpgradePrefabs();
             var db = AssetFactory.Database;
             EditorUtil.Assign(ref db.boulderPrefab, Boulder);
@@ -235,6 +242,13 @@ namespace RPG.EditorTools
             Bat = L($"{CharFolder}/Bat");
             CaveSpider = L($"{CharFolder}/CaveSpider");
             Golem = L($"{CharFolder}/Golem");
+            Beetle = L($"{CharFolder}/StoneBeetle");
+            CrystalSlime = L($"{CharFolder}/CrystalSlime");
+            CaveEye = L($"{CharFolder}/CaveEye");
+            Mimic = L($"{CharFolder}/Mimic");
+            CrystalGolem = L($"{CharFolder}/BossCrystalGolem");
+            SpiderQueen = L($"{CharFolder}/BossSpiderQueen");
+            Pillar = L($"{GameplayFolder}/CrystalPillar");
             Boulder = L($"{GameplayFolder}/TangDaLon");
             Loot = L($"{GameplayFolder}/Loot");
             Props.Clear();
@@ -885,6 +899,226 @@ namespace RPG.EditorTools
                 Drop("golem_core", 0.35f), Drop("crystal_shard", 0.6f, 1, 2), Drop("coin", 0.9f, 5, 10), Drop("potion_blue", 0.1f),
             };
             return EditorUtil.SavePrefab(root, $"{CharFolder}/Golem.prefab");
+        }
+
+        // ================================================================== the deeper cave
+        static GameObject BuildBeetle()
+        {
+            var (root, body) = Creature("StoneBeetle", "beetle_idle_0", 3f, 0.45f, 0.32f, 1.9f, false, 1.7f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.3f;
+            var ai = root.AddComponent<StoneBeetleAI>();
+            EnemyCommon(root, ai, body, "beetle", 1.3f, 300f);
+            var h = root.GetComponent<Health>();
+            h.resistances.poison = 0.3f;
+            h.resistances.lightning = -0.15f;   // the crystals in its shell carry the current
+            root.GetComponent<StatusEffects>().stunResist = 0.3f;
+            ai.style = Style(root, body);
+            ai.enemyId = "beetle";
+            ai.displayName = "Bọ Giáp Đá";
+            ai.level = 17;
+            ai.contactDamage = 6f;
+            ai.attackRange = 1.3f;
+            ai.attackCooldown = 2.2f;
+            ai.aggroRange = 7f;
+            ai.leashRange = 13f;
+            ai.wanderRadius = 1.8f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("beetle_shell", 0.5f), Drop("crystal_shard", 0.3f), Drop("coin", 0.9f, 4, 9), Drop("potion_red", 0.06f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/StoneBeetle.prefab");
+        }
+
+        static GameObject BuildCrystalSlime()
+        {
+            var (root, body) = Creature("CrystalSlime", "crystalslime_idle_0", 1f, 0.34f, 0.25f, 2.4f, false, 1f);
+            var ai = root.AddComponent<CrystalSlimeAI>();
+            EnemyCommon(root, ai, body, "crystalslime", 1.1f, 190f);
+            var h = root.GetComponent<Health>();
+            h.resistances.physical = -0.15f;   // brittle: blades bite deep
+            h.resistances.lightning = 0.3f;
+            h.resistances.ice = 0.3f;
+            var mirror = root.AddComponent<ShotReflector>();
+            mirror.body = body;
+            mirror.damage = 18f;
+            mirror.speed = 10f;
+            ai.style = Style(root, body);
+            ai.enemyId = "crystalslime";
+            ai.displayName = "Slime Pha Lê";
+            ai.level = 16;
+            ai.contactDamage = 8f;
+            ai.attackRange = 1.2f;
+            ai.attackCooldown = 1.8f;
+            ai.lungeDamage = 24f;
+            ai.aggroRange = 6.5f;
+            ai.leashRange = 12f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("crystal_jelly", 0.55f), Drop("crystal_shard", 0.45f, 1, 2), Drop("coin", 0.85f, 3, 7), Drop("potion_blue", 0.06f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/CrystalSlime.prefab");
+        }
+
+        static GameObject BuildCaveEye()
+        {
+            var (root, body) = Creature("CaveEye", "caveeye_idle_0", 50f, 0.6f, 0.5f, 0f, false, 0f);
+            var motor = root.GetComponent<CharacterMotor>();
+            motor.knockbackResist = 0f;   // grown into the wall
+            root.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+            var ai = root.AddComponent<CaveEyeAI>();
+            EnemyCommon(root, ai, body, "caveeye", 1.7f, 240f);
+            var h = root.GetComponent<Health>();
+            h.resistances.poison = 0.75f;
+            h.resistances.holy = -0.2f;
+            root.GetComponent<StatusEffects>().stunResist = 0.4f;
+            // unlit: its own crystal glow in the dark
+            body.sharedMaterial = AssetFactory.SpriteUnlit;
+            DarkLight(root, new Color(0.45f, 0.95f, 1f), 3f, 0.8f, new Vector3(0, 0.6f, 0), 0.1f);
+            ai.enemyId = "caveeye";
+            ai.displayName = "Mắt Hang";
+            ai.level = 18;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 3.2f;
+            ai.aggroRange = 9f;
+            ai.leashRange = 30f;
+            ai.wanderRadius = 0f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("eye_lens", 0.5f), Drop("crystal_shard", 0.5f, 1, 2), Drop("coin", 0.9f, 4, 9), Drop("potion_blue", 0.08f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/CaveEye.prefab");
+        }
+
+        static GameObject BuildMimic()
+        {
+            var (root, body) = Creature("Mimic", "mimic_hidden_0", 4f, 0.5f, 0.35f, 3.4f, false, 1.4f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.2f;
+            var ai = root.AddComponent<MimicAI>();
+            EnemyCommon(root, ai, body, "mimic", 1.8f, 1500f);
+            var h = root.GetComponent<Health>();
+            h.resistances.physical = 0.2f;   // oak and iron
+            h.resistances.fire = -0.2f;
+            h.resistances.poison = 0.5f;
+            root.GetComponent<StatusEffects>().stunResist = 0.5f;
+            ai.style = Style(root, body);
+            ai.enemyId = "mimic";
+            ai.displayName = "Mimic Tham Lam";
+            ai.level = 22;
+            ai.rank = EnemyRank.MiniBoss;
+            ai.contactDamage = 0f;
+            ai.attackRange = 1.4f;
+            ai.attackCooldown = 1.6f;
+            ai.leashRange = 40f;
+            ai.wanderRadius = 0f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("mimic_tooth", 1f), Drop("gem_red", 0.6f), Drop("gem_blue", 0.6f), Drop("coin", 1f, 25, 40), Drop("potion_red", 1f, 2, 2),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Mimic.prefab");
+        }
+
+        static GameObject BuildCrystalGolem()
+        {
+            var (root, boss) = Boss<BossCrystalGolem>("BossCrystalGolem", "oldgolem", 60f, 1f, 0.6f, 1.5f, false, 3600f, 3f, 3.4f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.05f;
+            var h = root.GetComponent<Health>();
+            h.resistances.physical = 0.2f;
+            h.resistances.lightning = -0.2f;
+            h.resistances.poison = 0.75f;
+            var core = PointLight(boss.bodyRoot.gameObject, new Color(1f, 0.7f, 0.3f), 2.6f, 0.9f, new Vector3(0f, 1.4f, 0));
+            var nl = core.gameObject.AddComponent<NightLight>();
+            nl.target = core;
+            nl.dayIntensity = 0.4f;
+            nl.nightIntensity = 0.9f;
+            nl.flicker = 0.12f;
+            var mirror = root.AddComponent<ShotReflector>();
+            mirror.frontOnly = true;
+            mirror.body = boss.body;
+            mirror.damage = 26f;
+            mirror.speed = 10f;
+            boss.poise.maxPoise = 320f;
+            boss.bossId = "crystalgolem";
+            boss.displayName = "Golem Pha Lê Cổ";
+            boss.title = "Người Canh Điện Pha Lê";
+            boss.level = 18;
+            boss.rank = EnemyRank.MiniBoss;
+            boss.homeName = "Điện Pha Lê";
+            boss.arenaRadius = 7.5f;
+            boss.wakeRadius = 5.5f;
+            boss.coins = 12;
+            boss.loot = new List<LootEntry>
+            {
+                Drop("ancient_core", 1f), Drop("golem_core", 1f, 2, 3), Drop("crystal_shard", 1f, 3, 5), Drop("gem_blue", 0.4f),
+                Drop("potion_blue", 1f, 2, 2),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/BossCrystalGolem.prefab");
+        }
+
+        static GameObject BuildSpiderQueen()
+        {
+            var (root, boss) = Boss<BossSpiderQueen>("BossSpiderQueen", "queen", 40f, 1.3f, 0.7f, 2.5f, false, 6400f, 4.2f, 3.4f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.05f;
+            var h = root.GetComponent<Health>();
+            h.resistances.poison = 0.6f;
+            h.resistances.fire = -0.15f;
+            var eyes = PointLight(boss.bodyRoot.gameObject, new Color(0.6f, 0.9f, 1f), 3.4f, 0.8f, new Vector3(0.6f, 2f, 0));
+            var nl = eyes.gameObject.AddComponent<NightLight>();
+            nl.target = eyes;
+            nl.dayIntensity = 0.4f;
+            nl.nightIntensity = 0.9f;
+            nl.flicker = 0.1f;
+            boss.poise.maxPoise = 420f;
+            boss.bossId = "spiderqueen";
+            boss.displayName = "Nhện Chúa Pha Lê";
+            boss.title = "Nữ Hoàng Hang Sâu";
+            boss.level = 20;
+            boss.rank = EnemyRank.Boss;
+            boss.homeName = "Hang Nhện Chúa";
+            boss.arenaRadius = 9.5f;
+            boss.wakeRadius = 7f;
+            boss.coins = 20;
+            boss.loot = new List<LootEntry>
+            {
+                Drop("queen_eye", 1f), Drop("crystal_silk", 1f, 2, 3), Drop("spider_silk", 1f, 3, 4), Drop("crystal_shard", 1f, 4, 6),
+                Drop("gem_red", 0.7f), Drop("gem_blue", 0.7f), Drop("potion_red", 1f, 3, 3),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/BossSpiderQueen.prefab");
+        }
+
+        /// <summary>
+        /// Cột Pha Lê of the spider queen's hall (<see cref="CrystalPillar"/>): her beam bounces off it,
+        /// a hero can break it, it grows back. A round foot, so a beam can glance off it at any angle.
+        /// </summary>
+        static GameObject BuildCrystalPillar()
+        {
+            var root = new GameObject("CrystalPillar");
+            root.layer = Layers.Obstacle;
+            Group(root);
+            Shadow(root, 1.2f, 0.04f);
+            var sr = Sprite(root, "Sprite", "crystal_pillar", AssetFactory.SpriteLit);
+            var flash = Flash(sr);
+            var col = root.AddComponent<CircleCollider2D>();
+            col.radius = 0.55f;
+            col.offset = new Vector2(0, 0.3f);
+            var health = root.AddComponent<Health>();
+            health.team = Team.Neutral;
+            health.displayName = "Cột Pha Lê";
+            health.level = 20;
+            health.maxHp = 90f;
+            health.hp = 90f;
+            health.head = Head(root, 3.6f);
+            var f = root.AddComponent<FadeWhenBehind>();
+            f.sr = sr;
+            var b = sr.sprite != null ? sr.sprite.bounds : new Bounds(Vector3.zero, Vector3.one);
+            f.areaSize = new Vector2(b.size.x * 0.8f, b.size.y * 0.8f);
+            f.areaOffset = new Vector2(0, b.center.y + 0.2f);
+            var light = DarkLight(root, new Color(0.4f, 0.95f, 1f), 3.8f, 0.9f, new Vector3(0, 1.8f, 0), 0.05f);
+            var pillar = root.AddComponent<CrystalPillar>();
+            pillar.sr = sr;
+            pillar.whole = ArtImporter.S("crystal_pillar");
+            pillar.broken = ArtImporter.S("crystal_pillar_broken");
+            pillar.glow = light;
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/CrystalPillar.prefab");
         }
 
         /// <summary>The frame every boss shares (the bear's own builder predates it).</summary>

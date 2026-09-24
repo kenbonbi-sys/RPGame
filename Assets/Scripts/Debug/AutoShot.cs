@@ -7,10 +7,10 @@ namespace RPG
 {
     /// <summary>
     /// Automated showcase used for testing builds: start the player with
-    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave]
+    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep]
     /// It plays a scripted tour (dialogue, skills, boss attacks, the swamp and its bosses, the
     /// world map, night), saves screenshots and quits; -autoshotOnly swamp tours the swamp alone,
-    /// -autoshotOnly cave the crystal cave.
+    /// -autoshotOnly cave the crystal cave, -autoshotOnly deep its deeper creatures and bosses.
     /// Exit code: 0 = clean run, 1 = errors or exceptions were logged, 2 = the tour did not finish
     /// within the timeout (CI reads it). Does nothing in normal play.
     /// </summary>
@@ -472,6 +472,210 @@ namespace RPG
             yield return Shot("crystal_hall");
         }
 
+        /// <summary>
+        /// The deeper Hang Pha Lê: a stone beetle's charge, a crystal slime turning a shot back, an
+        /// eye's bouncing beam, the mimic springing and digging down, the old golem's attacks and the
+        /// spider queen's beam, banked off a pillar and sent back into her.
+        /// </summary>
+        IEnumerator Deep(PlayerController p, DayNightCycle dn)
+        {
+            var zone = ZoneRoot.Current;
+            Transform Spot(string id) => zone != null ? zone.SpotOf(id) : null;
+            Vector2 At(string id, Vector2 fallback)
+            {
+                var t = Spot(id);
+                return t != null ? (Vector2)t.position : fallback;
+            }
+            if (dn != null) dn.time = 0.45f;
+
+            // Bọ Giáp Đá: its shell, then a charge
+            var mine = At("mine", new Vector2(177f, 90f));
+            var beetle = FindEnemy("beetle", mine) as StoneBeetleAI;
+            if (beetle != null)
+            {
+                Place(p, (Vector2)beetle.transform.position + new Vector2(beetle.Facing * 4f, -0.4f));
+                yield return Wait(1.2f);
+                yield return Shot("beetle");
+                beetle.DebugCharge(p);
+                yield return Wait(0.5f);
+                yield return Shot("beetle_charge_warning");
+                yield return Wait(0.5f);
+                yield return Shot("beetle_charge");
+                yield return Wait(1.5f);
+            }
+
+            // Slime Pha Lê: a hero's shot comes back as a splinter
+            var forest = At("crystalforest", new Vector2(136f, 95f));
+            var slime = FindEnemy("crystalslime", forest);
+            if (slime != null)
+            {
+                Vector2 s = slime.transform.position;
+                Place(p, s + new Vector2(-3.5f, -0.3f));
+                yield return Wait(1f);
+                yield return Shot("crystal_slime");
+                var db = GameManager.I.db;
+                var go = Pool.Get(db.fireballPrefab, (Vector2)p.transform.position + Vector2.up * 0.5f, Quaternion.identity);
+                var fx = go.GetComponent<PooledFX>();
+                if (fx != null) fx.Persistent = true;
+                var shot = go.GetComponent<Projectile>();
+                shot.team = Team.Player;
+                shot.damage = 30f;
+                shot.speed = 9f;
+                shot.lifetime = 1.2f;
+                shot.explodeRadius = 0f;
+                shot.Launch((Vector2)slime.transform.position - (Vector2)go.transform.position, p.gameObject);
+                yield return Wait(0.35f);
+                yield return Shot("crystal_slime_reflect");
+                yield return Wait(1.2f);
+            }
+
+            // Mắt Hang: it opens and its beam bounces off the rock
+            CaveEyeAI eye = null;
+            foreach (var e in EnemyBase.All)
+                if (e is CaveEyeAI ce && !ce.IsDead && (eye == null ||
+                    Vector2.Distance(ce.transform.position, forest) < Vector2.Distance(eye.transform.position, forest)))
+                    eye = ce;
+            if (eye != null)
+            {
+                Place(p, (Vector2)eye.transform.position + new Vector2(1.6f, -4f));
+                yield return Wait(1.2f);
+                yield return Shot("cave_eye");
+                eye.DebugBeam(p);
+                yield return Wait(0.6f);
+                yield return Shot("cave_eye_stare");
+                yield return Wait(0.4f);
+                yield return Shot("cave_eye_beam");
+                yield return Wait(1.2f);
+            }
+
+            // Mimic Tham Lam: a chest that is not one
+            var mimic = EnemyBase.All.Find(e => e.enemyId == "mimic") as MimicAI;
+            if (mimic != null)
+            {
+                Place(p, (Vector2)mimic.transform.position + new Vector2(-2.6f, -0.6f));
+                yield return Wait(1.2f);
+                yield return Shot("mimic_hidden");
+                p.inventory.gold = Mathf.Max(p.inventory.gold, 300);
+                mimic.DebugSpring();
+                yield return Wait(0.35f);
+                yield return Shot("mimic_spring");
+                Place(p, (Vector2)mimic.transform.position + new Vector2(-1.2f, 0f));
+                yield return Wait(1.4f);
+                yield return Shot("mimic_bite");
+                mimic.DebugBurrow();
+                yield return Wait(0.6f);
+                yield return Shot("mimic_burrow");
+                yield return Wait(1.6f);
+                Place(p, (Vector2)mimic.transform.position + new Vector2(-2.5f, -0.5f));
+                yield return Wait(0.5f);
+                yield return Shot("mimic_surfaced");
+                mimic.health.Kill();
+                yield return Wait(1.2f);
+                yield return Shot("mimic_defeated");
+            }
+
+            // Golem Pha Lê Cổ
+            var golem = BossBase.Find("crystalgolem") as BossCrystalGolem;
+            if (golem != null)
+            {
+                Place(p, golem.Home + new Vector2(golem.Facing * 5f, -1f));
+                yield return Wait(1.8f);
+                yield return Shot("oldgolem_intro");
+                yield return Wait(2.2f);
+                golem.DebugForce("spikes");
+                yield return Wait(0.5f);
+                yield return Shot("oldgolem_spikes_warning");
+                yield return Wait(0.6f);
+                yield return Shot("oldgolem_spikes");
+                yield return Wait(1f);
+                golem.DebugForce("shards");
+                yield return Wait(0.75f);
+                yield return Shot("oldgolem_shards");
+                yield return Wait(1f);
+                Place(p, golem.transform.position + new Vector3(-golem.Facing * 1.8f, 0.2f));
+                golem.DebugForce("spin");
+                yield return Wait(0.6f);
+                yield return Shot("oldgolem_spin_warning");
+                yield return Wait(0.45f);
+                yield return Shot("oldgolem_spin");
+                yield return Wait(1f);
+                golem.health.TakeDamage(DamageInfo.Make(golem.health.maxHp * 0.55f, Team.Player, p.gameObject, golem.transform.position, Vector2.up));
+                yield return Wait(2f);
+                Place(p, golem.Home + new Vector2(golem.Facing * 5f, -1.5f));
+                golem.DebugForce("beam");
+                yield return Wait(0.7f);
+                yield return Shot("oldgolem_beam_warning");
+                yield return Wait(0.45f);
+                yield return Shot("oldgolem_beam");
+                golem.health.Kill();
+                yield return Wait(3f);
+                yield return Shot("oldgolem_defeated");
+                yield return Wait(1.5f);
+            }
+
+            // Nhện Chúa Pha Lê
+            var queen = BossBase.Find("spiderqueen") as BossSpiderQueen;
+            if (queen != null)
+            {
+                Place(p, queen.Home + new Vector2(-6f, -3f));
+                yield return Wait(1.8f);
+                yield return Shot("queen_intro");
+                yield return Wait(2.2f);
+                queen.DebugForce("web");
+                yield return Wait(0.4f);
+                yield return Shot("queen_web_warning");
+                yield return Wait(0.3f);
+                yield return Shot("queen_web");
+                yield return Wait(1.2f);
+                // her beam off a pillar: the hero behind one, as it would be
+                CrystalPillar mirror = null;
+                foreach (var pillar in CrystalPillar.All)
+                {
+                    if (pillar == null || pillar.Broken || Vector2.Distance(pillar.transform.position, queen.Home) > 10f) continue;
+                    Vector2 foot = (Vector2)pillar.transform.position + Vector2.up * 0.3f;
+                    Vector2 q = queen.transform.position;
+                    Vector2 eyeAt = q + new Vector2(Mathf.Sign(foot.x - q.x) * 0.9f, 0.9f);
+                    Place(p, foot + (foot - eyeAt).normalized * 2.2f - Vector2.up * 0.35f);
+                    yield return null;
+                    queen.DebugForce("beam");
+                    yield return null;
+                    if (queen.Mirror == null) continue;
+                    mirror = queen.Mirror;
+                    break;
+                }
+                yield return Wait(0.5f);
+                yield return Shot("queen_beam_warning");
+                if (mirror != null)
+                {
+                    mirror.Health.TakeDamage(DamageInfo.Make(10f, Team.Player, p.gameObject, mirror.transform.position, Vector2.right));
+                    yield return Wait(0.15f);
+                    yield return Shot("queen_beam_backfire");
+                    yield return Wait(1.2f);
+                    yield return Shot("queen_stunned");
+                }
+                yield return Wait(2.5f);
+                queen.DebugForce("beam");
+                yield return Wait(1.3f);
+                yield return Shot("queen_beam");
+                yield return Wait(1f);
+                queen.health.TakeDamage(DamageInfo.Make(queen.health.maxHp * 0.55f, Team.Player, p.gameObject, queen.transform.position, Vector2.up));
+                yield return Wait(2f);
+                Place(p, queen.Home + new Vector2(-4f, -2f));
+                queen.DebugForce("drop");
+                yield return Wait(1.2f);
+                yield return Shot("queen_climb");
+                yield return Wait(1.3f);
+                yield return Shot("queen_drop_warning");
+                yield return Wait(0.8f);
+                yield return Shot("queen_drop");
+                yield return Wait(1f);
+                queen.health.Kill();
+                yield return Wait(3f);
+                yield return Shot("queen_defeated");
+                yield return Wait(1.5f);
+            }
+        }
+
         IEnumerator Run()
         {
             var gm = GameManager.I;
@@ -493,6 +697,13 @@ namespace RPG
             if (Only == "cave")
             {
                 yield return Cave(p, dn);
+                yield return Deep(p, dn);
+                Finish();
+                yield break;
+            }
+            if (Only == "deep")
+            {
+                yield return Deep(p, dn);
                 Finish();
                 yield break;
             }

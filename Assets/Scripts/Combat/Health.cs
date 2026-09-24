@@ -35,6 +35,11 @@ namespace RPG
         public Func<DamageInfo, bool> Evade;
         /// <summary>A blow about to fell this may leave it at 1 health instead (Bán Orc: Kiên Trì Bất Khuất); true: it endures.</summary>
         public Func<bool> Endure;
+        /// <summary>
+        /// Where a blow lands matters (Bọ Giáp Đá's armoured front, the old golem's core in its back):
+        /// multiplies a direct hit's damage (not Bỏng or Độc ticks).
+        /// </summary>
+        public Func<DamageInfo, float> Guard;
 
         /// <summary>Source of the random damage spread (0..1). Tests pin it to 0.5 for exact numbers.</summary>
         public static Func<float> SpreadRoll = () => UnityEngine.Random.value;
@@ -132,6 +137,7 @@ namespace RPG
                 }
                 dealt *= AttackerDealt(d);   // Nguyền on the attacker
                 raw = dealt * damageTakenMultiplier * (st != null ? st.DamageTakenMultiplier : 1f);
+                if (Guard != null && !d.dot) raw *= Mathf.Max(0f, Guard(d));
                 raw = ProgressionConfig.Current.Mitigate(raw, armor, armor > 0 ? AttackerLevel(d) : 1, Resistance(d.type), SpreadRoll());
             }
             float amount = Mathf.Max(1f, Mathf.Round(raw));

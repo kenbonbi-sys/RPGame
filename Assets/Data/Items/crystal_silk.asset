@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: crystal_silk
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: crystal_silk
+  displayName: "T\u01A1 Pha L\xEA"
+  description: "T\u01A1 c\u1EE7a Nh\u1EC7n Ch\xFAa, \xF3ng \xE1nh b\u1EE5i pha l\xEA, kh\xF4ng l\u01B0\u1EE1i dao n\xE0o c\u1EAFt \u0111\u1EE9t."
+  icon: {fileID: 2140396563, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 2
+  maxStack: 99
+  value: 120
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

@@ -438,6 +438,31 @@ def crystal_pillar(seed=0):
     return cv, (W_ // 2, H_ - 3)
 
 
+def crystal_pillar_broken(seed=0):
+    """What is left of a crystal pillar a hero broke: a jagged stump and splinters around it. Same
+    canvas and pivot as the whole pillar, so the sprite can be swapped in place."""
+    cv, piv = crystal_pillar(seed)
+    W_, H_ = cv.w, cv.h
+    col = C["cyan"]
+    rnd = random.Random(seed + 40)
+    # cut it off along a jagged line about a third of the way up
+    cut = [H_ - 22 + int(4 * math.sin(x * 1.3) + rnd.randint(-2, 2)) for x in range(W_)]
+    for x in range(W_):
+        for y in range(0, cut[x]):
+            cv.clear(x, y)
+    # the broken face, bright where it split
+    for x in range(W_):
+        y = cut[x]
+        if cv.opaque(x, y) and y < H_ - 6:
+            cv.px(x, y, col[6] if x % 3 else col[5])
+    # splinters on the ground
+    for (x, y) in ((2, H_ - 3), (20, H_ - 4), (5, H_ - 2), (18, H_ - 2)):
+        cv.px(x, y, col[5])
+        cv.px(x + 1, y, col[3])
+    cv.outline(mix(col[0], CAVE_OUT, 0.5))
+    return cv, piv
+
+
 def ore_vein():
     """A rock with a fat seam of amber crystal (the miners' prize)."""
     cv, piv = cave_rock(seed=77, big=True)
@@ -457,7 +482,8 @@ def props():
               ("caverock_big", cave_rock(3, True)), ("caverock_small", cave_rock(4, False)),
               ("minecart", mine_cart(5, True)), ("minecart_empty", mine_cart(6, False)),
               ("rails_h", rails(True)), ("rails_v", rails(False)), ("timber", timber_support()),
-              ("cobweb_0", cobweb(7)), ("cobweb_1", cobweb(8)), ("crystal_pillar", crystal_pillar(9)), ("orevein", ore_vein())]
+              ("cobweb_0", cobweb(7)), ("cobweb_1", cobweb(8)), ("crystal_pillar", crystal_pillar(9)), ("orevein", ore_vein()),
+              ("crystal_pillar_broken", crystal_pillar_broken(9))]
     # (name, Canvas, pivot) like the other prop generators
     return [(name, cv, piv) for name, (cv, piv) in items]
 
@@ -530,9 +556,84 @@ def icon_golem_core():
     return _done(cv)
 
 
+def icon_beetle_shell():
+    """Vỏ Bọ Giáp: a curved plate of rock with a crystal stud."""
+    cv = _icon()
+    st = ramp("#1f222c", "#2a2e3a", "#373c4b", "#474d5f", "#5a6176")
+    pts = [(2, 12), (3, 6), (8, 3), (13, 6), (14, 12), (8, 10)]
+    shaded_poly(cv, pts, st, grad_dir=(0.4, 1.0), dither=0.3)
+    cv.px(8, 4, C["cyan"][5])
+    cv.px(8, 5, C["cyan"][3])
+    cv.px(5, 7, C["cyan"][4])
+    return _done(cv)
+
+
+def icon_crystal_jelly():
+    """Nhân Slime Pha Lê: a quivering blue drop with a crystal inside."""
+    cv = _icon()
+    shaded_ellipse(cv, 8, 9.5, 5.5, 4.8, ramp("#12466a", "#1c6a96", "#3494c2", "#72c6e6", "#d0f4ff"), dither=0.25, bias=0.08)
+    col = C["cyan"]
+    cv.px(8, 8, col[6])
+    cv.px(8, 9, col[5])
+    cv.px(7, 10, col[4])
+    cv.px(9, 10, col[4])
+    cv.px(5, 7, hx("#ffffff"))
+    return _done(cv)
+
+
+def icon_eye_lens():
+    """Thủy Tinh Thể Mắt Hang: a clear lens with a cyan iris ghost in it."""
+    cv = _icon()
+    shaded_ellipse(cv, 8, 8, 5.6, 5.6, ramp("#8a90a0", "#c4cad6", "#eef2f8", "#ffffff"), dither=0.2, bias=0.1)
+    shaded_ellipse(cv, 8.5, 8.5, 2.6, 2.6, C["cyan"][1:6], dither=0.2)
+    cv.px(8, 8, hx("#04060c"))
+    cv.px(6, 6, hx("#ffffff"))
+    return _done(cv)
+
+
+def icon_ancient_core():
+    """Lõi Pha Lê Cổ: the old golem's burning amber heart in a ring of stone."""
+    cv = _icon()
+    shaded_ellipse(cv, 8, 8.5, 6.2, 6.2, ramp("#1f222c", "#2a2e3a", "#373c4b", "#474d5f"), dither=0.3)
+    shaded_ellipse(cv, 8, 8.5, 3.8, 4.0, C["amber"][2:7], dither=0.2, bias=0.1)
+    cv.px(7, 6, C["amber"][6])
+    return _done(cv)
+
+
+def icon_queen_eye():
+    """Mắt Nhện Chúa: a faceted red eye set in crystal."""
+    cv = _icon()
+    for (dx, h, lean) in ((-4, 5, -1), (0, 6, 0), (4, 5, 1)):
+        for k in range(h):
+            cv.px(8 + dx + int(lean * k / h), 7 - k, C["cyan"][3 + min(2, k // 2)])
+    shaded_ellipse(cv, 8, 10, 4.6, 4, ramp("#3a0a10", "#6a1418", "#a82a24", "#e0503a", "#ffa070"), dither=0.2, bias=0.05)
+    cv.px(7, 9, hx("#ffe0c0"))
+    return _done(cv)
+
+
+def icon_crystal_silk():
+    """Tơ Pha Lê: a skein of thread glittering with crystal dust."""
+    cv = icon_spider_silk()
+    for (x, y) in ((5, 7), (9, 6), (11, 10), (7, 11), (10, 8)):
+        cv.px(x, y, C["cyan"][5])
+    return cv
+
+
+def icon_mimic_tooth():
+    """Răng Mimic: a long curved tooth, a gold coin stuck to it."""
+    cv = _icon()
+    t = ramp("#8a8270", "#c8c0aa", "#f0ead8")
+    pts = [(4, 3), (8, 2), (11, 8), (9, 14), (7, 9)]
+    shaded_poly(cv, pts, t, grad_dir=(0.6, 0.8), dither=0.2)
+    shaded_ellipse(cv, 11.5, 11.5, 2.6, 2.6, ramp("#6a4a10", "#a87a1c", "#e0b030", "#ffe070"), dither=0.2, bias=0.1)
+    return _done(cv)
+
+
 def icons():
     return [("crystal_shard", icon_crystal_shard()), ("bat_wing", icon_bat_wing()), ("spider_silk", icon_spider_silk()),
-            ("golem_core", icon_golem_core())]
+            ("golem_core", icon_golem_core()), ("beetle_shell", icon_beetle_shell()), ("crystal_jelly", icon_crystal_jelly()),
+            ("eye_lens", icon_eye_lens()), ("ancient_core", icon_ancient_core()), ("queen_eye", icon_queen_eye()),
+            ("crystal_silk", icon_crystal_silk()), ("mimic_tooth", icon_mimic_tooth())]
 
 
 if __name__ == "__main__":

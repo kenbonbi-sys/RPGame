@@ -214,7 +214,7 @@ TextureImporter:
       name: pine_0
       rect:
         serializedVersion: 2
-        x: 107
+        x: 132
         y: 460
         width: 34
         height: 52
@@ -236,7 +236,7 @@ TextureImporter:
       name: pine_1
       rect:
         serializedVersion: 2
-        x: 142
+        x: 167
         y: 460
         width: 34
         height: 52
@@ -258,7 +258,7 @@ TextureImporter:
       name: pine_2
       rect:
         serializedVersion: 2
-        x: 177
+        x: 202
         y: 460
         width: 34
         height: 52
@@ -940,7 +940,7 @@ TextureImporter:
       name: deadtree_0
       rect:
         serializedVersion: 2
-        x: 25
+        x: 50
         y: 458
         width: 40
         height: 54
@@ -962,7 +962,7 @@ TextureImporter:
       name: deadtree_1
       rect:
         serializedVersion: 2
-        x: 66
+        x: 91
         y: 458
         width: 40
         height: 54
@@ -1728,6 +1728,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: crystal_pillar_broken
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 452
+        width: 24
+        height: 60
+      alignment: 9
+      pivot: {x: 0.52083, y: 0.03333}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7262d79c1e8f0cdd479efb0cbe8ab9bc
+      internalID: -1627744635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -1763,6 +1785,7 @@ TextureImporter:
       crystal_big_cyan: 2134070545
       crystal_big_pink: 1796899353
       crystal_pillar: -1202970734
+      crystal_pillar_broken: -1627744635
       crystal_small_amber: -85621488
       crystal_small_cyan: 1045725694
       crystal_small_pink: 309871515
@@ -1813,6 +1836,6 @@ TextureImporter:
       willow_1: -970113125
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  userData: rpg:8733202b012a7417880189e2a37a91fa
+  userData: rpg:b6804ff1b38f85efe8ef0deeaa291727
   assetBundleName: 
   assetBundleVariant: 

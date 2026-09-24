@@ -2092,6 +2092,75 @@ def build_swamp_ambience():
 # ============================================================================
 # output / verification
 # ============================================================================
+# ---------------------------------------------------------------- the deeper cave (Hang Pha Lê)
+@sfx("sfx_crystal")
+def _crystal(rng):
+    """A crystal struck: a glassy ping with a short ring."""
+    n = ns(0.5)
+    f = rng.uniform(1900, 2300)
+    ping = partials(n, [f, 2.41 * f, 3.9 * f, 5.6 * f], [1.0, 0.55, 0.3, 0.15], [0.18, 0.1, 0.06, 0.04], rng=rng)
+    tick = rmsn(hp(white(n, rng), 4000)) * env_perc(n, 0.0005, 0.006)
+    return reverb(0.8 * norm(ping) + 0.3 * tick, 0.3, 0.8, seed=51)
+
+
+@sfx("sfx_crystal_break")
+def _crystal_break(rng):
+    """A crystal pillar shattering: a sharp crack, a cascade of glassy shards, a low thud."""
+    n = ns(1.2)
+    crack = rmsn(hp(white(n, rng), 2200)) * env_perc(n, 0.0006, 0.02)
+    body = 0.35 * thump(n, 300, 90, 0.08, 0.03)
+    shards = np.zeros(n)
+    for t0 in 0.01 + 0.8 * rng.random(40) ** 1.6:
+        f = rng.uniform(1800, 6500)
+        m = ns(0.3)
+        tau = rng.uniform(0.04, 0.14)
+        v = partials(m, [f, 2.41 * f, 3.9 * f], [1.0, 0.5, 0.2], [tau, tau * 0.6, tau * 0.3], rng=rng)
+        place(shards, v * rng.uniform(0.3, 1.0) * np.exp(-t0 / 0.45), t0 * SR)
+    y = 0.6 * crack + body + 0.8 * norm(shards)
+    return reverb(y, 0.35, 1.2, seed=52)
+
+
+@sfx("sfx_reflect")
+def _reflect(rng):
+    """A shot glancing off crystal: a bright ricochet ping bending upward."""
+    n = ns(0.35)
+    t = tvec(n)
+    f = 1500 * np.exp(t / 0.25)
+    zing = osc("sine", f, n) * env_perc(n, 0.001, 0.08) + 0.4 * osc("sine", f * 2.01, n) * env_perc(n, 0.001, 0.05)
+    tick = rmsn(bp(white(n, rng), 5000, 2.0)) * env_perc(n, 0.0005, 0.01)
+    return reverb(0.7 * zing + 0.4 * tick, 0.25, 0.6, seed=53)
+
+
+@sfx("sfx_beam")
+def _beam(rng):
+    """A beam of crystal light firing: a bright zap and a humming, fading glassy tone."""
+    n = ns(0.9)
+    t = tvec(n)
+    zap = rmsn(bp(white(n, rng), 3000 * np.exp(-t / 0.08) + 900, 1.2)) * env_perc(n, 0.001, 0.06)
+    f = 520.0
+    hum = (osc("saw", f, n) * 0.4 + osc("sine", f * 2, n) + 0.5 * osc("sine", f * 3.01, n))
+    hum = lp(hum, 3500) * env_perc(n, 0.004, 0.35) * (0.8 + 0.2 * np.sin(TAU * 18 * t))
+    glass = 0.4 * sparkles(n, rng, 14, 0.0, 0.5, 3500, 8000, tau=0.03)
+    return reverb(0.7 * zap + 0.35 * rmsn(hum) + glass, 0.3, 0.9, seed=54)
+
+
+@sfx("sfx_mimic")
+def _mimic(rng):
+    """The chest that bites: a wooden clack of jaws and a greedy, gurgling growl."""
+    n = ns(0.7)
+    t = tvec(n)
+    y = np.zeros(n)
+    m = ns(0.15)
+    place(y, 0.8 * thump(m, 380, 140, 0.03), 0.0)
+    place(y, 0.5 * rmsn(bp(white(m, rng), 1200, 2.0)) * env_perc(m, 0.0005, 0.02), 0.0)
+    f = 95 + 25 * smooth_rand(n, 9, rng)
+    growl = osc("saw", f, n) * (0.6 + 0.4 * np.abs(smooth_rand(n, 30, rng)))
+    growl = formant(growl, [(450, 4.0, 1.0), (900, 5.0, 0.5)]) * env_hump(n, 0.35, 1.5, 2.0)
+    y += 0.5 * rmsn(growl)
+    coins = 0.25 * sparkles(n, rng, 8, 0.1, 0.5, 3000, 7000, tau=0.02)
+    return reverb(y + coins, 0.25, 0.7, seed=55)
+
+
 SFX_NAMES = [
     "sfx_swing", "sfx_hit", "sfx_hit_heavy", "sfx_crit", "sfx_fireball_cast", "sfx_fireball_explode",
     "sfx_ice_cast", "sfx_ice_shatter", "sfx_thunder", "sfx_heal", "sfx_shield", "sfx_bladestorm",
@@ -2104,6 +2173,7 @@ SFX_NAMES = [
     "sfx_croak", "sfx_splash", "sfx_wade", "sfx_hiss", "sfx_spit", "sfx_splat", "sfx_mud_slam", "sfx_tongue", "sfx_waystone",
     "sfx_buzz", "sfx_wisp", "sfx_wisp_burst", "sfx_bat", "sfx_web",
     "sfx_chest_appear", "sfx_chest_open",
+    "sfx_crystal", "sfx_crystal_break", "sfx_reflect", "sfx_beam", "sfx_mimic",
 ]
 # name, builder, allowed duration range (s), target peak dBFS
 MUSIC = [

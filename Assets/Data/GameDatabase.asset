@@ -50,6 +50,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0df81070e39614a4c946c5409e2aee96, type: 2}
   - {fileID: 11400000, guid: 1a857f153006a8b41b3d722dc12c6726, type: 2}
   - {fileID: 11400000, guid: ebe39c5cf5e8cd44a89ccc734d0e4f4d, type: 2}
+  - {fileID: 11400000, guid: 04602f8eb202b4b47b78ec346710b700, type: 2}
+  - {fileID: 11400000, guid: d68a0ab90d5d32c4aaf5d263a322f261, type: 2}
+  - {fileID: 11400000, guid: 31f8e57107dffe740b08ede484d1b691, type: 2}
+  - {fileID: 11400000, guid: 3c85245f22021ea4789de34d870f4b90, type: 2}
+  - {fileID: 11400000, guid: 98e04122ed19d864cae4c392113d9526, type: 2}
+  - {fileID: 11400000, guid: 2dde40785894b4c458fc25309b79c457, type: 2}
+  - {fileID: 11400000, guid: ca3ceab021e021c40a45ec59ed92772a, type: 2}
   abilities:
   - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
   - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}
@@ -145,6 +152,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ac7cfde1639336d44902a420de4e4445, type: 2}
   - {fileID: 11400000, guid: a1492c28afb8653499fc69b293449f9b, type: 2}
   - {fileID: 11400000, guid: b6add70316dd3f54d84de3c2733f9fa4, type: 2}
+  - {fileID: 11400000, guid: 6c1d5704ddf344f4c82865202df538c7, type: 2}
+  - {fileID: 11400000, guid: 9f245ba366805a2478d787cfafe5c8a3, type: 2}
+  - {fileID: 11400000, guid: ff98cc04726f76647b79bd5852424446, type: 2}
+  - {fileID: 11400000, guid: 592942e69aa798e479ae2944c9462c39, type: 2}
+  - {fileID: 11400000, guid: f4b2d0ee525aff34594e144284d8d96d, type: 2}
+  - {fileID: 11400000, guid: c96dae57d0fd44e4694ac1a418273ef6, type: 2}
   zones:
   - {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
   races:
@@ -201,6 +214,7 @@ MonoBehaviour:
   venomPrefab: {fileID: 40009730964553345, guid: 4db1f30aa617ae149b088a5680f172bb, type: 3}
   venomArcPrefab: {fileID: 6563847976823840878, guid: 248b66c04de4c244781b426d6379a513, type: 3}
   webPrefab: {fileID: 6434890101799069727, guid: ec4abc17786b4684789a7ec1366994a3, type: 3}
+  shardPrefab: {fileID: 3814228701410162278, guid: b046854a7d2cb2a4d9925a9582b228c0, type: 3}
   chestPrefab: {fileID: 1402235809284517033, guid: 0c5855967a134f44fb7cfcff74dcbf4e, type: 3}
   mistMaterial: {fileID: 2100000, guid: 9151a6cf50d0f064183f54e52369e00a, type: 2}
   netHeroPrefab: {fileID: 4885084979465001528, guid: ae3e903ab7b28a648b5a6f37a73a1646, type: 3}

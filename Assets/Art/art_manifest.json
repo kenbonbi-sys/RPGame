@@ -2616,8 +2616,25 @@
      ]
     },
     {
-     "name": "deadtree_0",
+     "name": "crystal_pillar_broken",
      "x": 25,
+     "y": 452,
+     "w": 24,
+     "h": 60,
+     "pivot": [
+      0.52083,
+      0.03333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "deadtree_0",
+     "x": 50,
      "y": 458,
      "w": 40,
      "h": 54,
@@ -2634,7 +2651,7 @@
     },
     {
      "name": "deadtree_1",
-     "x": 66,
+     "x": 91,
      "y": 458,
      "w": 40,
      "h": 54,
@@ -2651,7 +2668,7 @@
     },
     {
      "name": "pine_0",
-     "x": 107,
+     "x": 132,
      "y": 460,
      "w": 34,
      "h": 52,
@@ -2668,7 +2685,7 @@
     },
     {
      "name": "pine_1",
-     "x": 142,
+     "x": 167,
      "y": 460,
      "w": 34,
      "h": 52,
@@ -2685,7 +2702,7 @@
     },
     {
      "name": "pine_2",
-     "x": 177,
+     "x": 202,
      "y": 460,
      "w": 34,
      "h": 52,
@@ -8568,6 +8585,1805 @@
    ]
   },
   {
+   "path": "Assets/Art/Characters/beetle.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "beetle_idle_0",
+     "x": 0,
+     "y": 130,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_idle_1",
+     "x": 34,
+     "y": 130,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_move_0",
+     "x": 0,
+     "y": 104,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_move_1",
+     "x": 34,
+     "y": 104,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_move_2",
+     "x": 68,
+     "y": 104,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_move_3",
+     "x": 102,
+     "y": 104,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_windup_0",
+     "x": 0,
+     "y": 78,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_windup_1",
+     "x": 34,
+     "y": 78,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_attack_0",
+     "x": 0,
+     "y": 52,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_attack_1",
+     "x": 34,
+     "y": 52,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_hurt_0",
+     "x": 0,
+     "y": 26,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_dead_1",
+     "x": 34,
+     "y": 0,
+     "w": 34,
+     "h": 26,
+     "pivot": [
+      0.5,
+      0.07692
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "path": "Assets/Art/Characters/crystalslime.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "crystalslime_idle_0",
+     "x": 0,
+     "y": 96,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_idle_1",
+     "x": 24,
+     "y": 96,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_move_0",
+     "x": 0,
+     "y": 72,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_move_1",
+     "x": 24,
+     "y": 72,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_move_2",
+     "x": 48,
+     "y": 72,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_move_3",
+     "x": 72,
+     "y": 72,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_attack_0",
+     "x": 0,
+     "y": 48,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_attack_1",
+     "x": 24,
+     "y": 48,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_attack_2",
+     "x": 48,
+     "y": 48,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_hurt_0",
+     "x": 0,
+     "y": 24,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystalslime_dead_1",
+     "x": 24,
+     "y": 0,
+     "w": 24,
+     "h": 24,
+     "pivot": [
+      0.5,
+      0.08333
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "path": "Assets/Art/Characters/caveeye.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "caveeye_idle_0",
+     "x": 0,
+     "y": 140,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_idle_1",
+     "x": 28,
+     "y": 140,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_move_0",
+     "x": 0,
+     "y": 112,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_move_1",
+     "x": 28,
+     "y": 112,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_windup_0",
+     "x": 0,
+     "y": 84,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_windup_1",
+     "x": 28,
+     "y": 84,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_windup_2",
+     "x": 56,
+     "y": 84,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_attack_0",
+     "x": 0,
+     "y": 56,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_attack_1",
+     "x": 28,
+     "y": 56,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_hurt_0",
+     "x": 0,
+     "y": 28,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "caveeye_dead_1",
+     "x": 28,
+     "y": 0,
+     "w": 28,
+     "h": 28,
+     "pivot": [
+      0.5,
+      0.14286
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "path": "Assets/Art/Characters/mimic.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "mimic_hidden_0",
+     "x": 0,
+     "y": 270,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_spring_0",
+     "x": 0,
+     "y": 240,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_spring_1",
+     "x": 30,
+     "y": 240,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_spring_2",
+     "x": 60,
+     "y": 240,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_idle_0",
+     "x": 0,
+     "y": 210,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_idle_1",
+     "x": 30,
+     "y": 210,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_move_0",
+     "x": 0,
+     "y": 180,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_move_1",
+     "x": 30,
+     "y": 180,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_move_2",
+     "x": 60,
+     "y": 180,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_windup_0",
+     "x": 0,
+     "y": 150,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_windup_1",
+     "x": 30,
+     "y": 150,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_attack_0",
+     "x": 0,
+     "y": 120,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_attack_1",
+     "x": 30,
+     "y": 120,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_burrow_0",
+     "x": 0,
+     "y": 90,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_burrow_1",
+     "x": 30,
+     "y": 90,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_burrow_2",
+     "x": 60,
+     "y": 90,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_emerge_0",
+     "x": 0,
+     "y": 60,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_emerge_1",
+     "x": 30,
+     "y": 60,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_emerge_2",
+     "x": 60,
+     "y": 60,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_hurt_0",
+     "x": 0,
+     "y": 30,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_dead_1",
+     "x": 30,
+     "y": 0,
+     "w": 30,
+     "h": 30,
+     "pivot": [
+      0.5,
+      0.1
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "path": "Assets/Art/Characters/oldgolem.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "oldgolem_idle_0",
+     "x": 0,
+     "y": 448,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_idle_1",
+     "x": 56,
+     "y": 448,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_walk_0",
+     "x": 0,
+     "y": 392,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_walk_1",
+     "x": 56,
+     "y": 392,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_walk_2",
+     "x": 112,
+     "y": 392,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_walk_3",
+     "x": 168,
+     "y": 392,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_windup_0",
+     "x": 0,
+     "y": 336,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_windup_1",
+     "x": 56,
+     "y": 336,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_slam_0",
+     "x": 0,
+     "y": 280,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_slam_1",
+     "x": 56,
+     "y": 280,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_spin_0",
+     "x": 0,
+     "y": 224,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_spin_1",
+     "x": 56,
+     "y": 224,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_spin_2",
+     "x": 112,
+     "y": 224,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_spin_3",
+     "x": 168,
+     "y": 224,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_spin_4",
+     "x": 224,
+     "y": 224,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_spin_5",
+     "x": 280,
+     "y": 224,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_cast_0",
+     "x": 0,
+     "y": 168,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_cast_1",
+     "x": 56,
+     "y": 168,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_roar_0",
+     "x": 0,
+     "y": 112,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_roar_1",
+     "x": 56,
+     "y": 112,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_hurt_0",
+     "x": 0,
+     "y": 56,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "oldgolem_dead_1",
+     "x": 56,
+     "y": 0,
+     "w": 56,
+     "h": 56,
+     "pivot": [
+      0.5,
+      0.05357
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "path": "Assets/Art/Characters/queen.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "queen_idle_0",
+     "x": 0,
+     "y": 640,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_idle_1",
+     "x": 80,
+     "y": 640,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_walk_0",
+     "x": 0,
+     "y": 576,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_walk_1",
+     "x": 80,
+     "y": 576,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_walk_2",
+     "x": 160,
+     "y": 576,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_walk_3",
+     "x": 240,
+     "y": 576,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_windup_0",
+     "x": 0,
+     "y": 512,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_windup_1",
+     "x": 80,
+     "y": 512,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_bite_0",
+     "x": 0,
+     "y": 448,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_bite_1",
+     "x": 80,
+     "y": 448,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_cast_0",
+     "x": 0,
+     "y": 384,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_cast_1",
+     "x": 80,
+     "y": 384,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_climb_0",
+     "x": 0,
+     "y": 320,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_climb_1",
+     "x": 80,
+     "y": 320,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_air_0",
+     "x": 0,
+     "y": 256,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_land_0",
+     "x": 0,
+     "y": 192,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_roar_0",
+     "x": 0,
+     "y": 128,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_roar_1",
+     "x": 80,
+     "y": 128,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_hurt_0",
+     "x": 0,
+     "y": 64,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_dead_0",
+     "x": 0,
+     "y": 0,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_dead_1",
+     "x": 80,
+     "y": 0,
+     "w": 80,
+     "h": 64,
+     "pivot": [
+      0.5,
+      0.04688
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
    "path": "Assets/Art/Icons/items.png",
    "filter": "point",
    "ppu": 16,
@@ -8576,7 +10392,7 @@
     {
      "name": "potion_red",
      "x": 0,
-     "y": 64,
+     "y": 80,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8593,7 +10409,7 @@
     {
      "name": "potion_blue",
      "x": 16,
-     "y": 64,
+     "y": 80,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8610,7 +10426,7 @@
     {
      "name": "potion_green",
      "x": 32,
-     "y": 64,
+     "y": 80,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8627,7 +10443,7 @@
     {
      "name": "coin",
      "x": 48,
-     "y": 64,
+     "y": 80,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8644,7 +10460,7 @@
     {
      "name": "gold",
      "x": 64,
-     "y": 64,
+     "y": 80,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8661,7 +10477,7 @@
     {
      "name": "gel",
      "x": 80,
-     "y": 64,
+     "y": 80,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8678,7 +10494,7 @@
     {
      "name": "shroom_cap",
      "x": 96,
-     "y": 64,
+     "y": 80,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8695,7 +10511,7 @@
     {
      "name": "claw",
      "x": 112,
-     "y": 64,
+     "y": 80,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8712,7 +10528,7 @@
     {
      "name": "pelt",
      "x": 0,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8729,7 +10545,7 @@
     {
      "name": "meat",
      "x": 16,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8746,7 +10562,7 @@
     {
      "name": "apple",
      "x": 32,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8763,7 +10579,7 @@
     {
      "name": "sword",
      "x": 48,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8780,7 +10596,7 @@
     {
      "name": "shield",
      "x": 64,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8797,7 +10613,7 @@
     {
      "name": "ring",
      "x": 80,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8814,7 +10630,7 @@
     {
      "name": "gem_red",
      "x": 96,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8831,7 +10647,7 @@
     {
      "name": "gem_blue",
      "x": 112,
-     "y": 48,
+     "y": 64,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8848,7 +10664,7 @@
     {
      "name": "scroll",
      "x": 0,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8865,7 +10681,7 @@
     {
      "name": "key",
      "x": 16,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8882,7 +10698,7 @@
     {
      "name": "herb",
      "x": 32,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8899,7 +10715,7 @@
     {
      "name": "bread",
      "x": 48,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8916,7 +10732,7 @@
     {
      "name": "bone",
      "x": 64,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8933,7 +10749,7 @@
     {
      "name": "toad_skin",
      "x": 80,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8950,7 +10766,7 @@
     {
      "name": "poison_gland",
      "x": 96,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8967,7 +10783,7 @@
     {
      "name": "leech_tooth",
      "x": 112,
-     "y": 32,
+     "y": 48,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -8984,7 +10800,7 @@
     {
      "name": "mud_core",
      "x": 0,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9001,7 +10817,7 @@
     {
      "name": "toad_crown",
      "x": 16,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9018,7 +10834,7 @@
     {
      "name": "snake_scale",
      "x": 32,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9035,7 +10851,7 @@
     {
      "name": "snake_fang",
      "x": 48,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9052,7 +10868,7 @@
     {
      "name": "venom_sac",
      "x": 64,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9069,7 +10885,7 @@
     {
      "name": "lotus",
      "x": 80,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9086,7 +10902,7 @@
     {
      "name": "wsnake_skin",
      "x": 96,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9103,7 +10919,7 @@
     {
      "name": "dragonfly_wing",
      "x": 112,
-     "y": 16,
+     "y": 32,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9120,7 +10936,7 @@
     {
      "name": "wisp_essence",
      "x": 0,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9137,7 +10953,7 @@
     {
      "name": "crystal_shard",
      "x": 16,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9154,7 +10970,7 @@
     {
      "name": "bat_wing",
      "x": 32,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9171,7 +10987,7 @@
     {
      "name": "spider_silk",
      "x": 48,
-     "y": 0,
+     "y": 16,
      "w": 16,
      "h": 16,
      "pivot": [
@@ -9188,6 +11004,125 @@
     {
      "name": "golem_core",
      "x": 64,
+     "y": 16,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "beetle_shell",
+     "x": 80,
+     "y": 16,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystal_jelly",
+     "x": 96,
+     "y": 16,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "eye_lens",
+     "x": 112,
+     "y": 16,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "ancient_core",
+     "x": 0,
+     "y": 0,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "queen_eye",
+     "x": 16,
+     "y": 0,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "crystal_silk",
+     "x": 32,
+     "y": 0,
+     "w": 16,
+     "h": 16,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "mimic_tooth",
+     "x": 48,
      "y": 0,
      "w": 16,
      "h": 16,
@@ -11944,6 +13879,31 @@
    ]
   },
   {
+   "path": "Assets/Art/VFX/Pixel/Singles/proj_shard.png",
+   "filter": "point",
+   "ppu": 16,
+   "kind": "sprite",
+   "sprites": [
+    {
+     "name": "proj_shard",
+     "x": 0,
+     "y": 0,
+     "w": 10,
+     "h": 5,
+     "pivot": [
+      0.5,
+      0.5
+     ],
+     "border": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
    "path": "Assets/Art/VFX/Pixel/fx_slash.png",
    "filter": "point",
    "ppu": 16,
@@ -14187,6 +16147,485 @@
     "golem_dead_1"
    ],
    "fps": 4,
+   "loop": false
+  },
+  {
+   "set": "beetle",
+   "name": "idle",
+   "frames": [
+    "beetle_idle_0",
+    "beetle_idle_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  {
+   "set": "beetle",
+   "name": "move",
+   "frames": [
+    "beetle_move_0",
+    "beetle_move_1",
+    "beetle_move_2",
+    "beetle_move_3"
+   ],
+   "fps": 10,
+   "loop": true
+  },
+  {
+   "set": "beetle",
+   "name": "windup",
+   "frames": [
+    "beetle_windup_0",
+    "beetle_windup_1"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  {
+   "set": "beetle",
+   "name": "attack",
+   "frames": [
+    "beetle_attack_0",
+    "beetle_attack_1"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  {
+   "set": "beetle",
+   "name": "hurt",
+   "frames": [
+    "beetle_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "beetle",
+   "name": "dead",
+   "frames": [
+    "beetle_dead_0",
+    "beetle_dead_1"
+   ],
+   "fps": 5,
+   "loop": false
+  },
+  {
+   "set": "crystalslime",
+   "name": "idle",
+   "frames": [
+    "crystalslime_idle_0",
+    "crystalslime_idle_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  {
+   "set": "crystalslime",
+   "name": "move",
+   "frames": [
+    "crystalslime_move_0",
+    "crystalslime_move_1",
+    "crystalslime_move_2",
+    "crystalslime_move_3"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  {
+   "set": "crystalslime",
+   "name": "attack",
+   "frames": [
+    "crystalslime_attack_0",
+    "crystalslime_attack_1",
+    "crystalslime_attack_2"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  {
+   "set": "crystalslime",
+   "name": "hurt",
+   "frames": [
+    "crystalslime_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "crystalslime",
+   "name": "dead",
+   "frames": [
+    "crystalslime_dead_0",
+    "crystalslime_dead_1"
+   ],
+   "fps": 6,
+   "loop": false
+  },
+  {
+   "set": "caveeye",
+   "name": "idle",
+   "frames": [
+    "caveeye_idle_0",
+    "caveeye_idle_1"
+   ],
+   "fps": 1,
+   "loop": true
+  },
+  {
+   "set": "caveeye",
+   "name": "move",
+   "frames": [
+    "caveeye_move_0",
+    "caveeye_move_1"
+   ],
+   "fps": 1,
+   "loop": true
+  },
+  {
+   "set": "caveeye",
+   "name": "windup",
+   "frames": [
+    "caveeye_windup_0",
+    "caveeye_windup_1",
+    "caveeye_windup_2"
+   ],
+   "fps": 6,
+   "loop": false
+  },
+  {
+   "set": "caveeye",
+   "name": "attack",
+   "frames": [
+    "caveeye_attack_0",
+    "caveeye_attack_1"
+   ],
+   "fps": 10,
+   "loop": true
+  },
+  {
+   "set": "caveeye",
+   "name": "hurt",
+   "frames": [
+    "caveeye_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "caveeye",
+   "name": "dead",
+   "frames": [
+    "caveeye_dead_0",
+    "caveeye_dead_1"
+   ],
+   "fps": 4,
+   "loop": false
+  },
+  {
+   "set": "mimic",
+   "name": "hidden",
+   "frames": [
+    "mimic_hidden_0"
+   ],
+   "fps": 1,
+   "loop": true
+  },
+  {
+   "set": "mimic",
+   "name": "spring",
+   "frames": [
+    "mimic_spring_0",
+    "mimic_spring_1",
+    "mimic_spring_2"
+   ],
+   "fps": 10,
+   "loop": false
+  },
+  {
+   "set": "mimic",
+   "name": "idle",
+   "frames": [
+    "mimic_idle_0",
+    "mimic_idle_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  {
+   "set": "mimic",
+   "name": "move",
+   "frames": [
+    "mimic_move_0",
+    "mimic_move_1",
+    "mimic_move_2"
+   ],
+   "fps": 9,
+   "loop": true
+  },
+  {
+   "set": "mimic",
+   "name": "windup",
+   "frames": [
+    "mimic_windup_0",
+    "mimic_windup_1"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  {
+   "set": "mimic",
+   "name": "attack",
+   "frames": [
+    "mimic_attack_0",
+    "mimic_attack_1"
+   ],
+   "fps": 12,
+   "loop": false
+  },
+  {
+   "set": "mimic",
+   "name": "burrow",
+   "frames": [
+    "mimic_burrow_0",
+    "mimic_burrow_1",
+    "mimic_burrow_2"
+   ],
+   "fps": 5,
+   "loop": false
+  },
+  {
+   "set": "mimic",
+   "name": "emerge",
+   "frames": [
+    "mimic_emerge_0",
+    "mimic_emerge_1",
+    "mimic_emerge_2"
+   ],
+   "fps": 5,
+   "loop": false
+  },
+  {
+   "set": "mimic",
+   "name": "hurt",
+   "frames": [
+    "mimic_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "mimic",
+   "name": "dead",
+   "frames": [
+    "mimic_dead_0",
+    "mimic_dead_1"
+   ],
+   "fps": 4,
+   "loop": false
+  },
+  {
+   "set": "oldgolem",
+   "name": "idle",
+   "frames": [
+    "oldgolem_idle_0",
+    "oldgolem_idle_1"
+   ],
+   "fps": 2,
+   "loop": true
+  },
+  {
+   "set": "oldgolem",
+   "name": "walk",
+   "frames": [
+    "oldgolem_walk_0",
+    "oldgolem_walk_1",
+    "oldgolem_walk_2",
+    "oldgolem_walk_3"
+   ],
+   "fps": 5,
+   "loop": true
+  },
+  {
+   "set": "oldgolem",
+   "name": "windup",
+   "frames": [
+    "oldgolem_windup_0",
+    "oldgolem_windup_1"
+   ],
+   "fps": 4,
+   "loop": false
+  },
+  {
+   "set": "oldgolem",
+   "name": "slam",
+   "frames": [
+    "oldgolem_slam_0",
+    "oldgolem_slam_1"
+   ],
+   "fps": 8,
+   "loop": false
+  },
+  {
+   "set": "oldgolem",
+   "name": "spin",
+   "frames": [
+    "oldgolem_spin_0",
+    "oldgolem_spin_1",
+    "oldgolem_spin_2",
+    "oldgolem_spin_3",
+    "oldgolem_spin_4",
+    "oldgolem_spin_5"
+   ],
+   "fps": 16,
+   "loop": true
+  },
+  {
+   "set": "oldgolem",
+   "name": "cast",
+   "frames": [
+    "oldgolem_cast_0",
+    "oldgolem_cast_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  {
+   "set": "oldgolem",
+   "name": "roar",
+   "frames": [
+    "oldgolem_roar_0",
+    "oldgolem_roar_1"
+   ],
+   "fps": 4,
+   "loop": true
+  },
+  {
+   "set": "oldgolem",
+   "name": "hurt",
+   "frames": [
+    "oldgolem_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "oldgolem",
+   "name": "dead",
+   "frames": [
+    "oldgolem_dead_0",
+    "oldgolem_dead_1"
+   ],
+   "fps": 3,
+   "loop": false
+  },
+  {
+   "set": "queen",
+   "name": "idle",
+   "frames": [
+    "queen_idle_0",
+    "queen_idle_1"
+   ],
+   "fps": 3,
+   "loop": true
+  },
+  {
+   "set": "queen",
+   "name": "walk",
+   "frames": [
+    "queen_walk_0",
+    "queen_walk_1",
+    "queen_walk_2",
+    "queen_walk_3"
+   ],
+   "fps": 8,
+   "loop": true
+  },
+  {
+   "set": "queen",
+   "name": "windup",
+   "frames": [
+    "queen_windup_0",
+    "queen_windup_1"
+   ],
+   "fps": 6,
+   "loop": false
+  },
+  {
+   "set": "queen",
+   "name": "bite",
+   "frames": [
+    "queen_bite_0",
+    "queen_bite_1"
+   ],
+   "fps": 12,
+   "loop": false
+  },
+  {
+   "set": "queen",
+   "name": "cast",
+   "frames": [
+    "queen_cast_0",
+    "queen_cast_1"
+   ],
+   "fps": 6,
+   "loop": true
+  },
+  {
+   "set": "queen",
+   "name": "climb",
+   "frames": [
+    "queen_climb_0",
+    "queen_climb_1"
+   ],
+   "fps": 6,
+   "loop": false
+  },
+  {
+   "set": "queen",
+   "name": "air",
+   "frames": [
+    "queen_air_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "queen",
+   "name": "land",
+   "frames": [
+    "queen_land_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "queen",
+   "name": "roar",
+   "frames": [
+    "queen_roar_0",
+    "queen_roar_1"
+   ],
+   "fps": 5,
+   "loop": true
+  },
+  {
+   "set": "queen",
+   "name": "hurt",
+   "frames": [
+    "queen_hurt_0"
+   ],
+   "fps": 1,
+   "loop": false
+  },
+  {
+   "set": "queen",
+   "name": "dead",
+   "frames": [
+    "queen_dead_0",
+    "queen_dead_1"
+   ],
+   "fps": 3,
    "loop": false
   },
   {

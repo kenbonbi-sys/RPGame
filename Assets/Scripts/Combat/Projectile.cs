@@ -41,6 +41,8 @@ namespace RPG
 
         /// <summary>Deals damage (where the world's rules run), or only flies and bursts (a screen's copy).</summary>
         public bool Live => live;
+        /// <summary>Where it flies.</summary>
+        public Vector2 Direction => dir;
 
         /// <param name="dealsDamage">False for a copy that is only shown (online).</param>
         /// <param name="shows">False on a server without a screen.</param>
@@ -78,6 +80,7 @@ namespace RPG
             foreach (var h in buffer)
             {
                 if (alreadyHit.Contains(h)) continue;
+                if (Reflected(h, next)) return;
                 if (!pierce || explodeRadius > 0)
                 {
                     Explode(next);
@@ -87,6 +90,20 @@ namespace RPG
                 ApplyTo(h, next);
             }
             if (age >= lifetime) Explode(next);
+        }
+
+        /// <summary>
+        /// A hero's shot meeting crystal that turns it back (<see cref="ShotReflector"/>): it bursts
+        /// there without hurting anyone and comes back as a splinter. Where the rules run.
+        /// </summary>
+        bool Reflected(Health h, Vector2 at)
+        {
+            if (!live || team != Team.Player) return false;
+            var r = h.GetComponentInParent<ShotReflector>();
+            if (r == null || !r.TryReflect(this, at)) return false;
+            live = false;
+            Explode(at);
+            return true;
         }
 
         void ApplyTo(Health h, Vector2 point)

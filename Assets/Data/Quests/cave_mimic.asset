@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: cave_mimic
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: cave_mimic
+  title: "L\u1EDDi \u0110\u1ED3n: R\u01B0\u01A1ng Bi\u1EBFt C\u1EAFn"
+  kind: 2
+  summary: "Th\u1EE3 m\u1ECF k\u1EC3 c\xF3 m\u1ED9t r\u01B0\u01A1ng kho b\xE1u trong hang t\u1EF1 \u0111\u1ED5i ch\u1ED7. K\u1EBB n\xE0o m\u1EDF n\xF3 th\xEC m\u1EA5t v\xE0ng. H\u1EA1 n\xF3 tr\u01B0\u1EDBc khi n\xF3 chui xu\u1ED1ng \u0111\u1EA5t l\u1EA7n th\u1EE9 ba \u0111\u1EC3 l\u1EA5y l\u1EA1i g\u1EA5p \u0111\xF4i. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 20."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 19c6a341f4d25f34ba564b0b7202c59a, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: mimic
+    count: 1
+    text: "T\xECm v\xE0 h\u1EA1 Mimic Tham Lam"
+    countPrevious: 0
+    marker: mine
+  xp: 1500
+  gold: 200
+  items:
+  - item: {fileID: 11400000, guid: eef0c1b63f5d7d04db29774a7c3ca893, type: 2}
+    count: 1
+  setFlags: []
+  followUps: []

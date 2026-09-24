@@ -38,4 +38,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
     count: 2
   setFlags: []
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: 6c1d5704ddf344f4c82865202df538c7, type: 2}

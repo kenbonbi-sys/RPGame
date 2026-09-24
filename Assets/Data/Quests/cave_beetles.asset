@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: cave_beetles
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: cave_beetles
+  title: "Truy N\xE3: B\u1ECD Gi\xE1p \u0110\xE1"
+  kind: 0
+  summary: "Trong m\u1ECF b\u1ECF hoang c\xF3 lo\xE0i b\u1ECD kho\xE1c mai \u0111\xE1. \u0110\xE1nh v\xE0o \u0111\u1EA7u n\xF3 ch\u1EC9 t\xF3e l\u1EEDa: v\xF2ng ra sau l\u01B0ng, ho\u1EB7c d\u1EE5 n\xF3 h\xFAc v\xE0o v\xE1ch \u0111\xE1. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 17."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: b6add70316dd3f54d84de3c2733f9fa4, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: beetle
+    count: 4
+    text: "H\u1EA1 B\u1ECD Gi\xE1p \u0110\xE1"
+    countPrevious: 0
+    marker: mine
+  xp: 740
+  gold: 95
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 2
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 9f245ba366805a2478d787cfafe5c8a3, type: 2}

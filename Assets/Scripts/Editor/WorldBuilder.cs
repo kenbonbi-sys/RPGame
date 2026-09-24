@@ -130,7 +130,12 @@ namespace RPG.EditorTools
             new SwampCamp { name = "Wisps_South", at = new Vector2(126, 11), radius = 2.5f, count = 2, kind = "wisp", when = DayPart.Night, flies = true },
         };
 
-        /// <summary>The cave's camps: bats in their cave and among the crystals, spiders by their nest, golems in the old mine.</summary>
+        /// <summary>
+        /// The cave's camps: bats in their cave and among the crystals, spiders by their nest, golems
+        /// and stone beetles in the old mine (beetles also in the narrow loop to the crystal hall, where
+        /// a charge meets rock), crystal slimes among the crystals. The crystal hall is the old
+        /// golem's; the eyes in the walls and the mimic are placed on their own.
+        /// </summary>
         static readonly SwampCamp[] CaveCamps =
         {
             new SwampCamp { name = "Bats_West", at = new Vector2(142.5f, 78.5f), radius = 2.4f, count = 3, kind = "bat", flies = true },
@@ -141,7 +146,26 @@ namespace RPG.EditorTools
             new SwampCamp { name = "Spiders_Forest", at = new Vector2(143.5f, 99.5f), radius = 1.8f, count = 2, kind = "spider" },
             new SwampCamp { name = "Golems_MineWest", at = new Vector2(171.5f, 91), radius = 2f, count = 2, kind = "golem" },
             new SwampCamp { name = "Golems_MineEast", at = new Vector2(182.5f, 89.5f), radius = 2f, count = 2, kind = "golem" },
-            new SwampCamp { name = "Golems_Hall", at = new Vector2(186, 111), radius = 2.2f, count = 2, kind = "golem" },
+            new SwampCamp { name = "Beetles_Mine", at = new Vector2(176.5f, 86.5f), radius = 1.8f, count = 2, kind = "beetle" },
+            new SwampCamp { name = "Beetles_Loop", at = new Vector2(170f, 110.5f), radius = 1.2f, count = 2, kind = "beetle" },
+            new SwampCamp { name = "CrystalSlimes_West", at = new Vector2(134f, 98.5f), radius = 1.8f, count = 3, kind = "crystalslime" },
+            new SwampCamp { name = "CrystalSlimes_East", at = new Vector2(141.5f, 92.5f), radius = 1.8f, count = 2, kind = "crystalslime" },
+        };
+
+        /// <summary>Mắt Hang: grown into the upper wall of a chamber, looked for from its middle along a direction.</summary>
+        static readonly (string name, Vector2 from, Vector2 dir)[] CaveEyes =
+        {
+            ("Eye_CrystalForest", new Vector2(136, 95), new Vector2(0.15f, 1f)),
+            ("Eye_SpiderNest", new Vector2(157, 106), new Vector2(0f, 1f)),
+            ("Eye_BatCave", new Vector2(146, 77), new Vector2(0.5f, 1f)),
+            ("Eye_Mine", new Vector2(177, 90), new Vector2(0.2f, 1f)),
+        };
+
+        /// <summary>Where Mimic Tham Lam waits as a chest and comes up after digging down: quiet corners of the chambers.</summary>
+        static readonly Vector2[] MimicSpots =
+        {
+            new Vector2(170.5f, 93.5f), new Vector2(184f, 93f), new Vector2(128f, 93.5f), new Vector2(144f, 99f),
+            new Vector2(140f, 74.5f), new Vector2(152.5f, 104f),
         };
 
         /// <summary>Đá Truyền Tống: id, name, where.</summary>
@@ -888,6 +912,8 @@ namespace RPG.EditorTools
             }
             // the camps' middles stay clear
             foreach (var camp in CaveCamps) Mark(camp.at);
+            foreach (var spot in MimicSpots) Mark(spot);
+            foreach (var (_, from, dir) in CaveEyes) Mark(WallSpot(from, dir));
             // Cửa Hang: the miners' camp around a fire, their carts on a stretch of rails
             var c = MinersCamp;
             P("campfire", c + new Vector2(-1.8f, -0.4f));
@@ -914,7 +940,14 @@ namespace RPG.EditorTools
             for (int i = 0; i < 6; i++)
             {
                 var d = Util.FromAngle(i * 60f + 30f);
-                P("crystal_pillar", QueenHall + new Vector2(d.x * 7.2f, d.y * 5.8f));
+                var at = QueenHall + new Vector2(d.x * 7.2f, d.y * 5.8f);
+                if (PrefabFactory.Pillar == null)
+                {
+                    P("crystal_pillar", at);
+                    continue;
+                }
+                Spawn(PrefabFactory.Pillar, at, t, $"CotPhaLe_{i}");
+                Mark(at);
             }
             P("cobweb_0", QueenHall + new Vector2(-8.5f, 5.5f));
             P("cobweb_1", QueenHall + new Vector2(8f, 6.2f));
@@ -996,6 +1029,51 @@ namespace RPG.EditorTools
             go.transform.position = at;
             if (name != null) go.name = name;
             return go;
+        }
+
+        /// <summary>
+        /// A cave floor spot near <paramref name="from"/>, going along <paramref name="dir"/> until the
+        /// rock is a tile or so ahead (an eye grown into the wall).
+        /// </summary>
+        static Vector2 WallSpot(Vector2 from, Vector2 dir)
+        {
+            dir = dir.normalized;
+            var p = from;
+            for (int i = 0; i < 80; i++)
+            {
+                var next = p + dir * 0.25f;
+                if (!CaveFloor(next + dir * 1.2f) || NearWall(next, 1)) return p;
+                p = next;
+            }
+            return p;
+        }
+
+        /// <summary>The middle of the chamber nearest to <paramref name="p"/>.</summary>
+        static Vector2 NearestChamber(Vector2 p)
+        {
+            Vector2 best = Chambers[0].c;
+            float bestD = float.MaxValue;
+            foreach (var (c, rx, ry) in Chambers)
+            {
+                float d = (c - p).sqrMagnitude;
+                if (d < bestD)
+                {
+                    bestD = d;
+                    best = c;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>The nearest open cave floor to <paramref name="p"/>, going toward <paramref name="toward"/>.</summary>
+        static Vector2 OpenFloor(Vector2 p, Vector2 toward)
+        {
+            for (int i = 0; i < 60; i++)
+            {
+                if (CaveFloor(p) && !NearWall(p, 1)) return p;
+                p = Vector2.MoveTowards(p, toward, 0.25f);
+            }
+            return p;
         }
 
         /// <summary>Enemies waiting switched off until something calls them (a mud man's split, a boss's summons).</summary>
@@ -1080,8 +1158,29 @@ namespace RPG.EditorTools
             // the cave's camps
             foreach (var c in CaveCamps)
             {
-                var prefab = c.kind == "bat" ? PrefabFactory.Bat : c.kind == "spider" ? PrefabFactory.CaveSpider : PrefabFactory.Golem;
+                var prefab = c.kind == "bat" ? PrefabFactory.Bat : c.kind == "spider" ? PrefabFactory.CaveSpider
+                           : c.kind == "beetle" ? PrefabFactory.Beetle : c.kind == "crystalslime" ? PrefabFactory.CrystalSlime
+                           : PrefabFactory.Golem;
                 if (prefab != null) Camp(c.name, prefab, c.at, c.count, c.radius);
+            }
+            // the eyes in the walls: one each, right where they grew
+            if (PrefabFactory.CaveEye != null)
+                foreach (var (name, from, dir) in CaveEyes)
+                    Camp(name, PrefabFactory.CaveEye, WallSpot(from, dir), 1, 0.01f).GetComponent<EnemySpawner>().respawnDelay = 45f;
+            // the mimic: one chest somewhere in the cave, back long after it fled or fell
+            if (PrefabFactory.Mimic != null)
+            {
+                var spots = new Vector2[MimicSpots.Length];
+                for (int i = 0; i < spots.Length; i++) spots[i] = OpenFloor(MimicSpots[i], NearestChamber(MimicSpots[i]));
+                var go = Camp("Mimic_Hidden", PrefabFactory.Mimic, spots[0], 1, 0.01f);
+                var sp = go.GetComponent<EnemySpawner>();
+                sp.respawnDelay = 300f;
+                sp.minPlayerDistance = 6f;
+                foreach (var m in go.GetComponentsInChildren<MimicAI>(true))
+                {
+                    m.hideSpots = spots;
+                    EditorUtility.SetDirty(m);
+                }
             }
             res.swampSpot = camps.Find("ToadCamp_Edge");
             res.mudField = camps.Find("MudCamp_Field");
@@ -1119,6 +1218,26 @@ namespace RPG.EditorTools
                 snake.arenaCenter = lair;
                 if (PrefabFactory.Leech != null) snake.brood = MakeBrood(lair, "Brood", PrefabFactory.Leech, 4, SnakeLair + new Vector2(0f, -1.5f));
                 EditorUtility.SetDirty(snake);
+            }
+            // the cave's bosses: the old golem in the crystal hall, the spider queen among her pillars
+            if (PrefabFactory.CrystalGolem != null)
+            {
+                var hall = new GameObject("CrystalHallArena").transform;
+                hall.SetParent(root, false);
+                hall.position = CrystalHall;
+                var golem = Spawn(PrefabFactory.CrystalGolem, CrystalHall + new Vector2(0.5f, 0.8f), hall, "Golem Pha Le Co").GetComponent<BossCrystalGolem>();
+                golem.arenaCenter = hall;
+                EditorUtility.SetDirty(golem);
+            }
+            if (PrefabFactory.SpiderQueen != null)
+            {
+                var lair = new GameObject("QueenHallArena").transform;
+                lair.SetParent(root, false);
+                lair.position = QueenHall;
+                var queen = Spawn(PrefabFactory.SpiderQueen, QueenHall + new Vector2(0f, 1f), lair, "Nhen Chua Pha Le").GetComponent<BossSpiderQueen>();
+                queen.arenaCenter = lair;
+                if (PrefabFactory.CaveSpider != null) queen.brood = MakeBrood(lair, "Brood", PrefabFactory.CaveSpider, 4, QueenHall + new Vector2(0f, 3.5f));
+                EditorUtility.SetDirty(queen);
             }
             res.outpost = Marker(actors, "OutpostSpot", Outpost + new Vector2(0f, -2f));
             res.spots.Add(("cavemouth", Marker(actors, "CaveMouthSpot", MinersCamp)));

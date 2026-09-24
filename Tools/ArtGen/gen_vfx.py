@@ -575,6 +575,19 @@ def proj_note():
     return cv
 
 
+def proj_shard():
+    """A splinter of cave crystal flying right (Slime Pha Lê, shots turned back by crystal)."""
+    cv = Canvas(10, 5)
+    cols = [hx("#136a7a"), hx("#36c2c4"), hx("#88ecea"), hx("#dcfffc")]
+    for x in range(10):
+        half = 2 - abs(x - 6) * 2 / 6 if x >= 2 else 0.5
+        for y in range(5):
+            if abs(y - 2) <= half:
+                cv.px(x, y, cols[3] if y == 2 and x > 4 else cols[2] if y < 2 else cols[1] if y == 2 else cols[0])
+    cv.outline(hx("#0a2a38"))
+    return cv
+
+
 def build():
     smooth = {
         "glow": glow(), "glow_hard": glow_hard(), "ring": ring(), "ring_thick": ring_thick(),
@@ -588,6 +601,7 @@ def build():
         ("ice_shard", ice_shard()), ("magic_circle", magic_circle()), ("crack", crack_decal()),
         ("debris_0", debris(1)), ("debris_1", debris(2)),
         ("proj_arrow", proj_arrow()), ("proj_knife", proj_knife()), ("proj_axe", proj_axe()), ("proj_note", proj_note()),
+        ("proj_shard", proj_shard()),
     ]
     flipbooks = {
         "slash": slash_frames(), "claw": claw_frames(), "fire": fire_frames(),

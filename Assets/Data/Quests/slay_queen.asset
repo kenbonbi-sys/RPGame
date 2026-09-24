@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: slay_queen
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: slay_queen
+  title: "Nh\u1EC7n Ch\xFAa Pha L\xEA"
+  kind: 0
+  summary: "T\u1EADn c\xF9ng Hang Pha L\xEA, Nh\u1EC7n Ch\xFAa gi\u0103ng t\u01A1 gi\u1EEFa s\xE1u c\u1ED9t pha l\xEA. Tia s\xE1ng c\u1EE7a n\xF3 d\u1ED9i qua c\xE1c c\u1ED9t: \u0111\u1EADp v\u1EE1 c\u1ED9t s\u1EAFp b\u1ECB tia ch\u1EA1m v\xE0o \u0111\u1EC3 tia d\u1ED9i ng\u01B0\u1EE3c v\xE0o n\xF3. Xa h\u01A1n v\u1EC1 ph\xEDa t\xE2y b\u1EAFc l\xE0 Th\u1EA3o Nguy\xEAn Gi\xF3 (s\u1EAFp m\u1EDF). C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 20."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 592942e69aa798e479ae2944c9462c39, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: spiderqueen
+    count: 1
+    text: "\u0110\xE1nh b\u1EA1i Nh\u1EC7n Ch\xFAa Pha L\xEA"
+    countPrevious: 0
+    marker: queenhall
+  xp: 2000
+  gold: 240
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 4
+  - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
+    count: 3
+  setFlags:
+  - cave_cleared
+  followUps: []

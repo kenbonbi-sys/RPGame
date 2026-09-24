@@ -23,6 +23,7 @@ import gen_swamp
 import gen_swamp_creatures
 import gen_cave
 import gen_cave_creatures
+import gen_cave_deep
 import gen_class_icons
 from pixelkit import Canvas, pack_shelf
 
@@ -178,6 +179,26 @@ def build_chars():
     grid_sheet("spider", gen_cave_creatures.build_spider(), cave_order, 34, 24, (17, 22), os.path.join(ART, "Characters", "spider.png"), pfps)
     gfps = lambda k: {"idle": (2, True), "move": (6, True), "windup": (4, False), "attack": (8, False), "hurt": (1, False), "dead": (4, False)}[k]
     grid_sheet("golem", gen_cave_creatures.build_golem(), cave_order, 34, 34, (17, 32), os.path.join(ART, "Characters", "golem.png"), gfps)
+    # the deeper cave
+    efps = lambda k: {"idle": (3, True), "move": (10, True), "windup": (8, True), "attack": (10, False), "hurt": (1, False), "dead": (5, False)}[k]
+    grid_sheet("beetle", gen_cave_deep.build_beetle(), cave_order, 34, 26, (17, 24), os.path.join(ART, "Characters", "beetle.png"), efps)
+    slfps = lambda k: {"idle": (4, True), "move": (8, True), "attack": (10, False), "hurt": (1, False), "dead": (6, False)}[k]
+    grid_sheet("crystalslime", gen_cave_deep.build_crystal_slime(), ["idle", "move", "attack", "hurt", "dead"], 24, 24, (12, 22),
+               os.path.join(ART, "Characters", "crystalslime.png"), slfps)
+    yfps = lambda k: {"idle": (1, True), "move": (1, True), "windup": (6, False), "attack": (10, True), "hurt": (1, False), "dead": (4, False)}[k]
+    grid_sheet("caveeye", gen_cave_deep.build_cave_eye(), cave_order, 28, 28, (14, 24), os.path.join(ART, "Characters", "caveeye.png"), yfps)
+    mmfps = lambda k: {"hidden": (1, True), "spring": (10, False), "idle": (4, True), "move": (9, True), "windup": (6, True),
+                       "attack": (12, False), "burrow": (5, False), "emerge": (5, False), "hurt": (1, False), "dead": (4, False)}[k]
+    grid_sheet("mimic", gen_cave_deep.build_mimic(), ["hidden", "spring", "idle", "move", "windup", "attack", "burrow", "emerge", "hurt", "dead"],
+               30, 30, (15, 27), os.path.join(ART, "Characters", "mimic.png"), mmfps)
+    ogfps = lambda k: {"idle": (2, True), "walk": (5, True), "windup": (4, False), "slam": (8, False), "spin": (16, True),
+                       "cast": (4, True), "roar": (4, True), "hurt": (1, False), "dead": (3, False)}[k]
+    grid_sheet("oldgolem", gen_cave_deep.build_old_golem(), ["idle", "walk", "windup", "slam", "spin", "cast", "roar", "hurt", "dead"],
+               56, 56, (28, 53), os.path.join(ART, "Characters", "oldgolem.png"), ogfps)
+    qfps = lambda k: {"idle": (3, True), "walk": (8, True), "windup": (6, False), "bite": (12, False), "cast": (6, True),
+                      "climb": (6, False), "air": (1, False), "land": (1, False), "roar": (5, True), "hurt": (1, False), "dead": (3, False)}[k]
+    grid_sheet("queen", gen_cave_deep.build_queen(), ["idle", "walk", "windup", "bite", "cast", "climb", "air", "land", "roar", "hurt", "dead"],
+               80, 64, (40, 61), os.path.join(ART, "Characters", "queen.png"), qfps)
 
 
 def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):

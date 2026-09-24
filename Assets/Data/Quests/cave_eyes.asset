@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: cave_eyes
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: cave_eyes
+  title: "Truy N\xE3: M\u1EAFt Hang"
+  kind: 0
+  summary: "Nh\u1EEFng con m\u1EAFt kh\u1ED5ng l\u1ED3 m\u1ECDc trong v\xE1ch hang, b\u1EAFn tia s\xE1ng d\u1ED9i qua v\xE1ch \u0111\xE1. M\xED \u0111\xE1 c\u1EE7a ch\xFAng r\u1EA5t c\u1EE9ng: \u0111\xE1nh l\xFAc m\u1EAFt v\u1EEBa b\u1EAFn xong v\xE0 c\xF2n m\u1EDF. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 18."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 9f245ba366805a2478d787cfafe5c8a3, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: caveeye
+    count: 3
+    text: "H\u1EA1 M\u1EAFt Hang"
+    countPrevious: 0
+    marker: crystalforest
+  xp: 840
+  gold: 110
+  items:
+  - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
+    count: 2
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 592942e69aa798e479ae2944c9462c39, type: 2}

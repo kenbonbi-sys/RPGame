@@ -136,7 +136,7 @@ namespace RPG
         }
 
         /// <summary>
-        /// Numbers the zone's enemies, boss and rocks in scene order, a frame after the zone
+        /// Numbers the zone's enemies, bosses, rocks and crystal pillars in scene order, a frame after the zone
         /// loaded (so camps have made their enemies). Every machine loads the same scene, so the
         /// numbers match.
         /// </summary>
@@ -154,6 +154,7 @@ namespace RPG
                     if (t.GetComponent<BossBase>() != null) kind = NetEntityKind.Boss;
                     else if (t.GetComponent<EnemyBase>() != null) kind = NetEntityKind.Enemy;
                     else if (t.GetComponent<Boulder>() != null) kind = NetEntityKind.Boulder;
+                    else if (t.GetComponent<CrystalPillar>() != null) kind = NetEntityKind.Pillar;
                     else continue;
                     var e = NetEntity.Attach(t.gameObject, kind);
                     e.Id = NetProtocol.SceneIdBase + ++n;
@@ -448,7 +449,7 @@ namespace RPG
             }
             float reach = ServerPlayers.ViewRadius;
             if (kind == NetCues.Kind.Projectile) reach += m.a * m.b;   // speed × lifetime
-            else if (kind == NetCues.Kind.Arc) reach += Vector2.Distance(m.pos, m.pos2);
+            else if (kind == NetCues.Kind.Arc || kind == NetCues.Kind.Beam) reach += Vector2.Distance(m.pos, m.pos2);
             else if (kind == NetCues.Kind.Shake || kind == NetCues.Kind.Flash || kind == NetCues.Kind.Impact ||
                      kind == NetCues.Kind.Log || kind == NetCues.Kind.Banner || kind == NetCues.Kind.FlatSound) reach = Mathf.Max(reach, m.d);
             ServerPlayers.SendNear(m, m.pos, reach);
@@ -708,7 +709,7 @@ namespace RPG
             var db = GameManager.I != null ? GameManager.I.db : null;
             if (db == null) return;
             var prefab = m.id == "spore" ? db.sporePrefab : m.id == "venom" ? db.venomPrefab : m.id == "web" ? db.webPrefab
-                       : m.id == "fireball" ? db.fireballPrefab : null;
+                       : m.id == "fireball" ? db.fireballPrefab : m.id == "shard" ? db.shardPrefab : null;
             if (prefab == null) return;
             var go = Pool.Get(prefab, m.pos, Quaternion.identity);
             var fx = go.GetComponent<PooledFX>();
