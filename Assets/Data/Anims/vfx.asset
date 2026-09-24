@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: vfx
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: slash
+    frames:
+    - {fileID: -796450183, guid: 1e3a0514971fad5468afe13c325465e2, type: 3}
+    - {fileID: 976033709, guid: 1e3a0514971fad5468afe13c325465e2, type: 3}
+    - {fileID: 1536642080, guid: 1e3a0514971fad5468afe13c325465e2, type: 3}
+    - {fileID: 869136144, guid: 1e3a0514971fad5468afe13c325465e2, type: 3}
+    - {fileID: -1969980785, guid: 1e3a0514971fad5468afe13c325465e2, type: 3}
+    fps: 24
+    loop: 0
+  - name: claw
+    frames:
+    - {fileID: -249211892, guid: 72693e20ed714e349a463b1a7595cb47, type: 3}
+    - {fileID: 44938220, guid: 72693e20ed714e349a463b1a7595cb47, type: 3}
+    - {fileID: 819014826, guid: 72693e20ed714e349a463b1a7595cb47, type: 3}
+    - {fileID: 2052604259, guid: 72693e20ed714e349a463b1a7595cb47, type: 3}
+    fps: 18
+    loop: 0
+  - name: fire
+    frames:
+    - {fileID: 2067375441, guid: 9e0cf0345e9249e48acc23041f13cc44, type: 3}
+    - {fileID: -205599045, guid: 9e0cf0345e9249e48acc23041f13cc44, type: 3}
+    - {fileID: -663194820, guid: 9e0cf0345e9249e48acc23041f13cc44, type: 3}
+    - {fileID: -1504207067, guid: 9e0cf0345e9249e48acc23041f13cc44, type: 3}
+    - {fileID: 1261922555, guid: 9e0cf0345e9249e48acc23041f13cc44, type: 3}
+    - {fileID: -509089665, guid: 9e0cf0345e9249e48acc23041f13cc44, type: 3}
+    - {fileID: 2109347788, guid: 9e0cf0345e9249e48acc23041f13cc44, type: 3}
+    - {fileID: -1233831199, guid: 9e0cf0345e9249e48acc23041f13cc44, type: 3}
+    fps: 14
+    loop: 0
+  - name: smoke_px
+    frames:
+    - {fileID: -779923525, guid: c8372f2d0fc485e4da9fe8f0f76b57e0, type: 3}
+    - {fileID: -2126171165, guid: c8372f2d0fc485e4da9fe8f0f76b57e0, type: 3}
+    - {fileID: -55797085, guid: c8372f2d0fc485e4da9fe8f0f76b57e0, type: 3}
+    - {fileID: -1109208845, guid: c8372f2d0fc485e4da9fe8f0f76b57e0, type: 3}
+    fps: 10
+    loop: 0
+  - name: dust
+    frames:
+    - {fileID: -706040104, guid: 702fc6d34406d7244bb75d50241d4689, type: 3}
+    - {fileID: -1293773552, guid: 702fc6d34406d7244bb75d50241d4689, type: 3}
+    - {fileID: 1767746427, guid: 702fc6d34406d7244bb75d50241d4689, type: 3}
+    - {fileID: -1627519326, guid: 702fc6d34406d7244bb75d50241d4689, type: 3}
+    fps: 12
+    loop: 0
+  - name: fireball
+    frames:
+    - {fileID: 315210831, guid: 9acabdf1a609a5447ab306e9829de978, type: 3}
+    - {fileID: -414357821, guid: 9acabdf1a609a5447ab306e9829de978, type: 3}
+    - {fileID: -1099300790, guid: 9acabdf1a609a5447ab306e9829de978, type: 3}
+    - {fileID: -1016987595, guid: 9acabdf1a609a5447ab306e9829de978, type: 3}
+    fps: 12
+    loop: 1
+  - name: ice_spike
+    frames:
+    - {fileID: 2145764264, guid: d5ca6973ee10d714f9f8c5649080a5b9, type: 3}
+    - {fileID: -1415288499, guid: d5ca6973ee10d714f9f8c5649080a5b9, type: 3}
+    - {fileID: 1434352175, guid: d5ca6973ee10d714f9f8c5649080a5b9, type: 3}
+    - {fileID: -1590446485, guid: d5ca6973ee10d714f9f8c5649080a5b9, type: 3}
+    - {fileID: 333356917, guid: d5ca6973ee10d714f9f8c5649080a5b9, type: 3}
+    - {fileID: 1799573826, guid: d5ca6973ee10d714f9f8c5649080a5b9, type: 3}
+    fps: 14
+    loop: 0
+  - name: bolt_hit
+    frames:
+    - {fileID: -469277628, guid: 74d333732e7786440bb467ee199a2b18, type: 3}
+    - {fileID: 491279100, guid: 74d333732e7786440bb467ee199a2b18, type: 3}
+    - {fileID: 1960350931, guid: 74d333732e7786440bb467ee199a2b18, type: 3}
+    - {fileID: 904189138, guid: 74d333732e7786440bb467ee199a2b18, type: 3}
+    fps: 18
+    loop: 0
+  - name: hit
+    frames:
+    - {fileID: -1494260774, guid: d144b434bf1aff94488be79782d3f6f4, type: 3}
+    - {fileID: -218443139, guid: d144b434bf1aff94488be79782d3f6f4, type: 3}
+    - {fileID: -368686942, guid: d144b434bf1aff94488be79782d3f6f4, type: 3}
+    - {fileID: 402478197, guid: d144b434bf1aff94488be79782d3f6f4, type: 3}
+    fps: 24
+    loop: 0
+  - name: explosion
+    frames:
+    - {fileID: -1488267940, guid: 7b42a6b214a8c14488e29078d08ebebd, type: 3}
+    - {fileID: 1954622729, guid: 7b42a6b214a8c14488e29078d08ebebd, type: 3}
+    - {fileID: 1085559620, guid: 7b42a6b214a8c14488e29078d08ebebd, type: 3}
+    - {fileID: 548423076, guid: 7b42a6b214a8c14488e29078d08ebebd, type: 3}
+    - {fileID: -691382957, guid: 7b42a6b214a8c14488e29078d08ebebd, type: 3}
+    - {fileID: -1167460014, guid: 7b42a6b214a8c14488e29078d08ebebd, type: 3}
+    - {fileID: 981569078, guid: 7b42a6b214a8c14488e29078d08ebebd, type: 3}
+    fps: 16
+    loop: 0
+  - name: poison
+    frames:
+    - {fileID: -625951102, guid: 721ad04ee8d107b4e869a9ca1025c1ae, type: 3}
+    - {fileID: -332624562, guid: 721ad04ee8d107b4e869a9ca1025c1ae, type: 3}
+    - {fileID: 1018760679, guid: 721ad04ee8d107b4e869a9ca1025c1ae, type: 3}
+    - {fileID: -1682227204, guid: 721ad04ee8d107b4e869a9ca1025c1ae, type: 3}
+    fps: 8
+    loop: 0

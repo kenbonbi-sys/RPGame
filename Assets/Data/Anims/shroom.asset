@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: shroom
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: 85164712, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    - {fileID: 1435405781, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    fps: 3
+    loop: 1
+  - name: move
+    frames:
+    - {fileID: 1907180812, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    - {fileID: 2089105593, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    - {fileID: 573641934, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    - {fileID: 406659007, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    fps: 7
+    loop: 1
+  - name: attack
+    frames:
+    - {fileID: -1979426684, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    - {fileID: 671254994, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    - {fileID: -53197261, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    fps: 9
+    loop: 0
+  - name: hurt
+    frames:
+    - {fileID: -878420819, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: 917941513, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    - {fileID: -927049755, guid: 8858d659ffbb3984aa82147e7116f2bd, type: 3}
+    fps: 6
+    loop: 0

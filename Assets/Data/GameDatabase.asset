@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b38d1678b3ee1b44b9dfbc944d893a3, type: 3}
+  m_Name: GameDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.GameDatabase
+  items:
+  - {fileID: 11400000, guid: 1db11824d0c4c5647b687cad6191c8f2, type: 2}
+  - {fileID: 11400000, guid: e51cc3e24f73a934a95e7175837de719, type: 2}
+  - {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+  - {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
+  - {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
+  - {fileID: 11400000, guid: 2e4bdde857e7a4c43b2039d5cae2446e, type: 2}
+  - {fileID: 11400000, guid: b1590608630050e49b72adc6a413db98, type: 2}
+  - {fileID: 11400000, guid: b53a73395b653b140b7514945ce29fc0, type: 2}
+  - {fileID: 11400000, guid: 6f1e4987b84929547aadbeb4fce03793, type: 2}
+  - {fileID: 11400000, guid: eef0c1b63f5d7d04db29774a7c3ca893, type: 2}
+  - {fileID: 11400000, guid: e984d01a22c67604ead7c18aa741127e, type: 2}
+  - {fileID: 11400000, guid: a7a01d4106c1a1c4f80f45f92ea0598d, type: 2}
+  - {fileID: 11400000, guid: 8205ef3ae86c8dd4b822c9d624967d22, type: 2}
+  - {fileID: 11400000, guid: 57d6c33cf17daf449bbe470104bbd9d8, type: 2}
+  - {fileID: 11400000, guid: 3c135746fe3361043917fd1a255e46fe, type: 2}
+  - {fileID: 11400000, guid: 2473497de0bf7d748bbccd86f84bac8b, type: 2}
+  - {fileID: 11400000, guid: 6c41f0786e53970429e119a29978a692, type: 2}
+  - {fileID: 11400000, guid: e9ad6a108e3e8244f9f996dcc0f5f179, type: 2}
+  - {fileID: 11400000, guid: b64dd0d615888974f82f3c6084f35e88, type: 2}
+  - {fileID: 11400000, guid: 40972aa092910ac4b9f614dac3ea426a, type: 2}
+  - {fileID: 11400000, guid: be0441401d16df64d97895e32b062ddd, type: 2}
+  skills:
+  - {fileID: 11400000, guid: 65402b2295e328441bfde437665d4516, type: 2}
+  - {fileID: 11400000, guid: ee7a7175b4dbe3c488fb72bd5cee42c5, type: 2}
+  - {fileID: 11400000, guid: 857671e8dc3655642a47890aff497711, type: 2}
+  - {fileID: 11400000, guid: 04c74a943f8f308409de1f0210e93986, type: 2}
+  - {fileID: 11400000, guid: 337752403b8b9124185adcaf95f3be28, type: 2}
+  - {fileID: 11400000, guid: eeb6709ee72519e4391c139d08419404, type: 2}
+  - {fileID: 11400000, guid: 10f7cd43ed1e051478eac3fe47e44317, type: 2}
+  - {fileID: 11400000, guid: 3c6597995ce88534c931ff085631144a, type: 2}
+  shadowSprite: {fileID: 21300000, guid: b83736aed3397fe43b51422ef41c87df, type: 3}
+  whiteSprite: {fileID: -8108132, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
+  starIcon: {fileID: 1035912729, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
+  skullIcon: {fileID: -1397774851, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
+  questExclaim: {fileID: 664657996, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
+  questQuestion: {fileID: 327105227, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
+  glowSprite: {fileID: 21300000, guid: df29759890040a745ad1109a1c8c835d, type: 3}
+  beamSprite: {fileID: 21300000, guid: 7502c21665e27f1418fc2dd8ff7c3f61, type: 3}
+  cursorDefault: {fileID: 2800000, guid: 8c1403e44af8eef44bad42180573b94c, type: 3}
+  cursorAttack: {fileID: 2800000, guid: 2eb3d9fd7e9344d4d800e02fa5ba872b, type: 3}
+  stunIcon: {fileID: -1273753742, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
+  slowIcon: {fileID: 606797293, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
+  burnIcon: {fileID: -66854105, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
+  shieldIcon: {fileID: -1526223856, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
+  regenIcon: {fileID: -44040512, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
+  spriteLit: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  spriteUnlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  additive: {fileID: 2100000, guid: a184b5641139f194985755424d990a2a, type: 2}
+  silhouette: {fileID: 2100000, guid: 1f84dbfe08255ea4d9374c86abc7b260, type: 2}
+  lootPrefab: {fileID: 2862509457457448059, guid: 10a1b2f33b4f8924990642e726f4da20, type: 3}
+  boulderPrefab: {fileID: 3030058634836534199, guid: 5efdeceb5a415374a99a79a4b31a417e, type: 3}
+  telegraphPrefab: {fileID: 7646218539987314593, guid: cf386788186100248a105298daf6962b, type: 3}
+  rockProjectilePrefab: {fileID: 4887976638785927589, guid: 99d4a012649b7944c966d828601841ee, type: 3}
+  fireballPrefab: {fileID: 1260040946324525447, guid: f1d1754b37fb14245927ca86a84d88c4, type: 3}
+  sporePrefab: {fileID: 6042711782838213100, guid: fd31be627857a9e42acb63795f625cd5, type: 3}

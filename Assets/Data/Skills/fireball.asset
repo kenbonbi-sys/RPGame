@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a6d3d79bf8fa7b4e81fb9dae20841d1, type: 3}
+  m_Name: fireball
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.FireballSkill
+  id: fireball
+  displayName: "C\u1EA7u L\u1EEDa"
+  description: "Ph\xF3ng c\u1EA7u l\u1EEDa n\u1ED5 tung khi tr\xFAng m\u1EE5c ti\xEAu, thi\xEAu \u0111\u1ED1t k\u1EBB \u0111\u1ECBch trong 3 gi\xE2y."
+  icon: {fileID: -675067362, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  cooldown: 3
+  energyCost: 12
+  lockTime: 0.3
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_fireball_cast
+  maxRange: 12
+  damage: 46
+  speed: 11
+  explodeRadius: 1.7
+  burnDps: 8
+  burnDuration: 3
+  critChance: 0.12

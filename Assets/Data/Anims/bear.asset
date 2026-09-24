@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: bear
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: -1485431848, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: 1798716856, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 3
+    loop: 1
+  - name: walk
+    frames:
+    - {fileID: 1575033683, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: 917383198, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: 627482028, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: -834215784, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 6
+    loop: 1
+  - name: windup
+    frames:
+    - {fileID: 1199712233, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: 735848930, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 6
+    loop: 0
+  - name: slam
+    frames:
+    - {fileID: -1768513089, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: 1349854684, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 10
+    loop: 0
+  - name: throw
+    frames:
+    - {fileID: -86212813, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: -1507925676, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 8
+    loop: 0
+  - name: crouch
+    frames:
+    - {fileID: -222907444, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 1
+    loop: 0
+  - name: air
+    frames:
+    - {fileID: 658840187, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 1
+    loop: 0
+  - name: roar
+    frames:
+    - {fileID: 852695042, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: 1190646317, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 6
+    loop: 1
+  - name: hurt
+    frames:
+    - {fileID: 1619667383, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: 687394510, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    - {fileID: 1812740720, guid: 36ce20e1b7eeda54cb1278d5398c02d6, type: 3}
+    fps: 3
+    loop: 0

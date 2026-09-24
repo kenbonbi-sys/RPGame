@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: sword
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: sword
+  displayName: "Ki\u1EBFm S\u1EAFt"
+  description: "Thanh ki\u1EBFm s\u1EAFt \u0111\xE1ng tin c\u1EADy."
+  icon: {fileID: 486706123, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 3
+  rarity: 0
+  maxStack: 1
+  value: 30
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

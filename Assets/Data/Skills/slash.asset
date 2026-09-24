@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40c369d4f96680145b54ba8bfd2410d5, type: 3}
+  m_Name: slash
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SlashSkill
+  id: slash
+  displayName: "Ch\xE9m Gi\xF3"
+  description: "Vung ki\u1EBFm t\u1EA1o lu\u1ED3ng gi\xF3 ch\xE9m h\xECnh v\xF2ng cung. \u0110\xF2n th\u1EE9 3 li\xEAn ti\u1EBFp g\xE2y s\xE1t th\u01B0\u01A1ng c\u1EF1c m\u1EA1nh."
+  icon: {fileID: 267352410, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  cooldown: 0.42
+  energyCost: 0
+  lockTime: 0.26
+  animBase: attack
+  moveWhileCasting: 0.35
+  castSfx: 
+  maxRange: 12
+  damage: 22
+  radius: 1.9
+  angle: 150
+  knockback: 4
+  critChance: 0.15
+  comboWindow: 0.9
+  finisherMultiplier: 1.7

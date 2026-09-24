@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: claw
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: claw
+  displayName: "Vu\u1ED1t G\u1EA5u Ma"
+  description: "M\xF3ng vu\u1ED1t c\u1EE7a G\u1EA5u Ma R\u1EEBng Gi\xE0, v\u1EABn c\xF2n t\u1ECFa kh\xED l\u1EA1nh."
+  icon: {fileID: -698749146, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 2
+  maxStack: 99
+  value: 80
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

@@ -1,0 +1,131 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: player
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle_down
+    frames:
+    - {fileID: -1285984436, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: -1446932889, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 3
+    loop: 1
+  - name: idle_up
+    frames:
+    - {fileID: -2035663676, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: -710180237, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 3
+    loop: 1
+  - name: idle_side
+    frames:
+    - {fileID: -603044239, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: -578976631, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 3
+    loop: 1
+  - name: walk_down
+    frames:
+    - {fileID: -528687572, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 760905314, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: -950121270, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: -1658069973, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 10
+    loop: 1
+  - name: walk_up
+    frames:
+    - {fileID: -2078360302, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 772766040, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 240622097, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 1995887325, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 10
+    loop: 1
+  - name: walk_side
+    frames:
+    - {fileID: 1644280704, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: -1789069270, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 578840960, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 885864096, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 10
+    loop: 1
+  - name: attack_down
+    frames:
+    - {fileID: 195642374, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 754750491, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: -1020335764, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 16
+    loop: 0
+  - name: attack_up
+    frames:
+    - {fileID: -1792782761, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 1234215107, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 1768408784, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 16
+    loop: 0
+  - name: attack_side
+    frames:
+    - {fileID: -1634431093, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 31742026, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: -2003825387, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 16
+    loop: 0
+  - name: cast_down
+    frames:
+    - {fileID: 1120505824, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 1738261993, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 1
+  - name: cast_up
+    frames:
+    - {fileID: 108781541, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 449932243, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 1
+  - name: cast_side
+    frames:
+    - {fileID: -675659572, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    - {fileID: 2063764356, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 1
+  - name: hurt_down
+    frames:
+    - {fileID: -2044196545, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 0
+  - name: hurt_up
+    frames:
+    - {fileID: 820439774, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 0
+  - name: hurt_side
+    frames:
+    - {fileID: -2144920924, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 0
+  - name: dash_down
+    frames:
+    - {fileID: 2044887765, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 0
+  - name: dash_up
+    frames:
+    - {fileID: -438188265, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 0
+  - name: dash_side
+    frames:
+    - {fileID: -370680518, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: 1684228850, guid: 2ab41d16335ee07469cac85ca8f032a9, type: 3}
+    fps: 8
+    loop: 0

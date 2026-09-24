@@ -1,0 +1,990 @@
+fileFormatVersion: 2
+guid: 6d4985c63375f774e9c8df3554a54540
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6158802113039044628
+    second: props_0
+  - first:
+      213: -5693590246162419906
+    second: props_1
+  - first:
+      213: 5113305516112643439
+    second: props_2
+  - first:
+      213: -8689035635190686027
+    second: props_3
+  - first:
+      213: -7340963149319210717
+    second: props_4
+  - first:
+      213: -2011216184659823745
+    second: props_5
+  - first:
+      213: 5618000101936168721
+    second: props_6
+  - first:
+      213: -5369452329608476640
+    second: props_7
+  - first:
+      213: -6305492505211837727
+    second: props_8
+  - first:
+      213: 6539746089192941403
+    second: props_9
+  - first:
+      213: 3786519898515604688
+    second: props_10
+  - first:
+      213: 6247274585842468122
+    second: props_11
+  - first:
+      213: -427282983072032294
+    second: props_12
+  - first:
+      213: 5455203826815307459
+    second: props_13
+  - first:
+      213: -5109818577505360569
+    second: props_14
+  - first:
+      213: 2119963344433259550
+    second: props_15
+  - first:
+      213: 3810576410069108338
+    second: props_16
+  - first:
+      213: -1126118096209317862
+    second: props_17
+  - first:
+      213: 1768696024355884153
+    second: props_18
+  - first:
+      213: -2163347743467975525
+    second: props_19
+  - first:
+      213: 3017328239306347828
+    second: props_20
+  - first:
+      213: 774568690574796275
+    second: props_21
+  - first:
+      213: -5528228173893810620
+    second: props_22
+  - first:
+      213: 1756284534446157293
+    second: props_23
+  - first:
+      213: 8518954811034567692
+    second: props_24
+  - first:
+      213: -8778330639092187190
+    second: props_25
+  - first:
+      213: -1677439461080083856
+    second: props_26
+  - first:
+      213: -4708704120845580051
+    second: props_27
+  - first:
+      213: -2202906833347639133
+    second: props_28
+  - first:
+      213: 2266321774201485983
+    second: props_29
+  - first:
+      213: -6699950694707107707
+    second: props_30
+  - first:
+      213: 6311769280165211270
+    second: props_31
+  - first:
+      213: 4152254151572483245
+    second: props_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: pine_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 76
+        width: 34
+        height: 52
+      alignment: 9
+      pivot: {x: 0.51471, y: 0.05769}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a829147384814828f90b2f53de1221f3
+      internalID: 1371538388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pine_1
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 76
+        width: 34
+        height: 52
+      alignment: 9
+      pivot: {x: 0.51471, y: 0.05769}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 220caa560662937ef0d460c44790482a
+      internalID: 20226189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pine_2
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 76
+        width: 34
+        height: 52
+      alignment: 9
+      pivot: {x: 0.51471, y: 0.05769}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d639b66462a08b7568d9bec91e2b587
+      internalID: -750169196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hut
+      rect:
+        serializedVersion: 2
+        x: 105
+        y: 78
+        width: 52
+        height: 50
+      alignment: 9
+      pivot: {x: 0.50962, y: 0.08}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ac17071aab852c6f0528bf7356bc815
+      internalID: 2052509440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oak_0
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 80
+        width: 44
+        height: 48
+      alignment: 9
+      pivot: {x: 0.51136, y: 0.08333}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 740b1f2fbd7f760c2889435724385240
+      internalID: 221009688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: oak_1
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 80
+        width: 44
+        height: 48
+      alignment: 9
+      pivot: {x: 0.51136, y: 0.08333}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1382e494e7d580ca4b3c74f624623911
+      internalID: -996467787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pillar_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 39
+        width: 18
+        height: 36
+      alignment: 9
+      pivot: {x: 0.52778, y: 0.05556}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0524ddab4e0516ae2736b58d7eea8e33
+      internalID: -313098247
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pillar_1
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 39
+        width: 18
+        height: 36
+      alignment: 9
+      pivot: {x: 0.52778, y: 0.05556}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db5286ad0739d2f5fc047a5d54511482
+      internalID: 1421371927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tent
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 45
+        width: 36
+        height: 30
+      alignment: 9
+      pivot: {x: 0.51389, y: 0.1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89c90f2c48e94374c33c11dd66ba9b8d
+      internalID: 943344662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: well
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 45
+        width: 26
+        height: 30
+      alignment: 9
+      pivot: {x: 0.51923, y: 0.06667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fcda3d19cef4bf0202d814fb266badd6
+      internalID: 1682081605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lantern
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 49
+        width: 10
+        height: 26
+      alignment: 9
+      pivot: {x: 0.45, y: 0.03846}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b81787957a8284f4a0532763f4061d68
+      internalID: 1459000917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boulder
+      rect:
+        serializedVersion: 2
+        x: 113
+        y: 51
+        width: 28
+        height: 24
+      alignment: 9
+      pivot: {x: 0.51786, y: 0.08333}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4a0cf74646ee5790a8f828bb38172dca
+      internalID: 1477158193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: signpost
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 53
+        width: 18
+        height: 22
+      alignment: 9
+      pivot: {x: 0.52778, y: 0.04545}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b1f342313e2a7b629d976749893564c
+      internalID: 869973550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bush_big_0
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 55
+        width: 26
+        height: 20
+      alignment: 9
+      pivot: {x: 0.51923, y: 0.05}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec275066ec4b020425d9950b94edf590
+      internalID: -639442741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bush_big_1
+      rect:
+        serializedVersion: 2
+        x: 188
+        y: 55
+        width: 26
+        height: 20
+      alignment: 9
+      pivot: {x: 0.51923, y: 0.05}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6fb78e7d4e04f926b3f004249e4031ba
+      internalID: -526606660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flame_0
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 55
+        width: 16
+        height: 20
+      alignment: 9
+      pivot: {x: 0.53125, y: 0.05}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad530b6057da002acab7665e19e9800a
+      internalID: -460536006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flame_1
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 55
+        width: 16
+        height: 20
+      alignment: 9
+      pivot: {x: 0.53125, y: 0.05}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 70f895285330efc01385f9c993d50bf6
+      internalID: -1215352254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flame_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 18
+        width: 16
+        height: 20
+      alignment: 9
+      pivot: {x: 0.53125, y: 0.05}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb65cebd98ec7583e77480905f91cf7a
+      internalID: -1591196276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: flame_3
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 18
+        width: 16
+        height: 20
+      alignment: 9
+      pivot: {x: 0.53125, y: 0.05}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39a35d8e71f1871325e80977eea77df0
+      internalID: -86131100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rock_big_0
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 20
+        width: 22
+        height: 18
+      alignment: 9
+      pivot: {x: 0.52273, y: 0.11111}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9c7071d4c5956b21a686ccc11adb1ff7
+      internalID: 994659346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rock_big_1
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 20
+        width: 22
+        height: 18
+      alignment: 9
+      pivot: {x: 0.52273, y: 0.11111}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e45b506cfd6e845c4c0e8440277f69b6
+      internalID: -1936441105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: barrel
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 20
+        width: 14
+        height: 18
+      alignment: 9
+      pivot: {x: 0.53571, y: 0.05556}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 042f7dfc7cc127d610aacdcd12a24161
+      internalID: -1887357517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: log
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 22
+        width: 32
+        height: 16
+      alignment: 9
+      pivot: {x: 0.51562, y: 0.125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0a10f5622faaa5ce77de3a70cfb7c5dc
+      internalID: 248818757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stump
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 22
+        width: 18
+        height: 16
+      alignment: 9
+      pivot: {x: 0.52778, y: 0.125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5b5383105852f8c75cb8b8fe16d798fa
+      internalID: 479710220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: crate
+      rect:
+        serializedVersion: 2
+        x: 147
+        y: 22
+        width: 16
+        height: 16
+      alignment: 9
+      pivot: {x: 0.53125, y: 0.0625}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a37bf6e2babc39ba10c81e1bbe0b0e13
+      internalID: -1869675553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bush_small_0
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 24
+        width: 18
+        height: 14
+      alignment: 9
+      pivot: {x: 0.52778, y: 0.07143}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96d4adc33097d57cb2e3f863349533d6
+      internalID: -1365412942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bush_small_1
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 24
+        width: 18
+        height: 14
+      alignment: 9
+      pivot: {x: 0.52778, y: 0.07143}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27ad90f48823aa0539c9f4a979dc4e2a
+      internalID: 117339170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mushrooms
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 24
+        width: 16
+        height: 14
+      alignment: 9
+      pivot: {x: 0.53125, y: 0.07143}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b88b210713b9f12d2f262c638f2f995
+      internalID: -1442523392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: campfire
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 24
+        width: 20
+        height: 14
+      alignment: 9
+      pivot: {x: 0.525, y: 0.21429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 696efb76495de540d173151fc7495498
+      internalID: -1169827857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fence_h
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 24
+        width: 16
+        height: 14
+      alignment: 9
+      pivot: {x: 0.53125, y: 0.07143}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3bbf68f347865ce8c7dd496721ba5c0a
+      internalID: 28545197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fence_post
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3
+        width: 6
+        height: 14
+      alignment: 9
+      pivot: {x: 0.41667, y: 0.07143}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08f0f45615e20eab1436f17b99d52243
+      internalID: -1182865611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rock_small_0
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 7
+        width: 12
+        height: 10
+      alignment: 9
+      pivot: {x: 0.54167, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc5cad60d9349f0966270eafe509aa5b
+      internalID: -144341374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rock_small_1
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 7
+        width: 12
+        height: 10
+      alignment: 9
+      pivot: {x: 0.54167, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ec09a5fe5bbf96924b074e35986461f
+      internalID: 2114989198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: cace276210f051f468de0670a0ef2be9
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      barrel: -1887357517
+      boulder: 1477158193
+      bush_big_0: -639442741
+      bush_big_1: -526606660
+      bush_small_0: -1365412942
+      bush_small_1: 117339170
+      campfire: -1169827857
+      crate: -1869675553
+      fence_h: 28545197
+      fence_post: -1182865611
+      flame_0: -460536006
+      flame_1: -1215352254
+      flame_2: -1591196276
+      flame_3: -86131100
+      hut: 2052509440
+      lantern: 1459000917
+      log: 248818757
+      mushrooms: -1442523392
+      oak_0: 221009688
+      oak_1: -996467787
+      pillar_0: -313098247
+      pillar_1: 1421371927
+      pine_0: 1371538388
+      pine_1: 20226189
+      pine_2: -750169196
+      rock_big_0: 994659346
+      rock_big_1: -1936441105
+      rock_small_0: -144341374
+      rock_small_1: 2114989198
+      signpost: 869973550
+      stump: 479710220
+      tent: 943344662
+      well: 1682081605
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

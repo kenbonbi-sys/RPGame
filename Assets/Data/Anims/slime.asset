@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: slime
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: 775448245, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    - {fileID: -2014129083, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    fps: 4
+    loop: 1
+  - name: move
+    frames:
+    - {fileID: -1661889488, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    - {fileID: -1661768613, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    - {fileID: 2038291886, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    - {fileID: 123114594, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    fps: 8
+    loop: 1
+  - name: attack
+    frames:
+    - {fileID: 1001113727, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    - {fileID: -1862095626, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    - {fileID: 1716307975, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    fps: 10
+    loop: 0
+  - name: hurt
+    frames:
+    - {fileID: -1512834540, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: 569103112, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    - {fileID: 25887009, guid: f65687aefc7b41d46b11e42ded68c8ba, type: 3}
+    fps: 6
+    loop: 0

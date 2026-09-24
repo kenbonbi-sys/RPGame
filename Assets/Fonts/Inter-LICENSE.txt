@@ -1,0 +1,3 @@
+Inter typeface family by Rasmus Andersson (https://rsms.me/inter/)
+Licensed under the SIL Open Font License, Version 1.1 (https://openfontlicense.org)
+Copied from the Unity Editor installation, which ships the same OFL-licensed files.

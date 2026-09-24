@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: apple
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: apple
+  displayName: "T\xE1o \u0110\u1ECF"
+  description: "Gi\xF2n ng\u1ECDt. H\u1ED3i 10 M\xE1u."
+  icon: {fileID: -1373987852, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 1
+  rarity: 0
+  maxStack: 99
+  value: 2
+  healAmount: 10
+  energyAmount: 0
+  cleanse: 0

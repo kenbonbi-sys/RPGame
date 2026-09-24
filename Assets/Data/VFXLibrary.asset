@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be17a3b91dc928f4ab2873a3ee8a76f9, type: 3}
+  m_Name: VFXLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.VFXLibrary
+  entries:
+  - id: hit_spark
+    prefab: {fileID: 6978037436691473034, guid: c26b7c17ce2276849a38d0e6204983a2, type: 3}
+  - id: hit_fire
+    prefab: {fileID: 8020374056619834611, guid: 7d13b977c77125c409899183da831d7a, type: 3}
+  - id: hit_ice
+    prefab: {fileID: 1202884145077558455, guid: 7bab96991bb1c204e8ed0fb604b3aff4, type: 3}
+  - id: hit_lightning
+    prefab: {fileID: 1328365981762144279, guid: b0c8150d6a044394da6f1b8795e5adb6, type: 3}
+  - id: stun_stars
+    prefab: {fileID: 7254493414552805274, guid: e57b9f7ef481ef14db53142addee4a7e, type: 3}
+  - id: burning
+    prefab: {fileID: 3520948791795998669, guid: 73a8b590632605b48894a92e9f2c5d00, type: 3}
+  - id: slash
+    prefab: {fileID: 3254031615278132758, guid: 5a89b8b159bf0b84a8edb23e456fcaaa, type: 3}
+  - id: slash_big
+    prefab: {fileID: 7367705504774909085, guid: 3ff3bd129ffd89a4da7a160b9da9eab7, type: 3}
+  - id: cast_fire
+    prefab: {fileID: 724409651580492502, guid: 28f5f0e9968d3d942aca72b1a02a96be, type: 3}
+  - id: fire_explosion
+    prefab: {fileID: 3033194321731577801, guid: db188d0578027004caf3a0a0b392d5e8, type: 3}
+  - id: cast_ice
+    prefab: {fileID: 7533921849840607636, guid: 91ff3a43b8921504d9b9eed3aad4292f, type: 3}
+  - id: ice_spike
+    prefab: {fileID: 8996848823142553888, guid: eadccf783d232a841a632e183e8c7f1e, type: 3}
+  - id: storm_circle
+    prefab: {fileID: 833532787199705278, guid: 1e17e5516b74afa4d80801b8ab1b2e8e, type: 3}
+  - id: cast_lightning
+    prefab: {fileID: 7472865711282048500, guid: 4cf6c76c897823442851fd4ca7900af2, type: 3}
+  - id: lightning_strike
+    prefab: {fileID: 7404096161811967856, guid: 1bcb30e4a9acaf849b081978cd4c8190, type: 3}
+  - id: heal_burst
+    prefab: {fileID: 6412319813787452344, guid: 39e7b37d283a5c045be8291a10cd485b, type: 3}
+  - id: heal_aura
+    prefab: {fileID: 6509750967255280541, guid: 006cb793263ad2249b4373960911500f, type: 3}
+  - id: shield_cast
+    prefab: {fileID: 1755492040596546271, guid: 78a9a93f6a448db4a9347071e6cb4418, type: 3}
+  - id: shield_bubble
+    prefab: {fileID: 2815440624077487661, guid: 3ffae54a67ce40a4aab2b1b2485f3feb, type: 3}
+  - id: shield_break
+    prefab: {fileID: 3517823290432375610, guid: 28d52bfa909fa78448b2bbf04b987a62, type: 3}
+  - id: blade_storm
+    prefab: {fileID: 1821797400469207944, guid: 06bd702f5e9b2b04186376a7a7c877dd, type: 3}
+  - id: dash_burst
+    prefab: {fileID: 3218549169017573904, guid: 459d5047c07a8b346ba373ec31a5d16a, type: 3}
+  - id: step_dust
+    prefab: {fileID: 4409933543846988202, guid: 2da384479daea4649a4e396e4eaa1815, type: 3}
+  - id: potion_red
+    prefab: {fileID: 2688703102062617169, guid: 181e598a42c3ae94d96e392c8d6e71a7, type: 3}
+  - id: potion_blue
+    prefab: {fileID: 6189006737071102748, guid: 43851abdaa636144694ff84a34344210, type: 3}
+  - id: potion_green
+    prefab: {fileID: 5051993230291513042, guid: 2c10d47c821299349bf292017528cd91, type: 3}
+  - id: click_marker
+    prefab: {fileID: 8895960286448486607, guid: e0eb6efee77a47d458781fda046626c5, type: 3}
+  - id: respawn
+    prefab: {fileID: 4577948843949733679, guid: caa08554f15f2f644b93fd45deef8062, type: 3}
+  - id: quest_complete
+    prefab: {fileID: 6891808650866258255, guid: 9edf33c916b1f5442846e8c8ff391acf, type: 3}
+  - id: rock_chips
+    prefab: {fileID: 3974880333648121693, guid: d1b723f7d1be91048a20ad8b2c39ebfd, type: 3}
+  - id: boulder_break
+    prefab: {fileID: 8124116100870641384, guid: 0cfbc14bc17eaad42b84a541a489c7b6, type: 3}
+  - id: pickup_coin
+    prefab: {fileID: 6538213961637188208, guid: 7345274c1757392488125b0012da9965, type: 3}
+  - id: pickup_item
+    prefab: {fileID: 1849578036047594768, guid: 33be218ba23733845ab82f2cc31d1325, type: 3}
+  - id: enemy_death
+    prefab: {fileID: 2567253677435504740, guid: 8a39d15a5a6277f4f9968d266f0e8f27, type: 3}
+  - id: slime_splat
+    prefab: {fileID: 1307259635063086860, guid: e092c44c20067384d8d3321c0fa3708c, type: 3}
+  - id: spore_puff
+    prefab: {fileID: 3754566746660532006, guid: 75f48c9136cdd374b909fc8598cef7cd, type: 3}
+  - id: spore_hit
+    prefab: {fileID: 793179646199178635, guid: ab16032a21e0fc74fb494f791b0d61be, type: 3}
+  - id: boss_roar
+    prefab: {fileID: 6989909864205115917, guid: ff9ef33ffa1b53649a0887162b3478c3, type: 3}
+  - id: enrage_burst
+    prefab: {fileID: 4147754075199234794, guid: aaf2a4beda3c4144e80a899183f6281f, type: 3}
+  - id: enrage_aura
+    prefab: {fileID: 7610535570543622838, guid: b593b297d792c5f4c954911c9f8638b5, type: 3}
+  - id: claw_swipe
+    prefab: {fileID: 8331028852862881743, guid: 0c4e4377fa0279449a5c3101f1491c59, type: 3}
+  - id: stomp_shockwave
+    prefab: {fileID: 3306787513677839357, guid: ba3f53f3318d307429921af598c9e533, type: 3}
+  - id: pounce_land
+    prefab: {fileID: 4477413839546140451, guid: 410c0eb282f56424083d2dd99c7698e1, type: 3}
+  - id: rock_impact
+    prefab: {fileID: 2795923927097017417, guid: 6ce318387a2ce8043861680fb9d724c4, type: 3}
+  - id: boss_death
+    prefab: {fileID: 5600817194895829594, guid: 37c1e2b6efabd0e4c95aff05d5a4421d, type: 3}
