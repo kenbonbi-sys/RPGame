@@ -1416,13 +1416,13 @@ Nhịp 2 tuần, lúc nào cũng có bản build chơi được, và đo bằng 
 
 Tám việc để khởi động GĐ1. Đánh dấu khi xong.
 
-- [ ] Khởi tạo git + Git LFS cho thư mục RPG, commit bản prototype · *Claude làm được*
-- [ ] Chế độ authoring cho Build Everything (không ghi đè chỉnh tay) · *Claude làm được*
+- [x] Khởi tạo git + Git LFS cho thư mục RPG, commit bản prototype · *Claude làm được*
+- [x] Chế độ authoring cho Build Everything (không ghi đè chỉnh tay) · *Claude làm được*
 - [ ] Chơi thử prototype 30 phút, ghi 5 điều thích và 5 điều khó chịu · *Bạn*
 - [ ] Chốt nguồn art: thuê họa sĩ hay mua pack, theo ngân sách · *Bạn quyết*
-- [ ] StatBlock + XP và lên cấp 1–40 · *Claude làm được*
-- [ ] Save v1 với 3 slot và tự lưu · *Claude làm được*
-- [ ] Thanh Trấn Áp + input buffer 150 ms · *Claude làm được*
+- [x] StatBlock + XP và lên cấp 1–40 · *Claude làm được*
+- [x] Save v1 với 3 slot và tự lưu · *Claude làm được*
+- [x] Thanh Trấn Áp + input buffer 150 ms · *Claude làm được*
 - [ ] Tích hợp Yarn Spinner, chuyển thoại hiện có sang file .yarn · *Claude làm được*
 
 ### Cần bạn chốt
