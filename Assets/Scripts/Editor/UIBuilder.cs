@@ -28,6 +28,8 @@ namespace RPG.EditorTools
             public HUD hud;
             public Image flash;
             public MinimapUI minimap;
+            public CanvasGroup loading;
+            public TextMeshProUGUI loadingTitle;
         }
 
         // ================================================================== primitives
@@ -154,16 +156,20 @@ namespace RPG.EditorTools
             hud.energyOrb = BuildOrb(root, "EnergyOrb", OrbUI.Kind.Energy, "Năng lượng", EnergyBlue, new Vector2(1, 0), new Vector2(-150, 150), false);
             BuildPotionBar(root, hud);
             BuildSkillBar(root, hud);
+            hud.xpBar = BuildXpBar(root);
             BuildBuffBar(root, hud);
             BuildBanner(root, hud);
             BuildDialogue(root);
             hud.inventory = BuildInventory(root);
             hud.journal = BuildJournal(root);
+            hud.character = BuildCharacter(root);
             hud.help = BuildHelp(root);
             hud.pause = BuildPause(root);
+            hud.saves = BuildSaves(root);
             hud.death = BuildDeath(root);
             hud.tooltip = BuildTooltip(root);
             BuildHint(root);
+            BuildLoading(root, refs);
             return refs;
         }
 
@@ -252,6 +258,18 @@ namespace RPG.EditorTools
             Img(frame, "frame_boss", Color.white, Image.Type.Sliced);
             ui.hpText = Txt(frame, "HP", "6825 / 6825", 22, Color.white, TextAlignmentOptions.Center, C, C, new Vector2(0, 1), new Vector2(400, 30));
             ui.hpText.textWrappingMode = TextWrappingModes.NoWrap;
+            // Thanh Trấn Áp under the frame
+            var poise = Rect(shake, "Poise", C, C, new Vector2(0, -64), new Vector2(560, 22));
+            ui.poiseRoot = poise.gameObject;
+            var ptrack = Rect(poise, "Track", C, C, new Vector2(40, 0), new Vector2(460, 9));
+            Img(ptrack, "white", new Color(0.08f, 0.05f, 0.06f, 0.9f));
+            var pfill = Stretch(ptrack, "Fill", 1);
+            ui.poiseFill = Img(pfill, "white", new Color(0.95f, 0.8f, 0.4f), Image.Type.Filled);
+            ui.poiseFill.fillMethod = Image.FillMethod.Horizontal;
+            ui.poiseFill.fillAmount = 0;
+            ui.poiseLabel = Txt(poise, "Label", "Trấn Áp", 17, new Color(0.8f, 0.76f, 0.7f), TextAlignmentOptions.MidlineRight,
+                                C, new Vector2(1f, 0.5f), new Vector2(-196, 0), new Vector2(170, 22));
+            ui.poiseLabel.textWrappingMode = TextWrappingModes.NoWrap;
             hud.bossBar = ui;
         }
 
@@ -420,12 +438,13 @@ namespace RPG.EditorTools
                 Vector2 pos;
                 if (i < 6) pos = new Vector2(-(5 - i) * (size + gap) - size / 2, size / 2);
                 else pos = new Vector2(-(7 - i) * (size + gap) - size / 2, size + 14 + size / 2);
-                string key = InputReader.SkillKeyLabels[i];
+                string key = InputReader.SkillLabel(i);
                 var s = Slot(rt, "Skill_" + key, new Vector2(1, 0), pos, size, out var icon, out var cd, key);
                 var ui = s.gameObject.AddComponent<SkillSlotUI>();
                 ui.slot = i;
                 ui.icon = icon;
                 ui.cooldownMask = cd;
+                ui.keyLabel = s.Find("KeyBadge/Key").GetComponent<TextMeshProUGUI>();
                 ui.readyFlash = Img(s, "ReadyFlash", "white", new Color(1, 1, 1, 0), C, Vector2.zero, new Vector2(size - 14, size - 14));
                 ui.highlight = Img(s, "Highlight", "slot_highlight", Color.white, C, Vector2.zero, new Vector2(size, size), Image.Type.Sliced);
                 ui.highlight.enabled = false;
@@ -502,6 +521,62 @@ namespace RPG.EditorTools
             ui.nameText = Txt(box, "Name", "Trưởng Làng", 30, Gold, TextAlignmentOptions.TopLeft, new Vector2(0, 1), new Vector2(0, 1), new Vector2(206, -20), new Vector2(780, 40));
             ui.bodyText = Txt(box, "Body", "...", 26, Cream, TextAlignmentOptions.TopLeft, new Vector2(0, 1), new Vector2(0, 1), new Vector2(206, -64), new Vector2(800, 110), false);
             ui.hintText = Txt(box, "Hint", "► [F / Space / Click] tiếp tục", 18, Muted, TextAlignmentOptions.BottomRight, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-24, 16), new Vector2(500, 26), false);
+
+            // choices stack above the box's right side: 1 on top
+            var opts = Rect(box, "Options", new Vector2(1, 1), new Vector2(1, 0), new Vector2(-10, 10), new Vector2(600, 3 * 58));
+            ui.optionsRoot = opts;
+            for (int i = 0; i < 3; i++)
+            {
+                var b = Btn(opts, "Option_" + (i + 1), "", new Vector2(0.5f, 1f), new Vector2(0, -29 - i * 58), new Vector2(600, 52), 23);
+                var label = b.GetComponentInChildren<TextMeshProUGUI>();
+                label.alignment = TextAlignmentOptions.MidlineLeft;
+                label.margin = new Vector4(20, 0, 20, 0);
+                ui.optionButtons[i] = b;
+                ui.optionLabels[i] = label;
+            }
+            opts.gameObject.SetActive(false);
+        }
+
+        static Button Btn(Transform parent, string name, string label, Vector2 anchor, Vector2 pos, Vector2 size, float fontSize = 26)
+        {
+            var rt = Rect(parent, name, anchor, C, pos, size);
+            var img = Img(rt, "frame_panel", Color.white, Image.Type.Sliced, true);
+            var b = rt.gameObject.AddComponent<Button>();
+            b.targetGraphic = img;
+            var cols = b.colors;
+            cols.highlightedColor = new Color(1f, 0.92f, 0.7f);
+            cols.pressedColor = new Color(0.8f, 0.75f, 0.6f);
+            b.colors = cols;
+            Txt(rt, "Label", label, fontSize, Cream, TextAlignmentOptions.Center, C, C, Vector2.zero, size);
+            return b;
+        }
+
+        // ================================================================== xp
+        static XpBarUI BuildXpBar(Transform root)
+        {
+            // a thin strip along the bottom edge, between the two orbs and under the slot bars
+            var go = new GameObject("XpBar", typeof(RectTransform));
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(root, false);
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(1, 0);
+            rt.pivot = new Vector2(0.5f, 0);
+            rt.offsetMin = new Vector2(272, 2);
+            rt.offsetMax = new Vector2(-272, 11);
+            var ui = go.AddComponent<XpBarUI>();
+            Img(rt, "white", new Color(0.06f, 0.03f, 0.08f, 0.85f));
+            var fill = Stretch(rt, "Fill", 1);
+            ui.fill = Img(fill, "white", new Color(0.66f, 0.45f, 1f), Image.Type.Filled);
+            ui.fill.fillMethod = Image.FillMethod.Horizontal;
+            ui.flash = Img(Stretch(rt, "Flash", 0), "white", new Color(1, 1, 1, 0));
+            ui.label = Txt(root, "XpLabel", "Cấp 1  ·  0 / 50 XP", 19, new Color(0.86f, 0.8f, 1f), TextAlignmentOptions.Center,
+                           new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 14), new Vector2(420, 26));
+            ui.label.textWrappingMode = TextWrappingModes.NoWrap;
+            ui.pointsHint = Txt(root, "XpPoints", "+3 điểm chỉ số  [C]", 18, Gold, TextAlignmentOptions.Center,
+                                new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 40), new Vector2(420, 26));
+            ui.pointsHint.textWrappingMode = TextWrappingModes.NoWrap;
+            ui.pointsHint.enabled = false;
+            return ui;
         }
 
         // ================================================================== panels
@@ -561,6 +636,34 @@ namespace RPG.EditorTools
             return ui;
         }
 
+        static CharacterUI BuildCharacter(Transform root)
+        {
+            var w = Window(root, "Character", new Vector2(640, 720), new Vector2(-360, 20), out var g, "Nhân Vật");
+            var ui = w.parent.gameObject.AddComponent<CharacterUI>();
+            ui.group = g;
+            ui.window = w;
+            var top = new Vector2(0.5f, 1f);
+            ui.header = Txt(w, "Header", "Cấp 1  ·  0 / 50 XP", 24, new Color(0.86f, 0.8f, 1f), TextAlignmentOptions.Center, top, top, new Vector2(0, -96), new Vector2(560, 32));
+            string[] names = { "Sức Mạnh", "Trí Tuệ", "Nhanh Nhẹn", "Thể Chất" };
+            string[] hints = { "+1.5 Công vật lý · +1% Trấn Áp", "+1.5 Công phép · +3 năng lượng", "+0.25% chí mạng · +0.5% tốc đánh", "+10 máu · +1 giáp · +0.3% kháng" };
+            for (int i = 0; i < 4; i++)
+            {
+                float y = -150 - i * 62;
+                var row = Rect(w, "Attr_" + i, top, top, new Vector2(0, y), new Vector2(560, 56));
+                Img(row, "white", new Color(0.05f, 0.03f, 0.07f, 0.35f));
+                Txt(row, "Name", names[i], 25, Gold, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, 7), new Vector2(220, 30));
+                Txt(row, "Hint", hints[i], 16, Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, -15), new Vector2(360, 22), false);
+                ui.values[i] = Txt(row, "Value", "3", 27, Cream, TextAlignmentOptions.MidlineRight, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-76, 0), new Vector2(160, 40));
+                ui.plusButtons[i] = Btn(row, "Plus", "+", new Vector2(1, 0.5f), new Vector2(-32, 0), new Vector2(44, 44), 30);
+            }
+            ui.pointsText = Txt(w, "Points", "Điểm chỉ số: 0", 21, Cream, TextAlignmentOptions.Center, top, top, new Vector2(0, -400), new Vector2(560, 30), false);
+            Img(w, "Divider2", "divider", Color.white, top, new Vector2(0, -432), new Vector2(360, 12));
+            ui.derivedText = Txt(w, "Derived", "", 19, Cream, TextAlignmentOptions.TopLeft, top, top, new Vector2(0, -446), new Vector2(560, 170), false);
+            Txt(w, "Hint", "[C] Đóng  ·  Thiên phú và điểm kỹ năng dùng được khi có cây thiên phú", 16, Muted, TextAlignmentOptions.Center,
+                new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(600, 24), false);
+            return ui;
+        }
+
         static HelpPanelUI BuildHelp(Transform root)
         {
             var w = Window(root, "Help", new Vector2(1040, 640), Vector2.zero, out var g, "Hướng Dẫn");
@@ -575,7 +678,7 @@ namespace RPG.EditorTools
                 $"{K}Kỹ năng{E}\n  W Cầu Lửa · E Mũi Băng · R Lôi Phạt\n  A Hồi Phục · S Khiên Thánh · D Bão Kiếm\n  Space: Lướt (bất tử trong chốc lát)\n\n" +
                 $"{K}Bình thuốc{E}\n  1 Máu · 2 Năng lượng · 3 Thảo mộc";
             string right =
-                $"{K}Tương tác{E}\n  F: Nói chuyện · B: Túi đồ\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +
+                $"{K}Tương tác{E}\n  F: Nói chuyện · B: Túi đồ · C: Nhân vật\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +
                 $"{K}Mẹo chiến đấu{E}\n  Vòng đỏ dưới đất = đòn sắp đánh.\n  Lướt (Space) ra ngoài vòng!\n  Gấu Ma lao vào Tảng Đá Lớn sẽ bị choáng.\n\n" +
                 $"{K}Phím thử nghiệm{E}\n  F5 hồi đầy · F6 đổi giờ · F7 tới Boss\n  F8 về làng · F9 hạ quái gần";
             Txt(w, "Left", left, 22, Cream, TextAlignmentOptions.TopLeft, new Vector2(0, 1), new Vector2(0, 1), new Vector2(50, -104), new Vector2(460, 460), false);
@@ -587,27 +690,40 @@ namespace RPG.EditorTools
 
         static PauseMenuUI BuildPause(Transform root)
         {
-            var w = Window(root, "Pause", new Vector2(440, 400), Vector2.zero, out var g, "Tạm Dừng");
+            var w = Window(root, "Pause", new Vector2(440, 560), Vector2.zero, out var g, "Tạm Dừng");
             var ui = w.parent.gameObject.AddComponent<PauseMenuUI>();
             ui.group = g;
             ui.window = w;
             ui.pausesGame = true;
-            Button Btn(string label, float y)
+            Button PauseBtn(string label, float y) => Btn(w, "Btn_" + label, label, C, new Vector2(0, y), new Vector2(300, 60));
+            ui.resumeButton = PauseBtn("Tiếp tục", 118);
+            ui.saveButton = PauseBtn("Lưu game", 44);
+            ui.loadButton = PauseBtn("Tải game", -30);
+            ui.helpButton = PauseBtn("Hướng dẫn", -104);
+            ui.quitButton = PauseBtn("Thoát game", -178);
+            return ui;
+        }
+
+        static SaveSlotsUI BuildSaves(Transform root)
+        {
+            var w = Window(root, "Saves", new Vector2(640, 560), Vector2.zero, out var g, "Lưu Game");
+            var ui = w.parent.gameObject.AddComponent<SaveSlotsUI>();
+            ui.group = g;
+            ui.window = w;
+            ui.pausesGame = true;
+            ui.title = w.Find("Title").GetComponent<TextMeshProUGUI>();
+            for (int i = 0; i <= SaveManager.SlotCount; i++)
             {
-                var rt = Rect(w, "Btn_" + label, C, C, new Vector2(0, y), new Vector2(300, 60));
-                var img = Img(rt, "frame_panel", Color.white, Image.Type.Sliced, true);
-                var b = rt.gameObject.AddComponent<Button>();
-                b.targetGraphic = img;
-                var cols = b.colors;
-                cols.highlightedColor = new Color(1f, 0.92f, 0.7f);
-                cols.pressedColor = new Color(0.8f, 0.75f, 0.6f);
-                b.colors = cols;
-                Txt(rt, "Label", label, 26, Cream, TextAlignmentOptions.Center, C, C, Vector2.zero, new Vector2(300, 60));
-                return b;
+                var b = Btn(w, "Slot_" + i, "", new Vector2(0.5f, 1f), new Vector2(0, -140 - i * 94), new Vector2(560, 84), 23);
+                var label = b.GetComponentInChildren<TextMeshProUGUI>();
+                label.alignment = TextAlignmentOptions.MidlineLeft;
+                label.margin = new Vector4(22, 0, 22, 0);
+                label.lineSpacing = -8;
+                ui.rows[i] = b;
+                ui.labels[i] = label;
             }
-            ui.resumeButton = Btn("Tiếp tục", 30);
-            ui.helpButton = Btn("Hướng dẫn", -44);
-            ui.quitButton = Btn("Thoát game", -118);
+            Txt(w, "Hint", "[Esc] Đóng  ·  File lưu cũ được giữ lại dạng .bak", 17, Muted, TextAlignmentOptions.Center,
+                new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(560, 24), false);
             return ui;
         }
 
@@ -645,9 +761,21 @@ namespace RPG.EditorTools
             return ui;
         }
 
+        /// <summary>Black screen with the zone name, shown while the SceneLoader swaps zones (on top of everything).</summary>
+        static void BuildLoading(Transform root, Refs refs)
+        {
+            var rt = Stretch(root, "Loading");
+            var g = Group(rt.gameObject, true);   // interactable: it blocks clicks while visible
+            Img(rt, "white", new Color(0.03f, 0.03f, 0.05f, 1f), Image.Type.Simple, true);
+            refs.loadingTitle = Txt(rt, "Title", "Rừng Thì Thầm", 54, Cream, TextAlignmentOptions.Center, C, C, new Vector2(0, 20), new Vector2(1200, 80));
+            Img(rt, "Divider", "divider", Color.white, C, new Vector2(0, -26), new Vector2(360, 14));
+            Txt(rt, "Sub", "Đang tải…", 22, Muted, TextAlignmentOptions.Center, C, C, new Vector2(0, -60), new Vector2(600, 34), false);
+            refs.loading = g;
+        }
+
         static void BuildHint(Transform root)
         {
-            Txt(root, "HelpHint", "F1: Hướng dẫn   ·   B: Túi đồ   ·   J: Bách Khoa Trùm", 17, new Color(0.8f, 0.78f, 0.85f, 0.7f),
+            Txt(root, "HelpHint", "F1: Hướng dẫn   ·   B: Túi đồ   ·   C: Nhân vật   ·   J: Bách Khoa Trùm", 17, new Color(0.8f, 0.78f, 0.85f, 0.7f),
                 TextAlignmentOptions.Left, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, -14), new Vector2(700, 26), false);
         }
     }

@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: clear_forest
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: clear_forest
+  title: "D\u1ECDn D\u1EB9p R\u1EEBng Th\xEC Th\u1EA7m"
+  kind: 0
+  summary: "L\u0169 Slime R\xEAu v\xE0 N\u1EA5m \u0110\u1ED9c tr\xE0n ra kh\u1EAFp R\u1EEBng Th\xEC Th\u1EA7m, ph\xEDa \u0111\xF4ng l\xE0ng."
+  giver: chief
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 85b47a02ce97a9a48a96201cf90adcb0, type: 2}
+  requiredFlags: []
+  autoStart: 0
+  availableText: 
+  objectives:
+  - kind: 1
+    target: slime
+    count: 4
+    text: "H\u1EA1 Slime R\xEAu"
+    countPrevious: 0
+    marker: forest
+  - kind: 1
+    target: shroom
+    count: 2
+    text: "N\u1EA5m \u0110\u1ED9c"
+    countPrevious: 0
+    marker: forest
+  xp: 120
+  gold: 0
+  items: []
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 851a3537d31a1bb418f9aac2c4c8d799, type: 2}

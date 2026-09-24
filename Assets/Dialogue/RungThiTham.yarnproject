@@ -1,0 +1,13 @@
+{
+  "projectFileVersion": 3,
+  "sourceFiles": [
+    "**/*.yarn"
+  ],
+  "excludeFiles": [
+    "**/*~/*"
+  ],
+  "localisation": {},
+  "baseLanguage": "vi",
+  "definitions": null,
+  "compilerOptions": {}
+}

@@ -63,8 +63,20 @@ namespace RPG
 
         void Start()
         {
+            if (tex == null) BuildTexture();
+            if (objectiveMarker == null) objectiveMarker = MakeIcon(objectiveSprite, new Color(1f, 0.85f, 0.3f), 18);
+        }
+
+        /// <summary>Draws the map of a newly loaded zone.</summary>
+        public void SetWorld(ZoneRoot zone)
+        {
+            ground = zone.ground;
+            tallGrass = zone.tallGrass;
+            dirt = zone.dirt;
+            obstaclesRoot = zone.obstacles;
+            worldSize = new Vector2Int(Mathf.CeilToInt(zone.bounds.xMax), Mathf.CeilToInt(zone.bounds.yMax));
+            if (tex != null) Destroy(tex);
             BuildTexture();
-            objectiveMarker = MakeIcon(objectiveSprite, new Color(1f, 0.85f, 0.3f), 18);
         }
 
         void OnZone(string zone)

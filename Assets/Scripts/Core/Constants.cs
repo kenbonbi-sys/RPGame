@@ -70,6 +70,7 @@ namespace RPG
         public static readonly Color LogLoot = new Color(0.75f, 0.95f, 0.6f);
         public static readonly Color LogQuest = new Color(1f, 0.85f, 0.4f);
         public static readonly Color LogBestiary = new Color(0.85f, 0.8f, 1f);
+        public static readonly Color Xp = new Color(0.78f, 0.62f, 1f);
 
         public static Color ForType(DamageType t)
         {

@@ -18,6 +18,8 @@ namespace RPG
         public void Set(string msg, Color c)
         {
             born = Time.unscaledTime;
+            kind = null;      // lines are pooled: forget what this one said before
+            amount = 0;
             if (text != null)
             {
                 text.text = "• " + msg;

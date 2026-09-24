@@ -6,7 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Game.unity
-    guid: e8f546609e7868849bf856be9bb76b89
+    path: Assets/Scenes/Core.unity
+    guid: 6afd986724d2c5f46a57489d10357b26
+  - enabled: 1
+    path: Assets/Scenes/Zones/RungThiTham.unity
+    guid: ef32082fc4cad0b46a7bc2f438d22303
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

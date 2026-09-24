@@ -22,6 +22,19 @@ namespace RPG
         bool wasOnCooldown;
         bool hovered;
 
+        void OnEnable()
+        {
+            InputReader.BindingsChanged += RefreshKey;
+            RefreshKey();
+        }
+
+        void OnDisable() => InputReader.BindingsChanged -= RefreshKey;
+
+        void RefreshKey()
+        {
+            if (keyLabel != null) keyLabel.text = InputReader.SkillLabel(slot);
+        }
+
         public void OnCast()
         {
             punch = 1f;
@@ -77,7 +90,7 @@ namespace RPG
             var p = GameManager.I != null ? GameManager.I.player : null;
             var s = p != null ? p.skills.slots[slot] : null;
             if (s != null && HUD.I != null && HUD.I.tooltip != null)
-                HUD.I.tooltip.Show($"{s.displayName}  <color=#b8b0c8><size=80%>[{InputReader.SkillKeyLabels[slot]}]</size></color>", s.Tooltip(), new Color(1f, 0.88f, 0.55f));
+                HUD.I.tooltip.Show($"{s.displayName}  <color=#b8b0c8><size=80%>[{InputReader.SkillLabel(slot)}]</size></color>", s.Tooltip(), new Color(1f, 0.88f, 0.55f));
         }
 
         public void OnPointerExit(PointerEventData e)

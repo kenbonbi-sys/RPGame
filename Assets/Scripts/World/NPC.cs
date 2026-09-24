@@ -17,7 +17,7 @@ namespace RPG
         }
     }
 
-    /// <summary>A talkable character. Dialogue comes from the QuestSystem (or the fallback lines).</summary>
+    /// <summary>A talkable character. Dialogue comes from its Yarn node (or the fallback lines).</summary>
     public class NPC : MonoBehaviour
     {
         public static readonly List<NPC> All = new List<NPC>();
@@ -30,6 +30,9 @@ namespace RPG
         public SpriteRenderer questMarker;
         public string idleClip = "chief_idle";
         public string talkClip = "chief_talk";
+        [Tooltip("Yarn node started when the player talks to this NPC (Assets/Dialogue/*.yarn).")]
+        public string yarnNode = "";
+        [Tooltip("Used when there is no Yarn node.")]
         public List<DialogueLine> fallbackLines = new List<DialogueLine>();
 
         NameplateUI plate;
@@ -40,7 +43,6 @@ namespace RPG
 
         void Start()
         {
-            if (HUD.I != null) plate = HUD.I.CreateNameplate(transform, displayName, false, Color.white, null, 1.42f);
             MinimapUI.Register(transform, MinimapUI.MarkerKind.NPC);
         }
 
@@ -62,33 +64,34 @@ namespace RPG
 
         public void Interact(PlayerController p)
         {
-            if (talking || DialogueUI.I == null) return;
-            var lines = QuestSystem.I != null ? QuestSystem.I.GetDialogue(npcId) : null;
-            if (lines == null || lines.Count == 0) lines = fallbackLines;
-            if (lines.Count == 0) return;
-            talking = true;
-            if (body != null && p != null) body.flipX = p.transform.position.x < transform.position.x;
-            if (anim != null) anim.Play(talkClip);
-            DialogueUI.I.Open(this, lines, () =>
+            if (talking || DialogueDirector.I == null) return;
+            bool started = DialogueDirector.I.Talk(this, () =>
             {
                 talking = false;
                 if (anim != null) anim.Play(idleClip);
-                if (QuestSystem.I != null) QuestSystem.I.OnTalked(npcId);
             });
+            if (!started) return;
+            talking = true;
+            if (body != null && p != null) body.flipX = p.transform.position.x < transform.position.x;
+            if (anim != null) anim.Play(talkClip);
         }
 
         void Update()
         {
             if (questMarker != null && QuestSystem.I != null)
             {
-                var m = QuestSystem.I.MarkerFor(npcId);
+                var m = QuestSystem.I.MarkerFor(npcId, out var kind);
                 questMarker.gameObject.SetActive(m != QuestSystem.Marker.None && !talking);
                 if (m != QuestSystem.Marker.None)
                 {
                     var db = GameManager.I.db;
                     questMarker.sprite = m == QuestSystem.Marker.Exclaim ? db.questExclaim : db.questQuestion;
+                    // plan §09: gold for the main story, silver for side quests
+                    questMarker.color = kind == QuestKind.Main ? Color.white : new Color(0.78f, 0.84f, 0.95f);
                 }
             }
+            // created lazily: a zone opened on its own in the editor starts before the Core UI
+            if (plate == null && HUD.I != null) plate = HUD.I.CreateNameplate(transform, displayName, false, Color.white, null, 1.42f);
             if (plate != null && GameManager.I != null && GameManager.I.player != null)
             {
                 float d = Vector2.Distance(GameManager.I.player.transform.position, transform.position);

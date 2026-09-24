@@ -96,6 +96,17 @@ namespace RPG.EditorTools
                 Debug.LogWarning("[RPG] Not a texture: " + t.path);
                 return;
             }
+            // The importer remembers which manifest entry it was sliced from. In authoring mode a
+            // texture is only re-sliced when ArtGen changed that entry, so pivots/borders tuned
+            // by hand in the Sprite Editor survive until the source art itself changes.
+            string mark = "rpg:" + Hash128.Compute(JsonUtility.ToJson(t));
+            if (ti.userData == mark && !EditorUtil.Overwrite)
+            {
+                EditorUtil.Kept++;
+                return;
+            }
+            EditorUtil.Written++;
+            ti.userData = mark;
             ti.textureType = TextureImporterType.Sprite;
             bool multiple = t.sprites.Count > 1;
             ti.spriteImportMode = multiple ? SpriteImportMode.Multiple : SpriteImportMode.Single;
@@ -200,9 +211,17 @@ namespace RPG.EditorTools
                     set = ScriptableObject.CreateInstance<SpriteAnimSet>();
                     AssetDatabase.CreateAsset(set, path);
                 }
-                set.clips.Clear();
+                // authoring mode keeps existing clips (fps, loop and frames may be tuned by hand)
+                // and only adds clips that are new in the manifest
+                if (EditorUtil.Overwrite) set.clips.Clear();
                 foreach (var a in group)
                 {
+                    if (set.clips.Exists(c => c.name == a.name))
+                    {
+                        EditorUtil.Kept++;
+                        continue;
+                    }
+                    EditorUtil.Written++;
                     set.clips.Add(new SpriteAnimSet.Clip
                     {
                         name = a.name,
@@ -223,6 +242,7 @@ namespace RPG.EditorTools
             {
                 var ti = AssetImporter.GetAtPath(p) as TextureImporter;
                 if (ti == null) continue;
+                if (ti.textureType == TextureImporterType.Cursor && !EditorUtil.Overwrite) continue;
                 ti.textureType = TextureImporterType.Cursor;
                 ti.filterMode = FilterMode.Point;
                 ti.mipmapEnabled = false;

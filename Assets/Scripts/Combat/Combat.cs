@@ -11,6 +11,7 @@ namespace RPG
         /// <summary>Damages everything in a circle. Returns the number of targets hit.</summary>
         public static int DamageCircle(Vector2 center, float radius, DamageInfo template, float critChance = 0f, bool feedback = true)
         {
+            DebugConsole.RecordArea(center, radius);
             Util.HealthsInCircle(center, radius, template.sourceTeam, Buffer);
             int n = 0;
             foreach (var h in Buffer)
@@ -19,7 +20,7 @@ namespace RPG
                 d.point = h.transform.position;
                 Vector2 away = (Vector2)h.transform.position - center;
                 d.direction = away.sqrMagnitude > 0.001f ? away.normalized : template.direction;
-                if (critChance > 0) d = d.RollCrit(critChance);
+                d = d.RollCrit(critChance);
                 if (h.TakeDamage(d) > 0)
                 {
                     n++;
@@ -31,6 +32,7 @@ namespace RPG
 
         public static int DamageCone(Vector2 origin, Vector2 dir, float radius, float angle, DamageInfo template, float critChance = 0f)
         {
+            DebugConsole.RecordArea(origin, radius, dir, angle);
             Util.HealthsInCone(origin, dir, radius, angle, template.sourceTeam, Buffer);
             int n = 0;
             foreach (var h in Buffer)
@@ -38,7 +40,7 @@ namespace RPG
                 var d = template;
                 d.point = h.transform.position;
                 d.direction = ((Vector2)h.transform.position - origin).normalized;
-                if (critChance > 0) d = d.RollCrit(critChance);
+                d = d.RollCrit(critChance);
                 if (h.TakeDamage(d) > 0)
                 {
                     n++;

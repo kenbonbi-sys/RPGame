@@ -5,7 +5,7 @@ using UnityEngine;
 namespace RPG
 {
     /// <summary>Player bag: item stacks + gold.</summary>
-    public class Inventory : MonoBehaviour
+    public class Inventory : MonoBehaviour, ISaveable
     {
         public static Inventory I { get; private set; }
 
@@ -22,7 +22,13 @@ namespace RPG
 
         public event Action Changed;
 
-        void Awake() => I = this;
+        void Awake()
+        {
+            I = this;
+            SaveRegistry.Register(this);
+        }
+
+        void OnDestroy() => SaveRegistry.Unregister(this);
 
         public int Count(ItemDef item)
         {
@@ -67,6 +73,50 @@ namespace RPG
             Changed?.Invoke();
             if (announce) GameEvents.RaiseItemPicked(item, n - left);
             return left == 0;
+        }
+
+        // ------------------------------------------------------------------ save
+        [Serializable]
+        class SaveState
+        {
+            public int gold;
+            public List<StackState> stacks = new List<StackState>();
+        }
+
+        [Serializable]
+        class StackState
+        {
+            public string id;
+            public int count;
+        }
+
+        public string SaveKey => "inventory";
+
+        public string CaptureState()
+        {
+            var s = new SaveState { gold = gold };
+            foreach (var st in stacks)
+                if (st.item != null && st.count > 0) s.stacks.Add(new StackState { id = st.item.id, count = st.count });
+            return JsonUtility.ToJson(s);
+        }
+
+        public void RestoreState(string json)
+        {
+            var s = JsonUtility.FromJson<SaveState>(json);
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            gold = s.gold;
+            stacks.Clear();
+            foreach (var st in s.stacks)
+            {
+                var item = db != null ? db.Item(st.id) : null;
+                if (item == null)
+                {
+                    Debug.LogWarning("[Save] Unknown item id: " + st.id);
+                    continue;
+                }
+                stacks.Add(new Stack { item = item, count = st.count });
+            }
+            Changed?.Invoke();
         }
 
         public bool Remove(ItemDef item, int n = 1)

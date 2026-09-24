@@ -3,12 +3,18 @@ using UnityEngine;
 
 namespace RPG
 {
-    /// <summary>All items and skills of the game, plus shared sprites used at runtime.</summary>
+    /// <summary>All items, abilities, quests and dialogue of the game, plus shared sprites used at runtime.</summary>
     [CreateAssetMenu(menuName = "RPG/Game Database")]
     public class GameDatabase : ScriptableObject
     {
         public List<ItemDef> items = new List<ItemDef>();
-        public List<SkillDef> skills = new List<SkillDef>();
+        public List<AbilityDef> abilities = new List<AbilityDef>();
+        public ProgressionConfig progression;
+        public List<QuestDef> quests = new List<QuestDef>();
+        public List<ZoneDef> zones = new List<ZoneDef>();
+        public ZoneDef startZone;
+        [Tooltip("Compiled Yarn project with every NPC's dialogue (Assets/Dialogue).")]
+        public Yarn.Unity.YarnProject dialogue;
 
         [Header("Shared sprites")]
         public Sprite shadowSprite;
@@ -31,6 +37,8 @@ namespace RPG
 
         [Header("Materials")]
         public Material spriteLit;
+        [Tooltip("Lit sprite with dissolve + outline (characters).")]
+        public Material spriteLitFX;
         public Material spriteUnlit;
         public Material additive;
         public Material silhouette;
@@ -57,10 +65,18 @@ namespace RPG
             return item;
         }
 
-        public SkillDef Skill(string id)
+        public ZoneDef Zone(string id)
         {
-            foreach (var s in skills)
-                if (s != null && s.id == id) return s;
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var z in zones)
+                if (z != null && z.id == id) return z;
+            return null;
+        }
+
+        public AbilityDef Ability(string id)
+        {
+            foreach (var a in abilities)
+                if (a != null && a.id == id) return a;
             return null;
         }
     }

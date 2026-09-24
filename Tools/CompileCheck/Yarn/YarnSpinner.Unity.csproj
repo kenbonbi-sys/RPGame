@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The real Yarn Spinner for Unity runtime, cloned by setup.sh at the tag in Packages/manifest.json. -->
+  <PropertyGroup>
+    <AssemblyName>YarnSpinner.Unity</AssemblyName>
+    <DefineConstants>UNITY_EDITOR;UNITY_2021_3_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2019_1_OR_NEWER;USE_TMP;USE_INPUTSYSTEM;ENABLE_INPUT_SYSTEM;YARNTASKS_ARE_SYSTEMTASKS</DefineConstants>
+    <NoWarn>$(NoWarn);CS0108;CS0114;CS1998;CS4014</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(CacheDir)yarn/Runtime/**/*.cs" />
+    <Reference Include="$(CacheDir)yarn/Runtime/DLLs/*.dll" Private="false" />
+    <Reference Include="$(RefsDir)UnityEditor.dll" Private="false" />
+    <ProjectReference Include="../Stubs/RuntimeStubs.csproj" Private="false" />
+  </ItemGroup>
+</Project>

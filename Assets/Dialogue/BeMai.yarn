@@ -1,0 +1,24 @@
+title: Mai
+tags: npc:girl
+---
+// Bé Mai — cô bé bên giếng, giao nhiệm vụ phụ "Nấm Cho Bé Mai".
+<<if quest_status("talk_chief") != "done">>
+    Bé Mai: Anh chị ơi, ông Trưởng Làng đang tìm anh chị đó! Ông đứng cạnh đống lửa. #line:mai_find_chief
+<<elseif quest_status("mushrooms") == "available">>
+    Bé Mai: Mẹ em ốm rồi... Em cần 3 cái Mũ Nấm Đỏ để nấu thuốc. #line:mai_ask_1
+    Bé Mai: Lũ Nấm Độc trong rừng hay rơi ra lắm. Anh chị giúp em nhé? #line:mai_ask_2
+    -> Được, để anh chị tìm cho! #line:mai_ask_yes
+        <<quest_start "mushrooms">>
+        Bé Mai: Em cảm ơn! Anh chị đi cẩn thận nhé. #line:mai_ask_thanks
+    -> Để sau nhé, anh chị đang bận. #line:mai_ask_no
+        Bé Mai: Dạ... em đợi ở bên giếng. #line:mai_ask_later
+<<elseif quest_status("mushrooms") == "ready">>
+    Bé Mai: Oa, đủ nấm rồi! Em cảm ơn nhiều lắm! #line:mai_done_1
+    Bé Mai: Đây là thuốc xanh bà em làm, uống vào khỏe re luôn! #line:mai_done_2
+    <<quest_complete "mushrooms">>
+<<elseif quest_status("mushrooms") == "active">>
+    Bé Mai: Em cần 3 Mũ Nấm Đỏ... mới có {item_count("shroom_cap")} thôi. #line:mai_waiting
+<<else>>
+    Bé Mai: Mẹ em đỡ nhiều rồi! Anh chị là nhất! #line:mai_after
+<<endif>>
+===

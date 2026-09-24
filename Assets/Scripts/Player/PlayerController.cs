@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace RPG
 {
+    /// <summary>An active buff on the hero (see <see cref="BuffSpec"/>), shown in the buff bar.</summary>
     public class Buff
     {
         public string id;
@@ -10,6 +11,8 @@ namespace RPG
         public Sprite icon;
         public float until;
         public float duration;
+        public BuffSpec spec;
+        public GameObject vfx;
         public float Remaining => Mathf.Max(0, until - Time.time);
     }
 
@@ -17,7 +20,7 @@ namespace RPG
     /// The hero. Mouse (hold left/right button) or arrow keys to move, click an enemy to
     /// attack it, Q W E R A S D Space for skills, 1 2 3 potions, F to talk.
     /// </summary>
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, ISaveable, IAbilityCaster
     {
         [Header("Refs")]
         public CharacterMotor motor;
@@ -28,6 +31,7 @@ namespace RPG
         public AfterImageSpawner afterImages;
         public SpriteRenderer body;
         public PlayerSkills skills;
+        public PlayerStats stats;
 
         [Header("Stats")]
         public float maxEnergy = 63f;
@@ -65,27 +69,107 @@ namespace RPG
             if (health == null) health = GetComponent<Health>();
             if (status == null) status = GetComponent<StatusEffects>();
             if (skills == null) skills = GetComponent<PlayerSkills>();
+            if (stats == null) stats = GetComponent<PlayerStats>();
+            if (stats == null) stats = gameObject.AddComponent<PlayerStats>();   // prefabs made before stats existed
             health.Damaged += OnDamaged;
             health.Died += OnDied;
             if (anim != null) anim.FrameChanged += OnFrame;
+            skills.BufferedCast += OnKeySkillCast;
+            SaveRegistry.Register(this);
         }
 
-        // ------------------------------------------------------------------ buffs
-        public void AddBuff(string id, string name, Sprite icon, float duration)
+        void OnDestroy() => SaveRegistry.Unregister(this);
+
+        // ------------------------------------------------------------------ ability caster
+        MonoBehaviour IAbilityCaster.Runner => this;
+        Team IAbilityCaster.Team => health.team;
+        Health IAbilityCaster.Health => health;
+        CharacterMotor IAbilityCaster.Motor => motor;
+        StatusEffects IAbilityCaster.Status => status;
+        AfterImageSpawner IAbilityCaster.AfterImages => afterImages;
+        int IAbilityCaster.Level => stats != null ? stats.level : 1;
+
+        /// <summary>Physical skills use Công vật lý, every element Công phép (plan §04).</summary>
+        public float Attack(DamageType type)
         {
-            var b = buffs.Find(x => x.id == id);
+            if (stats == null) return ProgressionConfig.Current.PhysicalAttack(ProgressionConfig.Current.startStrength);
+            return stats.Stats.Get(type == DamageType.Physical ? StatId.PhysicalAttack : StatId.MagicAttack);
+        }
+
+        public float DamageDealt(AbilityDef ability) => stats != null ? stats.DamageDealt(ability) : 1f;
+
+        // ------------------------------------------------------------------ buffs
+        /// <summary>Adds or refreshes a buff; its speed, damage-taken and stun-immunity apply while it lasts.</summary>
+        public void AddBuff(BuffSpec spec)
+        {
+            if (spec == null) return;
+            var b = buffs.Find(x => x.id == spec.id);
             if (b == null)
             {
-                b = new Buff { id = id };
+                b = new Buff { id = spec.id };
                 buffs.Add(b);
+                if (!string.IsNullOrEmpty(spec.attachedVfx))
+                    b.vfx = VFX.Spawn(spec.attachedVfx, transform.position, Quaternion.identity, 1f, transform, true);
             }
-            b.name = name;
-            b.icon = icon;
-            b.duration = duration;
-            b.until = Time.time + duration;
+            b.spec = spec;
+            b.name = spec.displayName;
+            b.icon = spec.icon;
+            b.duration = spec.duration;
+            b.until = Time.time + spec.duration;
+            ApplyBuffs();
+        }
+
+        public void RemoveBuff(string id)
+        {
+            var b = buffs.Find(x => x.id == id);
+            if (b == null) return;
+            buffs.Remove(b);
+            EndBuff(b, true);
+            ApplyBuffs();
         }
 
         public bool HasBuff(string id) => buffs.Exists(b => b.id == id && b.Remaining > 0);
+
+        void EndBuff(Buff b, bool showEnd)
+        {
+            if (b.vfx != null) VFX.Release(b.vfx);
+            b.vfx = null;
+            if (showEnd && !IsDead && b.spec != null && !string.IsNullOrEmpty(b.spec.endVfx))
+                VFX.Spawn(b.spec.endVfx, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+        }
+
+        /// <summary>Speed multiplier of all buffs together.</summary>
+        float BuffSpeed
+        {
+            get
+            {
+                float m = 1f;
+                foreach (var b in buffs)
+                    if (b.spec != null) m *= b.spec.speedMultiplier;
+                return m;
+            }
+        }
+
+        void ApplyBuffs()
+        {
+            float taken = 1f;
+            bool immune = false;
+            foreach (var b in buffs)
+            {
+                if (b.spec == null) continue;
+                taken *= b.spec.damageTakenMultiplier;
+                immune |= b.spec.stunImmune;
+            }
+            health.damageTakenMultiplier = taken;
+            if (status != null) status.stunImmune = immune;
+        }
+
+        void ClearBuffs()
+        {
+            foreach (var b in buffs) EndBuff(b, false);
+            buffs.Clear();
+            ApplyBuffs();
+        }
 
         // ------------------------------------------------------------------ actions
         /// <summary>Called by skills: locks the pose for a moment and faces the aim.</summary>
@@ -129,7 +213,7 @@ namespace RPG
             HandleInteract();
             Vector2 move = ComputeMove();
             float speedMul = (status != null ? status.SpeedMultiplier : 1f) * (IsActing ? actionMoveMul : 1f);
-            if (HasBuff("bladestorm")) speedMul *= 0.85f;
+            speedMul *= BuffSpeed;
             motor.Move(move, speedMul);
             if (IsActing) motor.Facing = actionDir;
             UpdateAnimation(move);
@@ -153,8 +237,16 @@ namespace RPG
 
         void UpdateBuffs()
         {
+            bool changed = false;
             for (int i = buffs.Count - 1; i >= 0; i--)
-                if (buffs[i].Remaining <= 0) buffs.RemoveAt(i);
+            {
+                if (buffs[i].Remaining > 0) continue;
+                var b = buffs[i];
+                buffs.RemoveAt(i);
+                EndBuff(b, true);
+                changed = true;
+            }
+            if (changed) ApplyBuffs();
         }
 
         // ------------------------------------------------------------------ input
@@ -163,11 +255,7 @@ namespace RPG
             for (int i = 0; i < 8; i++)
             {
                 if (!InputReader.SkillPressed(i)) continue;
-                if (skills.TryCast(i, InputReader.MouseWorld))
-                {
-                    hasMoveTarget = false;
-                    attackTarget = null;
-                }
+                if (skills.Request(i, InputReader.MouseWorld)) OnKeySkillCast(i);
             }
             // auto basic attack on a clicked enemy
             if (attackTarget != null)
@@ -183,6 +271,13 @@ namespace RPG
                         skills.TryCast(0, attackTarget.transform.position);
                 }
             }
+        }
+
+        /// <summary>A key-pressed skill fired (now or from the input buffer): stop walking / auto-attacking.</summary>
+        void OnKeySkillCast(int slot)
+        {
+            hasMoveTarget = false;
+            attackTarget = null;
         }
 
         void HandlePotions()
@@ -350,7 +445,7 @@ namespace RPG
             motor.HardStop();
             hasMoveTarget = false;
             attackTarget = null;
-            buffs.Clear();
+            ClearBuffs();
             if (anim != null) anim.Play("dead", true);
             AudioManager.Play("sfx_player_die");
             TimeFX.SlowMo(0.3f, 1.2f);
@@ -367,6 +462,44 @@ namespace RPG
             health.invulnerable = false;
             if (anim != null) anim.Play("idle_down", true);
             VFX.Spawn("respawn", transform.position, Quaternion.identity);
+        }
+
+        // ------------------------------------------------------------------ save
+        [System.Serializable]
+        class SaveState
+        {
+            public float x, y, hp, energy;
+            public int level, xp, statPoints, talentPoints, skillPoints;
+            public int[] allocated;
+        }
+
+        public string SaveKey => "player";
+
+        public string CaptureState()
+        {
+            var s = new SaveState { x = transform.position.x, y = transform.position.y, hp = health.hp, energy = energy };
+            if (stats != null)
+            {
+                s.level = stats.level;
+                s.xp = stats.xp;
+                s.allocated = stats.allocated;
+                s.statPoints = stats.statPoints;
+                s.talentPoints = stats.talentPoints;
+                s.skillPoints = stats.skillPoints;
+            }
+            return JsonUtility.ToJson(s);
+        }
+
+        public void RestoreState(string json)
+        {
+            var s = JsonUtility.FromJson<SaveState>(json);
+            // stats first: they set max HP / energy
+            if (stats != null && s.level > 0) stats.SetState(s.level, s.xp, s.allocated, s.statPoints, s.talentPoints, s.skillPoints);
+            motor.Teleport(new Vector2(s.x, s.y));
+            hasMoveTarget = false;
+            attackTarget = null;
+            health.hp = Mathf.Clamp(s.hp, 1f, health.maxHp);
+            energy = Mathf.Clamp(s.energy, 0f, maxEnergy);
         }
 
         void OnDrawGizmosSelected()

@@ -8,7 +8,13 @@ namespace RPG
     {
         public RectTransform layer;
         public FloatingText prefab;
-        readonly Stack<FloatingText> free = new Stack<FloatingText>();
+        [Tooltip("Damage numbers created up front (shared Pool).")]
+        public int prewarm = 24;
+
+        void Start()
+        {
+            if (prefab != null && layer != null) Pool.Prewarm(prefab.gameObject, prewarm, layer);
+        }
 
         void OnEnable()
         {
@@ -54,16 +60,10 @@ namespace RPG
         public void Spawn(string text, Vector3 world, Color c, float scale, FloatingText.Style style)
         {
             if (prefab == null || layer == null) return;
-            var ft = free.Count > 0 ? free.Pop() : Instantiate(prefab, layer);
-            ft.gameObject.SetActive(true);
-            ft.transform.SetAsLastSibling();
+            var ft = Pool.Get(prefab, layer);
             ft.Play(this, text, world, c, scale, style);
         }
 
-        public void Recycle(FloatingText ft)
-        {
-            ft.gameObject.SetActive(false);
-            free.Push(ft);
-        }
+        public void Recycle(FloatingText ft) => Pool.Release(ft.gameObject, true);
     }
 }

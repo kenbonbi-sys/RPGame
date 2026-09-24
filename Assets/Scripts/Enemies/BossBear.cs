@@ -10,7 +10,7 @@ namespace RPG
     /// that stays on the field), Chụp Quăng (leap slam; landing on a boulder stuns the bear).
     /// Enrages at 50% HP.
     /// </summary>
-    public class BossBear : MonoBehaviour
+    public class BossBear : MonoBehaviour, ISaveable
     {
         [Header("Identity")]
         public string bossId = "bear";
@@ -33,6 +33,8 @@ namespace RPG
         public Transform bodyRoot;
         public SpriteRenderer body;
         public AfterImageSpawner afterImages;
+        public SpriteStyle style;
+        public Poise poise;
 
         [Header("Tuning")]
         public float walkSpeed = 2.3f;
@@ -53,6 +55,9 @@ namespace RPG
         Vector2 home;
 
         public bool Engaged => state != State.Dormant && state != State.Dead && state != State.Returning;
+
+        /// <summary>Every boss in the loaded scenes, alive or defeated.</summary>
+        public static readonly List<BossBear> All = new List<BossBear>();
         PlayerController Player => GameManager.I != null ? GameManager.I.player : null;
         Vector2 Pos => transform.position;
         float CdMul => enraged ? 0.65f : 1f;
@@ -64,6 +69,22 @@ namespace RPG
             if (status == null) status = GetComponent<StatusEffects>();
             health.Damaged += OnDamaged;
             health.Died += OnDied;
+            if (poise == null) poise = GetComponent<Poise>();
+            if (style == null) style = GetComponentInChildren<SpriteStyle>();
+            if (poise != null) poise.Broken += OnPoiseBroken;
+            All.Add(this);
+            SaveRegistry.Register(this);
+        }
+
+        void OnDestroy()
+        {
+            All.Remove(this);
+            SaveRegistry.Unregister(this);
+        }
+
+        void OnPoiseBroken()
+        {
+            if (state == State.Chase || state == State.Busy) EnterStun();
         }
 
         void Start()
@@ -130,13 +151,17 @@ namespace RPG
             if (auraFx != null) { VFX.Release(auraFx); auraFx = null; }
             if (flash != null) flash.SetTint(Color.white, 0);
             health.ResetHealth(maxHp);
+            if (poise != null) poise.ResetPoise();
             state = State.Returning;
-            if (HUD.I != null) HUD.I.bossBar.Hide();
+            GameEvents.RaiseBossDisengaged();
             CameraRig.SetZoom(1f);
             CameraRig.SetFocus(null);
-            AudioManager.PlayMusic("music_forest", 2f);
+            AudioManager.PlayMusic(ZoneMusic, 2f);
             if (bodyRoot != null) bodyRoot.localPosition = Vector3.zero;
         }
+
+        /// <summary>Music of the zone the boss lives in (back to it after the fight).</summary>
+        static string ZoneMusic => ZoneRoot.Current != null && ZoneRoot.Current.def != null ? ZoneRoot.Current.def.music : "music_forest";
 
         void ChaseAndDecide(PlayerController p)
         {
@@ -229,6 +254,8 @@ namespace RPG
             if (routine != null) StopCoroutine(routine);
             ClearTelegraphs();
             if (bodyRoot != null) bodyRoot.localPosition = Vector3.zero;
+            // an interrupted leap leaves the colliders off
+            foreach (var c in GetComponentsInChildren<Collider2D>()) c.enabled = true;
             state = State.Stunned;
         }
 
@@ -239,7 +266,7 @@ namespace RPG
 
         void Announce(string skill)
         {
-            if (HUD.I != null) HUD.I.ShowSkillBanner(health, "Kỹ năng: " + skill);
+            GameEvents.RaiseSkillAnnounced(health, "Kỹ năng: " + skill);
             Bestiary.RecordSkill(displayName, skill);
         }
 
@@ -271,11 +298,8 @@ namespace RPG
             VFX.Spawn("boss_roar", Pos + Vector2.up * 2.4f, Quaternion.identity);
             CameraRig.Shake(0.7f);
             ScreenFX.Impact(0.8f, 0.8f);
-            if (HUD.I != null)
-            {
-                HUD.I.banner.ShowTitle(displayName, title, new Color(1f, 0.45f, 0.4f));
-                HUD.I.bossBar.Show(health, displayName, level);
-            }
+            GameEvents.RaiseBanner(BannerKind.Title, displayName, title, new Color(1f, 0.45f, 0.4f));
+            GameEvents.RaiseBossEngaged(health, displayName, level);
             AudioManager.PlayMusic("music_boss", 0.8f);
             Bestiary.RecordSeen(bossId, displayName);
             yield return new WaitForSeconds(1.6f);
@@ -291,7 +315,7 @@ namespace RPG
         {
             enraged = true;
             anim.Play("roar", true);
-            if (HUD.I != null) HUD.I.ShowSkillBanner(health, "Cuồng Nộ!");
+            GameEvents.RaiseSkillAnnounced(health, "Cuồng Nộ!");
             GameEvents.RaiseLog($"{displayName} nổi cơn cuồng nộ!", new Color(1f, 0.5f, 0.5f));
             AudioManager.Play("sfx_enrage", 1f, 0.02f);
             VFX.Spawn("enrage_burst", Pos + Vector2.up * 1.6f, Quaternion.identity);
@@ -462,10 +486,7 @@ namespace RPG
             if (rock != null)
             {
                 rock.Shatter(false);
-                float resist = status.stunResist;
-                status.stunResist = 1f;
-                status.Stun(2.8f);
-                status.stunResist = resist;
+                status.ForceStun(2.8f);
                 GameEvents.RaiseLog($"{displayName} đâm sầm vào Tảng Đá Lớn và bị choáng!", Palette.Status);
                 EnterStun();
                 yield break;
@@ -524,25 +545,44 @@ namespace RPG
             yield return new WaitForSecondsRealtime(1.2f);
             Loot.Roll(loot, Pos);
             Loot.DropCoins(Pos, 12);
-            GameEvents.RaiseEnemyKilled(bossId);
+            GameEvents.RaiseEnemyKilled(new KillInfo { id = bossId, name = displayName, level = level, rank = EnemyRank.Boss, position = Pos });
             Bestiary.RecordKill(bossId, displayName);
-            if (HUD.I != null)
-            {
-                HUD.I.banner.ShowVictory("CHIẾN THẮNG!", $"Đã đánh bại {displayName}");
-                HUD.I.bossBar.Hide(1.5f);
-            }
+            GameEvents.RaiseBanner(BannerKind.Victory, "CHIẾN THẮNG!", $"Đã đánh bại {displayName}");
+            GameEvents.RaiseBossDisengaged(1.5f);
             AudioManager.Play("sfx_victory", 1f, 0f);
             CameraRig.SetZoom(1f);
             CameraRig.SetFocus(null);
             yield return new WaitForSeconds(4f);
-            AudioManager.PlayMusic("music_forest", 3f);
-            float t = 0;
-            while (t < 1.5f)
+            AudioManager.PlayMusic(ZoneMusic, 3f);
+            if (style != null && style.Supported) yield return style.Dissolve(1.8f);
+            else
             {
-                t += Time.deltaTime;
-                if (body != null) body.color = new Color(1, 1, 1, 1 - t / 1.5f);
-                yield return null;
+                for (float t = 0; t < 1.5f; t += Time.deltaTime)
+                {
+                    if (body != null) body.color = new Color(1, 1, 1, 1 - t / 1.5f);
+                    yield return null;
+                }
             }
+            gameObject.SetActive(false);
+        }
+
+        // ================================================================= save
+        [System.Serializable]
+        class SaveState
+        {
+            public bool defeated;
+        }
+
+        public string SaveKey => "boss:" + bossId;
+
+        public string CaptureState() => JsonUtility.ToJson(new SaveState { defeated = state == State.Dead || health.IsDead });
+
+        public void RestoreState(string json)
+        {
+            if (!JsonUtility.FromJson<SaveState>(json).defeated) return;
+            StopAllCoroutines();
+            ClearTelegraphs();
+            state = State.Dead;
             gameObject.SetActive(false);
         }
 

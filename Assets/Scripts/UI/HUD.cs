@@ -25,6 +25,9 @@ namespace RPG
         public PauseMenuUI pause;
         public DeathScreenUI death;
         public JournalUI journal;
+        public CharacterUI character;
+        public XpBarUI xpBar;
+        public SaveSlotsUI saves;
 
         [Header("World-anchored UI")]
         public RectTransform worldLayer;
@@ -33,11 +36,13 @@ namespace RPG
 
         void Awake() => I = this;
 
+        void OnEnable() => GameEvents.SkillAnnounced += ShowSkillBanner;
+        void OnDisable() => GameEvents.SkillAnnounced -= ShowSkillBanner;
+
         public NameplateUI CreateNameplate(Transform target, string label, bool star, Color barColor, Health health, float height)
         {
             if (nameplatePrefab == null || worldLayer == null) return null;
-            var p = Instantiate(nameplatePrefab, worldLayer);
-            p.gameObject.SetActive(true);
+            var p = Pool.Get(nameplatePrefab, worldLayer);
             p.Bind(target, label, star, barColor, health, height);
             return p;
         }
@@ -45,8 +50,7 @@ namespace RPG
         public void ShowSkillBanner(Health owner, string text)
         {
             if (skillBannerPrefab == null || worldLayer == null || owner == null) return;
-            var b = Instantiate(skillBannerPrefab, worldLayer);
-            b.gameObject.SetActive(true);
+            var b = Pool.Get(skillBannerPrefab, worldLayer);
             b.Show(owner, text);
         }
     }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -8,16 +9,62 @@ using UnityEngine.Rendering.Universal;
 namespace RPG.EditorTools
 {
     /// <summary>
-    /// Tools/RPG/Build Everything — imports the art, creates data/VFX/prefabs and assembles
-    /// Assets/Scenes/Game.unity (camera, lights, post-processing, managers, world, HUD).
-    /// Re-running regenerates the generated assets and the scene.
+    /// Tools/RPG/Build Everything — imports the art, creates data/VFX/prefabs and assembles the
+    /// scenes: Assets/Scenes/Core.unity (managers, hero, camera, light, post-processing, HUD —
+    /// always loaded) and one scene per zone in Assets/Scenes/Zones (terrain, props, NPCs,
+    /// enemies, boss, zone areas and a ZoneRoot), loaded next to Core by the SceneLoader.
+    ///
+    /// Authoring mode (default): only assets and scenes that are missing get created; existing
+    /// prefabs, materials, data and scenes are left exactly as they are, so hand edits survive.
+    /// Tools/RPG/Force Rebuild Everything regenerates all of it (the old behaviour).
     /// </summary>
     public static class SceneBuilder
     {
-        public const string ScenePath = "Assets/Scenes/Game.unity";
+        public const string CoreScenePath = "Assets/Scenes/Core.unity";
+        public const string ZoneFolder = "Assets/Scenes/Zones";
+        /// <summary>The scene to open to play the game.</summary>
+        public const string ScenePath = CoreScenePath;
 
-        [MenuItem("Tools/RPG/Build Everything (art, prefabs, VFX, scene)", priority = 20)]
+        public static string ZoneScenePath(ZoneDef zone) => $"{ZoneFolder}/{zone.sceneName}.unity";
+
+        /// <summary>Core first (build index 0), then every zone of the database.</summary>
+        public static string[] AllScenePaths()
+        {
+            var list = new List<string> { CoreScenePath };
+            var db = AssetFactory.Database;
+            if (db != null)
+                foreach (var z in db.zones)
+                    if (z != null && !string.IsNullOrEmpty(z.sceneName)) list.Add(ZoneScenePath(z));
+            return list.ToArray();
+        }
+
+        [MenuItem("Tools/RPG/Build Everything (create missing only)", priority = 20)]
         public static void BuildEverything()
+        {
+            EditorUtil.ResetStats();
+            RunSteps();
+            BuildScenes(false);
+            Debug.Log($"[RPG] Build Everything done ({EditorUtil.Stats}) → " + string.Join(", ", AllScenePaths()));
+        }
+
+        [MenuItem("Tools/RPG/Force Rebuild Everything (overwrite)", priority = 21)]
+        public static void ForceRebuildEverything()
+        {
+            if (!Application.isBatchMode && !EditorUtility.DisplayDialog("Force Rebuild Everything",
+                    "Regenerate every generated asset and scene?\n\nHand edits to generated prefabs, VFX, " +
+                    "materials, items, abilities, quests and the scenes will be lost.", "Overwrite", "Cancel"))
+                return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            EditorUtil.ResetStats();
+            EditorUtil.Forced(() =>
+            {
+                RunSteps();
+                BuildScenes(true);
+            });
+            Debug.Log($"[RPG] Force Rebuild Everything done ({EditorUtil.Stats})");
+        }
+
+        static void RunSteps()
         {
             ProjectSetup.EnsureSortingLayers();
             ProjectSetup.EnsureLayers();
@@ -26,24 +73,74 @@ namespace RPG.EditorTools
             AssetFactory.CreateAll();
             VFXFactory.BuildAll();
             PrefabFactory.BuildAll();
-            BuildScene();
-            Debug.Log("[RPG] Build Everything done → " + ScenePath);
+            AssetFactory.LinkLateReferences();
         }
 
-        [MenuItem("Tools/RPG/Steps/6. Rebuild Scene Only (keeps prefabs)", priority = 106)]
+        [MenuItem("Tools/RPG/Steps/6. Rebuild Scenes (keeps prefabs)", priority = 106)]
         public static void RebuildSceneOnly()
         {
             if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             PrefabFactory.LoadExisting();
-            BuildScene();
-            Debug.Log("[RPG] Scene rebuilt → " + ScenePath);
+            BuildScenes(true);
+            Debug.Log("[RPG] Scenes rebuilt → " + string.Join(", ", AllScenePaths()));
         }
 
-        static void BuildScene()
+        /// <summary>Builds the missing scenes (or all of them when <paramref name="all"/>), then the build settings.</summary>
+        static void BuildScenes(bool all)
+        {
+            // Force Rebuild remakes the VFX Gallery tool scene too (first, so Core is left open).
+            // Authoring mode leaves a missing one to Tools/RPG/VFX Gallery, which asks to save the open scene first.
+            if (all) VFXGalleryBuilder.Build();
+            var db = AssetFactory.Database;
+            foreach (var zone in db.zones)
+            {
+                if (zone == null) continue;
+                string path = ZoneScenePath(zone);
+                if (all || AssetDatabase.LoadAssetAtPath<SceneAsset>(path) == null) BuildZone(zone, path);
+                else EditorUtil.Kept++;
+            }
+            if (all || AssetDatabase.LoadAssetAtPath<SceneAsset>(CoreScenePath) == null) BuildCore();
+            else EditorUtil.Kept++;
+            EditorBuildSettings.scenes = AllScenePaths().Select(p => new EditorBuildSettingsScene(p, true)).ToArray();
+            AssetDatabase.SaveAssets();
+        }
+
+        // ================================================================== zone
+        static void BuildZone(ZoneDef zone, string path)
+        {
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var world = new GameObject("World");
+            var root = world.AddComponent<ZoneRoot>();
+            var res = WorldBuilder.Build(world.transform);
+            root.def = zone;
+            root.bounds = new Rect(0, 0, WorldBuilder.W, WorldBuilder.H);
+            void Spot(string id, Transform t)
+            {
+                if (t != null) root.spots.Add(new ZoneRoot.Spot { id = id, point = t });
+            }
+            Spot("spawn", res.playerSpawn);
+            Spot("forest", res.forestSpot);
+            Spot("boss", res.bossSpot);
+            Spot("chief", res.chief);
+            Spot("girl", res.girl);
+            root.ground = res.ground;
+            root.tallGrass = res.tall;
+            root.dirt = res.dirt;
+            root.obstacles = res.props;
+            EditorUtility.SetDirty(root);
+            EditorUtil.EnsureFolder(ZoneFolder);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene, path);
+            EditorUtil.Written++;
+        }
+
+        // ================================================================== core
+        static void BuildCore()
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var db = AssetFactory.Database;
             var vfx = VFXFactory.Library;
+            Vector3 spawn = new Vector3(18.5f, 15.2f, 0);   // only a preview position; the SceneLoader places the hero
 
             // ---------------------------------------------------------------- managers
             var game = new GameObject("[Game]");
@@ -54,6 +151,10 @@ namespace RPG.EditorTools
             audio.library = AssetDatabase.LoadAssetAtPath<AudioLibrary>("Assets/Data/AudioLibrary.asset");
             game.AddComponent<TimeFX>();
             game.AddComponent<QuestSystem>();
+            game.AddComponent<SaveManager>();
+            game.AddComponent<DialogueDirector>();
+            var loader = game.AddComponent<SceneLoader>();
+            loader.startZone = db.startZone;
             var inv = game.AddComponent<Inventory>();
             inv.gold = 25;
             inv.stacks.Add(new Inventory.Stack { item = db.Item("potion_red"), count = 4 });
@@ -64,6 +165,12 @@ namespace RPG.EditorTools
             game.AddComponent<DevCheats>();
             game.AddComponent<AutoShot>();
             var screenFx = game.AddComponent<ScreenFX>();
+
+            // ---------------------------------------------------------------- hero
+            var playerGo = (GameObject)PrefabUtility.InstantiatePrefab(PrefabFactory.Player);
+            playerGo.name = "Player";
+            playerGo.transform.position = spawn;
+            gm.player = playerGo.GetComponent<PlayerController>();
 
             // ---------------------------------------------------------------- lighting
             var lightGo = new GameObject("Global Light 2D");
@@ -92,17 +199,6 @@ namespace RPG.EditorTools
             screenFx.impactVolume = Vol("Impact Volume", "ImpactVolume", 0f, 5f);
             screenFx.dangerVolume = Vol("Danger Volume", "DangerVolume", 0f, 6f);
 
-            // ---------------------------------------------------------------- world
-            var world = new GameObject("World");
-            var res = WorldBuilder.Build(world.transform);
-            var player = res.player.GetComponent<PlayerController>();
-            gm.player = player;
-            gm.respawnPoint = res.playerSpawn;
-            gm.chiefSpot = res.chief;
-            gm.girlSpot = res.girl;
-            gm.forestSpot = res.forestSpot;
-            gm.bossSpot = res.bossSpot;
-
             // ---------------------------------------------------------------- camera
             var camGo = new GameObject("Main Camera");
             camGo.tag = "MainCamera";
@@ -113,14 +209,14 @@ namespace RPG.EditorTools
             cam.backgroundColor = new Color(0.07f, 0.1f, 0.08f);
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 50f;
-            camGo.transform.position = new Vector3(res.playerSpawn.position.x, res.playerSpawn.position.y, -10);
+            camGo.transform.position = new Vector3(spawn.x, spawn.y, -10);
             camGo.AddComponent<AudioListener>();
             var camData = cam.GetUniversalAdditionalCameraData();
             camData.renderPostProcessing = true;
             camData.antialiasing = AntialiasingMode.None;
             var rig = camGo.AddComponent<CameraRig>();
-            rig.target = res.player.transform;
-            rig.worldBounds = new Rect(0, 0, WorldBuilder.W, WorldBuilder.H);
+            rig.target = playerGo.transform;
+            rig.worldBounds = new Rect(0, 0, WorldBuilder.W, WorldBuilder.H);   // replaced by each zone's bounds
 
             // ---------------------------------------------------------------- ambient
             var ambGo = new GameObject("[Ambient]");
@@ -129,17 +225,14 @@ namespace RPG.EditorTools
             // ---------------------------------------------------------------- UI
             var ui = UIBuilder.Build();
             screenFx.flashImage = ui.flash;
-            ui.minimap.ground = res.ground;
-            ui.minimap.tallGrass = res.tall;
-            ui.minimap.dirt = res.dirt;
-            ui.minimap.obstaclesRoot = res.props;
+            loader.fade = ui.loading;
+            loader.fadeTitle = ui.loadingTitle;
 
             EditorUtility.SetDirty(gm);
             EditorSceneManager.MarkSceneDirty(scene);
             EditorUtil.EnsureFolder("Assets/Scenes");
-            EditorSceneManager.SaveScene(scene, ScenePath);
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
-            AssetDatabase.SaveAssets();
+            EditorSceneManager.SaveScene(scene, CoreScenePath);
+            EditorUtil.Written++;
         }
     }
 }

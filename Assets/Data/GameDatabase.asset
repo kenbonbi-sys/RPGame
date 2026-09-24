@@ -34,15 +34,25 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b64dd0d615888974f82f3c6084f35e88, type: 2}
   - {fileID: 11400000, guid: 40972aa092910ac4b9f614dac3ea426a, type: 2}
   - {fileID: 11400000, guid: be0441401d16df64d97895e32b062ddd, type: 2}
-  skills:
-  - {fileID: 11400000, guid: 65402b2295e328441bfde437665d4516, type: 2}
-  - {fileID: 11400000, guid: ee7a7175b4dbe3c488fb72bd5cee42c5, type: 2}
-  - {fileID: 11400000, guid: 857671e8dc3655642a47890aff497711, type: 2}
-  - {fileID: 11400000, guid: 04c74a943f8f308409de1f0210e93986, type: 2}
-  - {fileID: 11400000, guid: 337752403b8b9124185adcaf95f3be28, type: 2}
-  - {fileID: 11400000, guid: eeb6709ee72519e4391c139d08419404, type: 2}
-  - {fileID: 11400000, guid: 10f7cd43ed1e051478eac3fe47e44317, type: 2}
-  - {fileID: 11400000, guid: 3c6597995ce88534c931ff085631144a, type: 2}
+  abilities:
+  - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
+  - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}
+  - {fileID: 11400000, guid: cbc06fff899ca6849895123a4d09cfc3, type: 2}
+  - {fileID: 11400000, guid: 89705c0a208bfed40b346724a59f1f8f, type: 2}
+  - {fileID: 11400000, guid: 9adb5279c8b85af488b39cdac561ca07, type: 2}
+  - {fileID: 11400000, guid: 054d9d38b3ea87f449331f2d4b7eddb3, type: 2}
+  - {fileID: 11400000, guid: d48074b1a0c20d445bfff56705c52470, type: 2}
+  - {fileID: 11400000, guid: 7465bfb70b62e4449867a3836df88ea0, type: 2}
+  progression: {fileID: 11400000, guid: a0659d7ce1a0e5e4e934c9016c761110, type: 2}
+  quests:
+  - {fileID: 11400000, guid: 85b47a02ce97a9a48a96201cf90adcb0, type: 2}
+  - {fileID: 11400000, guid: 6fb51df590d44164fb1bff3d7cb9a655, type: 2}
+  - {fileID: 11400000, guid: 851a3537d31a1bb418f9aac2c4c8d799, type: 2}
+  - {fileID: 11400000, guid: 6b22d0c804ec8ae48ab51bece3e81c1a, type: 2}
+  zones:
+  - {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
+  startZone: {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
+  dialogue: {fileID: 7545569452688597077, guid: 5a037b0a5345d6e4d99795716e43e5d5, type: 3}
   shadowSprite: {fileID: 21300000, guid: b83736aed3397fe43b51422ef41c87df, type: 3}
   whiteSprite: {fileID: -8108132, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
   starIcon: {fileID: 1035912729, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
@@ -59,6 +69,7 @@ MonoBehaviour:
   shieldIcon: {fileID: -1526223856, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
   regenIcon: {fileID: -44040512, guid: c45e103a82b4e4e428eb49c3cd777468, type: 3}
   spriteLit: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  spriteLitFX: {fileID: 2100000, guid: 2dac890cd0589364296bbdd3dda5ebf8, type: 2}
   spriteUnlit: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   additive: {fileID: 2100000, guid: a184b5641139f194985755424d990a2a, type: 2}
   silhouette: {fileID: 2100000, guid: 1f84dbfe08255ea4d9374c86abc7b260, type: 2}

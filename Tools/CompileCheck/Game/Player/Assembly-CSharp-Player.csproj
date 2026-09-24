@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The same scripts as a player build sees them: no UNITY_EDITOR, no UnityEditor.dll. -->
+  <PropertyGroup>
+    <AssemblyName>Assembly-CSharp-Player</AssemblyName>
+    <DefineConstants>$(UnityDefines)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(ProjectRoot)Assets/**/*.cs" Exclude="$(ProjectRoot)Assets/**/Editor/**/*.cs" />
+    <Reference Include="$(CacheDir)yarn/Runtime/DLLs/*.dll" Private="false" />
+    <ProjectReference Include="../../Stubs/RuntimeStubs.csproj" Private="false" />
+    <ProjectReference Include="../../Yarn/YarnSpinner.Unity.csproj" Private="false" />
+  </ItemGroup>
+</Project>

@@ -14,6 +14,18 @@ namespace RPG
 
         void Awake() => UIUtil.SetAlpha(group, 0);
 
+        void OnEnable()
+        {
+            GameEvents.PlayerDowned += Show;
+            GameEvents.PlayerRespawned += Hide;
+        }
+
+        void OnDisable()
+        {
+            GameEvents.PlayerDowned -= Show;
+            GameEvents.PlayerRespawned -= Hide;
+        }
+
         public void Show(float seconds)
         {
             until = Time.unscaledTime + seconds;

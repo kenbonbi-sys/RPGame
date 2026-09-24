@@ -21,6 +21,7 @@ namespace RPG
         float burnDps;
         float burnTick;
         Team burnTeam;
+        bool burnScaled;
         Health health;
         HitFlash flash;
         GameObject stunFx, burnFx;
@@ -44,6 +45,18 @@ namespace RPG
             }
         }
 
+        /// <summary>A stun that ignores resistance and immunity (poise breaks, crashing into a boulder).</summary>
+        public void ForceStun(float seconds)
+        {
+            float resist = stunResist;
+            bool immune = stunImmune;
+            stunResist = 1f;
+            stunImmune = false;
+            Stun(seconds);
+            stunResist = resist;
+            stunImmune = immune;
+        }
+
         public void ClearStun() => stunUntil = 0;
 
         public void Slow(float amount, float seconds)
@@ -52,8 +65,9 @@ namespace RPG
             slowUntil = Mathf.Max(slowUntil, Time.time + seconds);
         }
 
-        public void Burn(float dps, float seconds, Team team)
+        public void Burn(float dps, float seconds, Team team, bool attackScaled = false)
         {
+            burnScaled = attackScaled;
             burnDps = Mathf.Max(IsBurning ? burnDps : 0f, dps);
             burnUntil = Mathf.Max(burnUntil, Time.time + seconds);
             burnTeam = team;
@@ -80,6 +94,7 @@ namespace RPG
                 {
                     burnTick = 0.5f;
                     var d = DamageInfo.Make(burnDps * 0.5f, burnTeam, null, transform.position, Vector2.up, DamageType.Fire);
+                    d.attackScaled = burnScaled;
                     health.TakeDamage(d);
                 }
             }

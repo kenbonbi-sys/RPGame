@@ -11,6 +11,7 @@ namespace RPG
         public string enemyId = "slime";
         public string displayName = "Slime Rêu";
         public int level = 2;
+        public EnemyRank rank = EnemyRank.Normal;
 
         [Header("Stats")]
         public float maxHp = 60f;
@@ -29,8 +30,12 @@ namespace RPG
         public StatusEffects status;
         public HitFlash flash;
         public SpriteRenderer body;
+        public SpriteStyle style;
 
         [HideInInspector] public EnemySpawner spawner;
+
+        /// <summary>Every enabled enemy (debug tools and AI queries use this instead of scene searches).</summary>
+        public static readonly List<EnemyBase> All = new List<EnemyBase>();
 
         protected enum State { Idle, Wander, Chase, Attack, Return, Dead }
         protected State state;
@@ -53,12 +58,14 @@ namespace RPG
             if (health == null) health = GetComponent<Health>();
             if (status == null) status = GetComponent<StatusEffects>();
             colliders = GetComponentsInChildren<Collider2D>(true);
+            if (style == null) style = GetComponentInChildren<SpriteStyle>();
             health.Damaged += OnDamaged;
             health.Died += OnDied;
         }
 
         protected virtual void OnEnable()
         {
+            All.Add(this);
             health.displayName = displayName;
             health.level = level;
             health.ResetHealth(maxHp);
@@ -71,9 +78,10 @@ namespace RPG
 
         protected virtual void OnDisable()
         {
+            All.Remove(this);
             if (plate != null)
             {
-                Destroy(plate.gameObject);
+                plate.Release();
                 plate = null;
             }
         }
@@ -222,12 +230,12 @@ namespace RPG
             foreach (var c in colliders) c.enabled = false;
             if (anim != null) anim.Play("dead", true);
             Loot.Roll(loot, transform.position);
-            GameEvents.RaiseEnemyKilled(enemyId);
+            GameEvents.RaiseEnemyKilled(new KillInfo { id = enemyId, name = displayName, level = level, rank = rank, position = transform.position });
             Bestiary.RecordKill(enemyId, displayName);
             VFX.Spawn("enemy_death", transform.position + Vector3.up * 0.4f, Quaternion.identity);
             if (plate != null)
             {
-                Destroy(plate.gameObject);
+                plate.Release();
                 plate = null;
             }
             StartCoroutine(Despawn());
@@ -236,12 +244,14 @@ namespace RPG
         IEnumerator Despawn()
         {
             yield return new WaitForSeconds(1.2f);
-            float t = 0;
-            while (t < 0.5f)
+            if (style != null && style.Supported) yield return style.Dissolve(0.6f);
+            else
             {
-                t += Time.deltaTime;
-                if (body != null) body.color = new Color(1, 1, 1, 1 - t / 0.5f);
-                yield return null;
+                for (float t = 0; t < 0.5f; t += Time.deltaTime)
+                {
+                    if (body != null) body.color = new Color(1, 1, 1, 1 - t / 0.5f);
+                    yield return null;
+                }
             }
             if (spawner != null) spawner.NotifyDead(this);
             gameObject.SetActive(false);

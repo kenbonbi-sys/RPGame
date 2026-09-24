@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: mushrooms
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: mushrooms
+  title: "N\u1EA5m Cho B\xE9 Mai"
+  kind: 1
+  summary: "M\u1EB9 B\xE9 Mai b\u1ECB \u1ED1m, c\xF4 b\xE9 c\u1EA7n 3 M\u0169 N\u1EA5m \u0110\u1ECF \u0111\u1EC3 n\u1EA5u thu\u1ED1c."
+  giver: girl
+  turnIn: girl
+  turnInText: "Mang n\u1EA5m v\u1EC1 cho B\xE9 Mai"
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 85b47a02ce97a9a48a96201cf90adcb0, type: 2}
+  requiredFlags: []
+  autoStart: 0
+  availableText: "N\xF3i chuy\u1EC7n v\u1EDBi B\xE9 Mai"
+  objectives:
+  - kind: 8
+    target: shroom_cap
+    count: 3
+    text: "Nh\u1EB7t M\u0169 N\u1EA5m \u0110\u1ECF"
+    countPrevious: 0
+    marker: forest
+  xp: 80
+  gold: 0
+  items:
+  - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
+    count: 3
+  setFlags: []
+  followUps: []

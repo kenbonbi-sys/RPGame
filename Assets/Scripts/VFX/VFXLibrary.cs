@@ -16,7 +16,20 @@ namespace RPG
         }
 
         public List<Entry> entries = new List<Entry>();
+
+        [Header("Budget per effect (plan §13), checked in the VFX Gallery")]
+        [Tooltip("Most particles alive at once in one effect.")]
+        public int particleBudget = 150;
+        [Tooltip("Most Light2D in one effect.")]
+        public int lightBudget = 1;
+        [Tooltip("Effects of a Tuyệt kỹ get twice the budget.")]
+        public List<string> ultimateIds = new List<string> { "storm_circle", "lightning_strike" };
+
         Dictionary<string, GameObject> map;
+
+        public bool IsUltimate(string id) => ultimateIds != null && ultimateIds.Contains(id);
+        public int ParticleLimit(string id) => IsUltimate(id) ? particleBudget * 2 : particleBudget;
+        public int LightLimit(string id) => IsUltimate(id) ? lightBudget * 2 : lightBudget;
 
         public GameObject Get(string id)
         {

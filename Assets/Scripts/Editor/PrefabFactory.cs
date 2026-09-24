@@ -18,7 +18,10 @@ namespace RPG.EditorTools
 
         public static GameObject Player, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
 
-        [MenuItem("Tools/RPG/Steps/5. Rebuild Character + Prop Prefabs", priority = 105)]
+        /// <summary>Abilities on Q W E R A S D Space.</summary>
+        static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
+
+        [MenuItem("Tools/RPG/Steps/5. Character + Prop Prefabs", priority = 105)]
         public static void BuildAll()
         {
             EditorUtil.EnsureFolder(CharFolder);
@@ -33,11 +36,73 @@ namespace RPG.EditorTools
             Boulder = BuildBoulder();
             Loot = BuildLoot();
             BuildProps();
+            UpgradePrefabs();
             var db = AssetFactory.Database;
-            db.boulderPrefab = Boulder;
-            db.lootPrefab = Loot;
+            EditorUtil.Assign(ref db.boulderPrefab, Boulder);
+            EditorUtil.Assign(ref db.lootPrefab, Loot);
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>Adds components introduced after the prefabs were first generated, keeping hand edits.</summary>
+        static void UpgradePrefabs()
+        {
+            EditorUtil.UpgradePrefab($"{CharFolder}/Player.prefab", root =>
+            {
+                var pc = root.GetComponent<PlayerController>();
+                if (pc == null) return false;
+                bool changed = false;
+                if (root.GetComponent<PlayerStats>() == null)
+                {
+                    pc.stats = root.AddComponent<PlayerStats>();
+                    changed = true;
+                }
+                // prefabs from before Ability System v2 lost their (SkillDef) slots: fill them with the ported abilities
+                var skills = root.GetComponent<PlayerSkills>();
+                if (skills != null && System.Array.TrueForAll(skills.slots, s => s == null))
+                {
+                    var db = AssetFactory.Database;
+                    for (int i = 0; i < skills.slots.Length && i < DefaultSlots.Length; i++) skills.slots[i] = db.Ability(DefaultSlots[i]);
+                    changed = true;
+                }
+                return changed;
+            });
+            void YarnNode(string file, string node) => EditorUtil.UpgradePrefab($"{CharFolder}/{file}.prefab", root =>
+            {
+                var npc = root.GetComponent<NPC>();
+                if (npc == null || !string.IsNullOrEmpty(npc.yarnNode)) return false;
+                npc.yarnNode = node;
+                return true;
+            });
+            YarnNode("Chief", "Chief");
+            YarnNode("Girl", "Mai");
+            // characters get the dissolve / outline sprite (T22)
+            foreach (var file in new[] { "Slime", "Shroom", "BossBear", "Chief", "Girl" })
+            {
+                EditorUtil.UpgradePrefab($"{CharFolder}/{file}.prefab", root =>
+                {
+                    if (root.GetComponentInChildren<SpriteStyle>(true) != null) return false;
+                    var body = root.GetComponentsInChildren<SpriteRenderer>(true).FirstOrDefault(r => r.name == "Body");
+                    var fx = AssetFactory.SpriteLitFX;
+                    if (body == null || fx == null) return false;
+                    body.sharedMaterial = fx;
+                    var style = root.AddComponent<SpriteStyle>();
+                    style.target = body;
+                    var enemy = root.GetComponent<EnemyBase>();
+                    if (enemy != null) enemy.style = style;
+                    var boss = root.GetComponent<BossBear>();
+                    if (boss != null) boss.style = style;
+                    return true;
+                });
+            }
+            EditorUtil.UpgradePrefab($"{CharFolder}/BossBear.prefab", root =>
+            {
+                var boss = root.GetComponent<BossBear>();
+                if (boss == null || root.GetComponent<Poise>() != null) return false;
+                boss.poise = root.AddComponent<Poise>();
+                boss.poise.maxPoise = 300f;
+                return true;
+            });
         }
 
         /// <summary>Loads the generated prefabs from disk (used when only the scene is rebuilt).</summary>
@@ -165,8 +230,7 @@ namespace RPG.EditorTools
             ghost.source = body;
             var skills = root.AddComponent<PlayerSkills>();
             var db = AssetFactory.Database;
-            string[] order = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
-            for (int i = 0; i < 8; i++) skills.slots[i] = db.Skill(order[i]);
+            for (int i = 0; i < 8; i++) skills.slots[i] = db.Ability(DefaultSlots[i]);
             var pc = root.AddComponent<PlayerController>();
             pc.motor = motor;
             pc.anim = anim;
@@ -285,6 +349,7 @@ namespace RPG.EditorTools
             var body = Sprite(root, "Body", "shroom_idle_0", AssetFactory.SpriteLit);
             var ai = root.AddComponent<ShroomAI>();
             EnemyCommon(root, ai, body, "shroom", 1.35f, 48f);
+            root.GetComponent<Health>().resistances.fire = -0.3f;   // weak to fire: the damage example of plan §04
             ai.enemyId = "shroom";
             ai.displayName = "Nấm Độc";
             ai.level = 3;

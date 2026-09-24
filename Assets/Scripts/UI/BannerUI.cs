@@ -31,8 +31,27 @@ namespace RPG
             UIUtil.SetAlpha(victoryGroup, 0);
         }
 
-        void OnEnable() => GameEvents.ZoneEntered += ShowZone;
-        void OnDisable() => GameEvents.ZoneEntered -= ShowZone;
+        void OnEnable()
+        {
+            GameEvents.ZoneEntered += ShowZone;
+            GameEvents.Banner += OnBanner;
+        }
+
+        void OnDisable()
+        {
+            GameEvents.ZoneEntered -= ShowZone;
+            GameEvents.Banner -= OnBanner;
+        }
+
+        void OnBanner(BannerKind kind, string title, string sub, Color color)
+        {
+            switch (kind)
+            {
+                case BannerKind.Title: ShowTitle(title, sub, color); break;
+                case BannerKind.Quest: ShowQuest(title, sub); break;
+                case BannerKind.Victory: ShowVictory(title, sub); break;
+            }
+        }
 
         public void ShowZone(string zone) => ShowTitle(zone, "— Khu vực —", new Color(0.95f, 0.92f, 0.82f));
 
