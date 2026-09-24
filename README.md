@@ -54,6 +54,7 @@ Tools/
   ArtGen/   python build_all.py  → vẽ lại toàn bộ pixel art
   AudioGen/ python gen_audio.py  → tổng hợp lại âm thanh
   CompileCheck/ ./check.sh       → biên dịch thử toàn bộ C# không cần Unity (Linux, CI)
+  FontGen/  python make_pixel_fonts.py → font pixel tiếng Việt Galmuri7/11 cho Assets/Fonts
 ```
 
 ## Menu Tools/RPG trong Unity
@@ -65,6 +66,7 @@ Tools/
 - **Build Windows Player** — xuất `Builds/Windows/RungThiTham.exe`.
 - **VFX Gallery** — mở scene `Assets/Scenes/Tools/VFXGallery.unity` (tự tạo nếu chưa có) và bấm Play: mọi hiệu ứng xếp lưới 3×3 theo trang, mỗi ô ghi số hạt cao nhất và số Light2D so với ngân sách (150 hạt, 1 Light2D; Tuyệt kỹ gấp đôi, chỉnh trong `Assets/Data/VFXLibrary.asset`). Phím: 1–9 phát một ô · Space cả trang · ←/→ đổi trang · B bật/tắt Bloom · L lặp · M đo tất cả rồi in báo cáo · Tab bảng tổng.
 - **VFX Budget Report** — đo mọi hiệu ứng ngay trong Editor (không cần Play) và in báo cáo ngân sách ra Console.
+- **Pixel Font Test** — tạo font asset TextMeshPro cho font pixel Galmuri7 (8 px) và Galmuri11 (12 px) rồi mở scene thử chữ tiếng Việt ở ×1/×2/×3 cạnh Inter. File font lấy bằng `python Tools/FontGen/make_pixel_fonts.py`; kết quả so sánh font: `Docs/FontPixelTiengViet.md`.
 
 ## Mở rộng
 
@@ -81,4 +83,5 @@ Tools/
 ## Giấy phép
 
 - Font **Inter** (SIL Open Font License 1.1), lấy từ bộ cài Unity.
+- Font pixel **Galmuri7**, **Galmuri11** của Lee Minseo (SIL Open Font License 1.1), bản rút gọn Latin + tiếng Việt do `Tools/FontGen/make_pixel_fonts.py` tạo; giấy phép ở `Assets/Fonts/Galmuri-LICENSE.txt`.
 - Toàn bộ art/âm thanh còn lại do script trong `Tools/` sinh ra. Bộ icon Franuka chỉ dùng làm tham khảo phong cách, không có trong project.

@@ -158,12 +158,15 @@ namespace RPG.EditorTools
             }
         }
 
-        static string VietnameseCharset()
+        /// <summary>The 134 letters of Vietnamese beyond ASCII (all vowels with every tone, and Đ/đ).</summary>
+        public const string VietnameseLetters = "ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯưẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỲỳỴỵỶỷỸỹ";
+
+        /// <summary>ASCII, the Vietnamese letters and the UI symbols: what every font atlas is pre-filled with.</summary>
+        public static string VietnameseCharset()
         {
             const string basic = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-            const string viet = "ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯưẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỲỳỴỵỶỷỸỹ";
             const string symbols = "◆◇►»•★☆✓♥·…→←↑↓×";
-            return basic + viet + symbols;
+            return basic + VietnameseLetters + symbols;
         }
 
         // ------------------------------------------------------------------ post processing
