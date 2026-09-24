@@ -40,6 +40,9 @@ namespace RPG
 
         static Saved saved;
         static bool loaded;
+        // this session's login, in memory only: changing channel logs in again without the password
+        static string sessionName, sessionSalt;
+        static byte[] sessionKey;
 
         static Saved Remembered
         {
@@ -80,6 +83,8 @@ namespace RPG
         public static byte[] KeyFor(byte[] salt, int iterations)
         {
             if (!string.IsNullOrEmpty(Password)) return LoginCrypto.DeriveKey(Password, salt, iterations);
+            if (sessionKey != null && LoginCrypto.NameKey(sessionName) == LoginCrypto.NameKey(Name) && sessionSalt == Convert.ToBase64String(salt))
+                return sessionKey;
             var r = Remembered;
             if (r == null || string.IsNullOrEmpty(r.key) || LoginCrypto.NameKey(r.name) != LoginCrypto.NameKey(Name)) return null;
             if (r.salt != Convert.ToBase64String(salt)) return null;
@@ -92,6 +97,12 @@ namespace RPG
             Name = name;
             Password = "";
             Mode = LoginMode.Login;
+            if (key != null && salt != null)
+            {
+                sessionName = name;
+                sessionSalt = Convert.ToBase64String(salt);
+                sessionKey = key;
+            }
             if (!Remember || key == null) return;
             saved = new Saved { name = name, salt = Convert.ToBase64String(salt), key = Convert.ToBase64String(key) };
             loaded = true;
@@ -112,6 +123,8 @@ namespace RPG
             saved = null;
             loaded = true;
             Password = "";
+            sessionName = sessionSalt = null;
+            sessionKey = null;
             try
             {
                 if (File.Exists(SavedPath)) File.Delete(SavedPath);
@@ -135,13 +148,17 @@ namespace RPG
         }
 
         /// <summary>A login is ready to be sent (a name, and a password or the remembered key).</summary>
-        public static bool Ready => !string.IsNullOrEmpty(Name) && (!string.IsNullOrEmpty(Password) || RememberedName != null && LoginCrypto.NameKey(RememberedName) == LoginCrypto.NameKey(Name));
+        public static bool Ready => !string.IsNullOrEmpty(Name) && (!string.IsNullOrEmpty(Password) ||
+                                                                    sessionKey != null && LoginCrypto.NameKey(sessionName) == LoginCrypto.NameKey(Name) ||
+                                                                    RememberedName != null && LoginCrypto.NameKey(RememberedName) == LoginCrypto.NameKey(Name));
 
         /// <summary>Forgets what was loaded (tests).</summary>
         public static void ResetForTests()
         {
             saved = null;
             loaded = false;
+            sessionName = sessionSalt = null;
+            sessionKey = null;
             Name = Password = "";
             Mode = LoginMode.Login;
             Remember = true;

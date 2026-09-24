@@ -188,6 +188,38 @@ namespace RPG.EditorTools.Tests
         }
 
         [UnityTest]
+        public IEnumerator TheBossGrowsWithTheHeroesInTheFight()
+        {
+            var boss = BossBear.All[0];
+            var spot = (Vector2)GameManager.I.bossSpot.position;
+            float baseHp = boss.maxHp;
+            float two = BossBear.MaxHpFor(baseHp, 2, boss.hpPerExtraHero);
+            me.health.invulnerable = other.health.invulnerable = true;
+            other.motor.Teleport(Away);
+            me.motor.Teleport(spot + new Vector2(-2f, -4f));
+            yield return Until(() => boss.Engaged, 5f);
+            Assert.IsTrue(boss.Engaged, "one hero wakes it");
+            yield return GameSmokeTests.GameSeconds(0.8f);
+            Assert.AreEqual(baseHp, boss.health.maxHp, 0.01f, "alone: the bear of the offline game");
+
+            boss.health.TakeDamage(Hit(me, boss.health, baseHp * 0.25f));
+            float share = boss.health.Fraction;
+            other.motor.Teleport(spot + new Vector2(2f, -4f));
+            yield return Until(() => boss.health.maxHp > baseHp, 3f);
+            Assert.AreEqual(two, boss.health.maxHp, 0.5f, "a second hero joins the fight: more health");
+            Assert.AreEqual(share, boss.health.Fraction, 0.01f, "with the same share of it left");
+
+            other.motor.Teleport(Away);
+            yield return GameSmokeTests.GameSeconds(1f);
+            Assert.AreEqual(two, boss.health.maxHp, 0.5f, "a hero leaving does not shrink it mid-fight");
+
+            me.motor.Teleport(Away + Vector2.left * 3f);
+            yield return Until(() => !boss.Engaged, 5f);
+            Assert.IsFalse(boss.Engaged);
+            Assert.AreEqual(baseHp, boss.health.maxHp, 0.01f, "the fight reset: back to its own health");
+        }
+
+        [UnityTest]
         public IEnumerator LootGoesToTheNearestHero()
         {
             other.motor.Teleport(Away);

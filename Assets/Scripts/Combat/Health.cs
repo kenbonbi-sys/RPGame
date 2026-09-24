@@ -71,6 +71,14 @@ namespace RPG
             attackers.Clear();
         }
 
+        /// <summary>A new maximum that keeps the share of health left (a boss growing with the heroes who fight it).</summary>
+        public void ScaleMax(float max)
+        {
+            if (max <= 0f) return;
+            hp = maxHp > 0f ? hp * max / maxHp : max;
+            maxHp = max;
+        }
+
         public bool CanBeDamagedBy(Team attacker)
         {
             if (attacker == team) return false;
@@ -94,6 +102,8 @@ namespace RPG
         public float TakeDamage(DamageInfo d)
         {
             if (!GameSession.IsAuthority || IsDead || !CanBeDamagedBy(d.sourceTeam)) return 0f;
+            // online, an enemy's hit on a hero played elsewhere lands half a ping later, so a dash pressed in time dodges it
+            if (LagCompensation.TryHold(this, d)) return 0f;
             if (invulnerable)
             {
                 Evaded?.Invoke(d);

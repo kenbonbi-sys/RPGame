@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using FishNet.Authenticating;
 using FishNet.Connection;
@@ -15,6 +16,8 @@ namespace RPG
     ///   client: LoginProof (HMAC of the nonce with the key made from the password; a new character also sends the key)
     ///   server: LoginResult, then FishNet lets the connection in or drops it.
     /// The password never leaves the player's machine. The host's own player logs in the same way.
+    /// Before letting a player in, the server claims their character (<see cref="Claim"/>): a
+    /// player changing channel waits a moment for the old channel to save and let go.
     /// </summary>
     public class AccountAuthenticator : Authenticator
     {
@@ -24,8 +27,14 @@ namespace RPG
         public ServerStore Store;
         /// <summary>Server: a reason to turn a name away before its password is checked (already playing, server full), or null.</summary>
         public Func<string, string> Refuse;
-        /// <summary>Server: a player is in (their account; true when it was just made).</summary>
-        public event Action<NetworkConnection, AccountRecord, bool> Admitted;
+        /// <summary>
+        /// Server: claims a character for this server while it plays (null: it plays elsewhere,
+        /// <see cref="ServerStore.TryLock"/>); tried for <see cref="ClaimWait"/> seconds. Null: no claims.
+        /// </summary>
+        public Func<string, IDisposable> Claim;
+        public const float ClaimWait = 6f;
+        /// <summary>Server: a player is in (their account; true when it was just made; the claim on their character, to let go when they leave).</summary>
+        public event Action<NetworkConnection, AccountRecord, bool, IDisposable> Admitted;
         /// <summary>Client: the server's answer arrived.</summary>
         public static event Action<LoginResult> ResultReceived;
 
@@ -204,7 +213,7 @@ namespace RPG
                     return;
                 }
                 Debug.Log($"[Server] new character \"{made.name}\"");
-                Succeed(conn, made, true);
+                StartCoroutine(Admit(conn, made, true));
                 return;
             }
             if (!LoginCrypto.Verify(p.account.Key, p.nonce, proof.proof))
@@ -222,15 +231,46 @@ namespace RPG
             }
             p.account.lastLogin = DateTime.Now.ToString("o");
             Store.SaveAccount(p.account);
-            Succeed(conn, p.account, false);
+            StartCoroutine(Admit(conn, p.account, false));
         }
 
-        void Succeed(NetworkConnection conn, AccountRecord account, bool created)
+        /// <summary>Claims the character (waiting a little when another channel still has it), then lets the player in.</summary>
+        IEnumerator Admit(NetworkConnection conn, AccountRecord account, bool created)
+        {
+            IDisposable claim = null;
+            float until = Time.unscaledTime + ClaimWait;
+            while (Claim != null && (claim = Claim(account.name)) == null)
+            {
+                if (Time.unscaledTime > until)
+                {
+                    if (conn.IsActive) Fail(conn, LoginCode.Refused, $"Nhân vật \"{account.name}\" đang ở kênh khác. Hãy thử lại sau ít giây.");
+                    yield break;
+                }
+                yield return new WaitForSecondsRealtime(0.25f);
+                if (!conn.IsActive) yield break;
+            }
+            if (!conn.IsActive)
+            {
+                claim?.Dispose();
+                yield break;
+            }
+            // checked again: the same name may have come in here while waiting
+            string refusal = Refuse != null ? Refuse(account.name) : null;
+            if (refusal != null)
+            {
+                claim?.Dispose();
+                Fail(conn, LoginCode.Refused, refusal);
+                yield break;
+            }
+            Succeed(conn, account, created, claim);
+        }
+
+        void Succeed(NetworkConnection conn, AccountRecord account, bool created, IDisposable claim)
         {
             bool gm = Store.IsGm(account.name);
             NetworkManager.ServerManager.Broadcast(conn, new LoginResult { code = LoginCode.Ok, name = account.name, created = created, gm = gm }, false);
             // FishNet lets the connection in; the session learns who it is before the hero is made
-            Admitted?.Invoke(conn, account, created);
+            Admitted?.Invoke(conn, account, created, claim);
             OnAuthenticationResult?.Invoke(conn, true);
         }
 

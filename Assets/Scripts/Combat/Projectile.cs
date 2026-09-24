@@ -97,6 +97,7 @@ namespace RPG
             d.poise = poise;
             d.attackScaled = attackScaled;
             d.skillName = skillName;
+            d.feedback = true;
             // no knockback or flash on a target that dodged (invulnerable)
             if (h.TakeDamage(d) > 0) Combat.OnHitFeedback(h, d);
         }

@@ -21,6 +21,8 @@ namespace RPG
         public bool pure;          // skips armor, resistances, damage-taken multipliers and the random spread (Kill, scripts)
         public bool contact;       // bumping into an enemy's body, not an attack: Lướt Hoàn Hảo ignores it
         public bool dot;           // a damage-over-time tick (Bỏng, Độc), not an attack either
+        public bool feedback;      // its knockback, flash and sparks show when it lands (Combat.OnHitFeedback)
+        public bool held;          // online, a hit the server held back for a moment (LagCompensation) that lands now
 
         /// <summary>The hero behind the hit (its caster, or the owner of its projectile), or null.</summary>
         public PlayerController SourcePlayer => source != null ? source.GetComponentInParent<PlayerController>() : null;

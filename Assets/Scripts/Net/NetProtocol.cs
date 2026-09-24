@@ -10,7 +10,7 @@ namespace RPG
     /// </summary>
     public static class NetProtocol
     {
-        public const int Version = 2;
+        public const int Version = 3;
 
         /// <summary>First id of the replicated objects of a zone (enemies, boss, rocks); heroes use their NetworkObject id, below it.</summary>
         public const int SceneIdBase = 1000000;
@@ -279,7 +279,11 @@ namespace RPG
         /// <summary>A line for the console (GM commands, server messages).</summary>
         Console = 6,
         /// <summary>Everything about the character has arrived: play.</summary>
-        Ready = 7
+        Ready = 7,
+        /// <summary><see cref="ControlMsg.text"/> asks this player into their party (the answer: <see cref="ActKind.PartyAnswer"/>).</summary>
+        PartyInvite = 8,
+        /// <summary>A line for this player's log only (answers to social commands: friends, parties).</summary>
+        Info = 9
     }
 
     /// <summary>Server → owner: orders and answers for that player's own hero.</summary>
@@ -312,8 +316,20 @@ namespace RPG
         GiveItem = 7,
         SpendStat = 8,
         Console = 9,
-        Chat = 10,
-        DialogueVars = 11
+        DialogueVars = 11,
+        /// <summary>The player's ping in ms (<see cref="ActRequest.value"/>), every few seconds: the server holds enemies' hits that long (<see cref="LagCompensation"/>).</summary>
+        Ping = 12,
+        /// <summary>Asks <see cref="ActRequest.text"/> into this player's party.</summary>
+        PartyInvite = 13,
+        /// <summary>The answer to <see cref="ActRequest.text"/>'s invitation: <see cref="ActRequest.value"/> 1 yes, 0 no.</summary>
+        PartyAnswer = 14,
+        PartyLeave = 15,
+        /// <summary>The leader sends <see cref="ActRequest.text"/> out of the party.</summary>
+        PartyKick = 16,
+        /// <summary>Adds <see cref="ActRequest.text"/> to this player's friends (<see cref="ActRequest.value"/> 0: removes them).</summary>
+        Friend = 17,
+        /// <summary>This player's friends and who of them is playing, as an <see cref="ControlKind.Info"/> line.</summary>
+        FriendList = 18
     }
 
     /// <summary>Client → server: everything else a player wants (potions, talking, dialogue commands, stat points, chat).</summary>
@@ -325,11 +341,39 @@ namespace RPG
         public string text;
     }
 
+    public enum ChatChannel : byte
+    {
+        /// <summary>Everyone in the world.</summary>
+        World = 0,
+        /// <summary>The speaker's party.</summary>
+        Party = 1,
+        /// <summary>One player (<see cref="ChatMsg.to"/>).</summary>
+        Whisper = 2
+    }
+
+    /// <summary>Client → server: something to say. A whisper's text starts with the name it goes to (names may have spaces; the server finds it).</summary>
+    public struct ChatRequest : IBroadcast
+    {
+        public ChatChannel channel;
+        public string text;
+    }
+
     /// <summary>Server → clients: a chat line.</summary>
     public struct ChatMsg : IBroadcast
     {
+        public ChatChannel channel;
         public string from;
+        /// <summary>A whisper: who it went to (the sender sees their own line too).</summary>
+        public string to;
         public string text;
         public bool system;
+    }
+
+    /// <summary>Server → each member: their party now (no names: not in one). Heroes are network ids, 0 when not in the world yet.</summary>
+    public struct PartyMsg : IBroadcast
+    {
+        public string leader;
+        public string[] names;
+        public int[] heroes;
     }
 }

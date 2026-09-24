@@ -233,6 +233,7 @@ namespace FishNet.Managing.Server
         public Dictionary<int, NetworkConnection> Clients = new Dictionary<int, NetworkConnection>();
         public bool GetStartOnHeadless() => false;
         public void SetStartOnHeadless(bool value) { }
+        public void SetFrameRate(ushort value) { }
         public bool StartConnection() => false;
         public bool StartConnection(ushort port) => false;
         public bool StopConnection(bool sendDisconnectMessage) => false;

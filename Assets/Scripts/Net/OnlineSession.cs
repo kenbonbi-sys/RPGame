@@ -25,6 +25,8 @@ namespace RPG
     public class OnlineSession : MonoBehaviour
     {
         public const ushort DefaultPort = 7770;
+        /// <summary>Frames per second of a dedicated server (the world ticks and sends 15 snapshots a second on top of it).</summary>
+        public const ushort ServerFrameRate = 60;
         public const string TitleScene = "Title";
 
         /// <summary>The server a client joins.</summary>
@@ -34,6 +36,12 @@ namespace RPG
         public static string DataFolder;
         /// <summary>Server: the name players see when their game finds it.</summary>
         public static string ServerName = "Rừng Thì Thầm";
+        /// <summary>
+        /// Kênh (online phase 4): every channel of a world is its own server process on the same
+        /// data folder, channel n on port <see cref="DefaultPort"/> + 2(n − 1). A player's machine
+        /// learns its channel from the server.
+        /// </summary>
+        public static int Channel = 1;
 
         public static OnlineSession I { get; private set; }
 
@@ -45,7 +53,11 @@ namespace RPG
 
         static bool commandLineRead;
         bool stopping;
+        float nextPing;
         ServerDiscovery discovery;
+        ServerStopSignal stopSignal;
+        float nextStopCheck;
+        bool quitting;
         readonly List<SectionMsg> pendingSections = new List<SectionMsg>();
 
         static bool RunsServer => GameSession.Mode == SessionMode.Host || GameSession.Mode == SessionMode.Server;
@@ -62,7 +74,8 @@ namespace RPG
 
         /// <summary>
         /// Sets the session from command-line words: -server, -host or -client [address], plus
-        /// -port n, -data folder, -maxplayers n, -servername "…" and -login name password.
+        /// -channel n (its port unless -port says otherwise), -port n, -data folder, -maxplayers n,
+        /// -servername "…" and -login name password.
         /// Returns false (and changes nothing but those settings) when no mode is named.
         /// </summary>
         public static bool Apply(string[] args)
@@ -71,6 +84,11 @@ namespace RPG
             {
                 int i = Array.IndexOf(args, flag);
                 return i >= 0 && i + 1 < args.Length && !args[i + 1].StartsWith("-") ? args[i + 1] : null;
+            }
+            if (int.TryParse(After("-channel"), out int channel) && channel >= 1 && channel <= ServerDiscovery.MaxChannels)
+            {
+                Channel = channel;
+                Port = ServerDiscovery.ChannelPort(DefaultPort, channel);
             }
             if (ushort.TryParse(After("-port"), out ushort port) && port > 0) Port = port;
             if (After("-data") != null) DataFolder = After("-data");
@@ -137,7 +155,13 @@ namespace RPG
         IEnumerator Start()
         {
             if (GameSession.Mode == SessionMode.Offline) yield break;
-            if (GameSession.Mode == SessionMode.Server) Application.targetFrameRate = 60;   // a server has no screen to keep smooth
+            if (GameSession.Mode == SessionMode.Server)
+            {
+                // a server has no screen to keep smooth: 60 frames a second is plenty (FishNet is told the same below)
+                QualitySettings.vSyncCount = 0;
+                Application.targetFrameRate = ServerFrameRate;
+            }
+            if (GameSession.HasScreen && HUD.I != null) PartyUI.Ensure(HUD.I);
             // heroes are placed in the zone, so the zone comes first
             while (SceneLoader.I == null || SceneLoader.I.Busy) yield return null;
             var world = gameObject.GetComponent<NetWorld>();
@@ -159,6 +183,8 @@ namespace RPG
             go.name = "[Network]";
             Network = go.GetComponent<NetworkManager>();
             Network.ServerManager.SetStartOnHeadless(false);
+            // left alone, FishNet runs a started server at up to 500 frames a second: a whole CPU core on the host PC
+            if (GameSession.Mode == SessionMode.Server) Network.ServerManager.SetFrameRate(ServerFrameRate);
             Network.TransportManager.Transport.SetPort(Port);
             var auth = go.AddComponent<AccountAuthenticator>();
             Network.ServerManager.SetAuthenticator(auth);
@@ -169,8 +195,9 @@ namespace RPG
                 if (players == null) players = gameObject.AddComponent<ServerPlayers>();
                 players.Begin(Network, auth, new ServerStore(folder));
                 Network.ServerManager.StartConnection(Port);
-                discovery = ServerDiscovery.StartResponder(Port, () => ServerName, () => ServerPlayers.I != null ? ServerPlayers.I.Count : 0, ServerPlayers.MaxPlayers);
-                Debug.Log($"[Online] {GameSession.Mode} \"{ServerName}\" listening on port {Port}, up to {ServerPlayers.MaxPlayers} players");
+                discovery = ServerDiscovery.StartResponder(Port, Channel, () => ServerName, () => ServerPlayers.I != null ? ServerPlayers.I.Count : 0, ServerPlayers.MaxPlayers);
+                if (GameSession.Mode == SessionMode.Server) stopSignal = ServerStopSignal.Listen();
+                Debug.Log($"[Online] {GameSession.Mode} \"{ServerName}\" channel {Channel} listening on port {Port}, up to {ServerPlayers.MaxPlayers} players");
             }
             world.Begin(Network);
             if (RunsClient)
@@ -180,6 +207,7 @@ namespace RPG
                 c.RegisterBroadcast<SectionMsg>(OnSection);
                 c.RegisterBroadcast<NoticeMsg>(OnNotice);
                 c.RegisterBroadcast<ControlMsg>(OnControl);
+                c.RegisterBroadcast<PartyMsg>(OnParty);
                 string address = GameSession.Mode == SessionMode.Host ? "localhost" : Address;
                 c.StartConnection(address, Port);
                 Debug.Log($"[Online] joining {address}:{Port} as \"{LoginInfo.Name}\"");
@@ -212,6 +240,9 @@ namespace RPG
                 discovery.Dispose();
                 discovery = null;
             }
+            stopSignal?.Dispose();
+            stopSignal = null;
+            PartyState.Reset();
             if (Network == null) return;
             stopping = true;
             var world = GetComponent<NetWorld>();
@@ -222,6 +253,31 @@ namespace RPG
             Destroy(Network.gameObject);
             Network = null;
             NetCues.Reset();
+        }
+
+        void Update()
+        {
+            if (stopSignal != null && !quitting && Time.unscaledTime >= nextStopCheck)
+            {
+                nextStopCheck = Time.unscaledTime + 0.5f;
+                if (stopSignal.Requested) StartCoroutine(StopCleanly());
+            }
+            // a player's machine tells the server its ping: enemies' hits wait that long there (LagCompensation)
+            if (GameSession.Mode != SessionMode.Client || !InWorld || Network == null || Time.unscaledTime < nextPing) return;
+            nextPing = Time.unscaledTime + 2f;
+            Ask(new ActRequest { kind = ActKind.Ping, value = (int)Network.TimeManager.RoundTripTime });
+        }
+
+        /// <summary>stop-server.ps1 asked (<see cref="ServerStopSignal"/>): tell the players, save everyone, quit.</summary>
+        IEnumerator StopCleanly()
+        {
+            quitting = true;
+            int players = ServerPlayers.I != null ? ServerPlayers.I.Count : 0;
+            Debug.Log($"[Server] asked to stop: saving {players} characters");
+            ServerPlayers.SystemChat("Máy chủ tắt để cập nhật. Game sẽ tự vào lại khi máy chủ chạy lại.");
+            yield return new WaitForSecondsRealtime(1f);   // the message leaves first
+            if (ServerPlayers.I != null) ServerPlayers.I.SaveAll("server stopping");
+            Application.Quit(0);
         }
 
         void OnClientState(ClientConnectionStateArgs args)
@@ -296,7 +352,14 @@ namespace RPG
             {
                 case ControlKind.Ready:
                     InWorld = true;
-                    GameEvents.RaiseLog($"Chào {m.text}! Bạn đã vào thế giới online.{(m.ok ? " (Quản trị)" : "")}", Palette.LogQuest);
+                    if (m.value >= 1f) Channel = Mathf.RoundToInt(m.value);
+                    GameEvents.RaiseLog($"Chào {m.text}! Bạn đã vào thế giới online, kênh {Channel}.{(m.ok ? " (Quản trị)" : "")} Gõ /giup để xem lệnh chat.", Palette.LogQuest);
+                    break;
+                case ControlKind.PartyInvite:
+                    PartyState.Invited(m.text);
+                    break;
+                case ControlKind.Info:
+                    GameEvents.RaiseLog(m.text, Palette.LogInfo);
                     break;
                 case ControlKind.Downed:
                     if (me == null) break;
@@ -361,25 +424,80 @@ namespace RPG
             }
         }
 
-        /// <summary>Says something to everyone in the world.</summary>
-        public static void Say(string text)
+        void OnParty(PartyMsg m, Channel channel) => PartyState.Apply(m);
+
+        /// <summary>Says something to everyone in the world, to this player's party, or (a whisper: the text starts with a name) to one player.</summary>
+        public static void Say(string text, ChatChannel channel = ChatChannel.World)
         {
             text = ServerPlayers.CleanChat(text);
             if (text.Length == 0) return;
-            if (GameSession.Mode == SessionMode.Client)
+            var nm = I != null ? I.Network : null;
+            if (nm != null && nm.ClientManager.Started)
             {
-                Ask(new ActRequest { kind = ActKind.Chat, text = text });
+                Ask(new ChatRequest { channel = channel, text = text });
                 return;
             }
             if (GameSession.Serving && ServerPlayers.I != null)
             {
-                string name = ServerPlayers.NameOf(Players.Local) ?? "Máy chủ";
-                var msg = new ChatMsg { from = name, text = text };
-                ServerPlayers.SendToAll(msg);
-                if (GameSession.HasScreen) NetWorld.ShowChat(msg);
+                // a server's own console speaks to everyone
+                ServerPlayers.SystemChat("[Máy chủ] " + text);
                 return;
             }
             GameEvents.RaiseLog("Chưa vào thế giới online.", Palette.LogInfo);
+        }
+
+        // ------------------------------------------------------------------ channels
+        /// <summary>The port of channel 1 of the world this machine plays in.</summary>
+        static ushort BasePort => (ushort)Mathf.Max(1, Port - 2 * (Channel - 1));
+
+        /// <summary>"/kenh": this world's channels and their players; "/kenh 2": go to channel 2 (the character comes along).</summary>
+        public static void ChannelCommand(string arg)
+        {
+            if (GameSession.Mode != SessionMode.Client || I == null || I.Network == null)
+            {
+                GameEvents.RaiseLog("Kênh chỉ có khi chơi online trên máy chủ.", Palette.LogInfo);
+                return;
+            }
+            int want = 0;
+            if (!string.IsNullOrWhiteSpace(arg) && (!int.TryParse(arg.Trim(), out want) || want < 1 || want > ServerDiscovery.MaxChannels))
+            {
+                GameEvents.RaiseLog($"Kênh từ 1 đến {ServerDiscovery.MaxChannels}. Gõ /kenh để xem các kênh.", Palette.LogInfo);
+                return;
+            }
+            if (want == Channel)
+            {
+                GameEvents.RaiseLog($"Bạn đang ở kênh {want}.", Palette.LogInfo);
+                return;
+            }
+            I.StartCoroutine(I.Channels(want));
+        }
+
+        IEnumerator Channels(int want)
+        {
+            var found = new List<ServerDiscovery.Found>();
+            yield return ServerDiscovery.Search(new[] { $"{Address}:{BasePort}" }, BasePort, 0.8f, found, false);
+            found.Sort((a, b) => a.channel.CompareTo(b.channel));
+            if (want == 0)
+            {
+                var sb = new StringBuilder();
+                foreach (var f in found)
+                {
+                    if (sb.Length > 0) sb.Append("  ·  ");
+                    sb.Append($"Kênh {f.channel}{(f.channel == Channel ? " (bạn ở đây)" : "")}: {f.players}/{f.max} người");
+                }
+                GameEvents.RaiseLog(sb.Length > 0 ? sb + ". Đổi kênh: /kenh <số>." : "Không hỏi được các kênh của máy chủ.", Palette.LogInfo);
+                yield break;
+            }
+            var to = found.Find(f => f.channel == want);
+            string why = to == null ? $"Máy chủ không có kênh {want}." : !to.Compatible ? $"Kênh {want} chạy phiên bản khác." : to.Full ? $"Kênh {want} đã đủ {to.max} người." : null;
+            if (why != null)
+            {
+                GameEvents.RaiseLog(why, Palette.LogInfo);
+                yield break;
+            }
+            GameEvents.RaiseLog($"Đang sang kênh {want}…", Palette.LogQuest);
+            Channel = want;
+            Reboot(SessionMode.Client, Address, to.port);
         }
 
         // ------------------------------------------------------------------ status
@@ -403,7 +521,7 @@ namespace RPG
             var names = new List<string>();
             if (ServerPlayers.I != null)
                 foreach (var s in ServerPlayers.I.Sessions)
-                    names.Add(s.gm ? s.Name + " (GM)" : s.Name);
+                    names.Add(s.Name + (s.gm ? " (GM)" : "") + (s.Local ? "" : $" {s.pingMs} ms"));
             else
                 foreach (var p in Players.All)
                 {

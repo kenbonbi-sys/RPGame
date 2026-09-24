@@ -16,14 +16,21 @@ namespace RPG
     /// UDP port game port + 1 (7771); a player's game asks every network it is on (LAN, Radmin VPN,
     /// Hamachi… a broadcast reaches the whole network) and the addresses written down in
     /// <see cref="ServerList"/>, and joins the best answer. The answer carries the server's name,
-    /// its players and its version, so an outdated game can say so.
+    /// its channel, its players and its version, so an outdated game can say so. Every channel of
+    /// a world answers on its own port (<see cref="ChannelPort"/>), and a search asks them all.
     /// </summary>
     public sealed class ServerDiscovery : IDisposable
     {
         const string AskWord = "RTT?";
         const string ReplyWord = "RTT!";
 
+        /// <summary>Channels a search asks for on every address (online phase 4).</summary>
+        public const int MaxChannels = 4;
+
         public static ushort PortFor(ushort gamePort) => (ushort)(gamePort + 1);
+
+        /// <summary>The game port of <paramref name="channel"/> (1, 2…) of a world whose channel 1 is on <paramref name="basePort"/>: every channel takes two ports (game, discovery).</summary>
+        public static ushort ChannelPort(ushort basePort, int channel) => (ushort)(basePort + 2 * (Math.Max(1, channel) - 1));
 
         /// <summary>Players in the world right now, for the answer (the server keeps it up to date).</summary>
         public static volatile int PlayerCount;
@@ -33,15 +40,16 @@ namespace RPG
         volatile bool running;
         string serverName;
         int maxPlayers;
+        int channel;
         ushort gamePort;
 
         // ================================================================== server
         /// <summary>Starts answering; null when the port is taken (the game still runs, it just cannot be found).</summary>
-        public static ServerDiscovery StartResponder(ushort gamePort, Func<string> name, Func<int> players, int max)
+        public static ServerDiscovery StartResponder(ushort gamePort, int channel, Func<string> name, Func<int> players, int max)
         {
             try
             {
-                var d = new ServerDiscovery { serverName = name(), maxPlayers = max, gamePort = gamePort };
+                var d = new ServerDiscovery { serverName = name(), maxPlayers = max, gamePort = gamePort, channel = channel };
                 PlayerCount = players();
                 d.udp = new UdpClient(AddressFamily.InterNetwork);
                 d.udp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
@@ -70,7 +78,7 @@ namespace RPG
                     string msg = Encoding.UTF8.GetString(data);
                     if (!msg.StartsWith(AskWord)) continue;
                     string token = msg.Length > AskWord.Length + 1 ? msg.Substring(AskWord.Length + 1) : "";
-                    byte[] reply = Encoding.UTF8.GetBytes(ReplyText(NetProtocol.Version, gamePort, PlayerCount, maxPlayers, serverName, token));
+                    byte[] reply = Encoding.UTF8.GetBytes(ReplyText(NetProtocol.Version, gamePort, PlayerCount, maxPlayers, channel, serverName, token));
                     udp.Send(reply, reply.Length, from);
                 }
                 catch (SocketException)
@@ -89,9 +97,9 @@ namespace RPG
             }
         }
 
-        /// <summary>The server's answer: RTT!|version|port|players|max|token|name.</summary>
-        public static string ReplyText(int version, ushort port, int players, int max, string name, string token) =>
-            $"{ReplyWord}|{version}|{port}|{players}|{max}|{token}|{name}";
+        /// <summary>The server's answer: RTT!|version|port|players|max|token|channel|name (a game older than protocol 3 reads "channel|name" as the name, and still sees the version).</summary>
+        public static string ReplyText(int version, ushort port, int players, int max, int channel, string name, string token) =>
+            $"{ReplyWord}|{version}|{port}|{players}|{max}|{token}|{channel}|{name}";
 
         public void Dispose()
         {
@@ -109,6 +117,8 @@ namespace RPG
             public ushort port;
             public string name;
             public int players, max, version;
+            /// <summary>1, 2… (0: a server too old to say).</summary>
+            public int channel;
             /// <summary>Seconds from asking to the answer.</summary>
             public float ping;
 
@@ -120,20 +130,28 @@ namespace RPG
         public static Found Parse(string text, string token, string address)
         {
             if (string.IsNullOrEmpty(text) || !text.StartsWith(ReplyWord + "|")) return null;
-            var parts = text.Split(new[] { '|' }, 7);
+            var parts = text.Split(new[] { '|' }, 8);
             if (parts.Length < 7 || parts[5] != token) return null;
             if (!int.TryParse(parts[1], out int version) || !ushort.TryParse(parts[2], out ushort port)) return null;
             int.TryParse(parts[3], out int players);
             int.TryParse(parts[4], out int max);
-            return new Found { address = address, port = port, players = players, max = max, version = version, name = parts[6] };
+            var f = new Found { address = address, port = port, players = players, max = max, version = version, name = parts[6] };
+            // protocol 3 on: the channel before the name
+            if (parts.Length == 8 && int.TryParse(parts[6], out int channel))
+            {
+                f.channel = channel;
+                f.name = parts[7];
+            }
+            return f;
         }
 
         /// <summary>
-        /// Asks every network this machine is on and every address in <paramref name="addresses"/>
-        /// ("host" or "host:port") for <paramref name="seconds"/>; <paramref name="results"/>
-        /// gets one entry per server, fastest first.
+        /// Asks every network this machine is on (unless <paramref name="broadcast"/> is false) and
+        /// every address in <paramref name="addresses"/> ("host" or "host:port"), on each channel's
+        /// port, for <paramref name="seconds"/>; <paramref name="results"/> gets one entry per
+        /// server, fastest first.
         /// </summary>
-        public static IEnumerator Search(IList<string> addresses, ushort gamePort, float seconds, List<Found> results)
+        public static IEnumerator Search(IList<string> addresses, ushort gamePort, float seconds, List<Found> results, bool broadcast = true)
         {
             results.Clear();
             UdpClient udp;
@@ -151,14 +169,18 @@ namespace RPG
             byte[] ask = Encoding.UTF8.GetBytes(AskWord + "|" + token);
             float sentAt = Time.realtimeSinceStartup;
             var asked = new HashSet<string>();
-            void Send(IPAddress ip, ushort port)
+            void Send(IPAddress ip, ushort basePort)
             {
-                string key = ip + ":" + port;
-                if (!asked.Add(key)) return;
-                try { udp.Send(ask, ask.Length, new IPEndPoint(ip, PortFor(port))); }
-                catch (Exception) { /* an interface that cannot send: skip it */ }
+                for (int c = 1; c <= MaxChannels; c++)
+                {
+                    ushort port = ChannelPort(basePort, c);
+                    if (!asked.Add(ip + ":" + port)) continue;
+                    try { udp.Send(ask, ask.Length, new IPEndPoint(ip, PortFor(port))); }
+                    catch (Exception) { /* an interface that cannot send: skip it */ }
+                }
             }
-            foreach (var bc in BroadcastAddresses()) Send(bc, gamePort);
+            if (broadcast)
+                foreach (var bc in BroadcastAddresses()) Send(bc, gamePort);
             if (addresses != null)
                 foreach (var a in addresses)
                     if (TryResolve(a, gamePort, out var ip, out ushort port)) Send(ip, port);

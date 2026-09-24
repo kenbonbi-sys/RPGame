@@ -145,20 +145,36 @@ namespace RPG.EditorTools.Tests
         [Test]
         public void AnAnswerIsReadBack()
         {
-            string text = ServerDiscovery.ReplyText(NetProtocol.Version, 7770, 3, 20, "Rừng | Thì Thầm", "4242");
+            string text = ServerDiscovery.ReplyText(NetProtocol.Version, 7772, 3, 20, 2, "Rừng | Thì Thầm", "4242");
             var f = ServerDiscovery.Parse(text, "4242", "26.253.10.125");
             Assert.NotNull(f);
             Assert.AreEqual("26.253.10.125", f.address);
-            Assert.AreEqual(7770, f.port);
+            Assert.AreEqual(7772, f.port);
             Assert.AreEqual(3, f.players);
             Assert.AreEqual(20, f.max);
+            Assert.AreEqual(2, f.channel);
             Assert.AreEqual("Rừng | Thì Thầm", f.name, "the name may hold the separator");
             Assert.IsTrue(f.Compatible);
             Assert.IsFalse(f.Full);
             Assert.IsNull(ServerDiscovery.Parse(text, "1111", "x"), "an answer to someone else's question");
             Assert.IsNull(ServerDiscovery.Parse("hello", "4242", "x"));
-            Assert.IsFalse(ServerDiscovery.Parse(ServerDiscovery.ReplyText(NetProtocol.Version + 1, 7770, 0, 20, "a", "1"), "1", "x").Compatible);
-            Assert.IsTrue(ServerDiscovery.Parse(ServerDiscovery.ReplyText(NetProtocol.Version, 7770, 20, 20, "a", "1"), "1", "x").Full);
+            Assert.IsFalse(ServerDiscovery.Parse(ServerDiscovery.ReplyText(NetProtocol.Version + 1, 7770, 0, 20, 1, "a", "1"), "1", "x").Compatible);
+            Assert.IsTrue(ServerDiscovery.Parse(ServerDiscovery.ReplyText(NetProtocol.Version, 7770, 20, 20, 1, "a", "1"), "1", "x").Full);
+
+            // a server of protocol 2 (no channel) is still read, and told apart
+            var old = ServerDiscovery.Parse("RTT!|2|7770|1|20|9|Rừng Thì Thầm", "9", "x");
+            Assert.NotNull(old);
+            Assert.AreEqual("Rừng Thì Thầm", old.name);
+            Assert.AreEqual(0, old.channel);
+            Assert.IsFalse(old.Compatible);
+        }
+
+        [Test]
+        public void EveryChannelHasItsOwnPorts()
+        {
+            Assert.AreEqual(7770, ServerDiscovery.ChannelPort(7770, 1));
+            Assert.AreEqual(7772, ServerDiscovery.ChannelPort(7770, 2));
+            Assert.AreEqual(7773, ServerDiscovery.PortFor(ServerDiscovery.ChannelPort(7770, 2)), "its discovery port next to it");
         }
 
         [Test]
@@ -181,6 +197,21 @@ namespace RPG.EditorTools.Tests
         {
             Assert.AreEqual("‹b›hi‹/b› there", ServerPlayers.CleanChat(" <b>hi</b>\nthere "));
             Assert.AreEqual(120, ServerPlayers.CleanChat(new string('a', 300)).Length);
+        }
+
+        [Test]
+        public void AServerCanBeAskedToStop()
+        {
+            int pid = 900000 + UnityEngine.Random.Range(0, 99999);   // a process id no server has
+            Assert.IsFalse(ServerStopSignal.Ask(pid), "nobody listens yet");
+            using (var signal = ServerStopSignal.Listen(pid))
+            {
+                Assert.NotNull(signal, "named events work here");
+                Assert.IsFalse(signal.Requested);
+                Assert.IsTrue(ServerStopSignal.Ask(pid), "what stop-server.ps1 does");
+                Assert.IsTrue(signal.Requested);
+            }
+            Assert.IsFalse(ServerStopSignal.Ask(pid), "gone with the server");
         }
     }
 }

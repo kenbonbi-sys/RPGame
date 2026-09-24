@@ -288,6 +288,7 @@ namespace RPG
             {
                 // every hero who helped gets the kill; online each of them rolls their own loot
                 var credited = new List<PlayerController>(health.Attackers);
+                ServerPlayers.ShareKill(credited, transform.position);   // party members nearby
                 Loot.Roll(loot, transform.position, credited);
                 GameEvents.RaiseEnemyKilled(new KillInfo
                 {

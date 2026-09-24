@@ -75,6 +75,7 @@ namespace RPG
             if (GetComponent<DebugConsole>() == null) gameObject.AddComponent<DebugConsole>();
             if (GetComponent<OnlineSession>() == null) gameObject.AddComponent<OnlineSession>();
             if (NetSmoke.Active && GetComponent<NetSmoke>() == null) gameObject.AddComponent<NetSmoke>();
+            if (LoadBot.Active && GetComponent<LoadBot>() == null) gameObject.AddComponent<LoadBot>();
             if (BackdropShot.Active && GetComponent<BackdropShot>() == null) gameObject.AddComponent<BackdropShot>();
             if (GameSession.Online && GameSession.HasScreen && GetComponent<ChatInput>() == null) gameObject.AddComponent<ChatInput>();
             if (GameSession.Mode == SessionMode.Server) WithoutScreen();
@@ -108,7 +109,7 @@ namespace RPG
         {
             SetCursor(false);
             if (SaveManager.HasPendingLoad) return;   // loading a save: no welcome
-            bool screen = GameSession.Mode != SessionMode.Server && !AutoShot.Active && !NetSmoke.Active && !BackdropShot.Active;
+            bool screen = GameSession.Mode != SessionMode.Server && !AutoShot.Active && !NetSmoke.Active && !LoadBot.Active && !BackdropShot.Active;
             if (showHelpOnStart && screen && HUD.I != null && HUD.I.help != null) HUD.I.help.Show();
             GameEvents.RaiseLog("Chào mừng đến Làng Lá Xanh! Bấm F1 để xem hướng dẫn.", Palette.LogQuest);
         }

@@ -174,6 +174,9 @@ namespace RPG
                 VFX.Spawn(b.spec.endVfx, transform.position + Vector3.up * 0.5f, Quaternion.identity);
         }
 
+        /// <summary>The fastest this hero may walk now (its buffs; slows left out): the server's move check (<see cref="MoveCheck"/>).</summary>
+        public float TopWalkSpeed => (motor != null ? motor.moveSpeed : 4f) * Mathf.Max(1f, BuffSpeed);
+
         /// <summary>Speed multiplier of all buffs together.</summary>
         float BuffSpeed
         {

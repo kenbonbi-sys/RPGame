@@ -9,7 +9,8 @@ namespace RPG
     /// Patterns: Vồ (claw swipe), Dậm Đất (ground stomp, stuns), Ném Đá Lớn (throws a boulder
     /// that stays on the field), Chụp Quăng (leap slam; landing on a boulder stuns the bear).
     /// Enrages at 50% HP. Wakes for any hero, fights the one it has the most threat on and resets
-    /// once every hero is down or has left the arena.
+    /// once every hero is down or has left the arena. More heroes in the fight make it tougher
+    /// (<see cref="hpPerExtraHero"/>), so a crowd does not melt it.
     /// Online (Docs/KeHoach-Online.md, phase 3) the server fights; every screen near the arena gets
     /// its warnings, roars and effects (<see cref="NetCues"/>), its big moments
     /// (<see cref="Present"/>), and shows its bar and music while its hero is in the fight. It
@@ -31,6 +32,9 @@ namespace RPG
         public float wakeRadius = 7.5f;
         [Tooltip("Online: seconds after its fall before the bear is back (a shared world has more than one hero).")]
         public float respawnSeconds = 180f;
+        [Tooltip("Extra health for every hero in the fight after the first, as a share of maxHp (0.7: two heroes face 170%). " +
+                 "Counted as heroes arrive; it does not shrink before the fight ends.")]
+        public float hpPerExtraHero = 0.7f;
 
         [Header("Refs")]
         public CharacterMotor motor;
@@ -77,6 +81,9 @@ namespace RPG
         bool remoteEngaged, remoteEnraged;
         // this screen shows the fight (bar, music) — online, only while its hero is in it
         bool shownHere;
+        // most heroes in the fight at once since it began (its health follows)
+        int fightHeroes;
+        float nextHeroCount;
 
         public bool Engaged => GameSession.IsAuthority
             ? state != State.Dormant && state != State.Dead && state != State.Returning
@@ -132,6 +139,11 @@ namespace RPG
         void Update()
         {
             if (!GameSession.IsAuthority) return;   // online the server fights; this copy only shows
+            if (Engaged && Time.time >= nextHeroCount)
+            {
+                nextHeroCount = Time.time + 0.5f;
+                GrowWithHeroes();
+            }
             switch (state)
             {
                 case State.Dormant:
@@ -190,12 +202,38 @@ namespace RPG
             return p;
         }
 
+        /// <summary>Health for a fight with <paramref name="heroes"/> heroes in it.</summary>
+        public static float MaxHpFor(float baseHp, int heroes, float perExtraHero) =>
+            baseHp * (1f + Mathf.Max(0f, perExtraHero) * Mathf.Max(0, heroes - 1));
+
+        /// <summary>Heroes on their feet near the arena: the ones in the fight.</summary>
+        int HeroesInFight()
+        {
+            int n = 0;
+            foreach (var p in Players.All)
+                if (p != null && !p.IsDead && Vector2.Distance(p.transform.position, home) <= LeashRadius) n++;
+            return n;
+        }
+
+        /// <summary>A hero joined the fight: more health, the same share of it left.</summary>
+        void GrowWithHeroes()
+        {
+            int n = HeroesInFight();
+            if (n <= fightHeroes) return;
+            fightHeroes = n;
+            float max = MaxHpFor(maxHp, n, hpPerExtraHero);
+            if (max <= health.maxHp) return;
+            health.ScaleMax(max);
+            NetCues.Log($"{displayName} mạnh lên: {n} người trong trận.", new Color(1f, 0.7f, 0.5f), Pos);
+        }
+
         void ResetFight()
         {
             if (routine != null) StopCoroutine(routine);
             ClearTelegraphs();
             threat.Clear();
             target = null;
+            fightHeroes = 0;
             enraged = false;
             walkSpeed = baseWalkSpeed;
             motor.moveSpeed = walkSpeed;
@@ -595,6 +633,7 @@ namespace RPG
             NetCues.Boss(this, Moment.Death);
             yield return new WaitForSecondsRealtime(1.2f);
             var credited = new List<PlayerController>(health.Attackers);
+            ServerPlayers.ShareKill(credited, Pos);   // party members nearby
             Loot.Roll(loot, Pos, credited);
             Loot.DropCoins(Pos, 12, credited);
             GameEvents.RaiseEnemyKilled(new KillInfo
@@ -627,6 +666,7 @@ namespace RPG
             gameObject.SetActive(true);
             foreach (var c in GetComponentsInChildren<Collider2D>(true)) c.enabled = true;
             enraged = false;
+            fightHeroes = 0;
             walkSpeed = baseWalkSpeed;
             motor.moveSpeed = walkSpeed;
             health.ResetHealth(maxHp);

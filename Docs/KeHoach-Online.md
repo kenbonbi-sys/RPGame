@@ -1,6 +1,6 @@
 # Kế hoạch online — Rừng Thì Thầm (hướng C: thế giới online nhiều người)
 
-> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0, 1, 2 và 3 xong**: thế giới online chạy trên một máy chủ luôn bật, người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss Gấu Ma do máy chủ điều khiển, mỗi người rơi đồ riêng; có chat (một phần giai đoạn 4). Tiếp theo: phần còn lại của giai đoạn 4 (nhiều vùng, kênh, party) và giai đoạn 5 (VPS, chống gian lận). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
+> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Còn lại: nhiều vùng (chờ có vùng thứ hai), đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
 
 ## 1. Mục tiêu
 
@@ -76,8 +76,8 @@ Game có Lướt Hoàn Hảo (cửa sổ 0.15 s), input buffer 150 ms, vòng c�
 | **1. Hai người thấy nhau** ✓ | Cài FishNet; build dedicated server; 2 client vào cùng vùng, đi lại, Lướt, thấy nhau. | Chạy server trên máy, 2 cửa sổ game thấy nhau di chuyển mượt. **Xong** — xem mục 9. | 3–5 tuần |
 | **2. Tài khoản và lưu nhân vật** ✓ | Máy chủ luôn bật; màn hình chính tự tìm máy chủ; đăng ký/đăng nhập (mật khẩu không qua mạng); server nạp và ghi nhân vật. Dữ liệu nằm ngay trong máy chủ game, không dùng Nakama/PostgreSQL (lý do ở mục 10). | Thoát game, mở lại trên máy khác, nhân vật còn nguyên. **Xong** — xem mục 10. | 3–5 tuần |
 | **3. Chiến đấu online** ✓ | Skill, sát thương, trạng thái, quái, bãi hồi sinh, boss Gấu Ma, Thanh Trấn Áp, rơi đồ, XP, nhiệm vụ, hội thoại — tất cả do server quyết định. Lag compensation cho Lướt: chưa (mục 11). | 3–5 người cùng hạ Gấu Ma, ai cũng nhận thưởng đúng. **Xong phần chính** — xem mục 11. | 6–10 tuần |
-| **4. Thế giới** | Nhiều vùng, chuyển vùng giữa các zone server, kênh (k1, k2…), chat, party, danh sách bạn. | Đi từ Làng sang Rừng, đổi kênh, chat được. | 4–6 tuần |
-| **5. Vận hành** | Đưa lên VPS; giám sát, log, backup; chống gian lận cơ bản; thử tải 50+ người (dùng bot client — tái dùng chế độ `-autoshot` tự chơi). | Chạy thử kín với người thật. | 3–5 tuần |
+| **4. Thế giới** ◐ | Nhiều vùng, chuyển vùng giữa các zone server, kênh (k1, k2…), chat, party, danh sách bạn. | Đi từ Làng sang Rừng, đổi kênh, chat được. **Xong kênh, tổ đội, bạn bè, chat** (đổi kênh giữ nguyên nhân vật); nhiều vùng chờ có vùng thứ hai — mục 12. | 4–6 tuần |
+| **5. Vận hành** ◐ | Đưa lên VPS; giám sát, log, backup; chống gian lận cơ bản; thử tải 50+ người (dùng bot client — tái dùng chế độ `-autoshot` tự chơi). | Chạy thử kín với người thật. **Xong giám sát, tắt đúng cách, kiểm tra di chuyển, thử tải** (10 bot trên một máy); VPS chưa — mục 12. | 3–5 tuần |
 
 **Tổng: khoảng 5–8 tháng** cho 1 người toàn thời gian để tới bản chạy thử kín. Chưa tính nội dung mới (vùng, quái, boss) và các hệ thống MMO thường có sau này (giao dịch, chợ, guild, PvP).
 
@@ -207,10 +207,46 @@ Nguyên tắc: **máy chủ chạy luật chơi y như bản offline** (cùng co
 - `Tools/Server/netsmoke.ps1` với bản build (24/09): một máy chủ và hai người chơi (SmokeA có cửa sổ, SmokeB chạy nền). Vòng 1: hai người thấy nhau đi (18,1–18,6 đơn vị), mỗi người hạ Slime Rêu trên máy chủ, nhận 32 XP và vàng. Vòng 2: vào lại, SmokeA còn đúng cấp 1 / 32 XP như lúc thoát, đánh tiếp lên 48 XP. Máy chủ không lỗi.
 - Màn hình chính tìm thấy máy chủ chạy nền trên máy này ("Rừng Thì Thầm · 0/20 người · 15 ms").
 
-### Còn thiếu, làm sau
+### Còn thiếu lúc đó (đã làm ở mục 12)
 
-- **Bù trễ cho Lướt:** máy chủ nhận lệnh lướt muộn nửa ping, nên muốn né đòn phải bấm sớm hơn chừng ấy (qua Radmin trong nước khoảng 10–40 ms). Bước sau: máy chủ giữ đòn đánh vào người chơi thêm nửa ping và bỏ nó nếu lệnh lướt tới kịp ("nghiêng về phía người né", mục 4).
-- **Chống gian lận di chuyển:** máy chủ chưa kiểm tra tốc độ (giai đoạn 5).
-- **Máu boss theo số người:** 20 người cùng đánh thì Gấu Ma chết rất nhanh; cần tăng máu theo số người trong đấu trường.
-- **Nhiều vùng, kênh, party, bạn bè** (giai đoạn 4); **VPS, giám sát, thử tải 50 người** (giai đoạn 5).
+- ✓ Bù trễ cho Lướt, ✓ chống gian lận di chuyển, ✓ máu boss theo số người, ✓ kênh, tổ đội, bạn bè, ✓ giám sát, thử tải.
 - Nhân vật online bắt đầu mới ở cấp 1, không mang từ file lưu offline sang (tránh sửa file để gian lận).
+
+## 12. Phần còn lại của giai đoạn 3, giai đoạn 4 và 5 đã làm gì
+
+Giao thức lên **3**: game cũ (giao thức 2) vào máy chủ mới sẽ được báo tải bản mới (`RungThiTham.zip` đóng gói lại cùng ngày).
+
+### Chiến đấu
+
+| Phần | Làm thế nào | Code |
+|---|---|---|
+| **Bù trễ cho Lướt** | Máy người chơi báo ping 2 giây một lần. Trên máy chủ, đòn của quái đánh vào nhân vật của người chơi ở máy khác chờ nửa ping (tối đa 0,15 giây) rồi mới trúng; nếu lệnh Lướt tới kịp thì lúc đó nhân vật đang bất tử và đòn bị né, kể cả Lướt Hoàn Hảo. Tức là bấm né đúng lúc vòng cảnh báo khép trên màn hình mình là né được. Sát thương theo thời gian, đòn của kịch bản và nhân vật của chính máy chủ (host) không chờ. | `Net/LagCompensation.cs`, `Health.TakeDamage` |
+| **Máu boss theo số người** | Gấu Ma đếm người đang đứng quanh đấu trường; mỗi người thứ hai trở đi thêm 70% máu gốc (`hpPerExtraHero`), giữ nguyên tỉ lệ máu còn lại. Người rời giữa trận không làm boss yếu đi; trận kết thúc thì về máu gốc. Chơi một mình như cũ. Log báo "mạnh lên: n người trong trận". | `BossBear.GrowWithHeroes`, `Health.ScaleMax` |
+
+### Thế giới (giai đoạn 4)
+
+| Phần | Làm thế nào | Code |
+|---|---|---|
+| **Kênh** | Mỗi kênh là một tiến trình máy chủ riêng trên cùng thư mục dữ liệu: kênh n ở cổng 7770 + 2(n − 1) (7770, 7772…). Một nhân vật chỉ ở một kênh một lúc: máy chủ giữ file `data/online/<tên>.lock` khi người đó đang chơi (Windows tự nhả khi máy chủ tắt hay lỗi); kênh khác chờ tối đa 6 giây cho kênh cũ lưu xong rồi mới cho vào. Màn hình chính hiện các kênh và vào kênh còn chỗ có số nhỏ nhất (bạn bè gặp nhau ở kênh 1 trước). Trong game: `/kenh` xem các kênh, `/kenh 2` sang kênh 2, nhân vật đi theo, không phải nhập lại mật khẩu (khóa đăng nhập của phiên giữ trong bộ nhớ). Cài nhiều kênh: `install-server.ps1 -Channels 2`. | `ServerStore.TryLock`, `AccountAuthenticator.Admit`, `OnlineSession.ChannelCommand`, `ServerDiscovery` |
+| **Tổ đội** | Tối đa 5 người; người mời đầu tiên là đội trưởng, đội trưởng rời thì người kế tiếp lên thay. `/moi <tên>` mời; người được mời thấy hộp lời mời (Y vào, N từ chối, hoặc bấm nút, hoặc `/dongy`, `/tuchoi`); `/roi` rời, `/duoi <tên>` mời ra. Bảng tổ đội ở góc trên bên trái: tên, cấp, máu. Thành viên đứng trong 30 đơn vị quanh chỗ quái chết cùng nhận công (XP, nhiệm vụ, đồ rơi riêng) dù không đánh. Tổ đội không lưu: rời game là rời tổ đội. | `Net/Parties.cs`, `ServerPlayers.Social.cs`, `Net/PartyState.cs`, `UI/PartyUI.cs` |
+| **Chat** | Enter mở ô chat. Chữ thường nói với cả kênh; `/n <lời>` nói với tổ đội (màu xanh lá); `/w <tên> <lời>` nhắn riêng (màu hồng, tên có dấu cách vẫn được); `/ai` ai đang chơi; `/giup` danh sách lệnh. Lệnh gõ có dấu hay không dấu đều được (`/mời` = `/moi`). | `Net/ChatCommands.cs`, `NetWorld.ShowChat` |
+| **Bạn bè** | `/ketban <tên>`, `/huyban <tên>`, `/banbe` (ai đang chơi, ở kênh nào). Danh sách lưu cùng tài khoản trên máy chủ; người được thêm nhận thông báo. | `ServerPlayers.Friend`, `AccountRecord.friends` |
+| **Nhiều vùng** | Chưa làm: game mới có một scene vùng (làng → rừng → đấu trường chung một bản đồ). Cách làm khi có vùng thứ hai: mỗi vùng là một máy chủ như một kênh (`-zone`), đi qua cổng vùng = đổi máy chủ đúng như `/kenh` (lưu, nhả khóa, vào máy chủ vùng kia). | — |
+
+### Vận hành (giai đoạn 5)
+
+| Phần | Làm thế nào | Code |
+|---|---|---|
+| **Tắt đúng cách** | `stop-server.ps1` (và `install-server.ps1` khi cập nhật) xin máy chủ tắt bằng một sự kiện có tên của Windows; máy chủ báo người chơi, lưu mọi nhân vật rồi thoát (game của họ tự vào lại khi máy chủ chạy lại). Chỉ khi 20 giây không tắt mới bị giết. Trước đây máy chủ bị giết ngay, mất tối đa 30 giây chơi. | `Net/ServerStopSignal.cs`, `OnlineSession.StopCleanly` |
+| **Giám sát** | Mỗi kênh ghi `data/status-k<kênh>.json` 10 giây một lần: ai đang chơi, chạy bao lâu, FPS, bộ nhớ, số lỗi / cảnh báo. `Tools/Server/status-server.ps1` in trạng thái mọi kênh, hỏi thử như game của người chơi, và các dòng lỗi mới nhất trong log. Máy chủ ghi cảnh báo khi dưới 25 FPS. | `Net/ServerStatus.cs` |
+| **60 FPS** | Máy chủ giữ 60 khung hình mỗi giây (FishNet mặc định để 500: tốn nguyên một nhân CPU). Rảnh: khoảng 3% một nhân; 10 người: 12–14%. | `OnlineSession.ServerFrameRate` |
+| **Chống gian lận di chuyển** | Máy chủ xem 5 lần mỗi giây nhân vật đi được bao xa trong 1 giây vừa qua: tối đa gấp đôi tốc độ đi (mạng đôi khi dồn gói), cộng 3 đơn vị, cộng mỗi lần Lướt 9 đơn vị và mỗi cú đánh bật lùi. Vượt quá (dịch chuyển tức thời, chạy nhanh gấp ba) thì bị kéo về chỗ cũ và ghi log. Chờ thêm một lần xem trước khi kéo, để lệnh Lướt tới muộn vẫn được tính; im lặng 1–2 giây sau khi chính máy chủ dời nhân vật (vào game, hồi sinh, GM `tp`). Chỉ bắt gian lận rõ ràng: người mạng giật không bao giờ bị kéo nhầm. | `Net/MoveCheck.cs`, `ServerPlayers.CheckMoves` |
+| **Thử tải** | `Tools/Server/loadtest.ps1 -Bots 10`: máy chủ thật trên cổng thử và các bot (`-bot`, `Debug/LoadBot.cs`) chơi như người: đi, đánh quái, dùng chiêu, lướt. Cuối cùng xin máy chủ tắt khi còn một bot đang chơi và kiểm tra nó được lưu. | `Debug/LoadBot.cs` |
+| **VPS** | Chưa: cần thuê máy (xem `MayChu.md` mục 5). Script cài chạy y như trên máy nhà. | — |
+
+### Đã kiểm tra (24/09)
+
+- 128 test EditMode qua (2 test phông chữ bỏ qua như trước), thêm `OnlineCombatTests` (giữ đòn nửa ping, né bằng Lướt, giới hạn 0,15 giây, kiểm tra di chuyển, máu boss), `OnlineSocialTests` (luật tổ đội, chia công, đọc lệnh chat), `OnlineChannelTests` (một nhân vật một kênh, khóa bị bỏ lại, bạn bè lưu cùng tài khoản), test boss lớn lên với hai nhân vật thật (`OnlinePrepTests`), tín hiệu tắt máy chủ, câu trả lời tìm máy chủ có kênh.
+- `Tools/Server/netsmoke.ps1` với bản build, 3 vòng, 0 lỗi: (1) hai người thấy nhau đi, lập tổ đội, chat tổ đội, nhắn riêng, kết bạn, mỗi người hạ một Slime Rêu; (2) vào lại: đúng cấp và XP, bạn bè còn; (3) hai kênh trên cùng dữ liệu: SmokeA thấy danh sách kênh, `/kenh 2`, sang kênh 2 đúng cấp, XP, vàng.
+- `Tools/Server/loadtest.ps1 -Bots 10 -Seconds 90`: 10/10 người cùng lúc, máy chủ 48–57 FPS (giữ 60), CPU nhiều nhất 14% một nhân, khoảng 234 MB; không lỗi; không ai bị kéo về vì đi quá nhanh (mỗi bot lướt khoảng 15 lần); tắt đúng cách, bot còn chơi được lưu. Mỗi bot tốn khoảng 245 MB RAM nên một máy 16 GB chỉ thử được khoảng 15 bot; muốn thử 50 cần vài máy hoặc máy lớn.
+- Máy chủ thật trên máy nhà đã cập nhật lên bản này: trả lời ở 127.0.0.1 và địa chỉ Radmin 26.253.10.125 (giao thức 3, kênh 1).

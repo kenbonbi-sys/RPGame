@@ -17,6 +17,8 @@ namespace RPG
         public string created;
         public string lastLogin;
         public bool banned;
+        /// <summary>Names this player keeps as friends (online phase 4).</summary>
+        public List<string> friends = new List<string>();
 
         public byte[] Salt => Convert.FromBase64String(salt ?? "");
         public byte[] Key => Convert.FromBase64String(key ?? "");
@@ -28,7 +30,10 @@ namespace RPG
     ///   characters/&lt;key&gt;.json  each character, in the save file format (one section per system)
     ///   backups/yyyy-MM-dd/      a copy of both, once a day, the last <see cref="BackupsKept"/> kept
     ///   gm.txt                   names of the game masters, one per line
+    ///   online/&lt;key&gt;.lock      open while the character plays, on any channel server using this folder
     /// Files are written safely (<see cref="SafeFile"/>): a crash never leaves half a character.
+    /// Every channel (online phase 4) is its own server process on the same folder: a character
+    /// plays on one of them at a time (<see cref="TryLock"/>).
     /// </summary>
     public class ServerStore
     {
@@ -38,6 +43,7 @@ namespace RPG
         public string AccountsDir => Path.Combine(Root, "accounts");
         public string CharactersDir => Path.Combine(Root, "characters");
         public string BackupsDir => Path.Combine(Root, "backups");
+        public string OnlineDir => Path.Combine(Root, "online");
         public string GmFile => Path.Combine(Root, "gm.txt");
 
         public ServerStore(string root)
@@ -46,8 +52,15 @@ namespace RPG
             Directory.CreateDirectory(AccountsDir);
             Directory.CreateDirectory(CharactersDir);
             Directory.CreateDirectory(BackupsDir);
-            if (!File.Exists(GmFile))
-                File.WriteAllText(GmFile, "# Tên các tài khoản quản trị (GM), mỗi dòng một tên. GM dùng được bảng lệnh ` trong game.\n");
+            try
+            {
+                if (!File.Exists(GmFile))
+                    File.WriteAllText(GmFile, "# Tên các tài khoản quản trị (GM), mỗi dòng một tên. GM dùng được bảng lệnh ` trong game.\n");
+            }
+            catch (IOException)
+            {
+                // another channel starting on the same folder is writing it
+            }
         }
 
         /// <summary>Where the server keeps its data unless -data says otherwise: next to the game, in ServerData.</summary>
@@ -127,6 +140,79 @@ namespace RPG
             f.character = LoginCrypto.NormalizeName(name);
             f.savedAt = DateTime.Now.ToString("o");
             SafeFile.Write(CharacterPath(name), JsonUtility.ToJson(f, true));
+        }
+
+        // ------------------------------------------------------------------ who plays where
+        string LockPath(string name) => Path.Combine(OnlineDir, LoginCrypto.NameKey(name) + ".lock");
+
+        /// <summary>
+        /// Claims <paramref name="name"/> for this server while they play on <paramref name="channel"/>:
+        /// null when a server (this one or another channel) has them. Dispose to let go; a server
+        /// that stops or crashes lets go by itself (Windows closes the file).
+        /// </summary>
+        public IDisposable TryLock(string name, int channel)
+        {
+            try
+            {
+                Directory.CreateDirectory(OnlineDir);
+                var fs = new FileStream(LockPath(name), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                fs.SetLength(0);
+                var bytes = System.Text.Encoding.UTF8.GetBytes(channel.ToString());
+                fs.Write(bytes, 0, bytes.Length);
+                fs.Flush();
+                return new OnlineLock(fs, LockPath(name));
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>The channel <paramref name="name"/> plays on right now (any server using this folder), or 0.</summary>
+        public int ChannelOf(string name)
+        {
+            string path = LockPath(name);
+            if (!File.Exists(path)) return 0;
+            try
+            {
+                using (new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.Read)) { }
+                return 0;   // nobody holds it: left behind by a server that stopped
+            }
+            catch (IOException)
+            {
+                try
+                {
+                    using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (var r = new StreamReader(fs))
+                        return int.TryParse(r.ReadToEnd().Trim(), out int ch) && ch > 0 ? ch : 1;
+                }
+                catch (IOException)
+                {
+                    return 1;
+                }
+            }
+        }
+
+        sealed class OnlineLock : IDisposable
+        {
+            FileStream stream;
+            readonly string path;
+
+            public OnlineLock(FileStream stream, string path)
+            {
+                this.stream = stream;
+                this.path = path;
+            }
+
+            public void Dispose()
+            {
+                if (stream == null) return;
+                stream.Dispose();
+                stream = null;
+                try { File.Delete(path); }
+                catch (IOException) { /* another channel is looking at it: it stays, unheld */ }
+                catch (UnauthorizedAccessException) { }
+            }
         }
 
         // ------------------------------------------------------------------ backups

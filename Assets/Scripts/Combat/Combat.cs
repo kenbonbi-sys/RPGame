@@ -21,6 +21,7 @@ namespace RPG
                 Vector2 away = (Vector2)h.transform.position - center;
                 d.direction = away.sqrMagnitude > 0.001f ? away.normalized : template.direction;
                 d = d.RollCrit(critChance);
+                d.feedback = feedback;
                 if (h.TakeDamage(d) > 0)
                 {
                     n++;
@@ -41,6 +42,7 @@ namespace RPG
                 d.point = h.transform.position;
                 d.direction = ((Vector2)h.transform.position - origin).normalized;
                 d = d.RollCrit(critChance);
+                d.feedback = true;
                 if (h.TakeDamage(d) > 0)
                 {
                     n++;

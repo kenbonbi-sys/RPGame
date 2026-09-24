@@ -4,10 +4,12 @@
 #   2. đăng ký tác vụ "RungThiTham Server" chạy run-server.ps1 ẩn mỗi khi bạn đăng nhập Windows;
 #   3. bật máy chủ ngay.
 # Chạy lại file này sau mỗi lần build game mới để cập nhật máy chủ (dữ liệu không mất).
+# -Channels 2: hai kênh (cổng 7770 và 7772, dùng chung dữ liệu), khi một kênh 20 người không đủ.
 # Tường lửa: xem hướng dẫn ở cuối (cần quyền quản trị, bạn tự chạy lệnh).
 param(
     [string]$Target = (Join-Path $env:LOCALAPPDATA "RungThiTham-Server"),
     [string]$Build = (Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))) "Builds\Windows"),
+    [ValidateRange(1, 4)][int]$Channels = 1,
     [switch]$NoAutostart,
     [switch]$Direct   # nội bộ: lần chạy qua Task Scheduler bên dưới, không kiểm tra lại
 )
@@ -38,7 +40,7 @@ if (-not $Direct -and (Test-PrivateAppData)) {
     $log = Join-Path $env:TEMP "RungThiTham-install.log"   # Temp thì hai bên cùng thấy
     Remove-Item $log -Force -ErrorAction SilentlyContinue
     function Quote([string]$s) { "'" + $s.Replace("'", "''") + "'" }
-    $call = "& $(Quote $PSCommandPath) -Direct -Target $(Quote $Target) -Build $(Quote $Build)"
+    $call = "& $(Quote $PSCommandPath) -Direct -Target $(Quote $Target) -Build $(Quote $Build) -Channels $Channels"
     if ($NoAutostart) { $call += " -NoAutostart" }
     $call += " *>&1 | Out-File -FilePath $(Quote $log) -Encoding utf8; exit `$LASTEXITCODE"
     $installTask = "RungThiTham Install"
@@ -73,10 +75,12 @@ Copy-Item $Build $game -Recurse
 Remove-Item (Join-Path $game "RungThiTham_BackUpThisFolder_ButDontShipItWithYourGame") -Recurse -Force -ErrorAction SilentlyContinue
 Copy-Item (Join-Path $here "run-server.ps1") $Target -Force
 Copy-Item (Join-Path $here "stop-server.ps1") $Target -Force
+Copy-Item (Join-Path $here "status-server.ps1") $Target -Force
 Write-Host "Đã chép bản build mới. Dữ liệu người chơi giữ nguyên trong $(Join-Path $Target 'data')."
 
 $runner = Join-Path $Target "run-server.ps1"
-$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$runner`""
+$runArgs = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$runner`" -Channels $Channels"
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $runArgs
 if (-not $NoAutostart) {
     $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
     $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit ([TimeSpan]::Zero) -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
@@ -84,10 +88,11 @@ if (-not $NoAutostart) {
     Write-Host "Đã đăng ký tác vụ '$taskName': máy chủ tự chạy mỗi khi bạn đăng nhập Windows."
     Start-ScheduledTask -TaskName $taskName
 } else {
-    Start-Process powershell.exe -ArgumentList "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$runner`"" -WindowStyle Hidden
+    Start-Process powershell.exe -ArgumentList $runArgs -WindowStyle Hidden
 }
-Write-Host "Máy chủ đang chạy. Log: $(Join-Path $Target 'logs')"
+Write-Host "Máy chủ đang chạy ($Channels kênh). Log: $(Join-Path $Target 'logs')"
 Write-Host ""
+$lastPort = 7771 + 2 * ($Channels - 1)
 Write-Host "Tường lửa (làm một lần): mở PowerShell bằng 'Run as administrator' rồi chạy:"
-Write-Host "  New-NetFirewallRule -DisplayName 'Rung Thi Tham Server' -Direction Inbound -Protocol UDP -LocalPort 7770,7771 -Action Allow -Profile Any"
+Write-Host "  New-NetFirewallRule -DisplayName 'Rung Thi Tham Server' -Direction Inbound -Protocol UDP -LocalPort 7770-$lastPort -Action Allow -Profile Any"
 Write-Host "Và đặt Windows không tự ngủ khi cắm điện (Settings > System > Power & sleep > Sleep: Never), nếu không máy chủ dừng khi máy ngủ."

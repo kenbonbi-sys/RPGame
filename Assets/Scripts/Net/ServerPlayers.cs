@@ -15,11 +15,11 @@ namespace RPG
     /// they left it (a new one starts at the zone's spawn); the server sends them their character
     /// sheet and keeps it up to date, and saves it on disk every 30 seconds when something changed,
     /// soon after a level or a big kill, when they leave and when the server stops. It also runs
-    /// what players ask for: skills, potions, talking, dialogue commands, stat points, chat and
-    /// (game masters only) the console.
+    /// what players ask for: skills, potions, talking, dialogue commands, stat points and (game
+    /// masters only) the console; chat, parties and friends are in ServerPlayers.Social.cs.
     /// </summary>
     [DefaultExecutionOrder(-55)]
-    public class ServerPlayers : MonoBehaviour
+    public partial class ServerPlayers : MonoBehaviour
     {
         public static ServerPlayers I { get; private set; }
 
@@ -45,6 +45,16 @@ namespace RPG
             public bool unsaved;
             public float lastSaved;
             public float saveAt = -1f;
+            /// <summary>The player's ping as their machine reports it (<see cref="LagCompensation"/>).</summary>
+            public int pingMs;
+            /// <summary>This server's hold on the character while they play (other channels wait for it: <see cref="ServerStore.TryLock"/>).</summary>
+            public IDisposable claim;
+            /// <summary>Whether the moves their machine reports could have happened (a remote hero only).</summary>
+            public readonly MoveCheck moves = new MoveCheck();
+            public bool movesFresh = true;
+            /// <summary>Until then the server just moved the hero (arrival, getting up, a teleport) and its player's machine catches up: no checks.</summary>
+            public float movesQuietUntil;
+            public int movesPutBack;
             public readonly Dictionary<string, string> extra = new Dictionary<string, string>();
             public readonly HashSet<string> dirty = new HashSet<string>();
             public string Name => account.name;
@@ -55,7 +65,10 @@ namespace RPG
         static readonly List<NetworkConnection> Ready = new List<NetworkConnection>();
         NetworkManager nm;
         AccountAuthenticator auth;
-        float nextFlush, nextSaveCheck;
+        float nextFlush, nextSaveCheck, nextMoveCheck;
+        ServerStatus status;
+        /// <summary>Seconds between two looks at where remote heroes are (<see cref="MoveCheck"/>).</summary>
+        const float MoveCheckEvery = 0.2f;
         DateTime backupDay;
 
         public IEnumerable<Session> Sessions => sessions.Values;
@@ -66,6 +79,9 @@ namespace RPG
         void OnDestroy()
         {
             SaveAll("server stopping");
+            foreach (var s in sessions.Values) s.claim?.Dispose();
+            status?.Dispose();
+            LagCompensation.Clear();
             End();
             if (I == this) I = null;
             Ready.Clear();
@@ -81,12 +97,16 @@ namespace RPG
             Store = store;
             auth.Store = store;
             auth.Refuse = Refuse;
+            auth.Claim = name => store.TryLock(name, OnlineSession.Channel);
             auth.Admitted += OnAdmitted;
             nm.ServerManager.OnRemoteConnectionState += OnRemoteState;
             nm.SceneManager.OnClientLoadedStartScenes += OnClientLoaded;
             nm.ServerManager.RegisterBroadcast<CastRequest>(OnCast);
             nm.ServerManager.RegisterBroadcast<ActRequest>(OnAct);
+            nm.ServerManager.RegisterBroadcast<ChatRequest>(OnChat);
             GameEvents.EnemyKilled += OnKilled;
+            GameEvents.Damaged += OnHeroPushed;
+            if (GameSession.Mode == SessionMode.Server) status = new ServerStatus(store.Root, OnlineSession.Channel);
             BackupNow();
             Debug.Log($"[Server] data in {store.Root}: {store.CountAccounts()} characters");
         }
@@ -100,9 +120,11 @@ namespace RPG
                 nm.ServerManager.OnRemoteConnectionState -= OnRemoteState;
                 nm.ServerManager.UnregisterBroadcast<CastRequest>(OnCast);
                 nm.ServerManager.UnregisterBroadcast<ActRequest>(OnAct);
+                nm.ServerManager.UnregisterBroadcast<ChatRequest>(OnChat);
             }
             if (nm.SceneManager != null) nm.SceneManager.OnClientLoadedStartScenes -= OnClientLoaded;
             GameEvents.EnemyKilled -= OnKilled;
+            GameEvents.Damaged -= OnHeroPushed;
             nm = null;
         }
 
@@ -115,12 +137,13 @@ namespace RPG
             return null;
         }
 
-        void OnAdmitted(NetworkConnection conn, AccountRecord account, bool created)
+        void OnAdmitted(NetworkConnection conn, AccountRecord account, bool created, IDisposable claim)
         {
             var s = new Session
             {
                 conn = conn,
                 account = account,
+                claim = claim,
                 gm = Store.IsGm(account.name),
                 file = created ? null : Store.LoadCharacter(account.name),
                 joinedAt = Time.unscaledTime,
@@ -138,6 +161,9 @@ namespace RPG
             // before FishNet despawns the hero: this is the last look at it
             if (!sessions.TryGetValue(conn.ClientId, out var s)) return;
             Save(s, "left");
+            s.claim?.Dispose();   // saved: another channel may have them now
+            s.claim = null;
+            if (Parties.Of(s.Name) != null) PartyLeave(s, $"{s.Name} đã rời thế giới.");
             Ready.Remove(conn);
             sessions.Remove(conn.ClientId);
             ServerDiscovery.PlayerCount = sessions.Count;
@@ -166,6 +192,7 @@ namespace RPG
             nm.ServerManager.Spawn(nob, conn);
             nm.SceneManager.AddOwnerToDefaultScene(nob);
             s.hero = hero;
+            s.movesQuietUntil = Time.unscaledTime + 2f;   // its player's machine takes it from here
             Watch(s);
             NetWorld.AnnounceHero(hero, s.Name);
             if (s.Local)
@@ -178,7 +205,7 @@ namespace RPG
                 NetWorld.I.SendEverything(conn);
                 foreach (var key in SectionKeys) SendSection(s, key);
                 if (s.extra.TryGetValue("dialogue", out var json)) nm.ServerManager.Broadcast(conn, new SectionMsg { key = "dialogue", json = json });
-                nm.ServerManager.Broadcast(conn, new ControlMsg { kind = ControlKind.Ready, text = s.Name, ok = s.gm });
+                nm.ServerManager.Broadcast(conn, new ControlMsg { kind = ControlKind.Ready, text = s.Name, ok = s.gm, value = OnlineSession.Channel });
                 Ready.Add(conn);
             }
             s.ready = true;
@@ -264,7 +291,14 @@ namespace RPG
         void Update()
         {
             if (nm == null) return;
+            LagCompensation.Tick();
+            status?.Tick(this);
             float now = Time.unscaledTime;
+            if (now >= nextMoveCheck)
+            {
+                nextMoveCheck = now + MoveCheckEvery;
+                CheckMoves(now);
+            }
             if (now >= nextFlush)
             {
                 nextFlush = now + 0.15f;
@@ -279,6 +313,43 @@ namespace RPG
                 if ((s.saveAt >= 0f && now >= s.saveAt) || now - s.lastSaved >= SaveEvery) Save(s, null);
             }
             if (DateTime.Now.Date != backupDay) BackupNow();
+        }
+
+        // ================================================================== moves (phase 5)
+        /// <summary>Puts back a remote hero whose reported move could not have happened (<see cref="MoveCheck"/>).</summary>
+        void CheckMoves(float now)
+        {
+            if (NetSmoke.Active) return;   // the automated check moves its heroes around on purpose
+            foreach (var s in sessions.Values)
+            {
+                var hero = s.hero;
+                if (hero == null || s.Local || !s.ready) continue;
+                Vector2 at = hero.transform.position;
+                if (hero.IsDead)
+                {
+                    s.movesFresh = true;   // gets up somewhere else
+                    s.movesQuietUntil = now + 1f;
+                    continue;
+                }
+                if (now < s.movesQuietUntil) continue;
+                if (s.movesFresh)
+                {
+                    s.moves.Reset(at);
+                    s.movesFresh = false;
+                    continue;
+                }
+                if (s.moves.Check(at, hero.TopWalkSpeed, now, out Vector2 back)) continue;
+                s.movesPutBack++;
+                Debug.LogWarning($"[Server] \"{s.Name}\" moved {s.moves.Moved:0.0} units in {MoveCheck.Window:0.#} s (at most {s.moves.Allowed:0.0}): put back ({s.movesPutBack} times)");
+                Teleport(hero, back);
+            }
+        }
+
+        void OnHeroPushed(Health h, DamageInfo d, float amount)
+        {
+            if (d.knockback <= 0f || h == null || h.team != Team.Player) return;
+            var s = SessionOf(h.GetComponent<PlayerController>());
+            if (s != null) s.moves.Pushed(d.knockback, Time.unscaledTime);
         }
 
         void OnKilled(KillInfo k)
@@ -320,9 +391,15 @@ namespace RPG
             }
         }
 
-        /// <summary>Saves every character now (console "save", the server stopping).</summary>
+        string lastSaveAll;
+        float lastSaveAllAt = -99f;
+
+        /// <summary>Saves every character now (console "save", the server stopping). Asked twice for the same reason at once (a clean stop, then quitting), it saves once.</summary>
         public void SaveAll(string why)
         {
+            if (why == lastSaveAll && Time.unscaledTime - lastSaveAllAt < 2f) return;
+            lastSaveAll = why;
+            lastSaveAllAt = Time.unscaledTime;
             foreach (var s in sessions.Values)
                 if (s.ready) Save(s, why);
         }
@@ -351,6 +428,11 @@ namespace RPG
             if (s == null) return;
             string refused = s.hero.skills.ServerCast(r.slot, r.aim, r.origin);
             if (refused != null) nm.ServerManager.Broadcast(conn, new ControlMsg { kind = ControlKind.CastRefused, id = r.slot, text = refused });
+            else
+            {
+                var ability = r.slot < s.hero.skills.slots.Length ? s.hero.skills.slots[r.slot] : null;
+                if (ability != null && ability.HasTag(AbilityTags.Movement)) s.moves.Dashed(Time.unscaledTime);
+            }
         }
 
         void OnAct(NetworkConnection conn, ActRequest r, Channel channel)
@@ -403,8 +485,26 @@ namespace RPG
                         s.unsaved = true;
                     }
                     return;
-                case ActKind.Chat:
-                    Chat(s, r.text);
+                case ActKind.PartyInvite:
+                    PartyInvite(s, r.text);
+                    return;
+                case ActKind.PartyAnswer:
+                    PartyAnswer(s, r.text, r.value != 0);
+                    return;
+                case ActKind.PartyLeave:
+                    PartyLeave(s);
+                    return;
+                case ActKind.PartyKick:
+                    PartyKick(s, r.text);
+                    return;
+                case ActKind.Friend:
+                    Friend(s, r.text, r.value != 0);
+                    return;
+                case ActKind.FriendList:
+                    FriendList(s);
+                    return;
+                case ActKind.Ping:
+                    s.pingMs = Mathf.Clamp(r.value, 0, 2000);
                     return;
                 case ActKind.Console:
                     RunConsole(s, r.text);
@@ -426,32 +526,6 @@ namespace RPG
                 if (q.requiredFlags.Contains(flag) || q.setFlags.Contains(flag)) return true;
             }
             return false;
-        }
-
-        void Chat(Session s, string text)
-        {
-            text = CleanChat(text);
-            if (text.Length == 0) return;
-            var msg = new ChatMsg { from = s.Name, text = text };
-            SendToAll(msg);
-            if (GameSession.HasScreen) NetWorld.ShowChat(msg);
-            Debug.Log($"[Chat] {s.Name}: {text}");
-        }
-
-        /// <summary>A chat line as it may be shown: one line, at most 120 characters, no rich-text tags.</summary>
-        public static string CleanChat(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return "";
-            text = text.Replace('\n', ' ').Replace('\r', ' ').Replace("<", "‹").Replace(">", "›").Trim();
-            return text.Length > 120 ? text.Substring(0, 120) : text;
-        }
-
-        /// <summary>A server message for everyone ("X đã vào thế giới.").</summary>
-        public static void SystemChat(string text)
-        {
-            var msg = new ChatMsg { text = text, system = true };
-            SendToAll(msg);
-            if (GameSession.HasScreen) NetWorld.ShowChat(msg);
         }
 
         void RunConsole(Session s, string line)
@@ -531,6 +605,12 @@ namespace RPG
         {
             if (hero == null) return;
             hero.motor.Teleport(to);
+            var s = SessionOf(hero);
+            if (s != null)
+            {
+                s.movesFresh = true;
+                s.movesQuietUntil = Time.unscaledTime + 1f;
+            }
             SendTo(hero, new ControlMsg { kind = ControlKind.Teleport, pos = to });
         }
     }

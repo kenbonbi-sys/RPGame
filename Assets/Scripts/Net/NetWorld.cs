@@ -567,11 +567,27 @@ namespace RPG
 
         void OnChat(ChatMsg m, Channel channel) => ShowChat(m);
 
-        /// <summary>A chat line in the log.</summary>
+        static readonly Color PartyColor = new Color(0.55f, 1f, 0.62f);
+        static readonly Color WhisperColor = new Color(1f, 0.66f, 0.88f);
+
+        /// <summary>A chat line in the log, coloured by its channel: everyone, the party, a whisper.</summary>
         public static void ShowChat(ChatMsg m)
         {
-            if (m.system) GameEvents.RaiseLog(m.text, Palette.LogQuest);
-            else GameEvents.RaiseLog($"<color=#8fd3ff>{m.from}:</color> {m.text}", new Color(0.92f, 0.95f, 1f));
+            switch (m.channel)
+            {
+                case ChatChannel.Party:
+                    if (m.system) GameEvents.RaiseLog("[Tổ đội] " + m.text, PartyColor);
+                    else GameEvents.RaiseLog($"<color=#7dff9a>[Tổ đội] {m.from}:</color> {m.text}", new Color(0.86f, 1f, 0.88f));
+                    return;
+                case ChatChannel.Whisper:
+                    bool mine = string.Equals(LoginCrypto.NormalizeName(m.from), LoginCrypto.NormalizeName(LoginInfo.Name), System.StringComparison.OrdinalIgnoreCase);
+                    GameEvents.RaiseLog(mine ? $"<color=#ff9ad8>Bạn → {m.to}:</color> {m.text}" : $"<color=#ff9ad8>{m.from} → bạn:</color> {m.text}  <color=#b8b0c8>(/w {m.from} …)</color>", WhisperColor);
+                    return;
+                default:
+                    if (m.system) GameEvents.RaiseLog(m.text, Palette.LogQuest);
+                    else GameEvents.RaiseLog($"<color=#8fd3ff>{m.from}:</color> {m.text}", new Color(0.92f, 0.95f, 1f));
+                    return;
+            }
         }
 
         // ------------------------------------------------------------------ client: things only watched

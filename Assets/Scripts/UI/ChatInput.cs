@@ -5,8 +5,9 @@ namespace RPG
 {
     /// <summary>
     /// Online chat (Docs/KeHoach-Online.md, phase 4): Enter opens a line at the bottom of the
-    /// screen, Enter sends it to everyone in the world, Esc closes it. Lines from everyone show in
-    /// the log. While typing, the hero does not act on the keys.
+    /// screen, Enter sends it (to everyone, or a command such as /n for the party or /w for a
+    /// whisper: <see cref="ChatCommands"/>), Esc closes it. Lines show in the log. While typing,
+    /// the hero does not act on the keys.
     /// </summary>
     public class ChatInput : MonoBehaviour
     {
@@ -59,7 +60,7 @@ namespace RPG
                 {
                     string line = text.Trim();
                     Close();
-                    if (line.Length > 0) OnlineSession.Say(line);
+                    if (line.Length > 0) ChatCommands.Run(line);
                     e.Use();
                     return;
                 }

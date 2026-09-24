@@ -11,8 +11,8 @@ namespace RPG
 {
     /// <summary>
     /// The title screen (scene Title, the game's first): "Vào thế giới" finds the online world by
-    /// itself (<see cref="ServerDiscovery"/>) and joins it with the character this machine
-    /// remembers, or asks for a name and password first (a new name makes a new character);
+    /// itself (<see cref="ServerDiscovery"/>) and joins it — its first channel with room — with the
+    /// character this machine remembers, or asks for a name and password first (a new name makes a new character);
     /// "Chơi một mình" starts the offline game. When a session ended badly it says why, and after a
     /// lost connection it joins again by itself. Started with -server, -host, -client, -autoshot or
     /// -netsmoke the game goes straight on. The widgets are made here from the references the
@@ -61,7 +61,7 @@ namespace RPG
         {
             // started for a server, a host, a direct join or an automated run: no title
             OnlineSession.ReadCommandLine();
-            if (GameSession.Mode != SessionMode.Offline || AutoShot.Active || NetSmoke.Active || BackdropShot.Active)
+            if (GameSession.Mode != SessionMode.Offline || AutoShot.Active || NetSmoke.Active || LoadBot.Active || BackdropShot.Active)
             {
                 SceneManager.LoadScene(ZoneRoot.CoreScene);
                 enabled = false;
@@ -132,7 +132,7 @@ namespace RPG
             if (best == null) SetServer("Không tìm thấy máy chủ. Kiểm tra mạng (LAN / Radmin VPN) rồi bấm Tìm lại.", Bad);
             else if (!best.Compatible)
                 SetServer(best.version > NetProtocol.Version ? $"{best.name}: máy chủ mới hơn game này. Hãy tải bản mới." : $"{best.name}: máy chủ đang chạy bản cũ.", Bad);
-            else SetServer($"● {best.name}  ·  {best.players}/{best.max} người  ·  {Mathf.RoundToInt(best.ping * 1000f)} ms", Good);
+            else SetServer($"● {best.name}{ChannelLabel(best)}  ·  {best.players}/{best.max} người  ·  {Mathf.RoundToInt(best.ping * 1000f)} ms{OtherChannels(best)}", Good);
             if (wantJoin)
             {
                 wantJoin = false;
@@ -140,16 +140,29 @@ namespace RPG
             }
         }
 
-        /// <summary>The server to join: a compatible one with room, the fastest first.</summary>
+        /// <summary>The server to join: a compatible one with room, the first channel of the fastest world (friends meet there).</summary>
         ServerDiscovery.Found Best()
         {
-            ServerDiscovery.Found any = null;
+            ServerDiscovery.Found any = null, best = null;
             foreach (var f in found)
             {
-                if (f.Compatible && !f.Full) return f;
                 if (any == null) any = f;
+                if (!f.Compatible || f.Full) continue;
+                if (best == null || f.address == best.address && f.channel < best.channel) best = f;
             }
-            return any;
+            return best ?? any;
+        }
+
+        static string ChannelLabel(ServerDiscovery.Found f) => f.channel > 0 ? $" · Kênh {f.channel}" : "";
+
+        /// <summary>The other channels of the same world, when it has more than one: "Kênh 2: 3/20".</summary>
+        string OtherChannels(ServerDiscovery.Found best)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var f in found)
+                if (f != best && f.address == best.address && f.channel > 0 && f.Compatible)
+                    sb.Append($"  ·  Kênh {f.channel}: {f.players}/{f.max}");
+            return sb.ToString();
         }
 
         void OnJoinClicked()
@@ -195,6 +208,7 @@ namespace RPG
             GameSession.Mode = SessionMode.Client;
             OnlineSession.Address = best.address;
             OnlineSession.Port = best.port;
+            OnlineSession.Channel = Mathf.Max(1, best.channel);
             SceneManager.LoadScene(ZoneRoot.CoreScene);
         }
 
