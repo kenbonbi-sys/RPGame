@@ -46,6 +46,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 213338fe08ca3a74097fcf1fcc00d13a, type: 2}
   - {fileID: 11400000, guid: 37aa63d51a490d34e8c023f9c9ec4ae1, type: 2}
   - {fileID: 11400000, guid: fc9959f914778894eab44764ec753088, type: 2}
+  - {fileID: 11400000, guid: 034b2413f670e0940a5104c85aa06128, type: 2}
+  - {fileID: 11400000, guid: 0df81070e39614a4c946c5409e2aee96, type: 2}
+  - {fileID: 11400000, guid: 1a857f153006a8b41b3d722dc12c6726, type: 2}
+  - {fileID: 11400000, guid: ebe39c5cf5e8cd44a89ccc734d0e4f4d, type: 2}
   abilities:
   - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
   - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}
@@ -69,6 +73,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b9b514017c7c8b34e8da788930f75a12, type: 2}
   - {fileID: 11400000, guid: 53cbc7b013e50c44988302eb6c9f4654, type: 2}
   - {fileID: 11400000, guid: d9b2a6761f18fa443b8f9ec58e659a66, type: 2}
+  - {fileID: 11400000, guid: 19c6a341f4d25f34ba564b0b7202c59a, type: 2}
+  - {fileID: 11400000, guid: ac7cfde1639336d44902a420de4e4445, type: 2}
+  - {fileID: 11400000, guid: a1492c28afb8653499fc69b293449f9b, type: 2}
+  - {fileID: 11400000, guid: b6add70316dd3f54d84de3c2733f9fa4, type: 2}
   zones:
   - {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
   startZone: {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
@@ -101,6 +109,7 @@ MonoBehaviour:
   sporePrefab: {fileID: 6042711782838213100, guid: fd31be627857a9e42acb63795f625cd5, type: 3}
   venomPrefab: {fileID: 40009730964553345, guid: 4db1f30aa617ae149b088a5680f172bb, type: 3}
   venomArcPrefab: {fileID: 6563847976823840878, guid: 248b66c04de4c244781b426d6379a513, type: 3}
+  webPrefab: {fileID: 6434890101799069727, guid: ec4abc17786b4684789a7ec1366994a3, type: 3}
   mistMaterial: {fileID: 2100000, guid: 9151a6cf50d0f064183f54e52369e00a, type: 2}
   netHeroPrefab: {fileID: 4885084979465001528, guid: ae3e903ab7b28a648b5a6f37a73a1646, type: 3}
   networkManagerPrefab: {fileID: 3420617665053863353, guid: c2b98b4a3e3834f4db920baf9ec1f0d0, type: 3}

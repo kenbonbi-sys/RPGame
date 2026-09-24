@@ -900,6 +900,94 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: crystal_shard
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 0
+        width: 16
+        height: 16
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 197ad736401904a4adf9e39d2211273b
+      internalID: 1641229681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bat_wing
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 16
+        height: 16
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c78db514eee21d19bab62657f83d7836
+      internalID: 693762386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: spider_silk
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 16
+        height: 16
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f80857f7d91423e659bedacfd1e29124
+      internalID: 473673898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: golem_core
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 16
+        height: 16
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06a30dd867da653b6763349b472c6d64
+      internalID: -759048516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -915,15 +1003,18 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       apple: -1373987852
+      bat_wing: 693762386
       bone: -1304257260
       bread: 251692380
       claw: -698749146
       coin: 1929956710
+      crystal_shard: 1641229681
       dragonfly_wing: 333815107
       gel: -806971080
       gem_blue: 1784506815
       gem_red: -994946836
       gold: 594964215
+      golem_core: -759048516
       herb: 853045759
       key: -1626015439
       leech_tooth: 1625922025
@@ -941,6 +1032,7 @@ TextureImporter:
       shroom_cap: 646626825
       snake_fang: -1907630274
       snake_scale: 1193381248
+      spider_silk: 473673898
       sword: 486706123
       toad_crown: -579325442
       toad_skin: 1669568829
@@ -949,6 +1041,6 @@ TextureImporter:
       wsnake_skin: -1868904918
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  userData: rpg:e6e8dd0490448a4af0e540fd82703b0b
+  userData: rpg:a3045169b7082f339d375a110ef5de78
   assetBundleName: 
   assetBundleVariant: 

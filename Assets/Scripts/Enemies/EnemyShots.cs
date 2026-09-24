@@ -39,6 +39,38 @@ namespace RPG
         }
 
         /// <summary>
+        /// A sticky ball of web (Nhện Hang) from <paramref name="start"/> toward <paramref name="target"/>:
+        /// whoever it hits is bound (Trói) for <paramref name="root"/> seconds.
+        /// </summary>
+        public static Projectile Web(GameObject source, Vector2 start, Vector2 target, float damage, float speed, float root,
+                                     string skill = null, float lifetime = 1.3f)
+        {
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            if (db == null || db.webPrefab == null) return null;
+            var go = Pool.Get(db.webPrefab, start, Quaternion.identity);
+            var fx = go.GetComponent<PooledFX>();
+            if (fx != null) fx.Persistent = true;
+            var pr = go.GetComponent<Projectile>();
+            pr.team = Team.Enemy;
+            pr.damage = damage;
+            pr.speed = speed;
+            pr.damageType = DamageType.Physical;
+            pr.status = new StatusHit { root = root };
+            pr.hitVfx = "web_hit";
+            pr.hitSfx = "sfx_web";
+            pr.shake = 0.04f;
+            pr.lifetime = lifetime;
+            pr.critChance = 0f;
+            pr.explodeRadius = 0f;
+            pr.knockback = 0f;
+            pr.pierce = false;
+            pr.skillName = skill;
+            pr.Launch(target - start, source);
+            NetCues.Projectile("web", start, target - start, pr.speed, pr.lifetime, Team.Enemy, pr.hitVfx, pr.hitSfx, pr.shake, 0f);
+            return pr;
+        }
+
+        /// <summary>
         /// A glob lobbed onto <paramref name="target"/> in <paramref name="flight"/> seconds: it splashes
         /// everyone within <paramref name="radius"/> and leaves a poison pool (<see cref="HazardZone"/>).
         /// </summary>

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: bat_wing
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: bat_wing
+  displayName: "C\xE1nh D\u01A1i Pha L\xEA"
+  description: "C\xE1nh d\u01A1i m\u1ECFng, m\xE9p c\xE1nh l\u1EA5m t\u1EA5m nh\u1EEFng h\u1EA1t pha l\xEA."
+  icon: {fileID: 693762386, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 0
+  maxStack: 99
+  value: 7
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

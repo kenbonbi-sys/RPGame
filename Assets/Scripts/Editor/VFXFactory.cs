@@ -103,6 +103,9 @@ namespace RPG.EditorTools
             Build("waystone_wake", WaystoneWake, 2.2f);
             Build("wisp_blink", WispBlink, 0.9f);
             Build("wisp_burst", WispBurst, 1.4f);
+            // cave (Hang Pha Lê)
+            Build("web_hit", WebHit, 1.2f);
+            Build("crystal_burst", CrystalBurst, 1.2f);
             // boss
             Build("boss_roar", BossRoar, 1.6f);
             Build("enrage_burst", EnrageBurst, 1.8f);
@@ -121,6 +124,7 @@ namespace RPG.EditorTools
             EditorUtil.Assign(ref db.sporePrefab, BuildSpore());
             EditorUtil.Assign(ref db.venomPrefab, BuildVenom());
             EditorUtil.Assign(ref db.venomArcPrefab, BuildVenomGlob());
+            EditorUtil.Assign(ref db.webPrefab, BuildWebShot());
             EditorUtil.Assign(ref db.mistMaterial, Mat("smoke", false, 1f));
             EditorUtil.Assign(ref db.rockProjectilePrefab, BuildRockProjectile());
             EditorUtil.Assign(ref db.telegraphPrefab, BuildTelegraph());
@@ -910,6 +914,29 @@ namespace RPG.EditorTools
         static readonly Color WispBlue = new Color(0.45f, 0.85f, 1f);
         static readonly Color WispPale = new Color(0.78f, 1f, 1f);
 
+        static readonly Color Silk = new Color(0.92f, 0.94f, 1f);
+        static readonly Color CrystalCyan = new Color(0.4f, 0.95f, 1f);
+
+        /// <summary>A ball of web splatting: pale strands flung out and a wisp of silk left hanging.</summary>
+        static void WebHit(GameObject r)
+        {
+            PS(r, "Strands", Mat("px_square", false, 1f)).Burst(14).Life(0.35f, 0.7f).Speed(2f, 4.5f).Size(0.05f, 0.1f)
+                .Col(Silk, new Color(0.75f, 0.8f, 0.9f)).Circle(0.2f).Drag(3f).Stretch(1.6f, 0.03f).Fade();
+            var splat = Spr(r, "Splat", "ring", Mat("ring", false, 1f), A(Silk, 0.8f), SortingLayerNames.Decal, 2);
+            splat.transform.localScale = new Vector3(1f, 0.6f, 1f);
+            SFX(splat, 1.1f, C(0, 0.2f, 0.12f, 0.9f, 1, 1f), C(0, 1, 0.6f, 0.8f, 1, 0));
+        }
+
+        /// <summary>Crystal shattering (a golem crumbling, a crystal cracked): bright shards and a flash.</summary>
+        static void CrystalBurst(GameObject r)
+        {
+            PS(r, "Shards", Mat("px_square", true, 2f)).Burst(18).Life(0.4f, 0.9f).Speed(2.5f, 6f).Size(0.07f, 0.15f)
+                .Col(Color.white, CrystalCyan).ConeUp(80f, 0.3f).Grav(2.2f).Fade();
+            PS(r, "Glints", Mat("spark4", true, 2.2f)).Burst(8).Life(0.3f, 0.6f).Speed(0.5f, 1.5f).Size(0.14f, 0.26f)
+                .Col(Color.white, CrystalCyan).Circle(0.3f).Fade();
+            Light(r, CrystalCyan, 3f, 1.4f, 0.5f);
+        }
+
         /// <summary>A Ma Trơi guttering out or flaring up: a cold puff and a few rising motes.</summary>
         static void WispBlink(GameObject r)
         {
@@ -1193,6 +1220,24 @@ namespace RPG.EditorTools
                 .Col(A(Venom, 0.8f), A(VenomGreen, 0.7f)).Circle(0.08f).Fade();
             Light(root, Venom, 1.8f, 0.8f, pulse: false);
             return EditorUtil.SavePrefab(root, $"{GameplayFolder}/Venom.prefab");
+        }
+
+        /// <summary>A ball of sticky web (Nhện Hang's), spinning as it flies.</summary>
+        static GameObject BuildWebShot()
+        {
+            var root = new GameObject("WebShot");
+            root.layer = Layers.Projectile;
+            var fx = root.AddComponent<PooledFX>();
+            fx.lifetime = 0f;
+            fx.stopLinger = 0.4f;
+            var p = root.AddComponent<Projectile>();
+            p.rotateToDirection = false;
+            var ball = Spr(root, "Ball", "ring", Mat("ring", false, 1.1f), Silk, scale: 0.5f);
+            ball.gameObject.AddComponent<Spinner>().degreesPerSecond = 420f;
+            Spr(root, "Core", "glow_hard", Mat("glow_hard", false, 1f), A(Silk, 0.85f), scale: 0.3f, order: 1);
+            PS(root, "Trail", Mat("px_square", false, 1f), SortingLayerNames.VFX, -1).Loop().Rate(26).Life(0.25f, 0.45f).Size(0.04f, 0.08f)
+                .Col(A(Silk, 0.9f), new Color(0.7f, 0.75f, 0.85f, 0.6f)).Circle(0.1f).Fade();
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/WebShot.prefab");
         }
 
         static GameObject BuildVenomGlob()

@@ -7,9 +7,10 @@ namespace RPG
 {
     /// <summary>
     /// Automated showcase used for testing builds: start the player with
-    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp]
+    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave]
     /// It plays a scripted tour (dialogue, skills, boss attacks, the swamp and its bosses, the
-    /// world map, night), saves screenshots and quits; -autoshotOnly swamp tours the swamp alone.
+    /// world map, night), saves screenshots and quits; -autoshotOnly swamp tours the swamp alone,
+    /// -autoshotOnly cave the crystal cave.
     /// Exit code: 0 = clean run, 1 = errors or exceptions were logged, 2 = the tour did not finish
     /// within the timeout (CI reads it). Does nothing in normal play.
     /// </summary>
@@ -351,6 +352,96 @@ namespace RPG
             if (dn != null) dn.time = 0.42f;
         }
 
+        /// <summary>
+        /// Hang Pha Lê: the trail up from the swamp and the mouth in the cliff, the miners' camp in the
+        /// dark, the world map, bats darting, a spider's web, a golem's slam, the crystal forest and
+        /// the spider queen's hall with its pillars.
+        /// </summary>
+        IEnumerator Cave(PlayerController p, DayNightCycle dn)
+        {
+            var zone = ZoneRoot.Current;
+            Transform Spot(string id) => zone != null ? zone.SpotOf(id) : null;
+            Vector2 At(string id, Vector2 fallback)
+            {
+                var t = Spot(id);
+                return t != null ? (Vector2)t.position : fallback;
+            }
+            if (dn != null) dn.time = 0.45f;
+
+            Place(p, new Vector2(168f, 57.5f));
+            yield return Wait(1.6f);
+            yield return Shot("cave_trail");
+            var mouth = At("cavemouth", new Vector2(168f, 72.5f));
+            Place(p, mouth + new Vector2(0.5f, -3f));
+            yield return Wait(3.5f);   // the eyes adjust to the dark
+            yield return Shot("cave_camp");
+            foreach (var w in Waystone.All)
+                if (p.waystones != null) p.waystones.Touch(w);
+            yield return Wait(0.3f);
+            if (WorldMapUI.I != null)
+            {
+                WorldMapUI.I.Show();
+                yield return Wait(0.8f);
+                yield return Shot("cave_world_map");
+                WorldMapUI.I.Close();
+                yield return Wait(0.3f);
+            }
+
+            // crystal bats: one darts through the hero
+            var bats = At("batcave", new Vector2(146f, 77f));
+            var bat = FindEnemy("bat", bats) as DragonflyAI;
+            if (bat != null)
+            {
+                Place(p, (Vector2)bat.transform.position + new Vector2(-2.6f, -1f));
+                yield return Wait(1.6f);
+                yield return Shot("bats");
+                bat.DebugDart(p);
+                yield return Wait(0.3f);
+                yield return Shot("bat_windup");
+                yield return Wait(0.3f);
+                yield return Shot("bat_dart");
+                yield return Wait(1f);
+            }
+
+            // a cave spider spits web
+            var nest = At("spidernest", new Vector2(157f, 106f));
+            var spider = FindEnemy("spider", nest) as CaveSpiderAI;
+            if (spider != null)
+            {
+                Place(p, (Vector2)spider.transform.position + new Vector2(-4f, -0.6f));
+                yield return Wait(1.2f);
+                spider.DebugWeb(p);
+                yield return Wait(0.35f);
+                yield return Shot("spider_web_warning");
+                yield return Wait(0.45f);
+                yield return Shot("spider_web");
+                yield return Wait(1.2f);
+            }
+
+            // a golem in the old mine raises its fists
+            var mine = At("mine", new Vector2(177f, 90f));
+            var golem = FindEnemy("golem", mine);
+            if (golem != null)
+            {
+                Place(p, (Vector2)golem.transform.position + new Vector2(-1.8f, -0.3f));
+                yield return Wait(0.9f);
+                yield return Shot("golem_windup");
+                yield return Wait(0.8f);
+                yield return Shot("golem_slam");
+                yield return Wait(1f);
+            }
+
+            Place(p, At("crystalforest", new Vector2(136f, 95f)) + new Vector2(-2f, -3f));
+            yield return Wait(2.5f);
+            yield return Shot("crystal_forest");
+            Place(p, At("queenhall", new Vector2(117f, 115f)) + new Vector2(0f, -6f));
+            yield return Wait(2.5f);
+            yield return Shot("queen_hall");
+            Place(p, At("crystalhall", new Vector2(186f, 112f)) + new Vector2(-3f, -3f));
+            yield return Wait(2.5f);
+            yield return Shot("crystal_hall");
+        }
+
         IEnumerator Run()
         {
             var gm = GameManager.I;
@@ -366,6 +457,12 @@ namespace RPG
             if (Only == "swamp")
             {
                 yield return Swamp(p, dn);
+                Finish();
+                yield break;
+            }
+            if (Only == "cave")
+            {
+                yield return Cave(p, dn);
                 Finish();
                 yield break;
             }

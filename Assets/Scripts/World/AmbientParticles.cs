@@ -6,6 +6,7 @@ namespace RPG
     /// Keeps ambient particle systems (fireflies, falling leaves, pollen, low mist) around the
     /// camera. In a misty region (<see cref="DayNightCycle.Mist"/>) the leaves stop and the mist
     /// rolls in; the mist is made here when the scene has none (<see cref="GameDatabase.mistMaterial"/>).
+    /// Under the rock (<see cref="DayNightCycle.Underground"/>) only a little dust drifts.
     /// </summary>
     public class AmbientParticles : MonoBehaviour
     {
@@ -32,9 +33,10 @@ namespace RPG
             transform.position = p;
             float n = DayNightCycle.NightFactor;
             float m = DayNightCycle.Mist;
-            SetRate(fireflies, Mathf.Lerp(fireflyDay, fireflyNight, n) * (1f + m));
-            SetRate(leaves, leavesRate * (1f - m));
-            SetRate(motes, Mathf.Lerp(motesDay, motesNight, n));
+            float u = DayNightCycle.Underground;   // under the rock: no fireflies, no leaves, a little dust
+            SetRate(fireflies, Mathf.Lerp(fireflyDay, fireflyNight, n) * (1f + m) * (1f - u));
+            SetRate(leaves, leavesRate * (1f - m) * (1f - u));
+            SetRate(motes, Mathf.Lerp(Mathf.Lerp(motesDay, motesNight, n), motesNight, u));
             SetRate(mist, mistRate * m);
         }
 

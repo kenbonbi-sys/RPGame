@@ -24,11 +24,15 @@ namespace RPG
         public float flitSeconds = 0.32f, hoverSeconds = 0.16f;
         [Tooltip("The body flies this high over its shadow; it drops to the ground when it falls.")]
         public Transform flight;
+        [Tooltip("Its wings as it takes aim and darts (a bat's squeak).")]
+        public string wingSound = "sfx_buzz";
+        [Tooltip("What its dart is called in the log.")]
+        public string stingName = "Kim Chích";
 
         enum Step { Windup, Dart, Retreat }
         Step step;
         Vector2 dartDir, flitDir, wanderGoal;
-        float flitLeft, hoverLeft, nextGoal;
+        float flitLeft, hoverLeft, nextGoal, retreatFor;
         bool orbiting;
         float orbitAngle, orbitSign, attackAfter;
         readonly HashSet<PlayerController> stung = new HashSet<PlayerController>();
@@ -140,7 +144,7 @@ namespace RPG
             Vector2 aim = (Vector2)p.transform.position + Vector2.up * 0.3f - Pos;
             dartDir = aim.sqrMagnitude > 0.01f ? aim.normalized : Vector2.right;
             if (anim != null) anim.Play("windup", true);
-            NetCues.Sound("sfx_buzz", 0.5f, 0.1f, transform.position, 0.15f);
+            NetCues.Sound(wingSound, 0.5f, 0.1f, transform.position, 0.15f);
             EnemyShots.WarnLine(this, Pos, dartDir, dartSpeed * dartSeconds, 0.35f, 0.7f, windup, t => Warn(t));
         }
 
@@ -156,21 +160,19 @@ namespace RPG
                     ForgetWarnings();
                     if (anim != null) anim.Play("attack", true);
                     motor.Dash(dartDir * dartSpeed, dartSeconds);
-                    NetCues.Sound("sfx_buzz", 0.8f, 0.08f, transform.position, 0.1f);
+                    NetCues.Sound(wingSound, 0.8f, 0.08f, transform.position, 0.1f);
                     return;
                 case Step.Dart:
                     Sting();
                     if (stateTime < dartSeconds + 0.02f) return;
-                    step = Step.Retreat;
-                    stateTime = 0f;
                     // off and away, before anyone can answer
                     Vector2 away = p != null ? Pos - (Vector2)p.transform.position : -dartDir;
-                    flitDir = Util.Rotate(away.sqrMagnitude > 0.01f ? away.normalized : -dartDir, Random.Range(-35f, 35f));
+                    BeginRetreat(away.sqrMagnitude > 0.01f ? away.normalized : -dartDir, retreatSeconds);
                     return;
                 default:
                     motor.Move(flitDir, 1.6f * (status != null ? status.SpeedMultiplier : 1f));
                     if (anim != null) anim.Play("move");
-                    if (stateTime < retreatSeconds) return;
+                    if (stateTime < retreatFor) return;
                     nextAttack = Time.time + attackCooldown * Random.Range(0.9f, 1.3f) / AttackSpeed;
                     SetState(State.Chase);
                     return;
@@ -185,6 +187,28 @@ namespace RPG
             SetState(State.Chase);
         }
 
+        void BeginRetreat(Vector2 away, float seconds)
+        {
+            step = Step.Retreat;
+            stateTime = 0f;
+            retreatFor = seconds;
+            flitDir = Util.Rotate(away, Random.Range(-35f, 35f));
+        }
+
+        /// <summary>
+        /// Flies off away from <paramref name="from"/> for <paramref name="seconds"/>, whatever it was
+        /// doing (a bat dazzled by a bright hit). Where the rules run.
+        /// </summary>
+        protected void Scatter(Vector2 from, float seconds)
+        {
+            if (!GameSession.IsAuthority || IsDead) return;
+            ClearWarnings();
+            orbiting = false;
+            SetState(State.Attack);
+            Vector2 away = Pos - from;
+            BeginRetreat(away.sqrMagnitude > 0.01f ? away.normalized : Random.insideUnitCircle.normalized, seconds);
+        }
+
         /// <summary>Everyone the dart goes through is stung, once.</summary>
         void Sting()
         {
@@ -194,18 +218,23 @@ namespace RPG
                 if (Vector2.Distance(h.transform.position, Pos) > 0.8f) continue;
                 stung.Add(h);
                 var d = DamageInfo.Make(stingDamage, Team.Enemy, gameObject, h.transform.position, dartDir, DamageType.Physical, 2f);
-                d.skillName = "Kim Chích";
+                d.skillName = stingName;
                 d.feedback = true;
-                if (h.health.TakeDamage(d) > 0f) Combat.OnHitFeedback(h.health, d);
+                float dealt = h.health.TakeDamage(d);
+                if (dealt > 0f) Combat.OnHitFeedback(h.health, d);
+                OnStung(h, dealt);
             }
         }
+
+        /// <summary>A dart went through <paramref name="h"/> for <paramref name="dealt"/> (0: it did not hurt).</summary>
+        protected virtual void OnStung(PlayerController h, float dealt) { }
 
         protected override void OnDied(DamageInfo d)
         {
             base.OnDied(d);
             if (flight != null) StartCoroutine(Drop());
             if (!GameSession.HasScreen) return;
-            AudioManager.Play("sfx_buzz", 0.4f, 0.2f, transform.position);
+            AudioManager.Play(wingSound, 0.4f, 0.2f, transform.position);
         }
 
         /// <summary>A fallen dragonfly tumbles out of the air onto the ground.</summary>

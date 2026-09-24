@@ -6,7 +6,7 @@ Lộ trình biến bản prototype hiện có (1 vùng, 1 boss, 8 chiêu) thành
 
 Bản HTML có sơ đồ tương tác và bộ lọc backlog: https://claude.ai/artifact/9g8PZSohsGFxQz1ykcadMe (link riêng tư, cần bật chia sẻ để người khác xem).
 
-> **Đổi hướng (24/09/2026): game cày cuốc kiểu Terraria, không phải RPG cốt truyện tuyến tính.** Thế giới online liền mạch nhiều người chơi (`Docs/KeHoach-Online.md`), càng đi xa quái càng mạnh. Mọi boss và quái đều hồi sinh để cày lại (boss sau 3 phút, cả khi chơi một mình); tiến bộ đến từ cấp, đồ rơi, chế tạo và mở vùng mới, không từ các hồi truyện. Các vùng mới nối liền vào cùng một bản đồ thay vì mỗi vùng một màn riêng. Cốt truyện (mục 12) chỉ còn là bối cảnh và nhiệm vụ phụ; các mục khác giữ nguyên cho tới khi được xem lại. Bản đồ đã có tới đâu: mục 10, phần *Đã có trong game* (Đầm Lầy Sương Mù đã nối vào phía đông).
+> **Đổi hướng (24/09/2026): game cày cuốc kiểu Terraria, không phải RPG cốt truyện tuyến tính.** Thế giới online liền mạch nhiều người chơi (`Docs/KeHoach-Online.md`), càng đi xa quái càng mạnh. Mọi boss và quái đều hồi sinh để cày lại (boss sau 3 phút, cả khi chơi một mình); tiến bộ đến từ cấp, đồ rơi, chế tạo và mở vùng mới, không từ các hồi truyện. Các vùng mới nối liền vào cùng một bản đồ thay vì mỗi vùng một màn riêng. Cốt truyện (mục 12) chỉ còn là bối cảnh và nhiệm vụ phụ; các mục khác giữ nguyên cho tới khi được xem lại. Bản đồ đã có tới đâu: mục 10, phần *Đã có trong game* (Đầm Lầy Sương Mù đã nối vào phía đông, Hang Pha Lê phía bắc đầm).
 
 **Phạm vi bản 1.0**
 
@@ -732,9 +732,9 @@ Làng Lá Xanh ở trung tâm, 7 vùng xếp theo cấp. Mỗi vùng có một c
 - **Thời tiết:** Nắng, mưa (Lửa −20%, Lôi +20%, Vua Slime Hoàng Kim xuất hiện), sương, gió mạnh, bão tuyết, mưa tro. Mỗi vùng một bảng tỉ lệ riêng.
 - **Ngày và đêm:** 1 ngày trong game = 6 phút như prototype (chỉnh được). Ban đêm có quái riêng (Ma Rừng, Ma Trơi, Hồn Ma Lạc), quái mạnh hơn và cho thêm XP, NPC về nhà.
 
-### Đã có trong game (24/09/2026)
+### Đã có trong game (25/09/2026)
 
-Một bản đồ liền mạch 200 × 64 ô (`Editor/WorldBuilder.cs`): đi bộ từ làng tới cuối đầm không qua màn chuyển nào. Online, mỗi kênh là một máy chủ giữ cả bản đồ; máy chủ chỉ gửi cho mỗi người những gì trong 32 đơn vị quanh họ, và quái không có ai trong 40 đơn vị thì ngủ, nên bản đồ lớn thêm không làm nặng mạng hay máy chủ (`Docs/KeHoach-Online.md` mục 13).
+Một bản đồ liền mạch 200 × 128 ô (`Editor/WorldBuilder.cs`): dải phía nam cao 64 ô là rừng và đầm, nửa phía bắc là núi đá với Hang Pha Lê khoét bên trong; đi bộ từ làng tới cuối hang không qua màn chuyển nào. Online, mỗi kênh là một máy chủ giữ cả bản đồ; máy chủ chỉ gửi cho mỗi người những gì trong 32 đơn vị quanh họ, và quái không có ai trong 40 đơn vị thì ngủ, nên bản đồ lớn thêm không làm nặng mạng hay máy chủ (`Docs/KeHoach-Online.md` mục 13).
 
 | Khu | Có gì |
 |---|---|
@@ -749,10 +749,13 @@ Một bản đồ liền mạch 200 × 64 ô (`Editor/WorldBuilder.cs`): đi b�
 | **Đá Truyền Tống** (T49) | 5 viên: Làng Lá Xanh, Cửa Rừng Già, Trạm Nhà Sàn, Ao Cóc Tía, Đầm Xà Mẫu. Lại gần là đánh thức; gục ngã thì hồi sinh ở viên chạm vào sau cùng (chưa có thì ở làng); đứng cạnh viên đã thức bấm F, hoặc mở bản đồ (M), để dịch chuyển tới viên đã thức khác. Mỗi nhân vật giữ các viên của mình, lưu cùng nhân vật (online: trên máy chủ). |
 | **Bản đồ thế giới** (M) | Toàn bộ bản đồ, vị trí mình, các đá đã thức (đứng ở đá thì bấm một viên để đi), boss. Chưa có sương khám phá và ghim. |
 | **Nhiệm vụ** | Sau Gấu Ma tự mở Đường Tới Đầm Lầy; tới trạm thì mở 4 lệnh truy nã: Cóc Độc và Đỉa Bùn, Người Bùn, Rắn Nước và Chuồn Chuồn Kim, Ánh Lửa Ma Trơi (ban đêm). Xong truy nã cóc thì mở Cóc Tía Ao Độc; xong Người Bùn và Cóc Tía thì mở Xà Mẫu Đầm Lầy. Vật phẩm mới: Da Cóc, Tuyến Độc, Răng Đỉa, Lõi Bùn, Túi Nọc, Sen Đầm (hồi máu và năng lượng), Da Rắn Nước, Cánh Chuồn Chuồn, Tinh Chất Ma Trơi, Vương Miện Cóc Tía, Vảy Xà Mẫu, Nanh Xà Mẫu. |
+| **Hang Pha Lê** (bắc đầm, x 100–200, y 64–128, cấp 14–16) | Đường mòn từ giữa đầm (x ≈ 168) lên cửa hang. Trong núi là 7 khoang nối bằng đường hầm rộng khoảng 4 ô, đá đặc ở mọi chỗ khác (va chạm thật: tilemap `Walls` với một collider gộp): **Cửa Hang** (trại thợ mỏ, đống lửa, xe goòng trên ray), **Hang Dơi**, **Mỏ Bỏ Hoang** (ray, xe goòng, cột chống, mạch quặng), **Rừng Pha Lê**, **Tổ Nhện** (mạng nhện), **Điện Pha Lê**, **Hang Nhện Chúa** (cột pha lê, chỗ để dành cho boss). Hang luôn tối dù ngoài trời là trưa (`ZoneArea.underground`: ánh sáng riêng của vùng thay ánh sáng trời); nhân vật tự mang một quầng sáng nhỏ, pha lê xanh, hồng, hổ phách tự phát sáng. Nhạc và âm nền riêng (nước nhỏ giọt, tiếng vang). Minimap tô đá và nền hang; bản đồ thế giới (M) cao gấp đôi. |
+| **Quái hang** | **Dơi Pha Lê** (cấp 14, 3 bầy): bay, lượn vòng và lao xuyên qua cắn như chuồn chuồn nhưng đi bầy; cắn hút máu (hồi nửa số máu gây ra); sợ ánh sáng: trúng đòn lửa, lôi hoặc thánh quang là tán loạn bay đi một lúc. **Nhện Hang** (cấp 15, 3 bãi): giữ khoảng cách, chồm lên (vạch báo trước) phun cục tơ trói chân (Trói), rồi lao vào cắn độc. **Golem Đá Nhỏ** (cấp 16, 3 bãi): chậm, trâu, chém ít đau (kháng vật lý), sợ lôi; giơ hai nắm đấm (vòng báo trước) rồi đập xuống gây Choáng. |
+| **Đá Truyền Tống và nhiệm vụ hang** | Thêm 3 viên: Cửa Hang Pha Lê, Rừng Pha Lê, Cổng Hang Nhện Chúa (8 viên tất cả). Xong Xà Mẫu thì mở Hang Pha Lê (tới cửa hang), rồi 3 lệnh truy nã: Dơi Pha Lê, Nhện Hang, Golem Đá. Vật phẩm mới: Mảnh Pha Lê, Cánh Dơi Pha Lê, Tơ Nhện Hang, Lõi Golem. |
 
 Mọi boss và mini-boss quay lại 3 phút sau khi gục, cả khi chơi một mình (`BossBase`: phần chung của mọi boss; mỗi boss mới chỉ viết các đòn của nó). Online, máu boss tăng 70% cho mỗi người thêm trong trận.
 
-**Khác với thiết kế ở trên:** Xà Mẫu gọi Đỉa Bùn thay cho Ấp Trứng, và cú Lao Thẳng là đòn cuồng nộ (không cần phá trứng mới lao); chưa có Siết. Đầm Lầy đã đủ 6 loài quái của bảng trên (thêm Bùn Con).
+**Khác với thiết kế ở trên:** Xà Mẫu gọi Đỉa Bùn thay cho Ấp Trứng, và cú Lao Thẳng là đòn cuồng nộ (không cần phá trứng mới lao); chưa có Siết. Đầm Lầy đã đủ 6 loài quái của bảng trên (thêm Bùn Con). Hang Pha Lê mới có vùng (T58, trừ tia phản xạ và đi xe goòng: xe goòng mới là đồ trang trí) và 3 trong 6 loài quái; còn Bọ Giáp Đá, Slime Pha Lê, Mắt Hang, Golem Pha Lê Cổ, Mimic Tham Lam (T59) và Nhện Chúa Pha Lê (T60). Nhân vật tự có quầng sáng nên chưa cần đuốc hay Lập Lòe.
 
 <a id="quai-boss"></a>
 

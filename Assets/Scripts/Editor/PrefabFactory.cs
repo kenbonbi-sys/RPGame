@@ -19,6 +19,8 @@ namespace RPG.EditorTools
         public static GameObject Player, NetHero, Chief, Girl, Slime, Shroom, Bear, Boulder, Loot;
         // Đầm Lầy Sương Mù
         public static GameObject Toad, Leech, MudMan, Mudling, ToadKing, Snake, WaterSnake, Dragonfly, Wisp;
+        // Hang Pha Lê
+        public static GameObject Bat, CaveSpider, Golem;
 
         /// <summary>Abilities on Q W E R A S D Space.</summary>
         static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
@@ -44,6 +46,9 @@ namespace RPG.EditorTools
             WaterSnake = BuildWaterSnake();
             Dragonfly = BuildDragonfly();
             Wisp = BuildWisp();
+            Bat = BuildBat();
+            CaveSpider = BuildCaveSpider();
+            Golem = BuildGolem();
             Boulder = BuildBoulder();
             Loot = BuildLoot();
             BuildProps();
@@ -223,6 +228,9 @@ namespace RPG.EditorTools
             WaterSnake = L($"{CharFolder}/WaterSnake");
             Dragonfly = L($"{CharFolder}/Dragonfly");
             Wisp = L($"{CharFolder}/Wisp");
+            Bat = L($"{CharFolder}/Bat");
+            CaveSpider = L($"{CharFolder}/CaveSpider");
+            Golem = L($"{CharFolder}/Golem");
             Boulder = L($"{GameplayFolder}/TangDaLon");
             Loot = L($"{GameplayFolder}/Loot");
             Props.Clear();
@@ -777,6 +785,94 @@ namespace RPG.EditorTools
             return EditorUtil.SavePrefab(root, $"{CharFolder}/Wisp.prefab");
         }
 
+        // ================================================================== Hang Pha Lê
+        static GameObject BuildBat()
+        {
+            var (root, body, air) = Flyer("Bat", "bat_idle_0", 0.3f, 0.4f, 0.8f, 4.6f, 0.75f, 0.14f, 7f, 0.55f, AssetFactory.SpriteLit);
+            root.GetComponent<CharacterMotor>().acceleration = 55f;
+            var ai = root.AddComponent<BatAI>();
+            EnemyCommon(root, ai, body, "bat", 1.9f, 110f);
+            var h = root.GetComponent<Health>();
+            h.resistances.fire = -0.25f;   // it fears the light
+            h.resistances.holy = -0.25f;
+            ai.flight = air.transform;
+            ai.style = Style(root, body);
+            ai.enemyId = "bat";
+            ai.displayName = "Dơi Pha Lê";
+            ai.level = 14;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 2.4f;
+            ai.aggroRange = 7.5f;
+            ai.leashRange = 14f;
+            ai.wanderRadius = 2.5f;
+            ai.orbitRadius = 3f;
+            ai.dartSpeed = 12f;
+            ai.windup = 0.4f;
+            ai.stingDamage = 16f;
+            ai.wingSound = "sfx_bat";
+            ai.stingName = "Cắn Hút Máu";
+            ai.loot = new List<LootEntry>
+            {
+                Drop("bat_wing", 0.5f), Drop("crystal_shard", 0.3f), Drop("coin", 0.85f, 3, 7), Drop("potion_red", 0.05f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Bat.prefab");
+        }
+
+        static GameObject BuildCaveSpider()
+        {
+            var (root, body) = Creature("CaveSpider", "spider_idle_0", 1.2f, 0.42f, 0.3f, 3.2f, false, 1.5f);
+            var ai = root.AddComponent<CaveSpiderAI>();
+            EnemyCommon(root, ai, body, "spider", 1.35f, 160f);
+            root.GetComponent<Health>().resistances.poison = 0.4f;
+            ai.style = Style(root, body);
+            ai.enemyId = "spider";
+            ai.displayName = "Nhện Hang";
+            ai.level = 15;
+            ai.contactDamage = 0f;
+            ai.attackRange = 1.1f;
+            ai.attackCooldown = 2f;
+            ai.aggroRange = 7.5f;
+            ai.leashRange = 13f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("spider_silk", 0.55f), Drop("crystal_shard", 0.2f), Drop("coin", 0.9f, 3, 8), Drop("potion_green", 0.08f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/CaveSpider.prefab");
+        }
+
+        static GameObject BuildGolem()
+        {
+            var (root, body) = Creature("Golem", "golem_idle_0", 4f, 0.5f, 0.38f, 1.4f, false, 1.6f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.4f;
+            var ai = root.AddComponent<GolemAI>();
+            EnemyCommon(root, ai, body, "golem", 2.3f, 380f);
+            var h = root.GetComponent<Health>();
+            h.resistances.physical = 0.3f;    // rock: blades glance off
+            h.resistances.lightning = -0.2f;  // the crystals in it carry the current
+            h.resistances.poison = 0.75f;
+            root.GetComponent<StatusEffects>().stunResist = 0.6f;
+            ai.style = Style(root, body);
+            ai.enemyId = "golem";
+            ai.displayName = "Golem Đá Nhỏ";
+            ai.level = 16;
+            ai.contactDamage = 8f;
+            ai.attackCooldown = 2.8f;
+            ai.aggroRange = 6f;
+            ai.leashRange = 12f;
+            ai.slamDamage = 34f;
+            ai.slamReach = 1.2f;
+            ai.slamRadius = 1.7f;
+            ai.slamWindup = 0.85f;
+            ai.slamSlow = 0f;
+            ai.slamStun = 0.9f;
+            ai.splitInto = 0;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("golem_core", 0.35f), Drop("crystal_shard", 0.6f, 1, 2), Drop("coin", 0.9f, 5, 10), Drop("potion_blue", 0.1f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Golem.prefab");
+        }
+
         /// <summary>The frame every boss shares (the bear's own builder predates it).</summary>
         static (GameObject root, T boss) Boss<T>(string name, string set, float mass, float radius, float colliderY, float speed, bool swims,
                                                  float hp, float shadow, float headY) where T : BossBase
@@ -1098,6 +1194,66 @@ namespace RPG.EditorTools
                 r.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/VFX/px_square_add_2_6.mat");
                 r.sortingLayerName = SortingLayerNames.VFX;
             });
+            BuildCaveProps();
+        }
+
+        /// <summary>A prop lying flat on the ground (mine rails): under everyone's feet, nothing to bump into.</summary>
+        static GameObject Decal(string name, string sprite)
+        {
+            var root = new GameObject(name);
+            var g = root.AddComponent<SortingGroup>();
+            g.sortingLayerName = SortingLayerNames.Decal;
+            Sprite(root, "Sprite", sprite, AssetFactory.SpriteLit, SortingLayerNames.Decal);
+            var prefab = EditorUtil.SavePrefab(root, $"{PropFolder}/{name}.prefab");
+            Props[name] = prefab;
+            return prefab;
+        }
+
+        /// <summary>A light that burns in the dark (the cave is always dark: see <see cref="DayNightCycle.Darkness"/>).</summary>
+        static Light2D DarkLight(GameObject go, Color c, float radius, float intensity, Vector3 pos, float flicker)
+        {
+            var l = PointLight(go, c, radius, intensity, pos);
+            var nl = l.gameObject.AddComponent<NightLight>();
+            nl.target = l;
+            nl.dayIntensity = intensity * 0.3f;
+            nl.nightIntensity = intensity;
+            nl.flicker = flicker;
+            nl.flickerSpeed = 2.5f;
+            return l;
+        }
+
+        /// <summary>Hang Pha Lê: glowing crystals, stalagmites, rocks, the old mine's carts, rails and timber, cobwebs, the queen's pillars.</summary>
+        static void BuildCaveProps()
+        {
+            var glow = new Dictionary<string, Color>
+            {
+                ["cyan"] = new Color(0.4f, 0.95f, 1f),
+                ["pink"] = new Color(1f, 0.45f, 0.95f),
+                ["amber"] = new Color(1f, 0.72f, 0.3f),
+            };
+            foreach (var kv in glow)
+            {
+                var c = kv.Value;
+                Prop($"crystal_big_{kv.Key}", $"crystal_big_{kv.Key}", new Vector2(1.3f, 0.5f), new Vector2(0, 0.25f), 0f, true,
+                     (go, sr) => DarkLight(go, c, 4.6f, 1f, new Vector3(0, 1.2f, 0), 0.06f));
+                Prop($"crystal_small_{kv.Key}", $"crystal_small_{kv.Key}", new Vector2(0.7f, 0.3f), new Vector2(0, 0.15f), 0f, false,
+                     (go, sr) => DarkLight(go, c, 2.6f, 0.7f, new Vector3(0, 0.6f, 0), 0.08f));
+            }
+            Prop("stalagmite_0", "stalagmite_0", new Vector2(0.6f, 0.3f), new Vector2(0, 0.15f), 0.8f, true);
+            Prop("stalagmite_1", "stalagmite_1", new Vector2(0.5f, 0.25f), new Vector2(0, 0.12f), 0.7f);
+            Prop("caverock_big", "caverock_big", new Vector2(1.3f, 0.55f), new Vector2(0, 0.28f), 1.5f);
+            Prop("caverock_small", "caverock_small", null, default, 0.8f);
+            Prop("minecart", "minecart", new Vector2(1.3f, 0.5f), new Vector2(0, 0.25f), 1.4f);
+            Prop("minecart_empty", "minecart_empty", new Vector2(1.3f, 0.5f), new Vector2(0, 0.25f), 1.4f);
+            Decal("rails_h", "rails_h");
+            Decal("rails_v", "rails_v");
+            Prop("timber", "timber", null, default, 0f, true);
+            Prop("cobweb_0", "cobweb_0", null, default, 0f, true);
+            Prop("cobweb_1", "cobweb_1", null, default, 0f, true);
+            Prop("crystal_pillar", "crystal_pillar", new Vector2(1.1f, 0.5f), new Vector2(0, 0.22f), 1.2f, true,
+                 (go, sr) => DarkLight(go, glow["cyan"], 3.8f, 0.9f, new Vector3(0, 1.8f, 0), 0.05f));
+            Prop("orevein", "orevein", new Vector2(1.3f, 0.55f), new Vector2(0, 0.28f), 1.5f, false,
+                 (go, sr) => DarkLight(go, glow["amber"], 1.8f, 0.5f, new Vector3(0, 0.5f, 0), 0.1f));
         }
     }
 }

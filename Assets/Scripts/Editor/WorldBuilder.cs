@@ -7,31 +7,37 @@ using UnityEngine.Tilemaps;
 namespace RPG.EditorTools
 {
     /// <summary>
-    /// Generates the world as one seamless map (plan §10: new regions join the same map): in the
-    /// west the village (Làng Lá Xanh), the forest paths with enemy camps and the bear's arena
-    /// (Rừng Già Cổ Thụ); in the east Đầm Lầy Sương Mù — water that slows whoever wades through
-    /// it, mud trails, dead trees and willows, toad, leech, mud-man and water-snake camps (dragonflies
-    /// by day, wisps at night), Cóc Tía's pond and
-    /// Xà Mẫu's lake with its four mounds — reached by a road through the forest's eastern edge
-    /// to a stilt-hut outpost. Đá Truyền Tống stand in the village, at the arena's gate and around
-    /// the swamp. Tiles are painted into Tilemaps, props are prefab instances — everything can be
+    /// Generates the world as one seamless map (plan §10: new regions join the same map). The
+    /// southern band (<see cref="LowH"/> high): in the west the village (Làng Lá Xanh), the forest
+    /// paths with enemy camps and the bear's arena (Rừng Già Cổ Thụ); in the east Đầm Lầy Sương Mù —
+    /// water that slows whoever wades through it, mud trails, dead trees and willows, toad, leech,
+    /// mud-man and water-snake camps (dragonflies by day, wisps at night), Cóc Tía's pond and Xà
+    /// Mẫu's lake with its four mounds — reached by a road through the forest's eastern edge to a
+    /// stilt-hut outpost. North of it all a wall of rock; behind the swamp a trail climbs to the
+    /// mouth of Hang Pha Lê, a dark cave of chambers and tunnels (solid rock between them) lit by
+    /// crystals. Đá Truyền Tống stand in the village, at the arena's gate, around the swamp and in
+    /// the cave. Tiles are painted into Tilemaps, props are prefab instances — everything can be
     /// edited by hand afterwards.
     /// </summary>
     public static class WorldBuilder
     {
-        public const int W = 200, H = 64;
+        public const int W = 200, H = 128;
+        /// <summary>The southern band of the forest and the swamp; the cave and the mountain rock lie north of it.</summary>
+        public const int LowH = 64;
         /// <summary>Roughly where the forest ends and the swamp begins (the real edge wanders, <see cref="SwampEdge"/>).</summary>
         public const int ForestW = 100;
         const string TileFolder = "Assets/Tiles";
 
         public class Result
         {
-            public Tilemap ground, tall, dirt, mud, water, details;
+            public Tilemap ground, tall, dirt, mud, water, details, walls;
             public Transform props;
             public Transform playerSpawn, chief, girl, forestSpot, bossSpot;
             public Transform outpost, swampSpot, mudField, toadPond, snakeLair, snakePools, dragonflies, wisps;
+            /// <summary>More places quests point at (the cave's chambers), by id.</summary>
+            public readonly List<(string id, Transform point)> spots = new List<(string, Transform)>();
             public BossBear boss;
-            /// <summary>Per grid corner: <see cref="ZoneRoot.Water"/>, <see cref="ZoneRoot.Mud"/>.</summary>
+            /// <summary>Per grid corner: <see cref="ZoneRoot.Water"/>, <see cref="ZoneRoot.Mud"/>, <see cref="ZoneRoot.Wall"/>.</summary>
             public byte[] terrain;
             public int terrainWidth;
         }
@@ -71,6 +77,9 @@ namespace RPG.EditorTools
                     new Vector2(143, 48) },
             new[] { new Vector2(134, 22), new Vector2(136, 15), new Vector2(142, 9), new Vector2(152, 8), new Vector2(162, 10),
                     new Vector2(168, 14), new Vector2(168, 21), new Vector2(164, 28.5f) },
+            // north through the wisps' haunt to the mouth of Hang Pha Lê
+            new[] { new Vector2(164, 28.5f), new Vector2(166, 36), new Vector2(167, 44), new Vector2(168, 52), new Vector2(168, 60),
+                    new Vector2(168, 64) },
         };
         static readonly (Vector2 c, float rx, float ry)[] Ponds =
         {
@@ -121,6 +130,20 @@ namespace RPG.EditorTools
             new SwampCamp { name = "Wisps_South", at = new Vector2(126, 11), radius = 2.5f, count = 2, kind = "wisp", when = DayPart.Night, flies = true },
         };
 
+        /// <summary>The cave's camps: bats in their cave and among the crystals, spiders by their nest, golems in the old mine.</summary>
+        static readonly SwampCamp[] CaveCamps =
+        {
+            new SwampCamp { name = "Bats_West", at = new Vector2(142.5f, 78.5f), radius = 2.4f, count = 3, kind = "bat", flies = true },
+            new SwampCamp { name = "Bats_East", at = new Vector2(150, 74.5f), radius = 2.2f, count = 3, kind = "bat", flies = true },
+            new SwampCamp { name = "Bats_Crystals", at = new Vector2(129, 98), radius = 2.4f, count = 3, kind = "bat", flies = true },
+            new SwampCamp { name = "Spiders_Nest", at = new Vector2(155, 107.5f), radius = 2.2f, count = 3, kind = "spider" },
+            new SwampCamp { name = "Spiders_Deep", at = new Vector2(160.5f, 104), radius = 1.8f, count = 2, kind = "spider" },
+            new SwampCamp { name = "Spiders_Forest", at = new Vector2(143.5f, 99.5f), radius = 1.8f, count = 2, kind = "spider" },
+            new SwampCamp { name = "Golems_MineWest", at = new Vector2(171.5f, 91), radius = 2f, count = 2, kind = "golem" },
+            new SwampCamp { name = "Golems_MineEast", at = new Vector2(182.5f, 89.5f), radius = 2f, count = 2, kind = "golem" },
+            new SwampCamp { name = "Golems_Hall", at = new Vector2(186, 111), radius = 2.2f, count = 2, kind = "golem" },
+        };
+
         /// <summary>Đá Truyền Tống: id, name, where.</summary>
         static readonly (string id, string name, Vector2 at)[] Stones =
         {
@@ -129,7 +152,42 @@ namespace RPG.EditorTools
             ("outpost", "Trạm Nhà Sàn", new Vector2(110.5f, 26.8f)),
             ("toadpond", "Ao Cóc Tía", new Vector2(144f, 45f)),
             ("snakelair", "Đầm Xà Mẫu", new Vector2(166.5f, 33f)),
+            ("cuahang", "Cửa Hang Pha Lê", new Vector2(172.6f, 70.6f)),
+            ("rungphale", "Rừng Pha Lê", new Vector2(131f, 90.5f)),
+            ("nhenchua", "Cổng Hang Nhện Chúa", new Vector2(125f, 103.8f)),
         };
+
+        // the cave (north of the swamp): chambers joined by tunnels, solid rock everywhere else
+        static readonly Vector2 CaveMouth = new Vector2(168, 64);
+        static readonly Vector2 MinersCamp = new Vector2(168, 72.5f);
+        static readonly Vector2 BatCave = new Vector2(146, 77);
+        static readonly Vector2 Mine = new Vector2(177, 90);
+        static readonly Vector2 CrystalForest = new Vector2(136, 95);
+        static readonly Vector2 SpiderNest = new Vector2(157, 106);
+        static readonly Vector2 CrystalHall = new Vector2(186, 112);
+        static readonly Vector2 QueenHall = new Vector2(117, 115);
+        static readonly (Vector2 c, float rx, float ry)[] Chambers =
+        {
+            (MinersCamp, 7.5f, 5.2f),       // Cửa Hang: the miners' camp
+            (BatCave, 9f, 6f),              // Hang Dơi
+            (Mine, 10.5f, 6f),              // Mỏ Bỏ Hoang
+            (CrystalForest, 12.5f, 8.5f),   // Rừng Pha Lê
+            (SpiderNest, 8.5f, 6.2f),       // Tổ Nhện
+            (CrystalHall, 9f, 7f),          // Điện Pha Lê
+            (QueenHall, 11.5f, 9.5f),       // Hang Nhện Chúa
+        };
+        static readonly Vector2[][] Tunnels =
+        {
+            new[] { new Vector2(168, 58), new Vector2(168, 68) },                                         // the mouth
+            new[] { new Vector2(162, 73), new Vector2(156, 75), new Vector2(150, 76.5f) },                // camp → bats
+            new[] { new Vector2(170, 77), new Vector2(173, 82), new Vector2(175, 86) },                   // camp → mine
+            new[] { new Vector2(143, 82), new Vector2(141, 86), new Vector2(139, 88) },                   // bats → crystal forest
+            new[] { new Vector2(147, 99), new Vector2(150, 102), new Vector2(152, 104) },                 // crystal forest → nest
+            new[] { new Vector2(185, 95), new Vector2(187, 100), new Vector2(186, 106) },                 // mine → crystal hall
+            new[] { new Vector2(163, 108), new Vector2(170, 110.5f), new Vector2(178, 111.5f) },          // nest → hall: a loop
+            new[] { new Vector2(127, 101), new Vector2(124, 105), new Vector2(121, 107) },                // forest → the queen's hall
+        };
+        const float TunnelHalfWidth = 2.1f;
 
         static System.Random rnd;
 
@@ -147,6 +205,7 @@ namespace RPG.EditorTools
             PlaceStones(res);
             PlaceForest(res);
             PlaceSwamp(res);
+            PlaceCave(res);
             PlaceBounds(worldRoot);
             PlaceActors(worldRoot, res);
             PlaceZones(worldRoot);
@@ -179,7 +238,34 @@ namespace RPG.EditorTools
         /// <summary>Where the swamp begins on row <paramref name="y"/> (the forest thins out into it).</summary>
         static float SwampEdge(float y) => 102f + 2f * Mathf.Sin(y * 0.23f) + (Noise(3f, y, 0.2f) - 0.5f) * 3f;
 
-        static bool InSwamp(Vector2 p) => p.x > SwampEdge(p.y);
+        static bool InSwamp(Vector2 p) => p.y < LowH && p.x > SwampEdge(p.y);
+
+        /// <summary>The cave's floor: inside a chamber or along a tunnel, the edges wobbling a little.</summary>
+        static bool CaveFloor(Vector2 p)
+        {
+            float wob = (Noise(p.x * 1.3f + 500f, p.y * 1.3f, 0.25f) - 0.5f) * 0.5f;
+            foreach (var (c, rx, ry) in Chambers)
+            {
+                float dx = (p.x - c.x) / rx, dy = (p.y - c.y) / ry;
+                if (dx * dx + dy * dy < 1f + wob) return true;
+            }
+            foreach (var t in Tunnels)
+                if (DistToPath(p, t) < TunnelHalfWidth + wob * 1.5f) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Solid rock at a grid corner: the whole north of the map but the cave's chambers and
+        /// tunnels, and a cliff along the top of the forest and the swamp.
+        /// </summary>
+        static bool IsWallAt(Vector2 p)
+        {
+            float edge = LowH - 1.2f + (Noise(p.x, 900f, 0.35f) - 0.5f) * 2.2f;
+            if (p.y < edge) return false;
+            return !CaveFloor(p);
+        }
+
+        static bool InCave(Vector2 p) => p.y >= LowH && p.x > ForestW;
 
         static bool IsDirt(Vector2 p)
         {
@@ -207,7 +293,7 @@ namespace RPG.EditorTools
 
         static bool IsTallGrass(Vector2 p)
         {
-            if (p.x < 27) return false;
+            if (p.x < 27 || p.y > LowH - 2.5f) return false;
             if (p.x > SwampEdge(p.y) - 4f) return false;
             if (Vector2.Distance(p, Arena) < 11.5f) return false;
             if (DirtDistance(p) < 1.6f) return false;
@@ -228,7 +314,7 @@ namespace RPG.EditorTools
         /// <summary>Swamp water at a grid corner: the pools, the lake, scattered puddles; never on trails, mounds or the outpost.</summary>
         static bool IsWaterAt(Vector2 p)
         {
-            if (p.x < 106f || !InSwamp(p)) return false;
+            if (p.x < 106f || p.y > LowH - 3f || !InSwamp(p)) return false;
             if (Vector2.Distance(p, Outpost) < 7.5f) return false;
             if (DistToTrails(p) < 1.7f) return false;
             foreach (var m in Mounds)
@@ -242,13 +328,16 @@ namespace RPG.EditorTools
                 if (dx * dx + dy * dy < 1f + wob) return true;
             }
             // scattered puddles and channels, away from the camps, the arenas and the edges of the map
-            if (p.y < 5f || p.y > H - 5f || p.x > W - 5f) return false;
+            if (p.y < 5f || p.y > LowH - 5f || p.x > W - 5f) return false;
             if (NearSwampCamp(p, 2.5f, true) || Vector2.Distance(p, ToadPond) < 11f || Vector2.Distance(p, SnakeLair) < 14.5f) return false;
             if (DistToTrails(p) < 3f) return false;
             return Noise(p.x + 400f, p.y, 0.09f) > 0.67f;
         }
 
-        static Tile MakeTile(string sprite)
+        static Tile MakeTile(string sprite) => MakeTile(sprite, false);
+
+        /// <summary>A tile asset of a sprite; a <paramref name="solid"/> one fills its cell with a collider (the cave's rock).</summary>
+        static Tile MakeTile(string sprite, bool solid)
         {
             EditorUtil.EnsureFolder(TileFolder);
             string path = $"{TileFolder}/{sprite}.asset";
@@ -261,7 +350,7 @@ namespace RPG.EditorTools
                 AssetDatabase.CreateAsset(t, path);
             }
             t.sprite = ArtImporter.S(sprite);
-            t.colliderType = Tile.ColliderType.None;
+            t.colliderType = solid ? Tile.ColliderType.Grid : Tile.ColliderType.None;
             EditorUtility.SetDirty(t);
             return t;
         }
@@ -277,6 +366,27 @@ namespace RPG.EditorTools
             tr.sharedMaterial = AssetFactory.SpriteLit;
             tr.mode = TilemapRenderer.Mode.Chunk;
             return tm;
+        }
+
+        /// <summary>
+        /// Makes a tilemap's solid tiles one merged collider on the obstacle layer. Called once its
+        /// tiles are down: a tilemap collider shapes later tiles a frame later, a frame a batch build
+        /// never gives it before it saves the scene (the rock would then load with no collider).
+        /// </summary>
+        static void MakeSolid(Tilemap map)
+        {
+            var go = map.gameObject;
+            go.layer = Layers.Obstacle;
+            go.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
+            var tiles = go.AddComponent<TilemapCollider2D>();
+            // compositeOperation = Merge, through its field: the compile check's Unity reference predates the property
+            var so = new SerializedObject(tiles);
+            so.FindProperty("m_CompositeOperation").intValue = 1;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            var shape = go.AddComponent<CompositeCollider2D>();
+            shape.geometryType = CompositeCollider2D.GeometryType.Polygons;
+            shape.GenerateGeometry();
+            if (shape.pathCount == 0) Debug.LogError($"[RPG] {go.name}: the solid tiles made no collider");
         }
 
         static Tile[] Tiles(string prefix, int count, bool firstEmpty = false) =>
@@ -297,6 +407,7 @@ namespace RPG.EditorTools
             res.mud = MakeMap(gridGo.transform, "Mud", 3);
             res.water = MakeMap(gridGo.transform, "Water", 4);
             res.details = MakeMap(gridGo.transform, "Details", 5);
+            res.walls = MakeMap(gridGo.transform, "Walls", 6);
 
             var grass = Tiles("grass", 8);
             var swampGround = Tiles("swamp", 8);
@@ -313,23 +424,32 @@ namespace RPG.EditorTools
             string[] swampDetailNames = { "reeds_0", "reeds_1", "reeds_0", "reeds_1", "puddle_0", "rotleaf_0", "rotleaf_0", "tuft_0", "tuft_2", "pebbles_1" };
             var swampDetails = swampDetailNames.Select(MakeTile).ToArray();
             var lilies = new[] { MakeTile("lily_0"), MakeTile("lily_1"), MakeTile("lily_2"), MakeTile("lotus_0") };
+            var caveFloor = Tiles("cave", 8);
+            // a wall cell is solid when at least two of its corners are rock (its face and top fill most of it)
+            var wallMs = Enumerable.Range(0, 16).Select(i => i == 0 ? null : MakeTile($"cavewall_{i}", Bits(i) >= 2)).ToArray();
+            var wallFull = Enumerable.Range(0, 4).Select(i => MakeTile($"cavewallfull_{i}", true)).ToArray();
+            string[] caveDetailNames = { "shards_0", "shards_1", "shards_2", "pebbles_c", "pebbles_c", "crack_0", "crack_1", "glowcap_0", "cavepuddle_0" };
+            var caveDetails = caveDetailNames.Select(n => MakeTile(n)).ToArray();
 
             var dirtV = new bool[W + 1, H + 1];
             var tallV = new bool[W + 1, H + 1];
             var waterV = new bool[W + 1, H + 1];
             var mudV = new bool[W + 1, H + 1];
+            var wallV = new bool[W + 1, H + 1];
             for (int y = 0; y <= H; y++)
                 for (int x = 0; x <= W; x++)
                 {
                     var p = new Vector2(x, y);
-                    dirtV[x, y] = IsDirt(p);
-                    tallV[x, y] = !dirtV[x, y] && IsTallGrass(p);
-                    waterV[x, y] = !dirtV[x, y] && IsWaterAt(p);
+                    wallV[x, y] = IsWallAt(p);
+                    if (y > LowH + 2) continue;   // the cave and the mountain: rock and cave floor only
+                    dirtV[x, y] = !wallV[x, y] && IsDirt(p);
+                    tallV[x, y] = !dirtV[x, y] && !wallV[x, y] && IsTallGrass(p);
+                    waterV[x, y] = !dirtV[x, y] && !wallV[x, y] && IsWaterAt(p);
                 }
             for (int y = 0; y <= H; y++)
                 for (int x = 0; x <= W; x++)
                 {
-                    if (waterV[x, y] || dirtV[x, y]) continue;
+                    if (waterV[x, y] || dirtV[x, y] || wallV[x, y] || y > LowH) continue;
                     var p = new Vector2(x, y);
                     float wob = (Noise(p.x, p.y, 0.4f) - 0.5f) * 1.2f;
                     bool mud = Mathf.Abs(p.x - SwampEdge(p.y)) < 1.1f + wob;   // hides where the grass turns into swamp
@@ -354,7 +474,8 @@ namespace RPG.EditorTools
             res.terrain = new byte[(W + 1) * (H + 1)];
             for (int y = 0; y <= H; y++)
                 for (int x = 0; x <= W; x++)
-                    res.terrain[y * (W + 1) + x] = (byte)((waterV[x, y] ? ZoneRoot.Water : 0) | (mudV[x, y] ? ZoneRoot.Mud : 0));
+                    res.terrain[y * (W + 1) + x] = (byte)((waterV[x, y] ? ZoneRoot.Water : 0) | (mudV[x, y] ? ZoneRoot.Mud : 0) |
+                                                          (wallV[x, y] ? ZoneRoot.Wall : 0));
 
             var gPos = new List<Vector3Int>();
             var gTiles = new List<TileBase>();
@@ -368,11 +489,39 @@ namespace RPG.EditorTools
             var wTiles = new List<TileBase>();
             var xPos = new List<Vector3Int>();
             var xTiles = new List<TileBase>();
+            var kPos = new List<Vector3Int>();
+            var kTiles = new List<TileBase>();
             for (int y = 0; y < H; y++)
                 for (int x = 0; x < W; x++)
                 {
                     var c = new Vector3Int(x, y, 0);
-                    bool swamp = InSwamp(new Vector2(x + 0.5f, y + 0.5f));
+                    var center = new Vector2(x + 0.5f, y + 0.5f);
+                    int ki = Corners(wallV, x, y);
+                    if (ki == 15)
+                    {
+                        // solid rock: nothing shows under it
+                        kPos.Add(c);
+                        kTiles.Add(wallFull[Pick(wallFull.Length, x, y)]);
+                        continue;
+                    }
+                    if (ki > 0)
+                    {
+                        kPos.Add(c);
+                        kTiles.Add(wallMs[ki]);
+                    }
+                    if (y >= LowH)
+                    {
+                        // the cave floor, a crystal splinter or a pebble here and there
+                        gPos.Add(c);
+                        gTiles.Add(caveFloor[Pick(caveFloor.Length, x, y)]);
+                        if (ki == 0 && rnd.NextDouble() < 0.09)
+                        {
+                            xPos.Add(c);
+                            xTiles.Add(caveDetails[rnd.Next(caveDetails.Length)]);
+                        }
+                        continue;
+                    }
+                    bool swamp = InSwamp(center);
                     gPos.Add(c);
                     gTiles.Add(swamp ? swampGround[Pick(swampGround.Length, x, y)] : grass[Pick(grass.Length, x, y)]);
                     int ti = Corners(tallV, x, y);
@@ -396,7 +545,7 @@ namespace RPG.EditorTools
                             xTiles.Add(rnd.NextDouble() < 0.2 ? lilies[3] : lilies[rnd.Next(3)]);
                         }
                     }
-                    else if (di == 0 && ti == 0 && mi == 0 && wi == 0 && rnd.NextDouble() < 0.1)
+                    else if (di == 0 && ti == 0 && mi == 0 && wi == 0 && ki == 0 && rnd.NextDouble() < 0.1)
                     {
                         xPos.Add(c);
                         xTiles.Add(swamp ? swampDetails[rnd.Next(swampDetails.Length)] : details[rnd.Next(details.Length)]);
@@ -408,11 +557,29 @@ namespace RPG.EditorTools
             res.mud.SetTiles(mPos.ToArray(), mTiles.ToArray());
             res.water.SetTiles(wPos.ToArray(), wTiles.ToArray());
             res.details.SetTiles(xPos.ToArray(), xTiles.ToArray());
-            waterAt = (x, y) => x >= 0 && y >= 0 && x <= W && y <= H && waterV[x, y];
+            res.walls.SetTiles(kPos.ToArray(), kTiles.ToArray());
+            MakeSolid(res.walls);
+            waterAt =(x, y) => x >= 0 && y >= 0 && x <= W && y <= H && waterV[x, y];
+            wallAt = (x, y) => x < 0 || y < 0 || x > W || y > H || wallV[x, y];
         }
 
         /// <summary>Water at a grid corner of the map being built (props keep out of it).</summary>
         static System.Func<int, int, bool> waterAt = (x, y) => false;
+
+        /// <summary>Rock at a grid corner of the map being built.</summary>
+        static System.Func<int, int, bool> wallAt = (x, y) => false;
+
+        /// <summary>Whether a prop at <paramref name="p"/> would stand in or against the rock (a margin of <paramref name="reach"/> corners).</summary>
+        static bool NearWall(Vector2 p, int reach)
+        {
+            int cx = Mathf.RoundToInt(p.x), cy = Mathf.RoundToInt(p.y);
+            for (int dy = -reach; dy <= reach; dy++)
+                for (int dx = -reach; dx <= reach; dx++)
+                    if (wallAt(cx + dx, cy + dy)) return true;
+            return false;
+        }
+
+        static int Bits(int i) => (i & 1) + ((i >> 1) & 1) + ((i >> 2) & 1) + ((i >> 3) & 1);
 
         /// <summary>Whether a prop at <paramref name="p"/> would stand in water.</summary>
         static bool Wet(Vector2 p) => waterAt(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
@@ -613,20 +780,21 @@ namespace RPG.EditorTools
             var t = res.props;
             float R() => (float)rnd.NextDouble();
             // dense border around the whole map: forest trees in the west, dead trees and willows in the swamp
-            for (float y = 0.8f; y < H; y += 1.7f)
+            for (float y = 0.8f; y < LowH; y += 1.7f)
                 for (float x = 0.8f; x < W; x += 1.7f)
                 {
-                    float edge = Mathf.Min(x, y, W - x, H - y);
+                    float edge = Mathf.Min(x, y, W - x, LowH - y);
                     if (edge > 3.6f) continue;
                     var p = new Vector2(x + (R() - 0.5f) * 0.8f, y + (R() - 0.5f) * 0.8f);
                     if (DirtDistance(p) < 0.8f && edge > 1.5f) continue;
+                    if (Vector2.Distance(p, CaveMouth) < 4.5f || NearWall(p, 0)) continue;   // the way up to the cave stays open
                     Place(InSwamp(p) ? SwampTree(p) : Tree(p, 0.8f), p, t);
                     Mark(p);
                 }
             // forest fill, thinning out where the swamp begins
             for (int i = 0; i < 9000; i++)
             {
-                var p = new Vector2(3 + R() * (ForestW + 4), 3 + R() * (H - 6));
+                var p = new Vector2(3 + R() * (ForestW + 4), 3 + R() * (LowH - 6));
                 if (InSwamp(p) || Reserved(p)) continue;
                 float dd = DirtDistance(p);
                 if (dd < 1.7f) continue;
@@ -643,7 +811,7 @@ namespace RPG.EditorTools
             int placed = 0;
             for (int i = 0; i < 6000 && placed < 230; i++)
             {
-                var p = new Vector2(3 + R() * (ForestW - 6), 3 + R() * (H - 6));
+                var p = new Vector2(3 + R() * (ForestW - 6), 3 + R() * (LowH - 6));
                 if (InSwamp(p)) continue;
                 if (Vector2.Distance(p, Village) < 9f || Vector2.Distance(p, Arena) < 9.5f) continue;
                 if (DirtDistance(p) < 0.9f) continue;
@@ -664,7 +832,7 @@ namespace RPG.EditorTools
             float R() => (float)rnd.NextDouble();
             for (int i = 0; i < 8000; i++)
             {
-                var p = new Vector2(ForestW - 2 + R() * (W - ForestW - 1), 3 + R() * (H - 6));
+                var p = new Vector2(ForestW - 2 + R() * (W - ForestW - 1), 3 + R() * (LowH - 6));
                 if (!InSwamp(p) || SwampReserved(p)) continue;
                 if (DistToTrails(p) < 1.9f || DirtDistance(p) < 1.6f) continue;
                 bool wet = Wet(p);
@@ -680,7 +848,7 @@ namespace RPG.EditorTools
             int placed = 0;
             for (int i = 0; i < 9000 && placed < 320; i++)
             {
-                var p = new Vector2(ForestW + R() * (W - ForestW - 3), 3 + R() * (H - 6));
+                var p = new Vector2(ForestW + R() * (W - ForestW - 3), 3 + R() * (LowH - 6));
                 if (!InSwamp(p) || Wet(p)) continue;
                 if (Vector2.Distance(p, Outpost) < 7f || Vector2.Distance(p, ToadPond) < 9f || Vector2.Distance(p, SnakeLair) < 12.5f) continue;
                 if (DistToTrails(p) < 1.2f || DirtDistance(p) < 0.9f || NearSwampCamp(p, 0f)) continue;
@@ -690,6 +858,101 @@ namespace RPG.EditorTools
                 Place(shore && R() < 0.75f ? $"cattails_{rnd.Next(2)}" : small[rnd.Next(small.Length)], p, t);
                 Mark(p);
                 placed++;
+            }
+        }
+
+        /// <summary>Near the middle of a tunnel (props keep them open).</summary>
+        static bool InTunnel(Vector2 p, float extra)
+        {
+            foreach (var t in Tunnels)
+                if (DistToPath(p, t) < TunnelHalfWidth * 0.6f + extra) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Hang Pha Lê: the miners' camp at the mouth, stalagmites in the bats' cave, rails, carts and
+        /// timber in the old mine, a thicket of glowing crystals, webs over the spiders' nest, amber
+        /// crystals in the crystal hall and the ring of crystal pillars in the spider queen's hall.
+        /// The middle of every chamber and every tunnel stays open to fight and walk through.
+        /// </summary>
+        static void PlaceCave(Result res)
+        {
+            var t = res.props;
+            float R() => (float)rnd.NextDouble();
+            void P(string n, Vector2 at)
+            {
+                if (Place(n, at, t) != null) Mark(at);
+            }
+            // the camps' middles stay clear
+            foreach (var camp in CaveCamps) Mark(camp.at);
+            // Cửa Hang: the miners' camp around a fire, their carts on a stretch of rails
+            var c = MinersCamp;
+            P("campfire", c + new Vector2(-1.8f, -0.4f));
+            P("lantern", c + new Vector2(-5.4f, 1.4f));
+            P("lantern", c + new Vector2(3.2f, -3.2f));
+            P("crate", c + new Vector2(-5f, -2.2f));
+            P("crate", c + new Vector2(-4.2f, -2.9f));
+            P("barrel", c + new Vector2(-3.4f, 3.3f));
+            P("barrel", c + new Vector2(-2.5f, 3.7f));
+            P("rails_h", c + new Vector2(2.2f, 3.3f));
+            P("minecart", c + new Vector2(2.2f, 3.5f));
+            P("signpost", c + new Vector2(-2f, -4.4f));
+            P("timber", new Vector2(170.6f, 78.2f));      // the way into the mine
+            P("timber", new Vector2(168f, 66.6f));        // the mouth
+            // Mỏ Bỏ Hoang: a line of track across it, carts left behind, ore in the rock
+            for (float x = Mine.x - 7.5f; x <= Mine.x + 7.5f; x += 2f) P("rails_h", new Vector2(x, Mine.y - 0.6f));
+            P("minecart", new Vector2(Mine.x - 3.4f, Mine.y - 0.4f));
+            P("minecart_empty", new Vector2(Mine.x + 4.6f, Mine.y - 0.4f));
+            P("orevein", new Vector2(Mine.x - 6.5f, Mine.y + 3.6f));
+            P("orevein", new Vector2(Mine.x + 7.2f, Mine.y + 3.2f));
+            P("lantern", new Vector2(Mine.x - 1f, Mine.y + 4.2f));
+            P("timber", new Vector2(185.2f, 96.2f));      // on to the crystal hall
+            // Hang Nhện Chúa: six crystal pillars in a ring (her beam bounces off them)
+            for (int i = 0; i < 6; i++)
+            {
+                var d = Util.FromAngle(i * 60f + 30f);
+                P("crystal_pillar", QueenHall + new Vector2(d.x * 7.2f, d.y * 5.8f));
+            }
+            P("cobweb_0", QueenHall + new Vector2(-8.5f, 5.5f));
+            P("cobweb_1", QueenHall + new Vector2(8f, 6.2f));
+            P("bones", QueenHall + new Vector2(-6f, -6.5f));
+            // the chambers' edges: what grows in each, the middle kept open
+            void Dress(Vector2 center, float rx, float ry, int count, string[] kinds, float minSpacing)
+            {
+                int placed = 0;
+                for (int i = 0; i < 400 && placed < count; i++)
+                {
+                    float a = R() * Mathf.PI * 2f;
+                    float r = Mathf.Lerp(0.5f, 0.9f, R());
+                    var p = center + new Vector2(Mathf.Cos(a) * rx * r, Mathf.Sin(a) * ry * r);
+                    if (!CaveFloor(p) || NearWall(p, 1) || InTunnel(p, 1.5f) || !Free(p, minSpacing)) continue;
+                    bool nearStone = false;
+                    foreach (var st in Stones) nearStone |= Vector2.Distance(p, st.at) < 2.6f;
+                    if (nearStone) continue;
+                    P(kinds[rnd.Next(kinds.Length)], p);
+                    placed++;
+                }
+            }
+            string[] rocks = { "stalagmite_0", "stalagmite_1", "caverock_big", "caverock_small" };
+            Dress(MinersCamp, 7.5f, 5.2f, 3, new[] { "caverock_small", "stalagmite_1", "crystal_small_cyan" }, 2.2f);
+            Dress(BatCave, 9f, 6f, 9, new[] { "stalagmite_0", "stalagmite_0", "stalagmite_1", "caverock_big", "crystal_small_cyan", "crystal_big_cyan" }, 2.2f);
+            Dress(Mine, 10.5f, 6f, 5, new[] { "caverock_big", "caverock_small", "stalagmite_1", "crystal_small_amber" }, 2.4f);
+            Dress(CrystalForest, 12.5f, 8.5f, 16, new[] { "crystal_big_cyan", "crystal_big_pink", "crystal_big_amber", "crystal_small_cyan",
+                                                          "crystal_small_pink", "crystal_small_amber", "stalagmite_0" }, 2.6f);
+            Dress(SpiderNest, 8.5f, 6.2f, 7, new[] { "cobweb_0", "cobweb_1", "bones", "crystal_small_pink", "caverock_small" }, 2.2f);
+            Dress(CrystalHall, 9f, 7f, 8, new[] { "crystal_big_amber", "crystal_big_amber", "crystal_small_amber", "crystal_big_pink", "stalagmite_0" }, 2.6f);
+            Dress(QueenHall, 11.5f, 9.5f, 4, rocks, 2.8f);
+            // the tunnels: the odd rock or crystal against their walls
+            foreach (var tun in Tunnels)
+            {
+                for (int i = 0; i + 1 < tun.Length; i++)
+                {
+                    var p = Vector2.Lerp(tun[i], tun[i + 1], 0.5f);
+                    var side = Vector2.Perpendicular((tun[i + 1] - tun[i]).normalized) * (TunnelHalfWidth - 0.4f) * (R() < 0.5f ? 1f : -1f);
+                    var q = p + side;
+                    if (q.y < LowH + 2f || !CaveFloor(q) || !Free(q, 2f)) continue;
+                    P(R() < 0.5f ? "caverock_small" : "crystal_small_cyan", q);
+                }
             }
         }
 
@@ -810,6 +1073,12 @@ namespace RPG.EditorTools
                     EditorUtility.SetDirty(m);
                 }
             }
+            // the cave's camps
+            foreach (var c in CaveCamps)
+            {
+                var prefab = c.kind == "bat" ? PrefabFactory.Bat : c.kind == "spider" ? PrefabFactory.CaveSpider : PrefabFactory.Golem;
+                if (prefab != null) Camp(c.name, prefab, c.at, c.count, c.radius);
+            }
             res.swampSpot = camps.Find("ToadCamp_Edge");
             res.mudField = camps.Find("MudCamp_Field");
             res.snakePools = camps.Find("SnakePool_Reeds");
@@ -848,6 +1117,13 @@ namespace RPG.EditorTools
                 EditorUtility.SetDirty(snake);
             }
             res.outpost = Marker(actors, "OutpostSpot", Outpost + new Vector2(0f, -2f));
+            res.spots.Add(("cavemouth", Marker(actors, "CaveMouthSpot", MinersCamp)));
+            res.spots.Add(("batcave", Marker(actors, "BatCaveSpot", BatCave)));
+            res.spots.Add(("mine", Marker(actors, "MineSpot", Mine)));
+            res.spots.Add(("crystalforest", Marker(actors, "CrystalForestSpot", CrystalForest)));
+            res.spots.Add(("spidernest", Marker(actors, "SpiderNestSpot", SpiderNest)));
+            res.spots.Add(("crystalhall", Marker(actors, "CrystalHallSpot", CrystalHall)));
+            res.spots.Add(("queenhall", Marker(actors, "QueenHallSpot", QueenHall)));
             if (res.toadPond == null) res.toadPond = Marker(actors, "ToadPondSpot", ToadPond);
             if (res.snakeLair == null) res.snakeLair = Marker(actors, "SnakeLairSpot", SnakeLair);
         }
@@ -868,12 +1144,12 @@ namespace RPG.EditorTools
                 return z;
             }
             Z("Làng Lá Xanh", Village, 11.5f, 2);
-            var forest = Z("Rừng Thì Thầm", new Vector2(ForestW / 2f + 1f, H / 2f), 0f, 0);
-            forest.size = new Vector2(ForestW + 2f, H);
+            var forest = Z("Rừng Thì Thầm", new Vector2(ForestW / 2f + 1f, LowH / 2f), 0f, 0);
+            forest.size = new Vector2(ForestW + 2f, LowH);
             forest.ambience = "amb_forest";
             Z("Rừng Già Cổ Thụ", Arena, 13f, 3);
-            var swamp = Z("Đầm Lầy Sương Mù", new Vector2((ForestW + 2f + W) / 2f, H / 2f), 0f, 0);
-            swamp.size = new Vector2(W - ForestW - 2f, H);
+            var swamp = Z("Đầm Lầy Sương Mù", new Vector2((ForestW + 2f + W) / 2f, LowH / 2f), 0f, 0);
+            swamp.size = new Vector2(W - ForestW - 2f, LowH);
             swamp.music = "music_swamp";
             swamp.ambience = "amb_swamp";
             swamp.tint = new Color(0.8f, 0.9f, 0.84f);
@@ -886,6 +1162,17 @@ namespace RPG.EditorTools
             pond.music = "music_swamp";
             var lair = Z("Đầm Xà Mẫu", SnakeLair, 13.5f, 3);
             lair.music = "music_swamp";
+            // Hang Pha Lê: under the rock, its own dim blue light whatever the hour
+            var cave = Z("Hang Pha Lê", new Vector2((ForestW + W) / 2f, (LowH + H) / 2f), 0f, 0);
+            cave.size = new Vector2(W - ForestW, H - LowH);
+            cave.music = "music_cave";
+            cave.ambience = "amb_cave";
+            cave.tint = new Color(0.55f, 0.62f, 0.95f);
+            cave.underground = 1f;
+            foreach (var (name, at, r, prio) in new[] { ("Cửa Hang", MinersCamp, 8f, 2), ("Hang Dơi", BatCave, 9.5f, 2), ("Mỏ Bỏ Hoang", Mine, 10.5f, 2),
+                                                         ("Rừng Pha Lê", CrystalForest, 12.5f, 2), ("Tổ Nhện", SpiderNest, 9f, 2),
+                                                         ("Điện Pha Lê", CrystalHall, 9.5f, 3), ("Hang Nhện Chúa", QueenHall, 12f, 3) })
+                Z(name, at, r, prio).music = "";   // the cave's music goes on (a boss brings its own)
         }
     }
 }

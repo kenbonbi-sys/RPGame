@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: cave_spiders
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: cave_spiders
+  title: "Truy N\xE3: Nh\u1EC7n Hang"
+  kind: 2
+  summary: "Nh\u1EC7n Hang phun t\u01A1 tr\xF3i ch\xE2n ng\u01B0\u1EDDi r\u1ED3i m\u1EDBi lao t\u1EDBi c\u1EAFn. T\u1ED5 c\u1EE7a ch\xFAng \u1EDF s\xE2u trong hang, ph\xEDa b\u1EAFc R\u1EEBng Pha L\xEA."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 19c6a341f4d25f34ba564b0b7202c59a, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: spider
+    count: 4
+    text: "H\u1EA1 Nh\u1EC7n Hang"
+    countPrevious: 0
+    marker: spidernest
+  xp: 620
+  gold: 80
+  items:
+  - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
+    count: 2
+  setFlags: []
+  followUps: []

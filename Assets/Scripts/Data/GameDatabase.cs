@@ -55,6 +55,8 @@ namespace RPG
         public GameObject venomPrefab;
         [Tooltip("A lobbed poison glob that leaves a pool where it lands (Cóc Tía).")]
         public GameObject venomArcPrefab;
+        [Tooltip("A ball of sticky web that binds whoever it hits (Nhện Hang).")]
+        public GameObject webPrefab;
         [Tooltip("Soft puff for the swamp's low mist (AmbientParticles).")]
         public Material mistMaterial;
 

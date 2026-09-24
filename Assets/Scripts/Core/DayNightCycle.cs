@@ -6,7 +6,8 @@ namespace RPG
     /// <summary>
     /// Drives the global 2D light through dawn / day / dusk / night, tinted by the region the
     /// hero on this screen walks in (<see cref="ZoneArea.tint"/>, blended over a few seconds).
-    /// Other lights (campfire, lanterns, fireflies) read <see cref="NightFactor"/>.
+    /// Under the rock (<see cref="ZoneArea.underground"/>) the region's own light replaces the sky's.
+    /// Lamps and the heroes' own light read <see cref="Darkness"/>, fireflies <see cref="NightFactor"/>.
     /// </summary>
     public class DayNightCycle : MonoBehaviour, ISaveable
     {
@@ -24,16 +25,23 @@ namespace RPG
         public Color duskColor = new Color(1f, 0.64f, 0.5f);
         public float nightIntensity = 0.42f;
         public float dayIntensity = 1f;
+        [Tooltip("The light's strength deep underground (its colour is the region's tint).")]
+        public float undergroundIntensity = 0.5f;
 
         /// <summary>0 during the day, 1 at deep night.</summary>
         public static float NightFactor => I != null ? I.night : 0f;
         public static bool IsNight => NightFactor > 0.5f;
         /// <summary>The region's mist around the hero on this screen, blended (0–1).</summary>
         public static float Mist => I != null ? I.mist : 0f;
+        /// <summary>How far under the rock the hero on this screen is, blended (0–1).</summary>
+        public static float Underground => I != null ? I.underground : 0f;
+        /// <summary>How dark it is around the hero on this screen: the night, or the rock overhead (0–1). Lamps light up with it.</summary>
+        public static float Darkness => Mathf.Max(NightFactor, Underground);
 
         float night;
         Color tint = Color.white;
         float mist;
+        float underground;
 
         void Awake()
         {
@@ -67,11 +75,14 @@ namespace RPG
             Evaluate(out Color c, out float intensity, out night);
             if (GameSession.HasScreen)
             {
-                ZoneArea.Mood(out Color want, out float wantMist);
+                ZoneArea.Mood(out Color want, out float wantMist, out float wantUnder);
                 float k = 1f - Mathf.Exp(-Time.unscaledDeltaTime * 0.8f);
                 tint = Color.Lerp(tint, want, k);
                 mist = Mathf.Lerp(mist, wantMist, k);
-                c *= tint;
+                // into a cave the eyes take a moment to adjust; out into the day, a little faster
+                underground = Mathf.Lerp(underground, wantUnder, 1f - Mathf.Exp(-Time.unscaledDeltaTime * (wantUnder > underground ? 1.2f : 1.8f)));
+                c = Color.Lerp(c * tint, tint, underground);
+                intensity = Mathf.Lerp(intensity, undergroundIntensity, underground);
             }
             if (globalLight != null)
             {

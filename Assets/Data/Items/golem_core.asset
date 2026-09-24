@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: golem_core
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: golem_core
+  displayName: "L\xF5i Golem"
+  description: "Tr\xE1i tim \u0111\xE1 c\u1EE7a Golem, m\u1ED9t con m\u1EAFt xanh v\u1EABn l\u1EADp l\xF2e."
+  icon: {fileID: -759048516, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 1
+  maxStack: 99
+  value: 24
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0

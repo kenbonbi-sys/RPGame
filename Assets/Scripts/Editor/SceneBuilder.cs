@@ -219,11 +219,13 @@ namespace RPG.EditorTools
             Spot("snakepools", res.snakePools);
             Spot("dragonflies", res.dragonflies);
             Spot("wisps", res.wisps);
+            foreach (var (id, point) in res.spots) Spot(id, point);
             root.ground = res.ground;
             root.tallGrass = res.tall;
             root.dirt = res.dirt;
             root.mud = res.mud;
             root.water = res.water;
+            root.walls = res.walls;
             root.terrain = res.terrain;
             root.terrainWidth = res.terrainWidth;
             root.obstacles = res.props;

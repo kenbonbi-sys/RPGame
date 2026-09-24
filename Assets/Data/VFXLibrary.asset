@@ -125,6 +125,10 @@ MonoBehaviour:
     prefab: {fileID: 2291047203352431237, guid: 0078d0e1958932942ae7720c4bc47a5d, type: 3}
   - id: wisp_burst
     prefab: {fileID: 1083068082431602035, guid: 868a5a2adb1ff8f48a1acb17320352e1, type: 3}
+  - id: web_hit
+    prefab: {fileID: 2459234258098288384, guid: 8eba41b5249bcca47abeffcf9844b71d, type: 3}
+  - id: crystal_burst
+    prefab: {fileID: 5171625631370354878, guid: dffcd717df76ade40a1dee49468aeaf9, type: 3}
   particleBudget: 150
   lightBudget: 1
   ultimateIds:

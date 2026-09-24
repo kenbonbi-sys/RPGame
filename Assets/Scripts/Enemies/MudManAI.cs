@@ -15,6 +15,8 @@ namespace RPG
         public float slamWindup = 0.75f;
         public float slamDamage = 26f;
         [Range(0f, 1f)] public float slamSlow = 0.4f;
+        [Tooltip("Seconds of Choáng the slam leaves (a stone golem's fists).")]
+        public float slamStun;
         [Tooltip("Where its Bùn Con wait (placed with the camp).")]
         public Brood brood;
         public int splitInto = 2;
@@ -59,13 +61,14 @@ namespace RPG
             {
                 slammed = true;
                 if (anim != null) anim.speed = 1f;
-                NetCues.Vfx("mud_splat", slamAt, 0f, 1.2f);
-                NetCues.Sound("sfx_mud_slam", 0.9f, 0.08f, slamAt);
+                NetCues.Vfx(SlamVfx, slamAt, 0f, 1.2f);
+                NetCues.Sound(SlamSound, 0.9f, 0.08f, slamAt);
                 NetCues.Shake(0.2f, slamAt);
                 var d = DamageInfo.Make(slamDamage, Team.Enemy, gameObject, slamAt, Vector2.down, DamageType.Physical, 6f);
                 d.status.slow = slamSlow;
                 d.status.slowDuration = 2f;
-                d.skillName = "Đập Bùn";
+                d.status.stun = slamStun;
+                d.skillName = SlamName;
                 Combat.DamageCircle(slamAt, slamRadius, d);
             }
             if (stateTime > slamWindup + 0.6f)
@@ -74,6 +77,11 @@ namespace RPG
                 SetState(State.Chase);
             }
         }
+
+        /// <summary>The slam's splash, sound and name (a golem's are rock).</summary>
+        protected virtual string SlamVfx => "mud_splat";
+        protected virtual string SlamSound => "sfx_mud_slam";
+        protected virtual string SlamName => "Đập Bùn";
 
         protected override void OnDied(DamageInfo d)
         {
@@ -85,8 +93,8 @@ namespace RPG
                 if (n > 0) NetCues.Log($"{displayName} tách thành {n} Bùn Con!", Palette.LogInfo, transform.position, NetCues.NearRadius);
             }
             if (!GameSession.HasScreen) return;
-            AudioManager.Play("sfx_mud_slam", 0.6f, 0.1f, transform.position);
-            VFX.Spawn("mud_splat", transform.position + Vector3.up * 0.2f, Quaternion.identity, 1.4f);
+            AudioManager.Play(SlamSound, 0.6f, 0.1f, transform.position);
+            VFX.Spawn(SlamVfx, transform.position + Vector3.up * 0.2f, Quaternion.identity, 1.4f);
         }
     }
 }

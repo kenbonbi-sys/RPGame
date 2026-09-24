@@ -21,7 +21,7 @@ namespace RPG
         static readonly Color Plate = new Color(0.07f, 0.06f, 0.1f, 0.94f);
         static readonly Color Here = new Color(0.45f, 1f, 0.95f);
 
-        const float MapWidth = 1560f, MapHeight = 520f;
+        const float MapWidth = 1560f, MapHeight = 740f;
 
         class StoneMark
         {

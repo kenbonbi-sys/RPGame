@@ -1,6 +1,6 @@
 # Kế hoạch online — Rừng Thì Thầm (hướng C: thế giới online nhiều người)
 
-> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Thế giới lớn dần thành một bản đồ liền mạch (mục 13): Đầm Lầy Sương Mù đã nối vào phía đông, một máy chủ mỗi kênh giữ cả bản đồ, không cần máy chủ riêng cho từng vùng; giao thức 5. Còn lại: đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
+> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Thế giới lớn dần thành một bản đồ liền mạch (mục 13): Đầm Lầy Sương Mù đã nối vào phía đông và Hang Pha Lê phía bắc đầm, một máy chủ mỗi kênh giữ cả bản đồ, không cần máy chủ riêng cho từng vùng; giao thức 6. Còn lại: đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
 
 ## 1. Mục tiêu
 
@@ -267,6 +267,8 @@ Từ 24/09 game là game cày cuốc (`Docs/KeHoach-RungThiTham.md`, đầu tài
 | **Ẩn dưới nước** | Rắn Nước lặn thì thân nó trên máy chủ tắt hẳn (không bị đánh trúng); cờ `Intangible` có sẵn cho bản sao đi xuyên. | `WaterSnakeAI` |
 
 Giao thức lên **4** (phần `waystones`, `ActKind.Travel`, cờ `Intangible`, đạn `"venom"`): game giao thức 3 vào máy chủ mới được báo tải bản mới; `RungThiTham.zip` đóng gói lại. Rồi lên **5** cùng ngày: bản đồ thêm Rắn Nước, Chuồn Chuồn Kim và Ma Trơi. Quái được đánh số theo thứ tự trong scene trên mọi máy, nên thêm hay bớt quái trong bản đồ cũng phải lên giao thức (không chỉ khi đổi tin nhắn).
+
+Giao thức lên **6** (25/09): bản đồ lớn lên 200 × 128 với Hang Pha Lê phía bắc đầm (Dơi Pha Lê, Nhện Hang, Golem Đá Nhỏ, 3 đá truyền tống mới) và đạn tơ nhện `"web"` cho người khác xem như `"venom"`. Đá trong hang là va chạm thật trên mọi máy (máy chủ cũng dùng nó cho quái). Bóng tối trong hang chỉ là phần hiển thị, máy chủ không tính.
 
 Sửa kèm: chơi một mình thì intro, thanh máu, nhạc của boss và dòng "Kỹ năng: …" trên đầu quái không hiện (chúng tra số hiệu mạng, mà offline không có); nay máy có màn hình tự hiện, máy chủ vẫn gửi cho người chơi như cũ.
 

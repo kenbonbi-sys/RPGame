@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: golem
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: -1409349692, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    - {fileID: -1092711136, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    fps: 2
+    loop: 1
+  - name: move
+    frames:
+    - {fileID: -1129448006, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    - {fileID: -1625758511, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    - {fileID: -479345204, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    - {fileID: 1236319501, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    fps: 6
+    loop: 1
+  - name: windup
+    frames:
+    - {fileID: 745295856, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    - {fileID: 1307937082, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    fps: 4
+    loop: 0
+  - name: attack
+    frames:
+    - {fileID: 59847889, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    - {fileID: -620203641, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    fps: 8
+    loop: 0
+  - name: hurt
+    frames:
+    - {fileID: -1948894813, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: -544771913, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    - {fileID: 773542224, guid: df9d124601da4114db2c56cab84a6eef, type: 3}
+    fps: 4
+    loop: 0

@@ -30,6 +30,9 @@ namespace RPG
         public Color tint = Color.white;
         [Tooltip("Low mist drifting over the ground here, 0–1.")]
         [Range(0f, 1f)] public float mist;
+        [Tooltip("Under the rock (a cave), 0–1: the tint is the whole light here, whatever the hour, and every " +
+                 "lamp and the heroes' own light burn as they do at night.")]
+        [Range(0f, 1f)] public float underground;
 
         void OnEnable() => All.Add(this);
         void OnDisable() => All.Remove(this);
@@ -56,24 +59,37 @@ namespace RPG
         /// <summary>The first area of that name (tools, tests), or null.</summary>
         public static ZoneArea Named(string zoneName) => All.Find(z => z != null && z.zoneName == zoneName);
 
-        /// <summary>Tint and mist of the region the hero on this screen is in (the region it belongs to when a smaller place has none).</summary>
-        public static void Mood(out Color tint, out float mist)
+        /// <summary>
+        /// Tint, mist and how far underground the region the hero on this screen is in is (the
+        /// region it belongs to when a smaller place has none).
+        /// </summary>
+        public static void Mood(out Color tint, out float mist, out float underground)
         {
             tint = Color.white;
             mist = 0f;
+            underground = 0f;
             var me = Players.Local;
             if (me == null) return;
-            // the largest area with a mood around the hero: a village inside the swamp keeps the swamp's light
+            MoodAt(me.transform.position, out tint, out mist, out underground);
+        }
+
+        /// <summary>The mood of the region at a point (see <see cref="Mood"/>).</summary>
+        public static void MoodAt(Vector2 pos, out Color tint, out float mist, out float underground)
+        {
+            tint = Color.white;
+            mist = 0f;
+            underground = 0f;
+            // the largest area with a mood around the point: a village inside the swamp keeps the swamp's light
             float best = -1f;
-            Vector2 pos = me.transform.position;
             foreach (var z in All)
             {
-                if (z.tint == Color.white && z.mist <= 0f || !z.Contains(pos)) continue;
+                if (z.tint == Color.white && z.mist <= 0f && z.underground <= 0f || !z.Contains(pos)) continue;
                 float area = z.size.x > 0f ? z.size.x * z.size.y : Mathf.PI * z.radius * z.radius;
                 if (area <= best) continue;
                 best = area;
                 tint = z.tint;
                 mist = z.mist;
+                underground = z.underground;
             }
         }
 

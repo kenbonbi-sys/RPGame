@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: bat
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: 1323540232, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: -1579298404, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: 1226955437, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: -1030122345, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    fps: 12
+    loop: 1
+  - name: move
+    frames:
+    - {fileID: -583902190, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: -1618192194, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: -151387138, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: -291174376, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    fps: 14
+    loop: 1
+  - name: windup
+    frames:
+    - {fileID: 323760299, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: -1319635035, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    fps: 8
+    loop: 1
+  - name: attack
+    frames:
+    - {fileID: 1215428955, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: 800194475, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    fps: 10
+    loop: 1
+  - name: hurt
+    frames:
+    - {fileID: -766478945, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: 1686267031, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    - {fileID: -1218344450, guid: 81099a11427d1c8459fd0c1f577cb674, type: 3}
+    fps: 5
+    loop: 0

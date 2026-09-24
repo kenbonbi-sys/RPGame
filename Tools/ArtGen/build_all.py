@@ -21,6 +21,8 @@ import gen_ui
 import gen_vfx
 import gen_swamp
 import gen_swamp_creatures
+import gen_cave
+import gen_cave_creatures
 from pixelkit import Canvas, pack_shelf
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -95,7 +97,8 @@ def build_terrain():
     sheet = Canvas(forest.w, 16 * T)
     sheet.blit(forest, 0, 0)
     y0 = forest.h
-    for r, row in enumerate(gen_swamp.tiles()):
+    # then the cave's (Hang Pha Lê, north of the swamp)
+    for r, row in enumerate(gen_swamp.tiles() + gen_cave.tiles()):
         for c, (name, tile) in enumerate(row):
             sheet.blit(tile, c * T, y0 + r * T)
             rects.append((name, c * T, y0 + r * T, T, T))
@@ -107,7 +110,7 @@ def build_terrain():
 
 
 def build_props():
-    items = gen_props.build() + gen_swamp.props()
+    items = gen_props.build() + gen_swamp.props() + gen_cave.props()
     sheet, rects = pack_shelf(items, 256)
     img = sheet.to_image()
     path = os.path.join(ART, "Props", "props.png")
@@ -166,6 +169,14 @@ def build_chars():
     ofps = lambda k: {"idle": (7, True), "move": (7, True), "attack": (6, False), "hurt": (1, False), "dead": (9, False)}[k]
     grid_sheet("wisp", gen_swamp_creatures.build_wisp(), ["idle", "move", "attack", "hurt", "dead"],
                24, 32, (12, 30), os.path.join(ART, "Characters", "wisp.png"), ofps)
+    # Hang Pha Lê
+    cave_order = ["idle", "move", "windup", "attack", "hurt", "dead"]
+    bfps = lambda k: {"idle": (12, True), "move": (14, True), "windup": (8, True), "attack": (10, True), "hurt": (1, False), "dead": (5, False)}[k]
+    grid_sheet("bat", gen_cave_creatures.build_bat(), cave_order, 26, 22, (13, 20), os.path.join(ART, "Characters", "bat.png"), bfps)
+    pfps = lambda k: {"idle": (3, True), "move": (10, True), "windup": (6, True), "attack": (8, False), "hurt": (1, False), "dead": (5, False)}[k]
+    grid_sheet("spider", gen_cave_creatures.build_spider(), cave_order, 34, 24, (17, 22), os.path.join(ART, "Characters", "spider.png"), pfps)
+    gfps = lambda k: {"idle": (2, True), "move": (6, True), "windup": (4, False), "attack": (8, False), "hurt": (1, False), "dead": (4, False)}[k]
+    grid_sheet("golem", gen_cave_creatures.build_golem(), cave_order, 34, 34, (17, 32), os.path.join(ART, "Characters", "golem.png"), gfps)
 
 
 def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):
@@ -183,7 +194,7 @@ def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):
 
 
 def build_icons():
-    simple_grid(gen_icons.build_items() + gen_swamp.icons(), 16, 16, os.path.join(ART, "Icons", "items.png"), ppu=16)
+    simple_grid(gen_icons.build_items() + gen_swamp.icons() + gen_cave.icons(), 16, 16, os.path.join(ART, "Icons", "items.png"), ppu=16)
     simple_grid(gen_icons.build_skills(), 24, 24, os.path.join(ART, "Icons", "skills.png"), ppu=16)
     simple_grid(gen_icons.build_status(), 10, 10, os.path.join(ART, "Icons", "status.png"), ppu=16)
 

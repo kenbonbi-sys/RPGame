@@ -19,7 +19,7 @@ namespace RPG
         public RawImage map;
         public RectTransform markerRoot;
         public RectTransform playerMarker;
-        public Tilemap ground, tallGrass, dirt, mud, water;
+        public Tilemap ground, tallGrass, dirt, mud, water, walls;
         public Transform obstaclesRoot;
         public Vector2Int worldSize = new Vector2Int(100, 64);
         public Vector2 viewTiles = new Vector2(44, 22);
@@ -88,6 +88,7 @@ namespace RPG
             dirt = zone.dirt;
             mud = zone.mud;
             water = zone.water;
+            walls = zone.walls;
             obstaclesRoot = zone.obstacles;
             worldSize = new Vector2Int(Mathf.CeilToInt(zone.bounds.xMax), Mathf.CeilToInt(zone.bounds.yMax));
             if (tex != null) Destroy(tex);
@@ -133,6 +134,8 @@ namespace RPG
             Color32 dirtC = new Color32(150, 118, 80, 255);
             Color32 mudC = new Color32(98, 82, 58, 255);
             Color32 waterC = new Color32(52, 92, 88, 255);
+            Color32 caveFloor = new Color32(58, 62, 80, 255);
+            Color32 rock = new Color32(16, 17, 24, 255);
             Color32 edge = new Color32(20, 30, 24, 255);
             var zone = ZoneRoot.Current;
             var groundColors = new Dictionary<TileBase, Color32>();
@@ -145,13 +148,15 @@ namespace RPG
                     if (g != null)
                     {
                         if (!groundColors.TryGetValue(g, out c))
-                            groundColors[g] = c = g.name.StartsWith("swamp") ? swamp : grass;
+                            groundColors[g] = c = g.name.StartsWith("swamp") ? swamp : g.name.StartsWith("cave") ? caveFloor : grass;
                     }
                     if (tallGrass != null && tallGrass.HasTile(p)) c = tall;
                     if (dirt != null && dirt.HasTile(p)) c = dirtC;
                     if (mud != null && mud.HasTile(p)) c = mudC;
                     // water where the middle of the tile is wet (its edge tiles are partly land)
                     if (water != null && water.HasTile(p) && (zone == null || zone.IsWater(new Vector2(x + 0.5f, y + 0.5f)))) c = waterC;
+                    // the cave's rock where the middle of the cell is solid
+                    if (walls != null && walls.HasTile(p) && (zone == null || zone.IsWall(new Vector2(x + 0.5f, y + 0.5f)))) c = rock;
                     cols[y * w + x] = c;
                 }
             // obstacles (trees, rocks) as dark pixels
@@ -162,6 +167,13 @@ namespace RPG
                     int x = Mathf.FloorToInt(t.position.x), y = Mathf.FloorToInt(t.position.y);
                     if (x < 0 || y < 0 || x >= w || y >= h) continue;
                     bool tree = t.name.StartsWith("pine") || t.name.StartsWith("oak") || t.name.StartsWith("deadtree") || t.name.StartsWith("willow");
+                    if (t.name.StartsWith("crystal"))
+                    {
+                        // the cave's crystals: little points of their own light
+                        cols[y * w + x] = t.name.Contains("pink") ? new Color32(220, 110, 220, 255) : t.name.Contains("amber") ? new Color32(236, 180, 80, 255)
+                                        : new Color32(110, 230, 240, 255);
+                        continue;
+                    }
                     cols[y * w + x] = tree ? new Color32(22, 48, 34, 255) : new Color32(110, 104, 118, 255);
                     if (tree && y + 1 < h) cols[(y + 1) * w + x] = new Color32(28, 58, 40, 255);
                 }

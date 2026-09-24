@@ -344,6 +344,11 @@ namespace RPG.EditorTools
                 Item("wsnake_skin", "Da Rắn Nước", M, ItemRarity.Common, "Lớp da lột xanh ô liu, còn nguyên những khoanh vằn sẫm.", 6),
                 Item("dragonfly_wing", "Cánh Chuồn Chuồn", M, ItemRarity.Common, "Cánh mỏng như sương, gân xanh chằng chịt. Chạm nhẹ là rung.", 5),
                 Item("wisp_essence", "Tinh Chất Ma Trơi", M, ItemRarity.Uncommon, "Một đốm lửa lạnh nhốt trong bình, không bao giờ tắt.", 18),
+                // Hang Pha Lê
+                Item("crystal_shard", "Mảnh Pha Lê", M, ItemRarity.Common, "Mảnh pha lê trong vắt, tự phát ra ánh sáng xanh nhạt.", 6),
+                Item("bat_wing", "Cánh Dơi Pha Lê", M, ItemRarity.Common, "Cánh dơi mỏng, mép cánh lấm tấm những hạt pha lê.", 7),
+                Item("spider_silk", "Tơ Nhện Hang", M, ItemRarity.Uncommon, "Cuộn tơ dai như dây thừng, dính tay khó gỡ.", 12),
+                Item("golem_core", "Lõi Golem", M, ItemRarity.Uncommon, "Trái tim đá của Golem, một con mắt xanh vẫn lập lòe.", 24),
             };
         }
 
@@ -765,6 +770,42 @@ namespace RPG.EditorTools
                 q.gold = 60;
                 q.items.Add(Reward("lotus", 2));
             });
+            // Hang Pha Lê, north of the swamp
+            var caveEnter = Quest("cave_enter", "Hang Pha Lê", QuestKind.Main, q =>
+            {
+                q.summary = "Ngư dân kể phía bắc đầm có một cửa hang tỏa ánh sáng xanh. Thợ mỏ bỏ đi đã lâu, nghe nói trong đó dơi, nhện và đá biết đi.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Reach, "Cửa Hang", 1, "Tới Cửa Hang Pha Lê ở phía bắc đầm", "cavemouth"));
+                q.xp = 500;
+                q.items.Add(Reward("potion_red", 3));
+            });
+            var caveBats = Quest("cave_bats", "Truy Nã: Dơi Pha Lê", QuestKind.Bounty, q =>
+            {
+                q.summary = "Bầy dơi trong Hang Dơi hút máu bất cứ ai mang đèn đi qua. Chúng sợ lửa và ánh sáng.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "bat", 6, "Hạ Dơi Pha Lê", "batcave"));
+                q.xp = 560;
+                q.gold = 70;
+                q.items.Add(Reward("potion_red", 2));
+            });
+            var caveSpiders = Quest("cave_spiders", "Truy Nã: Nhện Hang", QuestKind.Bounty, q =>
+            {
+                q.summary = "Nhện Hang phun tơ trói chân người rồi mới lao tới cắn. Tổ của chúng ở sâu trong hang, phía bắc Rừng Pha Lê.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "spider", 4, "Hạ Nhện Hang", "spidernest"));
+                q.xp = 620;
+                q.gold = 80;
+                q.items.Add(Reward("potion_green", 2));
+            });
+            var caveGolems = Quest("cave_golems", "Truy Nã: Golem Đá", QuestKind.Bounty, q =>
+            {
+                q.summary = "Đá trong mỏ bỏ hoang tự đứng dậy thành Golem. Kiếm chém vào chúng chỉ tóe lửa: lôi điện đánh chúng đau hơn.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "golem", 3, "Hạ Golem Đá Nhỏ", "mine"));
+                q.xp = 680;
+                q.gold = 90;
+                q.items.Add(Reward("potion_blue", 2));
+            });
             var toadKing = Quest("slay_toadking", "Cóc Tía Ao Độc", QuestKind.Bounty, q =>
             {
                 q.summary = "Cóc Tía ngự giữa Ao Cóc Tía phía bắc đầm. Lưỡi nó kéo người vào vũng độc.";
@@ -816,7 +857,15 @@ namespace RPG.EditorTools
             Link(snake, toadKing, null);
             Link(swampHunters, swampRoad, null);
             Link(swampWisps, swampRoad, null);
-            return new List<QuestDef> { talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake, swampHunters, swampWisps };
+            Link(caveEnter, snake, null);
+            Link(caveBats, caveEnter, null);
+            Link(caveSpiders, caveEnter, null);
+            Link(caveGolems, caveEnter, null);
+            return new List<QuestDef>
+            {
+                talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake, swampHunters, swampWisps,
+                caveEnter, caveBats, caveSpiders, caveGolems,
+            };
         }
 
         // ------------------------------------------------------------------ database

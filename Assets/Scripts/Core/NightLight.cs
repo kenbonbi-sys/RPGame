@@ -22,7 +22,7 @@ namespace RPG
         void Update()
         {
             if (target == null) return;
-            float n = DayNightCycle.NightFactor;
+            float n = DayNightCycle.Darkness;   // at night, and under the rock
             float f = 1f + (Mathf.PerlinNoise(seed, Time.time * flickerSpeed) - 0.5f) * 2f * flicker;
             target.intensity = Mathf.Lerp(dayIntensity, nightIntensity, n) * f;
         }

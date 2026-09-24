@@ -118,7 +118,7 @@ namespace RPG
 
         /// <summary>
         /// A projectile the others only watch (an enemy's spore, seen by the players' screens): it
-        /// flies and bursts there, the hits are the server's. <paramref name="prefabKey"/>: "spore", "venom", "fireball".
+        /// flies and bursts there, the hits are the server's. <paramref name="prefabKey"/>: "spore", "venom", "web", "fireball".
         /// </summary>
         public static void Projectile(string prefabKey, Vector2 start, Vector2 dir, float speed, float lifetime, Team team,
                                       string hitVfx, string hitSfx, float shake, float explodeRadius)

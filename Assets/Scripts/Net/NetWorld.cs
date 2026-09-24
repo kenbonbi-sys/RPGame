@@ -665,7 +665,8 @@ namespace RPG
         {
             var db = GameManager.I != null ? GameManager.I.db : null;
             if (db == null) return;
-            var prefab = m.id == "spore" ? db.sporePrefab : m.id == "venom" ? db.venomPrefab : m.id == "fireball" ? db.fireballPrefab : null;
+            var prefab = m.id == "spore" ? db.sporePrefab : m.id == "venom" ? db.venomPrefab : m.id == "web" ? db.webPrefab
+                       : m.id == "fireball" ? db.fireballPrefab : null;
             if (prefab == null) return;
             var go = Pool.Get(prefab, m.pos, Quaternion.identity);
             var fx = go.GetComponent<PooledFX>();

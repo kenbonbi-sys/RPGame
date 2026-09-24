@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: cave_enter
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: cave_enter
+  title: "Hang Pha L\xEA"
+  kind: 0
+  summary: "Ng\u01B0 d\xE2n k\u1EC3 ph\xEDa b\u1EAFc \u0111\u1EA7m c\xF3 m\u1ED9t c\u1EEDa hang t\u1ECFa \xE1nh s\xE1ng xanh. Th\u1EE3 m\u1ECF b\u1ECF \u0111i \u0111\xE3 l\xE2u, nghe n\xF3i trong \u0111\xF3 d\u01A1i, nh\u1EC7n v\xE0 \u0111\xE1 bi\u1EBFt \u0111i."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: b9b514017c7c8b34e8da788930f75a12, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 3
+    target: "C\u1EEDa Hang"
+    count: 1
+    text: "T\u1EDBi C\u1EEDa Hang Pha L\xEA \u1EDF ph\xEDa b\u1EAFc \u0111\u1EA7m"
+    countPrevious: 0
+    marker: cavemouth
+  xp: 500
+  gold: 0
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 3
+  setFlags: []
+  followUps: []

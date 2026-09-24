@@ -33,17 +33,19 @@ namespace RPG
         public Tilemap dirt;
         public Tilemap mud;
         public Tilemap water;
+        [Tooltip("The cave's rock (solid): its own colour on the map.")]
+        public Tilemap walls;
         [Tooltip("Parent of trees and rocks drawn as dots on the minimap.")]
         public Transform obstacles;
 
         [Header("Terrain")]
         [Tooltip("One byte per grid corner, row by row from the bottom left (terrainWidth per row): " +
-                 "Water (1) marks swamp water, which characters wade through slower.")]
+                 "Water (1) marks swamp water, which characters wade through slower; Wall (4) the cave's solid rock.")]
         [HideInInspector] public byte[] terrain;
         public int terrainWidth;
 
         /// <summary>Flags of <see cref="terrain"/>.</summary>
-        public const byte Water = 1, Mud = 2;
+        public const byte Water = 1, Mud = 2, Wall = 4;
         /// <summary>Share of their speed characters keep while wading (swimmers keep all of it).</summary>
         public const float WaterSpeed = 0.6f;
 
@@ -58,6 +60,9 @@ namespace RPG
         public bool IsWater(Vector2 p) => Has(p, Water);
 
         public bool IsMud(Vector2 p) => Has(p, Mud);
+
+        /// <summary>Whether a point is inside the solid rock of the cave (or the mountains around it).</summary>
+        public bool IsWall(Vector2 p) => Has(p, Wall);
 
         /// <summary>Share of their speed a wader keeps at a point.</summary>
         public float SpeedAt(Vector2 p) => IsWater(p) ? WaterSpeed : 1f;

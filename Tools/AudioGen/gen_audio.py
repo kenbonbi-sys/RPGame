@@ -980,6 +980,34 @@ def _wisp_burst(rng):
     return reverb(y, 0.35, 1.5, seed=73)
 
 
+@sfx("sfx_bat")
+def _bat(rng):
+    """A crystal bat: two shrill squeaks over a leathery flutter of wings."""
+    n = ns(0.5)
+    t = tvec(n)
+    y = np.zeros(n)
+    for t0 in (0.02, 0.17):
+        m = ns(0.07)
+        tt = tvec(m)
+        f = rng.uniform(4200, 5200) * np.exp(-tt / 0.08) + 2600
+        place(y, osc("sine", f, m) * env_hump(m, 0.25, 1.4, 2.2) * rng.uniform(0.7, 1.0), t0 * SR)
+    flaps = rmsn(bp(white(n, rng), 900, 1.2)) * (0.5 + 0.5 * np.sin(TAU * 17 * t)) ** 3 * env_hump(n, 0.4, 1.5, 2.0)
+    return 0.8 * y + 0.35 * flaps
+
+
+@sfx("sfx_web")
+def _web(rng):
+    """A spider's web ball: a sticky thwip and a soft wet smack."""
+    n = ns(0.3)
+    t = tvec(n)
+    thwip = rmsn(bp(white(n, rng), 2800 * np.exp(-t / 0.05) + 500, 1.6)) * env_perc(n, 0.002, 0.06)
+    m = ns(0.1)
+    smack = rmsn(bp(white(m, rng), 900, 1.4)) * env_perc(m, 0.001, 0.03)
+    y = 0.8 * thwip
+    place(y, 0.5 * smack, 0.09 * SR)
+    return y
+
+
 @sfx("sfx_waystone")
 def _waystone(rng):
     """A standing stone waking: a soft bell chord with a rising shimmer."""
@@ -1812,6 +1840,104 @@ def build_swamp():
     return mix - mix.mean(), {"bars": NB, "bpm": 60.0 * sr / (4 * S16), "buses": buses}
 
 
+def build_cave():
+    """D minor, 64 BPM, 16 bars: a deep drone pad and a slow bass under glassy crystal chimes and
+    a sparse plucked melody, water drops falling in a long echoing hall. Wonder more than dread."""
+    sr = MSR
+    S16 = 7500                       # samples per 16th -> 64.0 BPM at 32 kHz
+    NB = 16
+    N = NB * 16 * S16                # 1,920,000 samples = 60 s
+    rng = np.random.default_rng(seed_of("music_cave"))
+    PAD = {"Dm": "D3 A3 D4 F4", "Bb": "Bb2 F3 D4 F4", "Gm": "G2 D3 Bb3 D4", "C": "C3 G3 C4 E4",
+           "A": "A2 E3 A3 C#4", "F": "F2 C3 A3 C4"}
+    ROOT = {"Dm": "D2", "Bb": "Bb1", "Gm": "G1", "C": "C2", "A": "A1", "F": "F1"}
+    prog = ["Dm", "Dm", "Bb", "Gm", "Dm", "C", "Bb", "A",
+            "Dm", "F", "Gm", "Dm", "Bb", "C", "A", "A"]
+    MEL = ["-:8 A4:4 D5:4", "F5:8 E5:4 D5:4", "-:4 F5:4 D5:4 Bb4:4", "D5:12 -:4",
+           "-:8 A5:4 G5:4", "E5:6 C5:2 G5:8", "F5:4 D5:4 Bb4:8", "C#5:8 E5:8",
+           "-:8 D5:2 E5:2 F5:4", "A5:8 G5:4 F5:4", "G5:6 D5:2 Bb4:8", "A4:12 -:4",
+           "-:4 D5:4 F5:4 Bb5:4", "A5:6 G5:2 E5:8", "E5:4 C#5:4 A4:8", "-:16"]
+
+    pad = Loop(N)
+    for b, ch in enumerate(prog):
+        sig = inst_pad([midi(x) for x in PAD[ch].split()], 16 * S16 / sr, sr, rng, cutoff=520, att=1.2, rel=1.6, detune=7)
+        pad.add(sig, b * 16 * S16 - int(0.3 * sr))
+
+    bass = Loop(N)
+    for b, ch in enumerate(prog):
+        bass.add(inst_softbass(mtof(midi(ROOT[ch])), 14 * S16 / sr, sr), b * 16 * S16)
+
+    chimes = Loop(N)
+    for b in range(NB):
+        tones = sorted(midi(x) + 24 for x in PAD[prog[b]].split())
+        for i in range(4):
+            st = int(rng.integers(0, 16))
+            m = tones[int(rng.integers(len(tones)))] + (12 if rng.random() < 0.3 else 0)
+            sig = fm_bell(mtof(m), int(2.4 * sr), ratio=3.5, index=1.1, tau=0.9, itau=0.12, sr=sr)
+            chimes.add(sig, (b * 16 + st) * S16 + humanize(rng, 10, sr), rng.uniform(0.25, 0.55))
+
+    harp = Loop(N)
+    put_melody(harp, MEL, 0, S16, lambda f, d: inst_pluck(f, d, sr, rng, bright=0.45, decay=1.3, tail=0.8), rng, gain=0.9, gate=0.95, jitter_ms=8)
+
+    drops = Loop(N)
+    for b in range(NB):
+        for i in range(2):
+            st = int(rng.integers(0, 16))
+            m = int(0.07 * sr)
+            tt = tvec(m, sr)
+            d = osc("sine", rng.uniform(900, 1700) * np.exp(np.minimum(tt, 0.03) / 0.025), m, sr) * env_perc(m, 0.001, 0.02, sr)
+            drops.add(d, (b * 16 + st) * S16, rng.uniform(0.3, 0.7))
+
+    G = {"harp": 0.5, "pad": 0.7, "bass": 0.3, "chimes": 0.32, "drops": 0.35}
+    buses = {"harp": G["harp"] * circ_echo(harp.buf, 6 * S16, 0.35, 3, sr, damp=3000), "pad": G["pad"] * pad.buf,
+             "bass": G["bass"] * bass.buf, "chimes": G["chimes"] * chimes.buf,
+             "drops": G["drops"] * circ_echo(drops.buf, 5 * S16, 0.45, 4, sr, damp=2600)}
+    dry = sum(buses.values())
+    send = buses["harp"] + 0.8 * buses["pad"] + buses["chimes"] + buses["drops"]
+    buses["wet"] = 0.8 * cconv(send, make_ir(4.2, MSR, predelay=0.05, damp=2200, seed=83))
+    mix = circ_shape(dry + buses["wet"], sr, lo=30.0, hi=9500.0)
+    return mix - mix.mean(), {"bars": NB, "bpm": 60.0 * sr / (4 * S16), "buses": buses}
+
+
+def build_cave_ambience():
+    """20 s cave bed: a deep rumble of the rock, a hollow draught, water drops echoing in the dark
+    and now and then a faint crystal hum or a pebble falling. Cross-faded into its start like the swamp's."""
+    sr = MSR
+    N = 20 * sr
+    X = 2 * sr
+    M = N + X
+    rng = np.random.default_rng(seed_of("amb_cave"))
+    t = tvec(M, sr)
+    rumble = rmsn(lp(brown(M, rng, sr), 110 + 30 * np.sin(TAU * t / 13.0), 0.7, sr))
+    draught = rmsn(bp(pink(M, rng, sr), 320 + 90 * np.sin(TAU * t / 7.0), 1.8, sr)) * (0.6 + 0.4 * (0.5 + 0.5 * smooth_rand(M, 0.2, rng, sr)))
+    drips = np.zeros(M)
+    for t0 in rng.uniform(0, 19.5, 22):
+        m = int(0.07 * sr)
+        tt = tvec(m, sr)
+        d = osc("sine", rng.uniform(700, 1600) * np.exp(np.minimum(tt, 0.03) / 0.025), m, sr) * env_perc(m, 0.001, 0.02, sr)
+        place(drips, d * rng.uniform(0.4, 1.0), t0 * sr)
+    drips = drips + 0.8 * fftconv(drips, make_ir(2.6, sr, 0.04, 2800, seed=87), M)
+    hum = np.zeros(M)
+    for t0 in (3.0, 11.5):
+        m = int(4.0 * sr)
+        tt = tvec(m, sr)
+        tone = osc("sine", 880, m, sr) + 0.6 * osc("sine", 1321.5, m, sr) + 0.3 * osc("sine", 1762, m, sr)
+        place(hum, tone * env_hump(m, 0.5, 2.0, 2.0), t0 * sr)
+    pebbles = np.zeros(M)
+    for t0 in (6.2, 15.8):
+        for k in range(int(rng.integers(3, 6))):
+            m = int(0.04 * sr)
+            place(pebbles, rmsn(bp(white(m, rng), rng.uniform(1500, 3500), 3.0, sr)) * env_perc(m, 0.001, 0.012, sr) * rng.uniform(0.3, 1.0),
+                  (t0 + k * rng.uniform(0.06, 0.14)) * sr)
+    pebbles = pebbles + 0.6 * fftconv(pebbles, make_ir(2.0, sr, 0.03, 3000, seed=89), M)
+    y = 0.6 * norm(rumble) + 0.35 * norm(draught) + 0.38 * norm(drips) + 0.06 * norm(hum) + 0.18 * norm(pebbles)
+    w = np.linspace(0.0, 1.0, X, endpoint=False)
+    out = y[:N].copy()
+    out[:X] = y[:X] * np.sin(0.5 * np.pi * w) + y[N:N + X] * np.cos(0.5 * np.pi * w)
+    out = circ_shape(out, sr, lo=28.0)
+    return out - out.mean(), {"crossfade_s": X / sr}
+
+
 def bird_phrase(kind, rng, sr):
     def chirp(f0, f1, dur, harm=0.12, shape=1.0):
         n = int(dur * sr)
@@ -1942,7 +2068,7 @@ SFX_NAMES = [
     "sfx_telegraph", "sfx_stun", "sfx_step", "sfx_denied", "sfx_levelup", "sfx_enrage",
     "sfx_boulder_break", "sfx_lightning_charge",
     "sfx_croak", "sfx_splash", "sfx_wade", "sfx_hiss", "sfx_spit", "sfx_splat", "sfx_mud_slam", "sfx_tongue", "sfx_waystone",
-    "sfx_buzz", "sfx_wisp", "sfx_wisp_burst",
+    "sfx_buzz", "sfx_wisp", "sfx_wisp_burst", "sfx_bat", "sfx_web",
 ]
 # name, builder, allowed duration range (s), target peak dBFS
 MUSIC = [
@@ -1951,6 +2077,8 @@ MUSIC = [
     ("amb_forest", build_ambience, (19.5, 20.5), -12.0),
     ("music_swamp", build_swamp, (40.0, 64.0), -3.0),
     ("amb_swamp", build_swamp_ambience, (19.5, 20.5), -12.0),
+    ("music_cave", build_cave, (40.0, 64.0), -3.0),
+    ("amb_cave", build_cave_ambience, (19.5, 20.5), -12.0),
 ]
 
 
