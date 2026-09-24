@@ -38,7 +38,7 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 - **Nhiệm vụ (QuestDef):** mỗi nhiệm vụ là một asset trong `Assets/Data/Quests` (người giao, điều kiện mở, 9 loại mục tiêu, phần thưởng, cờ, nhiệm vụ tiếp theo). Chuỗi chính với Trưởng Làng + nhiệm vụ phụ của Bé Mai; tracker "(+1 · Tab)", dấu ! / ? trên đầu NPC (vàng: chính, bạc: phụ).
 - **Hội thoại (Yarn Spinner 3):** mỗi NPC một file `.yarn` trong `Assets/Dialogue`, có lựa chọn (phím 1–3), điều kiện theo nhiệm vụ và khóa `#line:` cho bản địa hóa. Hàm/lệnh Yarn: `quest_status`, `quest_left`, `item_count`, `has_flag`, `<<quest_start>>`, `<<quest_complete>>`, `<<give_item>>`, `<<victory>>` (xem `Assets/Scripts/Dialogue/YarnBindings.cs`).
 - **HUD:** thanh máu boss khung trang trí, minimap + tên vùng + ngày/đêm, quest tracker, orb Máu/Năng lượng dạng chất lỏng, thanh bình thuốc, skill bar với cooldown/chi phí, log sự kiện, số damage bay, nameplate, hội thoại có portrait, túi đồ + tooltip, màn chết/hồi sinh, banner khu vực/chiến thắng.
-- **Âm thanh:** 42 SFX, nhạc rừng, nhạc boss, âm nền rừng (tự tổng hợp, `Tools/AudioGen`).
+- **Âm thanh:** 42 SFX, nhạc rừng, nhạc boss, âm nền rừng (tự tổng hợp, `Tools/AudioGen`). Âm lượng riêng cho Master · Nhạc · SFX · UI · Môi trường · Blip thoại (`AudioManager.SetVolume`, lưu trong PlayerPrefs); nhạc tự hạ khi đang hội thoại và một lúc khi boss hô chiêu. Gán một AudioMixer có các nhóm cùng tên vào `AudioManager.mixer` thì âm thanh đi qua các nhóm đó.
 
 ## Cấu trúc project
 

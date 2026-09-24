@@ -437,6 +437,41 @@ namespace RPG.EditorTools.Tests
             yield return null;
         }
 
+        static IEnumerator RealSeconds(float seconds)
+        {
+            float end = Time.realtimeSinceStartup + seconds;
+            while (Time.realtimeSinceStartup < end) yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator MusicDucksForDialogueAndBossSkills()
+        {
+            var audio = AudioManager.I;
+            Assert.NotNull(audio, "AudioManager in Core");
+            Assert.AreEqual(1f, audio.Duck, 0.01f);
+
+            var chief = NPC.All.Find(n => n.npcId == "chief");
+            Assert.IsTrue(DialogueDirector.I.Talk(chief), "conversation starts");
+            yield return RealSeconds(0.6f);
+            Assert.AreEqual(audio.dialogueDuck, audio.Duck, 0.01f, "music lowered while talking");
+            float deadline = Time.realtimeSinceStartup + 15f;
+            while (DialogueDirector.I.IsRunning && Time.realtimeSinceStartup < deadline)
+            {
+                if (DialogueUI.I.ShowingOptions) DialogueUI.I.Choose(0);
+                else DialogueUI.I.DebugAdvance();
+                yield return null;
+            }
+            Assert.IsFalse(DialogueDirector.I.IsRunning, "conversation ended");
+            yield return RealSeconds(0.6f);
+            Assert.AreEqual(1f, audio.Duck, 0.01f, "back to full after the conversation");
+
+            GameEvents.RaiseSkillAnnounced(BossBear.All[0].health, "Kỹ năng: thử");
+            yield return RealSeconds(0.3f);
+            Assert.Less(audio.Duck, 0.95f, "a boss skill call ducks the music");
+            yield return RealSeconds(audio.skillDuckSeconds + 0.6f);
+            Assert.AreEqual(1f, audio.Duck, 0.01f, "and it comes back");
+        }
+
         [UnityTest]
         public IEnumerator ANewAbilityMadeOnlyFromData()
         {
