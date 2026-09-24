@@ -32,7 +32,7 @@ namespace RPG
             d.slowDuration = slowDuration;
             if (burnPower > 0)
             {
-                d.burnDps = burnPower * ctx.PowerScale * ctx.caster.Attack(type);
+                d.burnDps = burnPower * ctx.HitScale(type);
                 d.burnDuration = burnDuration;
             }
             return d;
@@ -99,7 +99,7 @@ namespace RPG
                 return;
             }
             p.team = ctx.Team;
-            p.damage = hit.power * ctx.PowerScale * ctx.caster.Attack(hit.type);
+            p.damage = hit.power * ctx.HitScale(hit.type);
             p.attackScaled = true;
             p.skillName = ctx.ability.displayName;
             p.damageType = hit.type;
@@ -109,7 +109,7 @@ namespace RPG
             p.stun = hit.stun;
             p.slow = hit.slow;
             p.slowDuration = hit.slowDuration;
-            p.burnDps = hit.burnPower > 0 ? hit.burnPower * ctx.PowerScale * ctx.caster.Attack(hit.type) : 0f;
+            p.burnDps = hit.burnPower > 0 ? hit.burnPower * ctx.HitScale(hit.type) : 0f;
             p.burnDuration = hit.burnDuration;
             p.speed = speed;
             p.explodeRadius = explodeRadius;

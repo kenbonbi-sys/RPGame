@@ -22,7 +22,9 @@ namespace RPG
         AttackSpeed,
         DashCooldownReduction,
         ElementalResist,
-        PoiseDamage
+        PoiseDamage,
+        /// <summary>Outgoing damage multiplier, base 1: the "(1 + Tăng%)" of plan §04. "+20% #Đạn" = PercentAdd 0.2 tagged #Đạn.</summary>
+        DamageDealt
     }
 
     public enum ModKind
@@ -94,7 +96,12 @@ namespace RPG
         }
 
         /// <summary>Final value. Untagged modifiers always count; tagged ones only for a matching tag.</summary>
-        public float Get(StatId s, string tag = null)
+        public float Get(StatId s, string tag = null) => Compute(s, tag, null);
+
+        /// <summary>Final value for something with several tags (an ability's "#Lửa #Đạn"): a tagged modifier counts when its tag is among them.</summary>
+        public float Get(StatId s, IReadOnlyList<string> tags) => Compute(s, null, tags);
+
+        float Compute(StatId s, string tag, IReadOnlyList<string> tags)
         {
             float flat = baseValues[(int)s];
             float add = 0f;
@@ -102,7 +109,7 @@ namespace RPG
             foreach (var m in mods)
             {
                 if (m.stat != s) continue;
-                if (!string.IsNullOrEmpty(m.tag) && m.tag != tag) continue;
+                if (!string.IsNullOrEmpty(m.tag) && m.tag != tag && !Contains(tags, m.tag)) continue;
                 switch (m.kind)
                 {
                     case ModKind.Flat: flat += m.value; break;
@@ -111,6 +118,14 @@ namespace RPG
                 }
             }
             return flat * (1f + add) * mult;
+        }
+
+        static bool Contains(IReadOnlyList<string> tags, string tag)
+        {
+            if (tags == null) return false;
+            for (int i = 0; i < tags.Count; i++)
+                if (tags[i] == tag) return true;
+            return false;
         }
     }
 }

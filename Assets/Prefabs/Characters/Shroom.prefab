@@ -155,6 +155,13 @@ MonoBehaviour:
   damageTakenMultiplier: 1
   armor: 0
   elementalResist: 0
+  resistances:
+    physical: 0
+    fire: -0.3
+    ice: 0
+    lightning: 0
+    poison: 0
+    holy: 0
   invulnerable: 0
   showDamageNumbers: 1
 --- !u!114 &7144777416413833185

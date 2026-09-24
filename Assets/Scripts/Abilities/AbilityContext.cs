@@ -18,6 +18,8 @@ namespace RPG
         bool IsDead { get; }
         /// <summary>Attack used by Damage blocks: damage = power × Attack (plan §04).</summary>
         float Attack(DamageType type);
+        /// <summary>Outgoing damage multiplier for this ability, 1 = none: the "(1 + Tăng%)" of plan §04.</summary>
+        float DamageDealt(AbilityDef ability);
         void BeginAction(string animBase, Vector2 dir, float lockTime, float moveMul);
         void AddBuff(BuffSpec buff);
         void RemoveBuff(string id);
@@ -60,10 +62,13 @@ namespace RPG
             return c;
         }
 
+        /// <summary>What power 1 is worth for an element: the ability's level scaling × the caster's Attack × damage bonuses.</summary>
+        public float HitScale(DamageType type) => PowerScale * caster.Attack(type) * caster.DamageDealt(ability);
+
         /// <summary>A hit worth <paramref name="power"/> × the caster's Attack for its element.</summary>
         public DamageInfo MakeDamage(float power, DamageType type, Vector2 at, Vector2 direction, float knockback = 0f)
         {
-            var d = DamageInfo.Make(power * PowerScale * caster.Attack(type), Team, caster.Runner.gameObject, at, direction, type, knockback);
+            var d = DamageInfo.Make(power * HitScale(type), Team, caster.Runner.gameObject, at, direction, type, knockback);
             d.attackScaled = true;
             d.sourceLevel = caster.Level;
             d.skillName = ability.displayName;

@@ -349,6 +349,7 @@ namespace RPG.EditorTools
             var body = Sprite(root, "Body", "shroom_idle_0", AssetFactory.SpriteLit);
             var ai = root.AddComponent<ShroomAI>();
             EnemyCommon(root, ai, body, "shroom", 1.35f, 48f);
+            root.GetComponent<Health>().resistances.fire = -0.3f;   // weak to fire: the damage example of plan §04
             ai.enemyId = "shroom";
             ai.displayName = "Nấm Độc";
             ai.level = 3;

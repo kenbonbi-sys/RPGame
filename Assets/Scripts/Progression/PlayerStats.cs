@@ -96,6 +96,7 @@ namespace RPG
             Stats.SetBase(StatId.Armor, c.armorPerVitality * vit, false);
             Stats.SetBase(StatId.ElementalResist, c.resistPerVitality * vit, false);
             Stats.SetBase(StatId.PoiseDamage, 1f + c.poisePerStrength * str, false);
+            Stats.SetBase(StatId.DamageDealt, 1f, false);
             Apply();
             Changed?.Invoke();
         }
@@ -137,6 +138,9 @@ namespace RPG
             bool magic = type != DamageType.Physical;
             return Config.DamageScale(Stats.Get(magic ? StatId.MagicAttack : StatId.PhysicalAttack), magic);
         }
+
+        /// <summary>Outgoing damage multiplier for an ability: untagged bonuses plus those for its tags (#Lửa, #Đạn…).</summary>
+        public float DamageDealt(AbilityDef ability) => Stats.Get(StatId.DamageDealt, ability != null ? ability.TagList : null);
 
         /// <summary>A skill's crit chance plus the Agility bonus, capped.</summary>
         public float CritChance(float skillChance) => Mathf.Min(Config.critMax, skillChance + Stats.Get(StatId.CritChance));
