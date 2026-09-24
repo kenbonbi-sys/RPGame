@@ -272,6 +272,13 @@ Giao thức lên **6** (25/09): bản đồ lớn lên 200 × 128 với Hang Pha
 
 Sửa kèm: chơi một mình thì intro, thanh máu, nhạc của boss và dòng "Kỹ năng: …" trên đầu quái không hiện (chúng tra số hiệu mạng, mà offline không có); nay máy có màn hình tự hiện, máy chủ vẫn gửi cho người chơi như cũ.
 
+### Đã kiểm tra (25/09, giao thức 6)
+
+- 154 test EditMode (2 test phông chữ bỏ qua như trước), thêm `CaveTests`: hang nằm phía bắc đầm, đá cản thật (đi vào vách hầm là dừng, không lọt vào đá), trong hang tối cả lúc giữa trưa, dơi tán loạn khi trúng đòn sáng, tơ nhện trói, golem đập gây choáng.
+- `Tools/Server/netsmoke.ps1` 3 vòng, 0 lỗi; `Tools/Server/loadtest.ps1` (10 bot, 120 giây): 10/10 người, máy chủ thấp nhất 42 FPS, trung bình 53, CPU nhiều nhất 18% một nhân, 250 MB; 0 lỗi, không ai bị kéo về, tắt đúng cách.
+- `RungThiTham.exe -autoshot -autoshotOnly cave`: 13 ảnh đi qua các khoang, từng đòn của 3 loài quái hang, bản đồ thế giới; 0 lỗi.
+- Máy chủ thật trên máy nhà đã cập nhật lên giao thức 6 (25/09, lúc không ai chơi; tài khoản giữ nguyên); `RungThiTham.zip` trên Desktop đóng gói lại cùng bản build, game giao thức 5 sẽ được báo tải bản mới.
+
 ### Đã kiểm tra (24/09)
 
 - 142 test EditMode (2 test phông chữ bỏ qua như trước), thêm `SwampTests`: đầm nằm phía đông rừng, nước làm chậm người lội mà không làm chậm quái bơi, boss hiện trận đấu trên màn hình khi chơi một mình, đá thức / mang theo / hồi sinh và dịch chuyển, Người Bùn tách đôi, vũng độc gây sát thương, hai boss đầm chạy đủ mọi đòn.
