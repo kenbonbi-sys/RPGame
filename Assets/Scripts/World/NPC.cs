@@ -43,7 +43,6 @@ namespace RPG
 
         void Start()
         {
-            if (HUD.I != null) plate = HUD.I.CreateNameplate(transform, displayName, false, Color.white, null, 1.42f);
             MinimapUI.Register(transform, MinimapUI.MarkerKind.NPC);
         }
 
@@ -91,6 +90,8 @@ namespace RPG
                     questMarker.color = kind == QuestKind.Main ? Color.white : new Color(0.78f, 0.84f, 0.95f);
                 }
             }
+            // created lazily: a zone opened on its own in the editor starts before the Core UI
+            if (plate == null && HUD.I != null) plate = HUD.I.CreateNameplate(transform, displayName, false, Color.white, null, 1.42f);
             if (plate != null && GameManager.I != null && GameManager.I.player != null)
             {
                 float d = Vector2.Distance(GameManager.I.player.transform.position, transform.position);

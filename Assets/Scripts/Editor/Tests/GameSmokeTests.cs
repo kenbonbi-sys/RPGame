@@ -26,6 +26,11 @@ namespace RPG.EditorTools.Tests
             EditorSceneManager.OpenScene(SceneBuilder.ScenePath);
             yield return new EnterPlayMode();
             yield return Frames(3);
+            // Core loads the start zone next to itself
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while ((SceneLoader.I == null || SceneLoader.I.Busy) && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.IsNotNull(ZoneRoot.Current, "start zone loaded");
+            yield return Frames(2);
             if (HUD.I != null && HUD.I.help != null) HUD.I.help.Close();   // the start-up help panel blocks input
             yield return null;
         }
@@ -154,7 +159,11 @@ namespace RPG.EditorTools.Tests
             Assert.IsTrue(File.Exists(SaveManager.PathFor(1) + ".bak"));
 
             Assert.IsTrue(SaveManager.I.Load(1));
-            yield return Frames(6);
+            // Core reloads, loads the saved zone, then applies the save
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while ((SaveManager.HasPendingLoad || SceneLoader.I == null || SceneLoader.I.Busy) && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            yield return Frames(2);
 
             var p = GameManager.I.player;
             Assert.AreEqual(3, PlayerStats.I.level);
@@ -444,6 +453,38 @@ namespace RPG.EditorTools.Tests
             Assert.IsFalse(hero.HasBuff("shield"));
             Assert.AreEqual(1f, hero.health.damageTakenMultiplier, 1e-4f);
             Assert.IsFalse(hero.status.stunImmune);
+        }
+
+        [UnityTest]
+        public IEnumerator CoreAndZoneAreSeparateScenes()
+        {
+            Assert.AreEqual("Core", GameManager.I.gameObject.scene.name);
+            Assert.AreEqual("Core", GameManager.I.player.gameObject.scene.name, "the hero lives in Core");
+            var zone = ZoneRoot.Current;
+            Assert.AreEqual("RungThiTham", zone.gameObject.scene.name);
+            Assert.AreEqual(zone.gameObject.scene, UnityEngine.SceneManagement.SceneManager.GetActiveScene(), "zone is the active scene");
+            Assert.AreEqual(zone.gameObject.scene, BossBear.All[0].gameObject.scene, "the boss belongs to the zone");
+            Assert.NotNull(GameManager.I.respawnPoint, "spots come from the zone");
+            Assert.AreEqual(zone.bounds, CameraRig.I.worldBounds);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator TravelReloadsTheZoneAtAnEntry()
+        {
+            VFX.Spawn("hit_spark", Vector3.zero, Quaternion.identity);   // makes the pool root
+            yield return Frames(2);
+            var zone = ZoneRoot.Current.def;
+            SceneLoader.I.Travel(zone, "boss");
+            Assert.IsTrue(SceneLoader.I.Busy);
+            float deadline = Time.realtimeSinceStartup + 20f;
+            while (SceneLoader.I.Busy && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return Frames(2);
+            Assert.NotNull(ZoneRoot.Current);
+            var boss = GameManager.I.bossSpot;
+            Assert.Less(Vector2.Distance(GameManager.I.player.transform.position, boss.position), 0.1f, "entered at the boss spot");
+            Assert.AreEqual(1, BossBear.All.Count, "old zone unloaded, new one loaded");
+            Assert.IsNotNull(VFX.Spawn("hit_spark", Vector3.zero, Quaternion.identity), "pool still works after the swap");
         }
 
         [UnityTest]

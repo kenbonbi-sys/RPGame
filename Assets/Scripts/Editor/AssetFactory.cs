@@ -36,7 +36,8 @@ namespace RPG.EditorTools
             var abilities = CreateAbilities();
             var progression = CreateProgression();
             var quests = CreateQuests();
-            CreateDatabase(items, abilities, progression, quests);
+            var zones = CreateZones();
+            CreateDatabase(items, abilities, progression, quests, zones);
             CreateAudioLibrary();
             AssetDatabase.SaveAssets();
         }
@@ -586,6 +587,40 @@ namespace RPG.EditorTools
             return c;
         }
 
+        // ------------------------------------------------------------------ zones
+        /// <summary>The zones of the world (Assets/Data/Zones). Each has its own scene in Assets/Scenes/Zones.</summary>
+        static List<ZoneDef> CreateZones()
+        {
+            ZoneDef Zone(string id, string name, string scene, int min, int max, string music, string ambience)
+            {
+                string path = $"{DataFolder}/Zones/{id}.asset";
+                EditorUtil.EnsureFolder(DataFolder + "/Zones");
+                var z = AssetDatabase.LoadAssetAtPath<ZoneDef>(path);
+                if (EditorUtil.Keep(z)) return z;
+                EditorUtil.Written++;
+                if (z == null)
+                {
+                    z = ScriptableObject.CreateInstance<ZoneDef>();
+                    AssetDatabase.CreateAsset(z, path);
+                }
+                z.id = id;
+                z.displayName = name;
+                z.sceneName = scene;
+                z.levelMin = min;
+                z.levelMax = max;
+                z.music = music;
+                z.ambience = ambience;
+                z.defaultEntry = "spawn";
+                EditorUtility.SetDirty(z);
+                return z;
+            }
+            return new List<ZoneDef>
+            {
+                // the prototype map: Làng Lá Xanh, the forest and the Rừng Già Cổ Thụ arena
+                Zone("rung_thi_tham", "Rừng Thì Thầm", "RungThiTham", 1, 8, "music_forest", "amb_forest"),
+            };
+        }
+
         // ------------------------------------------------------------------ quests
         public const string DialogueProject = "Assets/Dialogue/RungThiTham.yarnproject";
 
@@ -680,7 +715,7 @@ namespace RPG.EditorTools
         }
 
         // ------------------------------------------------------------------ database
-        static void CreateDatabase(List<ItemDef> items, List<AbilityDef> abilities, ProgressionConfig progression, List<QuestDef> quests)
+        static void CreateDatabase(List<ItemDef> items, List<AbilityDef> abilities, ProgressionConfig progression, List<QuestDef> quests, List<ZoneDef> zones)
         {
             string path = DataFolder + "/GameDatabase.asset";
             var db = AssetDatabase.LoadAssetAtPath<GameDatabase>(path);
@@ -694,6 +729,8 @@ namespace RPG.EditorTools
             db.abilities = Merge(db.abilities, abilities);
             EditorUtil.Assign(ref db.progression, progression);
             db.quests = Merge(db.quests, quests);
+            db.zones = Merge(db.zones, zones);
+            EditorUtil.Assign(ref db.startZone, zones.Count > 0 ? zones[0] : null);
             EditorUtil.Assign(ref db.dialogue, AssetDatabase.LoadAssetAtPath<Yarn.Unity.YarnProject>(DialogueProject));
             EditorUtil.Assign(ref db.shadowSprite, ArtImporter.S("shadow"));
             EditorUtil.Assign(ref db.whiteSprite, ArtImporter.S("white"));

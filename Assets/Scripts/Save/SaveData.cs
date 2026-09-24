@@ -34,7 +34,8 @@ namespace RPG
         public float playTime;       // seconds
         // summary shown in the slot list without restoring anything
         public int level;
-        public string zone;
+        public string zone;          // display name
+        public string zoneId;        // ZoneDef id: which zone scene to load
         public string quest;
         public List<SaveSection> sections = new List<SaveSection>();
 

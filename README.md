@@ -5,7 +5,8 @@ Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm v�
 ## Mở và chạy
 
 - **Chơi ngay:** `Builds/Windows/RungThiTham.exe`
-- **Mở trong Unity:** Unity Hub → *Add project from disk* → chọn thư mục `RPG` → mở bằng **Unity 6000.6.0f1** → mở scene `Assets/Scenes/Game.unity` → bấm **Play**.
+- **Mở trong Unity:** Unity Hub → *Add project from disk* → chọn thư mục `RPG` → mở bằng **Unity 6000.6.0f1** → mở scene `Assets/Scenes/Core.unity` → bấm **Play**.
+- **Cấu trúc scene:** `Core.unity` (quản lý, nhân vật, camera, ánh sáng, HUD — luôn được tải) + mỗi vùng một scene trong `Assets/Scenes/Zones` (địa hình, NPC, quái, boss), tải thêm bởi `SceneLoader` có màn chuyển. Mở riêng một scene vùng rồi bấm Play cũng chạy được: Core tự được tải kèm.
 
 ## Điều khiển (theo layout của game tham khảo)
 
@@ -56,7 +57,7 @@ Tools/
 
 - **Build Everything (create missing only)** — chế độ authoring: import art → data → VFX → prefab → scene, nhưng **chỉ tạo những gì còn thiếu**. Prefab, material, item, skill, VFX library và scene đã có được giữ nguyên, nên chỉnh tay không bị mất. Texture chỉ được cắt lại khi `art_manifest.json` đổi mục của nó.
 - **Force Rebuild Everything (overwrite)** — hành vi cũ: sinh lại toàn bộ và ghi đè (có hộp thoại xác nhận).
-- **Steps/1–6** — chạy từng bước, cũng theo chế độ authoring. **Steps/6. Rebuild Scene Only** luôn dựng lại scene từ các prefab đang có.
+- **Steps/1–6** — chạy từng bước, cũng theo chế độ authoring. **Steps/6. Rebuild Scenes** luôn dựng lại Core và các scene vùng từ các prefab đang có.
 - Batchmode: `-executeMethod RPG.EditorTools.Batch.BuildAll` (authoring), `Batch.ForceBuildAll`, `Batch.RebuildScene`.
 - **Build Windows Player** — xuất `Builds/Windows/RungThiTham.exe`.
 

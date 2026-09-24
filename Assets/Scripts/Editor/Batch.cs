@@ -43,7 +43,7 @@ namespace RPG.EditorTools
         {
             var opts = new BuildPlayerOptions
             {
-                scenes = new[] { SceneBuilder.ScenePath },
+                scenes = SceneBuilder.AllScenePaths(),
                 locationPathName = "Builds/Windows/RungThiTham.exe",
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.None

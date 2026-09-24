@@ -21,7 +21,6 @@ namespace RPG.EditorTools
             public Tilemap ground, tall, dirt, details;
             public Transform props;
             public Transform playerSpawn, chief, girl, forestSpot, bossSpot;
-            public GameObject player;
             public BossBear boss;
         }
 
@@ -378,8 +377,7 @@ namespace RPG.EditorTools
             actors.SetParent(root, false);
             res.playerSpawn = new GameObject("PlayerSpawn").transform;
             res.playerSpawn.SetParent(actors, false);
-            res.playerSpawn.position = new Vector3(18.5f, 15.2f, 0);
-            res.player = Spawn(PrefabFactory.Player, res.playerSpawn.position, null, "Player");
+            res.playerSpawn.position = new Vector3(18.5f, 15.2f, 0);   // the hero lives in the Core scene
 
             res.chief = Spawn(PrefabFactory.Chief, new Vector2(20.4f, 21.1f), actors, "Truong Lang").transform;
             res.girl = Spawn(PrefabFactory.Girl, new Vector2(12.6f, 15.4f), actors, "Be Mai").transform;

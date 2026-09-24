@@ -32,6 +32,8 @@ namespace RPG
         /// <summary>A file waiting to be applied after the scene reload.</summary>
         static SaveFile pending;
         public static bool HasPendingLoad => pending != null;
+        /// <summary>Zone of the save being loaded (the scene loader opens it first).</summary>
+        public static string PendingZoneId => pending != null ? pending.zoneId : null;
 
         public float PlayTime { get; private set; }
 
@@ -142,6 +144,7 @@ namespace RPG
                 playTime = PlayTime,
                 level = PlayerStats.I != null ? PlayerStats.I.level : 1,
                 zone = ZoneArea.Current != null ? ZoneArea.Current.zoneName : "",
+                zoneId = ZoneRoot.Current != null && ZoneRoot.Current.def != null ? ZoneRoot.Current.def.id : "",
                 quest = CurrentQuestTitle()
             };
             foreach (var s in Saveables())
@@ -231,13 +234,15 @@ namespace RPG
             }
             pending = f;
             TimeFX.Paused = false;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            SceneManager.LoadScene(ZoneRoot.CoreScene, LoadSceneMode.Single);   // Core boots, then loads the saved zone
             return true;
         }
 
         IEnumerator ApplyPending()
         {
             yield return null;   // let every Start() run first
+            while (SceneLoader.I != null && SceneLoader.I.Busy) yield return null;   // and the saved zone load
+            yield return null;
             var f = pending;
             pending = null;
             Apply(f);

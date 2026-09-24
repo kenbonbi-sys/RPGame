@@ -28,6 +28,8 @@ namespace RPG.EditorTools
             public HUD hud;
             public Image flash;
             public MinimapUI minimap;
+            public CanvasGroup loading;
+            public TextMeshProUGUI loadingTitle;
         }
 
         // ================================================================== primitives
@@ -167,6 +169,7 @@ namespace RPG.EditorTools
             hud.death = BuildDeath(root);
             hud.tooltip = BuildTooltip(root);
             BuildHint(root);
+            BuildLoading(root, refs);
             return refs;
         }
 
@@ -756,6 +759,18 @@ namespace RPG.EditorTools
             ui.title = Txt(rt, "Title", "Tên", 26, Gold, TextAlignmentOptions.TopLeft, C, C, Vector2.zero, new Vector2(356, 34));
             ui.body = Txt(rt, "Body", "Mô tả", 20, Cream, TextAlignmentOptions.TopLeft, C, C, Vector2.zero, new Vector2(356, 80), false);
             return ui;
+        }
+
+        /// <summary>Black screen with the zone name, shown while the SceneLoader swaps zones (on top of everything).</summary>
+        static void BuildLoading(Transform root, Refs refs)
+        {
+            var rt = Stretch(root, "Loading");
+            var g = Group(rt.gameObject, true);   // interactable: it blocks clicks while visible
+            Img(rt, "white", new Color(0.03f, 0.03f, 0.05f, 1f), Image.Type.Simple, true);
+            refs.loadingTitle = Txt(rt, "Title", "Rừng Thì Thầm", 54, Cream, TextAlignmentOptions.Center, C, C, new Vector2(0, 20), new Vector2(1200, 80));
+            Img(rt, "Divider", "divider", Color.white, C, new Vector2(0, -26), new Vector2(360, 14));
+            Txt(rt, "Sub", "Đang tải…", 22, Muted, TextAlignmentOptions.Center, C, C, new Vector2(0, -60), new Vector2(600, 34), false);
+            refs.loading = g;
         }
 
         static void BuildHint(Transform root)

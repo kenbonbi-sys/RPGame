@@ -11,6 +11,8 @@ namespace RPG
         public List<AbilityDef> abilities = new List<AbilityDef>();
         public ProgressionConfig progression;
         public List<QuestDef> quests = new List<QuestDef>();
+        public List<ZoneDef> zones = new List<ZoneDef>();
+        public ZoneDef startZone;
         [Tooltip("Compiled Yarn project with every NPC's dialogue (Assets/Dialogue).")]
         public Yarn.Unity.YarnProject dialogue;
 
@@ -59,6 +61,14 @@ namespace RPG
             }
             itemMap.TryGetValue(id, out var item);
             return item;
+        }
+
+        public ZoneDef Zone(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var z in zones)
+                if (z != null && z.id == id) return z;
+            return null;
         }
 
         public AbilityDef Ability(string id)

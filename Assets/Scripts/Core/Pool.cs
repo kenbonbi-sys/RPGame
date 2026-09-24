@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace RPG
 {
@@ -12,6 +13,10 @@ namespace RPG
     {
         static readonly Dictionary<GameObject, Stack<GameObject>> Free = new Dictionary<GameObject, Stack<GameObject>>();
         static Transform _root;
+        static Scene home;
+
+        /// <summary>The scene that keeps the pool root (Core), so zone changes do not destroy pooled objects.</summary>
+        public static void SetHome(Scene scene) => home = scene;
 
         static Transform Root
         {
@@ -20,6 +25,7 @@ namespace RPG
                 if (_root == null)
                 {
                     var go = new GameObject("[Pool]");
+                    if (home.IsValid() && home.isLoaded) SceneManager.MoveGameObjectToScene(go, home);
                     _root = go.transform;
                 }
                 return _root;

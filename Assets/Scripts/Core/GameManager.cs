@@ -22,17 +22,13 @@ namespace RPG
         public VFXLibrary vfx;
         public PlayerController player;
 
-        [Header("World points")]
-        public Transform respawnPoint;
-        public Transform chiefSpot;
-        public Transform girlSpot;
-        public Transform forestSpot;
-        public Transform bossSpot;
-
         [Header("Start")]
-        public string startMusic = "music_forest";
-        public string startAmbience = "amb_forest";
         public bool showHelpOnStart = true;
+
+        // places of the current zone (its ZoneRoot spots)
+        public Transform respawnPoint => Spot("spawn");
+        public Transform forestSpot => Spot("forest");
+        public Transform bossSpot => Spot("boss");
 
         public GameState State
         {
@@ -56,11 +52,13 @@ namespace RPG
             Bestiary.Reset();
             Pool.ClearAll();
             SetupPhysics();
+            Pool.SetHome(gameObject.scene);   // pooled objects outlive zone changes
             InputReader.Enable();
             Application.targetFrameRate = 120;
             // scenes built before these systems existed
             if (GetComponent<SaveManager>() == null) gameObject.AddComponent<SaveManager>();
             if (GetComponent<DialogueDirector>() == null) gameObject.AddComponent<DialogueDirector>();
+            if (GetComponent<SceneLoader>() == null) gameObject.AddComponent<SceneLoader>();
         }
 
         static void SetupPhysics()
@@ -75,8 +73,6 @@ namespace RPG
         void Start()
         {
             SetCursor(false);
-            AudioManager.PlayMusic(startMusic, 2f);
-            AudioManager.PlayAmbience(startAmbience);
             if (SaveManager.HasPendingLoad) return;   // loading a save: no welcome
             if (showHelpOnStart && HUD.I != null && HUD.I.help != null && !AutoShot.Active) HUD.I.help.Show();
             GameEvents.RaiseLog("Chào mừng đến Làng Lá Xanh! Bấm F1 để xem hướng dẫn.", Palette.LogQuest);
@@ -131,20 +127,11 @@ namespace RPG
 
         public void SetDialogue(bool on) => dialogue = on;
 
-        /// <summary>Named places for quest markers: forest, boss, village.</summary>
+        /// <summary>A named place of the current zone (spawn, forest, boss…), for quests, respawn and tools.</summary>
         public Transform Spot(string id)
         {
-            switch (id)
-            {
-                case "forest": return forestSpot;
-                case "boss":
-                case "arena": return bossSpot;
-                case "village":
-                case "respawn": return respawnPoint;
-                case "chief": return chiefSpot;
-                case "girl": return girlSpot;
-                default: return null;
-            }
+            var zone = ZoneRoot.Current;
+            return zone != null ? zone.SpotOf(id) : null;
         }
         public void SetCinematic(bool on) => cinematic = on;
 
