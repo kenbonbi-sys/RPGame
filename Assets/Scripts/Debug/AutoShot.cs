@@ -7,9 +7,10 @@ namespace RPG
 {
     /// <summary>
     /// Automated showcase used for testing builds: start the player with
-    ///   Game.exe -autoshot -autoshotDir "C:\shots"
+    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 300]
     /// It plays a scripted tour (dialogue, skills, boss attacks, night), saves screenshots and quits.
-    /// Does nothing in normal play.
+    /// Exit code: 0 = clean run, 1 = errors or exceptions were logged, 2 = the tour did not finish
+    /// within the timeout (CI reads it). Does nothing in normal play.
     /// </summary>
     public class AutoShot : MonoBehaviour
     {
@@ -17,6 +18,8 @@ namespace RPG
 
         string dir;
         int index;
+        int errors;
+        string firstError;
 
         void Start()
         {
@@ -29,7 +32,36 @@ namespace RPG
             int i = Array.IndexOf(args, "-autoshotDir");
             dir = i >= 0 && i + 1 < args.Length ? args[i + 1] : Path.Combine(Application.persistentDataPath, "autoshot");
             Directory.CreateDirectory(dir);
+            i = Array.IndexOf(args, "-autoshotTimeout");
+            float timeout = i >= 0 && i + 1 < args.Length && float.TryParse(args[i + 1], System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out float t) ? t : 300f;
+            Application.logMessageReceived += CountErrors;
             StartCoroutine(Run());
+            StartCoroutine(Watchdog(timeout));
+        }
+
+        void OnDestroy() => Application.logMessageReceived -= CountErrors;
+
+        void CountErrors(string message, string stackTrace, LogType type)
+        {
+            if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert) return;
+            errors++;
+            if (firstError == null) firstError = message;
+        }
+
+        /// <summary>A tour step that throws stops the tour; never leave the player running.</summary>
+        IEnumerator Watchdog(float seconds)
+        {
+            yield return Wait(seconds);
+            Debug.LogError($"[AutoShot] tour did not finish within {seconds:0} s ({index} shots)");
+            Application.Quit(2);
+        }
+
+        void Finish()
+        {
+            if (errors > 0) Debug.Log($"[AutoShot] done: {index} shots, {errors} errors; first: {firstError}");
+            else Debug.Log($"[AutoShot] done: {index} shots, no errors");
+            Application.Quit(errors > 0 ? 1 : 0);
         }
 
         IEnumerator Shot(string name)
@@ -309,7 +341,7 @@ namespace RPG
             yield return Wait(2.8f);
             yield return Shot("death");
             yield return Wait(0.5f);
-            Application.Quit();
+            Finish();
         }
     }
 }
