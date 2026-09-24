@@ -11,7 +11,7 @@ namespace RPG.EditorTools
 {
     /// <summary>
     /// VFX Gallery (plan T21). Tools/RPG/VFX Gallery builds Assets/Scenes/Tools/VFXGallery.unity when
-    /// it is missing, opens it and presses Play. Tools/RPG/VFX Budget Report measures every effect
+    /// it is missing (Force Rebuild Everything remakes it), opens it and presses Play. Tools/RPG/VFX Budget Report measures every effect
     /// without Play Mode (particles simulated in the editor) and logs it against the budget of the
     /// VFXLibrary. The gallery scene is a tool: it is not in the build settings.
     /// </summary>
