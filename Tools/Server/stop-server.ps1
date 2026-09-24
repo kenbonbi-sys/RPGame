@@ -1,13 +1,18 @@
-# Dừng máy chủ Rừng Thì Thầm đang chạy trên máy này. Máy chủ lưu mọi nhân vật trước khi tắt
-# (người đang chơi bị ngắt). Tác vụ tự chạy khi đăng nhập vẫn giữ: lần đăng nhập sau máy chủ lại chạy.
+﻿# Dừng máy chủ Rừng Thì Thầm đang chạy trên máy này. Người đang chơi bị ngắt; nhân vật của họ đã được lưu
+# trong vòng 30 giây trước đó. Tác vụ tự chạy khi đăng nhập vẫn giữ: lần đăng nhập sau máy chủ lại chạy.
 # Gỡ hẳn: Unregister-ScheduledTask -TaskName "RungThiTham Server"
 param(
     [string]$Target = (Join-Path $env:LOCALAPPDATA "RungThiTham-Server"),
     [switch]$Quiet
 )
 
-$flag = Join-Path $Target "stop.flag"
-if (Test-Path $Target) { Set-Content -Path $flag -Value "stop" }
+# dừng vòng tự bật lại trước (tác vụ lúc đăng nhập, hay run-server.ps1 chạy tay), rồi tới máy chủ
+$task = Get-ScheduledTask -TaskName "RungThiTham Server" -ErrorAction SilentlyContinue
+if ($task -and $task.State -eq "Running") { Stop-ScheduledTask -TaskName "RungThiTham Server" }
+$runner = Join-Path $Target "run-server.ps1"
+$loops = Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe' OR Name = 'pwsh.exe'" |
+    Where-Object { $_.CommandLine -and $_.CommandLine.IndexOf($runner, [StringComparison]::OrdinalIgnoreCase) -ge 0 }
+foreach ($l in $loops) { Stop-Process -Id $l.ProcessId -Force -ErrorAction SilentlyContinue }
 $game = Join-Path $Target "game"
 $procs = Get-Process -Name "RungThiTham" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($game, [StringComparison]::OrdinalIgnoreCase) }
 foreach ($p in $procs) {

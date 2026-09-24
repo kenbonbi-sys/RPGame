@@ -1,4 +1,4 @@
-# Kiểm tra online tự động với bản build (Debug/NetSmoke.cs): một máy chủ và hai người chơi trên máy này.
+﻿# Kiểm tra online tự động với bản build (Debug/NetSmoke.cs): một máy chủ và hai người chơi trên máy này.
 #   Vòng 1: SmokeA (có cửa sổ, chụp ảnh) và SmokeB (chạy nền) vào, thấy nhau đi, mỗi người đánh chết một Slime Rêu, nhận XP từ máy chủ.
 #   Vòng 2: cả hai vào lại; SmokeA phải còn nguyên cấp và XP như lúc thoát (máy chủ đã lưu).
 # Kết quả: mã thoát 0 = tất cả qua. Log và ảnh ở thư mục -Out.

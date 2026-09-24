@@ -21,7 +21,9 @@ Thế giới online chạy trên một **máy chủ riêng**: một bản của 
    Cổng 7770 là cổng chơi, 7771 để game của người khác tự tìm thấy máy chủ.
 4. **Không cho máy ngủ** khi cắm điện (Settings → System → Power & sleep → Sleep: Never). Máy ngủ thì máy chủ dừng.
 
-Cập nhật máy chủ sau khi build bản mới: chạy lại `install-server.ps1` (dữ liệu người chơi giữ nguyên). Dừng: `Tools/Server/stop-server.ps1`. Gỡ hẳn chế độ tự chạy: `Unregister-ScheduledTask -TaskName "RungThiTham Server"`.
+Cập nhật máy chủ sau khi build bản mới: chạy lại `install-server.ps1` (dữ liệu người chơi giữ nguyên). Dừng: `Tools/Server/stop-server.ps1` (dừng cả vòng tự bật lại; lần đăng nhập Windows sau máy chủ lại chạy). Gỡ hẳn chế độ tự chạy: `Unregister-ScheduledTask -TaskName "RungThiTham Server"`.
+
+Chạy script từ một ứng dụng dạng gói MSIX (ví dụ Claude desktop): chương trình mở từ đó chỉ thấy một bản `AppData` riêng, tác vụ lúc đăng nhập không thấy các file ghi vào đó. `install-server.ps1` tự nhận ra và cài qua Task Scheduler (thấy `AppData` thật), rồi in lại kết quả.
 
 ## 2. Người chơi vào bằng cách nào
 
