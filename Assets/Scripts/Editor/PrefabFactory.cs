@@ -23,6 +23,8 @@ namespace RPG.EditorTools
         public static GameObject Bat, CaveSpider, Golem, Beetle, CrystalSlime, CaveEye, Mimic, CrystalGolem, SpiderQueen, Pillar;
         // Thảo Nguyên Gió
         public static GameObject Hyena, Eagle, Bison, GiaTang;
+        // Hắc Phong (T62)
+        public static GameObject Scarecrow, BanditArcher, BanditBlade, IronBison, BlackWind;
 
         /// <summary>Abilities on Q W E R A S D Space.</summary>
         static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
@@ -62,6 +64,11 @@ namespace RPG.EditorTools
             Eagle = BuildEagle();
             Bison = BuildBison();
             GiaTang = BuildGiaTang();
+            Scarecrow = BuildScarecrow();
+            BanditArcher = BuildBanditArcher();
+            BanditBlade = BuildBanditBlade();
+            IronBison = BuildIronBison();
+            BlackWind = BuildBlackWind();
             Boulder = BuildBoulder();
             Loot = BuildLoot();
             var chest = BuildChest();
@@ -259,6 +266,11 @@ namespace RPG.EditorTools
             Eagle = L($"{CharFolder}/Eagle");
             Bison = L($"{CharFolder}/Bison");
             GiaTang = L($"{CharFolder}/GiaTang");
+            Scarecrow = L($"{CharFolder}/Scarecrow");
+            BanditArcher = L($"{CharFolder}/BanditArcher");
+            BanditBlade = L($"{CharFolder}/BanditBlade");
+            IronBison = L($"{CharFolder}/BossIronBison");
+            BlackWind = L($"{CharFolder}/BossBlackWind");
             Pillar = L($"{GameplayFolder}/CrystalPillar");
             Boulder = L($"{GameplayFolder}/TangDaLon");
             Loot = L($"{GameplayFolder}/Loot");
@@ -1012,6 +1024,197 @@ namespace RPG.EditorTools
             return EditorUtil.SavePrefab(root, $"{CharFolder}/Bison.prefab");
         }
 
+        // ================================================================== Hắc Phong (T62)
+        /// <summary>The first frame of a set's first clip (null without one).</summary>
+        static Sprite First(SpriteAnimSet set)
+        {
+            if (set == null) return null;
+            foreach (var c in set.clips)
+                if (c != null && c.frames != null && c.frames.Length > 0) return c.frames[0];
+            return null;
+        }
+
+        /// <summary>
+        /// A bandit's own animation set (Assets/Data/Anims/<paramref name="name"/>): the enemy clips it
+        /// plays, in this order, drawn with the hero template's frames. The server plays these and
+        /// their numbers go over the network; a screen dresses them in the bandit's look (<see cref="HeroLookEnemy"/>).
+        /// </summary>
+        static SpriteAnimSet HeroEnemySet(string name, params (string clip, float fps, bool loop)[] clips)
+        {
+            string path = $"{ArtImporter.AnimFolder}/{name}.asset";
+            var set = AssetDatabase.LoadAssetAtPath<SpriteAnimSet>(path);
+            if (set != null && !EditorUtil.Overwrite && set.clips.Count == clips.Length && First(set) != null) return set;
+            var hero = ArtImporter.AnimSet("player");
+            if (set == null)
+            {
+                set = ScriptableObject.CreateInstance<SpriteAnimSet>();
+                AssetDatabase.CreateAsset(set, path);
+            }
+            set.clips.Clear();
+            foreach (var (clip, fps, loop) in clips)
+            {
+                var pose = hero != null ? hero.Get(HeroLookEnemy.PoseFor(clip)) : null;
+                set.clips.Add(new SpriteAnimSet.Clip { name = clip, fps = fps, loop = loop, frames = pose != null ? pose.frames : new Sprite[0] });
+            }
+            EditorUtility.SetDirty(set);
+            AssetDatabase.SaveAssets();
+            return set;
+        }
+
+        /// <summary>Bù Nhìn Sống: a scarecrow on its post; its hop rides on a Lift every screen draws.</summary>
+        static GameObject BuildScarecrow()
+        {
+            var (root, body) = Creature("Scarecrow", "scarecrow_still_0", 1.2f, 0.3f, 0.2f, 2.9f, false, 1.1f);
+            var lift = EditorUtil.Child(root, "Lift");
+            body.transform.SetParent(lift.transform, false);
+            var ai = root.AddComponent<ScarecrowAI>();
+            EnemyCommon(root, ai, body, "scarecrow", 2.3f, 420f);
+            ai.anim.startClip = "still";
+            var h = root.GetComponent<Health>();
+            h.head.SetParent(lift.transform, false);
+            h.head.localPosition = new Vector3(0, 2.3f, 0);
+            h.resistances.fire = -0.3f;   // straw burns
+            ai.lift = lift.transform;
+            ai.style = Style(root, body);
+            ai.enemyId = "scarecrow";
+            ai.displayName = "Bù Nhìn Sống";
+            ai.level = 22;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 1.5f;
+            ai.aggroRange = 7f;
+            ai.leashRange = 12f;
+            ai.wanderRadius = 0f;
+            ai.windResponse = 0f;   // rooted on its post, it does not sway either
+            ai.loot = new List<LootEntry>
+            {
+                Drop("scarecrow_straw", 0.6f), Drop("coin", 0.9f, 5, 11), Drop("herb", 0.2f), Drop("potion_red", 0.06f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Scarecrow.prefab");
+        }
+
+        /// <summary>A Hắc Phong bandit: a hero's body (collider, shadow, head height) drawn in its look.</summary>
+        static (GameObject root, SpriteRenderer body) Bandit(string name, SpriteAnimSet set, float speed, HeroLook look)
+        {
+            var (root, body) = Creature(name, null, 1f, 0.3f, 0.25f, speed, false, 1f);
+            body.sprite = First(set);
+            var dressed = root.AddComponent<HeroLookEnemy>();
+            dressed.look = look;
+            return (root, body);
+        }
+
+        static GameObject BuildBanditArcher()
+        {
+            var set = HeroEnemySet("hp_archer", ("idle", 3, true), ("move", 10, true), ("aim", 6, true), ("attack", 14, false),
+                                   ("dash", 8, false), ("hurt", 8, false), ("dead", 8, false));
+            var (root, body) = Bandit("BanditArcher", set, 3.6f,
+                new HeroLook { race = "human", cls = "ranger", weapon = "bow", cloth = 6, hair = 0, hairColor = 0, skin = 1, eyes = 1 });
+            var ai = root.AddComponent<BanditArcherAI>();
+            EnemyCommon(root, ai, body, "hp_archer", 1.9f, 360f);
+            root.GetComponent<HeroLookEnemy>().anim = ai.anim;
+            ai.style = Style(root, body);
+            ai.enemyId = "hp_archer";
+            ai.displayName = "Cung Thủ Hắc Phong";
+            ai.level = 23;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 2.2f;
+            ai.aggroRange = 9f;
+            ai.leashRange = 16f;
+            ai.wanderRadius = 2f;
+            ai.windResponse = 0.3f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("hp_badge", 0.45f), Drop("coin", 0.9f, 6, 12), Drop("potion_blue", 0.08f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/BanditArcher.prefab");
+        }
+
+        static GameObject BuildBanditBlade()
+        {
+            var set = HeroEnemySet("hp_blade", ("idle", 3, true), ("move", 10, true), ("windup", 8, true), ("attack", 16, false),
+                                   ("dash", 8, false), ("hurt", 8, false), ("dead", 8, false));
+            var (root, body) = Bandit("BanditBlade", set, 3.9f,
+                new HeroLook { race = "human", cls = "rogue", weapon = "scimitar", cloth = 11, hair = 4, hairColor = 0, skin = 3, beard = 1 });
+            var ai = root.AddComponent<BanditBladeAI>();
+            EnemyCommon(root, ai, body, "hp_blade", 1.9f, 480f);
+            root.GetComponent<HeroLookEnemy>().anim = ai.anim;
+            ai.style = Style(root, body);
+            ai.enemyId = "hp_blade";
+            ai.displayName = "Đao Thủ Hắc Phong";
+            ai.level = 24;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 2.4f;
+            ai.aggroRange = 7.5f;
+            ai.leashRange = 15f;
+            ai.wanderRadius = 2.5f;
+            ai.windResponse = 0.3f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("hp_badge", 0.55f), Drop("coin", 0.9f, 7, 13), Drop("potion_red", 0.08f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/BanditBlade.prefab");
+        }
+
+        static GameObject BuildIronBison()
+        {
+            var (root, boss) = Boss<BossIronBison>("BossIronBison", "ironbison", 45f, 1.05f, 0.65f, 2.6f, false, 5200f, 4.2f, 3.8f);
+            boss.bodyRoot.localScale = new Vector3(1.6f, 1.6f, 1f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.05f;
+            var h = root.GetComponent<Health>();
+            h.resistances.physical = 0.1f;
+            h.resistances.lightning = -0.2f;   // the iron draws lightning
+            var eyes = PointLight(boss.bodyRoot.gameObject, new Color(1f, 0.4f, 0.25f), 1.8f, 0.6f, new Vector3(0.9f, 1.4f, 0));
+            var nl = eyes.gameObject.AddComponent<NightLight>();
+            nl.target = eyes;
+            nl.dayIntensity = 0.2f;
+            nl.nightIntensity = 0.9f;
+            nl.flicker = 0.1f;
+            boss.poise.maxPoise = 380f;
+            boss.bossId = "ironbison";
+            boss.displayName = "Bò Rừng Sắt";
+            boss.title = "Chiến Thú Hắc Phong";
+            boss.level = 23;
+            boss.rank = EnemyRank.MiniBoss;
+            boss.homeName = "Bãi Sừng Sắt";
+            boss.arenaRadius = 8f;
+            boss.wakeRadius = 6f;
+            boss.coins = 14;
+            boss.loot = new List<LootEntry>
+            {
+                Drop("iron_horn", 1f), Drop("iron_plate", 1f, 2, 3), Drop("bison_hide", 1f, 2, 3), Drop("hp_badge", 0.6f, 1, 2),
+                Drop("potion_red", 1f, 2, 2),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/BossIronBison.prefab");
+        }
+
+        static GameObject BuildBlackWind()
+        {
+            HeroEnemySet("blackwind", ("idle", 3, true), ("walk", 10, true), ("windup", 8, true), ("attack", 16, false),
+                         ("dash", 8, false), ("roar", 6, true), ("hurt", 8, false), ("dead", 8, false));
+            var (root, boss) = Boss<BossBlackWind>("BossBlackWind", "blackwind", 30f, 0.5f, 0.35f, 3.4f, false, 8200f, 2f, 3.2f);
+            boss.bodyRoot.localScale = new Vector3(1.5f, 1.5f, 1f);
+            var dressed = root.AddComponent<HeroLookEnemy>();
+            dressed.anim = boss.anim;
+            dressed.look = new HeroLook { race = "halforc", cls = "rogue", weapon = "scimitar", cloth = 0, metal = 3, upgrade = 7, hair = 1, hairColor = 0, skin = 2, beard = 1 };
+            var h = root.GetComponent<Health>();
+            h.resistances.physical = 0.1f;
+            boss.poise.maxPoise = 460f;
+            boss.bossId = "blackwind";
+            boss.displayName = "Thủ Lĩnh Hắc Phong";
+            boss.title = "Chúa Tể Gió Đen";
+            boss.level = 26;
+            boss.rank = EnemyRank.Boss;
+            boss.homeName = "Đồi Cối Xay";
+            boss.arenaRadius = 9.5f;
+            boss.wakeRadius = 7f;
+            boss.coins = 24;
+            boss.loot = new List<LootEntry>
+            {
+                Drop("blackwind_blade", 1f), Drop("hp_badge", 1f, 3, 5), Drop("boots_howl", 0.3f), Drop("scarf_blackwind", 0.3f),
+                Drop("gem_red", 0.7f), Drop("gem_blue", 0.7f), Drop("potion_red", 1f, 3, 3),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/BossBlackWind.prefab");
+        }
+
         /// <summary>Già Tăng, the old monk who leads the nomads' camp: a human monk drawn by HeroArt.</summary>
         static GameObject BuildGiaTang()
         {
@@ -1040,6 +1243,33 @@ namespace RPG.EditorTools
                 nl.flicker = 0.08f;
             });
             Prop("hp_banner", "hp_banner", new Vector2(0.3f, 0.2f), new Vector2(0, 0.1f), 0.5f);
+            // Hắc Phong (T62): the straw scarecrows sway in the wind (the living one does not)
+            Prop("scarecrow", "scarecrow", new Vector2(0.3f, 0.25f), new Vector2(0, 0.12f), 1.1f, false, (go, sr) =>
+            {
+                var mat = AssetFactory.GrassWind;
+                if (mat != null) sr.sharedMaterial = mat;
+            });
+            Prop("haystack", "haystack", new Vector2(1.3f, 0.5f), new Vector2(0, 0.25f), 1.5f);
+            Prop("stakefence", "stakefence", new Vector2(2f, 0.3f), new Vector2(0, 0.15f));
+            Prop("blacktent", "blacktent", new Vector2(2f, 0.6f), new Vector2(0, 0.3f), 2.4f, true, (go, sr) =>
+            {
+                var l = PointLight(go, new Color(1f, 0.55f, 0.25f), 2.2f, 0f, new Vector3(0.1f, 0.4f, 0));
+                var nl = l.gameObject.AddComponent<NightLight>();
+                nl.target = l;
+                nl.dayIntensity = 0f;
+                nl.nightIntensity = 0.9f;
+                nl.flicker = 0.12f;
+            });
+            Prop("windmill", "windmill", new Vector2(1.5f, 0.6f), new Vector2(0, 0.3f), 2.6f, true, (go, sr) =>
+            {
+                // the sails on the hub (40 px above the foot), a quarter turn apart in four frames
+                var sails = Sprite(go, "Sails", "windmill_sails_0", AssetFactory.SpriteLit, SortingLayerNames.Default, 1);
+                sails.transform.localPosition = new Vector3(0f, 2.5f, 0f);
+                var mill = go.AddComponent<Windmill>();
+                mill.sails = sails;
+                mill.frames = new[] { ArtImporter.S("windmill_sails_0"), ArtImporter.S("windmill_sails_1"),
+                                      ArtImporter.S("windmill_sails_2"), ArtImporter.S("windmill_sails_3") };
+            });
             // Cột Gió: a ring of stones flat on the ground, a column of rising air in it (drawn over everyone)
             var rgo = new GameObject("windcolumn");
             Sprite(rgo, "Sprite", "windring", AssetFactory.SpriteLit, SortingLayerNames.Decal);
@@ -1342,7 +1572,8 @@ namespace RPG.EditorTools
             status.stunResist = 0.5f;
             if (shadow > 0f) Shadow(root, shadow, 0.05f);
             var bodyRoot = EditorUtil.Child(root, "BodyRoot");
-            var body = Sprite(bodyRoot, "Body", set + "_idle_0", AssetFactory.SpriteLit);
+            var body = Sprite(bodyRoot, "Body", null, AssetFactory.SpriteLit);
+            body.sprite = First(ArtImporter.AnimSet(set)) ?? ArtImporter.S(set + "_idle_0");
             var anim = Animator(body, set, "idle");
             var flash = Flash(body);
             health.head = Head(root, headY);

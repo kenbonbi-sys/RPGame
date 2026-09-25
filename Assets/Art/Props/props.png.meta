@@ -214,8 +214,8 @@ TextureImporter:
       name: pine_0
       rect:
         serializedVersion: 2
-        x: 132
-        y: 460
+        x: 198
+        y: 399
         width: 34
         height: 52
       alignment: 9
@@ -236,8 +236,8 @@ TextureImporter:
       name: pine_1
       rect:
         serializedVersion: 2
-        x: 167
-        y: 460
+        x: 0
+        y: 341
         width: 34
         height: 52
       alignment: 9
@@ -258,8 +258,8 @@ TextureImporter:
       name: pine_2
       rect:
         serializedVersion: 2
-        x: 202
-        y: 460
+        x: 35
+        y: 341
         width: 34
         height: 52
       alignment: 9
@@ -280,8 +280,8 @@ TextureImporter:
       name: hut
       rect:
         serializedVersion: 2
-        x: 0
-        y: 401
+        x: 70
+        y: 343
         width: 52
         height: 50
       alignment: 9
@@ -302,8 +302,8 @@ TextureImporter:
       name: oak_0
       rect:
         serializedVersion: 2
-        x: 196
-        y: 403
+        x: 49
+        y: 292
         width: 44
         height: 48
       alignment: 9
@@ -324,8 +324,8 @@ TextureImporter:
       name: oak_1
       rect:
         serializedVersion: 2
-        x: 0
-        y: 352
+        x: 94
+        y: 292
         width: 44
         height: 48
       alignment: 9
@@ -346,8 +346,8 @@ TextureImporter:
       name: pillar_0
       rect:
         serializedVersion: 2
-        x: 103
-        y: 315
+        x: 235
+        y: 253
         width: 18
         height: 36
       alignment: 9
@@ -368,8 +368,8 @@ TextureImporter:
       name: pillar_1
       rect:
         serializedVersion: 2
-        x: 122
-        y: 315
+        x: 0
+        y: 208
         width: 18
         height: 36
       alignment: 9
@@ -390,8 +390,8 @@ TextureImporter:
       name: tent
       rect:
         serializedVersion: 2
-        x: 0
-        y: 280
+        x: 146
+        y: 214
         width: 36
         height: 30
       alignment: 9
@@ -412,8 +412,8 @@ TextureImporter:
       name: well
       rect:
         serializedVersion: 2
-        x: 37
-        y: 280
+        x: 183
+        y: 214
         width: 26
         height: 30
       alignment: 9
@@ -434,8 +434,8 @@ TextureImporter:
       name: lantern
       rect:
         serializedVersion: 2
-        x: 187
-        y: 284
+        x: 87
+        y: 181
         width: 10
         height: 26
       alignment: 9
@@ -456,8 +456,8 @@ TextureImporter:
       name: boulder
       rect:
         serializedVersion: 2
-        x: 198
-        y: 286
+        x: 98
+        y: 183
         width: 28
         height: 24
       alignment: 9
@@ -478,8 +478,8 @@ TextureImporter:
       name: signpost
       rect:
         serializedVersion: 2
-        x: 183
-        y: 257
+        x: 101
+        y: 156
         width: 18
         height: 22
       alignment: 9
@@ -500,8 +500,8 @@ TextureImporter:
       name: bush_big_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 234
+        x: 206
+        y: 158
         width: 26
         height: 20
       alignment: 9
@@ -522,8 +522,8 @@ TextureImporter:
       name: bush_big_1
       rect:
         serializedVersion: 2
-        x: 27
-        y: 234
+        x: 0
+        y: 133
         width: 26
         height: 20
       alignment: 9
@@ -544,8 +544,8 @@ TextureImporter:
       name: flame_0
       rect:
         serializedVersion: 2
-        x: 54
-        y: 234
+        x: 27
+        y: 133
         width: 16
         height: 20
       alignment: 9
@@ -566,8 +566,8 @@ TextureImporter:
       name: flame_1
       rect:
         serializedVersion: 2
-        x: 71
-        y: 234
+        x: 44
+        y: 133
         width: 16
         height: 20
       alignment: 9
@@ -588,8 +588,8 @@ TextureImporter:
       name: flame_2
       rect:
         serializedVersion: 2
-        x: 88
-        y: 234
+        x: 61
+        y: 133
         width: 16
         height: 20
       alignment: 9
@@ -610,8 +610,8 @@ TextureImporter:
       name: flame_3
       rect:
         serializedVersion: 2
-        x: 105
-        y: 234
+        x: 78
+        y: 133
         width: 16
         height: 20
       alignment: 9
@@ -632,8 +632,8 @@ TextureImporter:
       name: rock_big_0
       rect:
         serializedVersion: 2
-        x: 172
-        y: 236
+        x: 145
+        y: 135
         width: 22
         height: 18
       alignment: 9
@@ -654,8 +654,8 @@ TextureImporter:
       name: rock_big_1
       rect:
         serializedVersion: 2
-        x: 195
-        y: 236
+        x: 168
+        y: 135
         width: 22
         height: 18
       alignment: 9
@@ -676,8 +676,8 @@ TextureImporter:
       name: barrel
       rect:
         serializedVersion: 2
-        x: 218
-        y: 236
+        x: 191
+        y: 135
         width: 14
         height: 18
       alignment: 9
@@ -698,8 +698,8 @@ TextureImporter:
       name: log
       rect:
         serializedVersion: 2
-        x: 113
-        y: 217
+        x: 90
+        y: 116
         width: 32
         height: 16
       alignment: 9
@@ -720,8 +720,8 @@ TextureImporter:
       name: stump
       rect:
         serializedVersion: 2
-        x: 146
-        y: 217
+        x: 123
+        y: 116
         width: 18
         height: 16
       alignment: 9
@@ -742,8 +742,8 @@ TextureImporter:
       name: crate
       rect:
         serializedVersion: 2
-        x: 165
-        y: 217
+        x: 142
+        y: 116
         width: 16
         height: 16
       alignment: 9
@@ -764,8 +764,8 @@ TextureImporter:
       name: bush_small_0
       rect:
         serializedVersion: 2
-        x: 182
-        y: 219
+        x: 159
+        y: 118
         width: 18
         height: 14
       alignment: 9
@@ -786,8 +786,8 @@ TextureImporter:
       name: bush_small_1
       rect:
         serializedVersion: 2
-        x: 201
-        y: 219
+        x: 178
+        y: 118
         width: 18
         height: 14
       alignment: 9
@@ -808,8 +808,8 @@ TextureImporter:
       name: mushrooms
       rect:
         serializedVersion: 2
-        x: 220
-        y: 219
+        x: 197
+        y: 118
         width: 16
         height: 14
       alignment: 9
@@ -830,8 +830,8 @@ TextureImporter:
       name: campfire
       rect:
         serializedVersion: 2
-        x: 0
-        y: 200
+        x: 214
+        y: 118
         width: 20
         height: 14
       alignment: 9
@@ -852,8 +852,8 @@ TextureImporter:
       name: fence_h
       rect:
         serializedVersion: 2
-        x: 21
-        y: 200
+        x: 235
+        y: 118
         width: 16
         height: 14
       alignment: 9
@@ -874,8 +874,8 @@ TextureImporter:
       name: fence_post
       rect:
         serializedVersion: 2
-        x: 38
-        y: 200
+        x: 0
+        y: 99
         width: 6
         height: 14
       alignment: 9
@@ -896,8 +896,8 @@ TextureImporter:
       name: rock_small_0
       rect:
         serializedVersion: 2
-        x: 179
-        y: 204
+        x: 141
+        y: 103
         width: 12
         height: 10
       alignment: 9
@@ -918,8 +918,8 @@ TextureImporter:
       name: rock_small_1
       rect:
         serializedVersion: 2
-        x: 192
-        y: 204
+        x: 154
+        y: 103
         width: 12
         height: 10
       alignment: 9
@@ -940,8 +940,8 @@ TextureImporter:
       name: deadtree_0
       rect:
         serializedVersion: 2
-        x: 50
-        y: 458
+        x: 116
+        y: 397
         width: 40
         height: 54
       alignment: 9
@@ -962,8 +962,8 @@ TextureImporter:
       name: deadtree_1
       rect:
         serializedVersion: 2
-        x: 91
-        y: 458
+        x: 157
+        y: 397
         width: 40
         height: 54
       alignment: 9
@@ -984,8 +984,8 @@ TextureImporter:
       name: willow_0
       rect:
         serializedVersion: 2
-        x: 53
-        y: 401
+        x: 123
+        y: 343
         width: 46
         height: 50
       alignment: 9
@@ -1006,8 +1006,8 @@ TextureImporter:
       name: willow_1
       rect:
         serializedVersion: 2
-        x: 100
-        y: 401
+        x: 170
+        y: 343
         width: 46
         height: 50
       alignment: 9
@@ -1028,8 +1028,8 @@ TextureImporter:
       name: stilthut
       rect:
         serializedVersion: 2
-        x: 147
-        y: 401
+        x: 0
+        y: 290
         width: 48
         height: 50
       alignment: 9
@@ -1050,8 +1050,8 @@ TextureImporter:
       name: waystone
       rect:
         serializedVersion: 2
-        x: 141
-        y: 317
+        x: 60
+        y: 210
         width: 18
         height: 34
       alignment: 9
@@ -1072,8 +1072,8 @@ TextureImporter:
       name: waystone_lit
       rect:
         serializedVersion: 2
-        x: 160
-        y: 317
+        x: 79
+        y: 210
         width: 18
         height: 34
       alignment: 9
@@ -1094,8 +1094,8 @@ TextureImporter:
       name: cattails_0
       rect:
         serializedVersion: 2
-        x: 79
-        y: 282
+        x: 225
+        y: 216
         width: 20
         height: 28
       alignment: 9
@@ -1116,8 +1116,8 @@ TextureImporter:
       name: cattails_1
       rect:
         serializedVersion: 2
-        x: 100
-        y: 282
+        x: 0
+        y: 179
         width: 20
         height: 28
       alignment: 9
@@ -1138,8 +1138,8 @@ TextureImporter:
       name: swamprock_big_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 215
+        x: 206
+        y: 135
         width: 24
         height: 18
       alignment: 9
@@ -1160,8 +1160,8 @@ TextureImporter:
       name: swamprock_big_1
       rect:
         serializedVersion: 2
-        x: 25
-        y: 215
+        x: 231
+        y: 135
         width: 24
         height: 18
       alignment: 9
@@ -1182,8 +1182,8 @@ TextureImporter:
       name: mossylog
       rect:
         serializedVersion: 2
-        x: 45
-        y: 200
+        x: 7
+        y: 99
         width: 34
         height: 14
       alignment: 9
@@ -1204,8 +1204,8 @@ TextureImporter:
       name: bones
       rect:
         serializedVersion: 2
-        x: 93
-        y: 202
+        x: 55
+        y: 101
         width: 20
         height: 12
       alignment: 9
@@ -1226,8 +1226,8 @@ TextureImporter:
       name: swamprock_small_0
       rect:
         serializedVersion: 2
-        x: 205
-        y: 204
+        x: 167
+        y: 103
         width: 14
         height: 10
       alignment: 9
@@ -1248,8 +1248,8 @@ TextureImporter:
       name: swamprock_small_1
       rect:
         serializedVersion: 2
-        x: 220
-        y: 204
+        x: 182
+        y: 103
         width: 14
         height: 10
       alignment: 9
@@ -1292,8 +1292,8 @@ TextureImporter:
       name: crystal_big_cyan
       rect:
         serializedVersion: 2
-        x: 151
-        y: 356
+        x: 0
+        y: 245
         width: 32
         height: 44
       alignment: 9
@@ -1314,8 +1314,8 @@ TextureImporter:
       name: crystal_big_pink
       rect:
         serializedVersion: 2
-        x: 184
-        y: 356
+        x: 33
+        y: 245
         width: 32
         height: 44
       alignment: 9
@@ -1336,8 +1336,8 @@ TextureImporter:
       name: crystal_big_amber
       rect:
         serializedVersion: 2
-        x: 217
-        y: 356
+        x: 66
+        y: 245
         width: 32
         height: 44
       alignment: 9
@@ -1358,8 +1358,8 @@ TextureImporter:
       name: timber
       rect:
         serializedVersion: 2
-        x: 179
-        y: 317
+        x: 98
+        y: 210
         width: 34
         height: 34
       alignment: 9
@@ -1380,8 +1380,8 @@ TextureImporter:
       name: rails_v
       rect:
         serializedVersion: 2
-        x: 214
-        y: 319
+        x: 133
+        y: 212
         width: 12
         height: 32
       alignment: 9
@@ -1402,8 +1402,8 @@ TextureImporter:
       name: stalagmite_0
       rect:
         serializedVersion: 2
-        x: 64
-        y: 280
+        x: 210
+        y: 214
         width: 14
         height: 30
       alignment: 9
@@ -1424,8 +1424,8 @@ TextureImporter:
       name: cobweb_0
       rect:
         serializedVersion: 2
-        x: 121
-        y: 282
+        x: 21
+        y: 179
         width: 32
         height: 28
       alignment: 9
@@ -1446,8 +1446,8 @@ TextureImporter:
       name: cobweb_1
       rect:
         serializedVersion: 2
-        x: 154
-        y: 282
+        x: 54
+        y: 179
         width: 32
         height: 28
       alignment: 9
@@ -1468,8 +1468,8 @@ TextureImporter:
       name: crystal_small_cyan
       rect:
         serializedVersion: 2
-        x: 25
-        y: 255
+        x: 177
+        y: 183
         width: 18
         height: 24
       alignment: 9
@@ -1490,8 +1490,8 @@ TextureImporter:
       name: crystal_small_pink
       rect:
         serializedVersion: 2
-        x: 44
-        y: 255
+        x: 196
+        y: 183
         width: 18
         height: 24
       alignment: 9
@@ -1512,8 +1512,8 @@ TextureImporter:
       name: crystal_small_amber
       rect:
         serializedVersion: 2
-        x: 63
-        y: 255
+        x: 215
+        y: 183
         width: 18
         height: 24
       alignment: 9
@@ -1534,8 +1534,8 @@ TextureImporter:
       name: minecart
       rect:
         serializedVersion: 2
-        x: 122
-        y: 234
+        x: 95
+        y: 133
         width: 24
         height: 20
       alignment: 9
@@ -1556,8 +1556,8 @@ TextureImporter:
       name: minecart_empty
       rect:
         serializedVersion: 2
-        x: 147
-        y: 234
+        x: 120
+        y: 133
         width: 24
         height: 20
       alignment: 9
@@ -1578,8 +1578,8 @@ TextureImporter:
       name: stalagmite_1
       rect:
         serializedVersion: 2
-        x: 50
-        y: 215
+        x: 0
+        y: 114
         width: 12
         height: 18
       alignment: 9
@@ -1600,8 +1600,8 @@ TextureImporter:
       name: caverock_big
       rect:
         serializedVersion: 2
-        x: 63
-        y: 215
+        x: 13
+        y: 114
         width: 24
         height: 18
       alignment: 9
@@ -1622,8 +1622,8 @@ TextureImporter:
       name: orevein
       rect:
         serializedVersion: 2
-        x: 88
-        y: 215
+        x: 38
+        y: 114
         width: 24
         height: 18
       alignment: 9
@@ -1644,8 +1644,8 @@ TextureImporter:
       name: rails_h
       rect:
         serializedVersion: 2
-        x: 114
-        y: 202
+        x: 76
+        y: 101
         width: 32
         height: 12
       alignment: 9
@@ -1666,8 +1666,8 @@ TextureImporter:
       name: caverock_small
       rect:
         serializedVersion: 2
-        x: 164
-        y: 203
+        x: 126
+        y: 102
         width: 14
         height: 11
       alignment: 9
@@ -1688,8 +1688,8 @@ TextureImporter:
       name: chest_closed
       rect:
         serializedVersion: 2
-        x: 227
-        y: 286
+        x: 127
+        y: 183
         width: 24
         height: 24
       alignment: 9
@@ -1710,8 +1710,8 @@ TextureImporter:
       name: chest_open
       rect:
         serializedVersion: 2
-        x: 0
-        y: 255
+        x: 152
+        y: 183
         width: 24
         height: 24
       alignment: 9
@@ -1754,8 +1754,8 @@ TextureImporter:
       name: acacia_0
       rect:
         serializedVersion: 2
-        x: 45
-        y: 354
+        x: 139
+        y: 294
         width: 52
         height: 46
       alignment: 9
@@ -1776,8 +1776,8 @@ TextureImporter:
       name: acacia_1
       rect:
         serializedVersion: 2
-        x: 98
-        y: 354
+        x: 192
+        y: 294
         width: 52
         height: 46
       alignment: 9
@@ -1798,8 +1798,8 @@ TextureImporter:
       name: cairn
       rect:
         serializedVersion: 2
-        x: 0
-        y: 311
+        x: 99
+        y: 249
         width: 34
         height: 40
       alignment: 9
@@ -1820,8 +1820,8 @@ TextureImporter:
       name: hp_banner
       rect:
         serializedVersion: 2
-        x: 35
-        y: 311
+        x: 134
+        y: 249
         width: 20
         height: 40
       alignment: 9
@@ -1842,8 +1842,8 @@ TextureImporter:
       name: yurt
       rect:
         serializedVersion: 2
-        x: 56
-        y: 313
+        x: 155
+        y: 251
         width: 46
         height: 38
       alignment: 9
@@ -1864,8 +1864,8 @@ TextureImporter:
       name: sandrock_big_0
       rect:
         serializedVersion: 2
-        x: 82
-        y: 255
+        x: 0
+        y: 154
         width: 30
         height: 24
       alignment: 9
@@ -1886,8 +1886,8 @@ TextureImporter:
       name: sandrock_big_1
       rect:
         serializedVersion: 2
-        x: 113
-        y: 255
+        x: 31
+        y: 154
         width: 30
         height: 24
       alignment: 9
@@ -1908,8 +1908,8 @@ TextureImporter:
       name: windring
       rect:
         serializedVersion: 2
-        x: 144
-        y: 255
+        x: 62
+        y: 154
         width: 38
         height: 24
       alignment: 9
@@ -1930,8 +1930,8 @@ TextureImporter:
       name: steppegrass_0
       rect:
         serializedVersion: 2
-        x: 202
-        y: 257
+        x: 120
+        y: 156
         width: 16
         height: 22
       alignment: 9
@@ -1952,8 +1952,8 @@ TextureImporter:
       name: steppegrass_1
       rect:
         serializedVersion: 2
-        x: 219
-        y: 257
+        x: 137
+        y: 156
         width: 16
         height: 22
       alignment: 9
@@ -1974,8 +1974,8 @@ TextureImporter:
       name: steppegrass_2
       rect:
         serializedVersion: 2
-        x: 236
-        y: 257
+        x: 154
+        y: 156
         width: 16
         height: 22
       alignment: 9
@@ -1996,8 +1996,8 @@ TextureImporter:
       name: steppegrass_s
       rect:
         serializedVersion: 2
-        x: 80
-        y: 200
+        x: 42
+        y: 99
         width: 12
         height: 14
       alignment: 9
@@ -2018,8 +2018,8 @@ TextureImporter:
       name: sandrock_small
       rect:
         serializedVersion: 2
-        x: 147
-        y: 202
+        x: 109
+        y: 101
         width: 16
         height: 12
       alignment: 9
@@ -2032,6 +2032,204 @@ TextureImporter:
       bones: []
       spriteID: 0e559be31a6489c69b82b9ba7b5726a5
       internalID: -175690029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windmill
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 452
+        width: 36
+        height: 60
+      alignment: 9
+      pivot: {x: 0.51389, y: 0.01667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a111a528d786da273cc559fdaa412c51
+      internalID: 946720266
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windmill_sails_0
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 455
+        width: 57
+        height: 57
+      alignment: 9
+      pivot: {x: 0.5, y: 0.49123}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36c8f1b0fc464e8588157c816c4c34e4
+      internalID: 2030448230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windmill_sails_1
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 455
+        width: 57
+        height: 57
+      alignment: 9
+      pivot: {x: 0.5, y: 0.49123}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35e0c8f8e3a20159507aae205d3ef1fa
+      internalID: 1813842789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windmill_sails_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 394
+        width: 57
+        height: 57
+      alignment: 9
+      pivot: {x: 0.5, y: 0.49123}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d6be2ed748f96a5db78f0428d96a2319
+      internalID: 1176537143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windmill_sails_3
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 394
+        width: 57
+        height: 57
+      alignment: 9
+      pivot: {x: 0.5, y: 0.49123}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8109d586ce48879a47099e2081bede1a
+      internalID: 979618536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scarecrow
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 251
+        width: 32
+        height: 38
+      alignment: 9
+      pivot: {x: 0.48438, y: 0.02632}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3221a76c75162f0fca1c825d39c9fec3
+      internalID: -421590817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blacktent
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 208
+        width: 40
+        height: 36
+      alignment: 9
+      pivot: {x: 0.5125, y: 0.05556}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51bfd9aacf5ea5280d3552da5a4ea4e7
+      internalID: 751442976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: stakefence
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 156
+        width: 34
+        height: 22
+      alignment: 9
+      pivot: {x: 0.51471, y: 0.04545}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: caa8c424e18be7be2cdcd0a257a424be
+      internalID: 2090950893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: haystack
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 114
+        width: 26
+        height: 18
+      alignment: 9
+      pivot: {x: 0.51923, y: 0.05556}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b298884806587ec07edffa7b2fe4ae82
+      internalID: 1959088486
       vertices: []
       indices: 
       edges: []
@@ -2053,6 +2251,7 @@ TextureImporter:
       acacia_0: 834778590
       acacia_1: -1282971411
       barrel: -1887357517
+      blacktent: 751442976
       bones: -987511971
       boulder: 1477158193
       bush_big_0: -639442741
@@ -2086,6 +2285,7 @@ TextureImporter:
       flame_1: -1215352254
       flame_2: -1591196276
       flame_3: -86131100
+      haystack: 1959088486
       hp_banner: -1017153009
       hut: 2052509440
       lantern: 1459000917
@@ -2111,7 +2311,9 @@ TextureImporter:
       sandrock_big_0: -451094248
       sandrock_big_1: 409665494
       sandrock_small: -175690029
+      scarecrow: -421590817
       signpost: 869973550
+      stakefence: 2090950893
       stalagmite_0: -11665789
       stalagmite_1: 1285342686
       steppegrass_0: -1265568330
@@ -2131,10 +2333,15 @@ TextureImporter:
       well: 1682081605
       willow_0: -1304874048
       willow_1: -970113125
+      windmill: 946720266
+      windmill_sails_0: 2030448230
+      windmill_sails_1: 1813842789
+      windmill_sails_2: 1176537143
+      windmill_sails_3: 979618536
       windring: 1481587448
       yurt: -1805715863
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  userData: rpg:ed24292514c698bf2fbc13dd1cf3f542
+  userData: rpg:dc13a4ed5af3dd6a5f10960fcda7c369
   assetBundleName: 
   assetBundleVariant: 

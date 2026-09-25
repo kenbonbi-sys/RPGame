@@ -23,11 +23,16 @@ namespace RPG
         public ParticleSystem windStreaks;
         public float windRate = 26f;
         public float windSpeed = 11f;
+        [Tooltip("Sand driven by the wind in a sandstorm (Thủ Lĩnh Hắc Phong's rage).")]
+        public ParticleSystem sand;
+        public float sandRate = 90f;
+        public float sandSpeed = 8f;
 
         void Start()
         {
             if (mist == null && GameSession.HasScreen) mist = MakeMist();
             if (windStreaks == null && GameSession.HasScreen) windStreaks = MakeWindStreaks();
+            if (sand == null && GameSession.HasScreen) sand = MakeSand();
         }
 
         void LateUpdate()
@@ -43,13 +48,26 @@ namespace RPG
             SetRate(fireflies, Mathf.Lerp(fireflyDay, fireflyNight, n) * (1f + m) * (1f - u));
             SetRate(leaves, leavesRate * (1f - m) * (1f - u));
             SetRate(motes, Mathf.Lerp(Mathf.Lerp(motesDay, motesNight, n), motesNight, u));
-            SetRate(mist, mistRate * m);
+            // a sandstorm (Thủ Lĩnh Hắc Phong's rage): the mist turns to flying sand
+            float storm = ZoneArea.StormAt(p);
+            SetRate(mist, mistRate * m * (1f + storm));
+            TintMist(storm);
+            SetRate(sand, sandRate * storm);
+            if (sand != null && storm > 0f)
+            {
+                // the sand flies with the wind (on the hill it turns every 12 s)
+                Vector2 w = Wind.At(p);
+                Vector2 v = (w.sqrMagnitude > 0.0001f ? w.normalized : Vector2.right) * sandSpeed;
+                var vel = sand.velocityOverLifetime;
+                vel.x = new ParticleSystem.MinMaxCurve(v.x * 0.7f, v.x * 1.2f);
+                vel.y = new ParticleSystem.MinMaxCurve(v.y * 0.7f, v.y * 1.2f);
+            }
             // the steppe's wind: streaks along it, as many as it is strong where the camera looks
             Wind.Present();
             if (windStreaks != null)
             {
                 Vector2 w = Wind.At(p);
-                SetRate(windStreaks, windRate * w.magnitude);
+                SetRate(windStreaks, windRate * w.magnitude * (1f + storm * 1.5f));
                 if (w.sqrMagnitude > 0.0001f)
                 {
                     var vel = windStreaks.velocityOverLifetime;
@@ -58,6 +76,67 @@ namespace RPG
                     vel.y = new ParticleSystem.MinMaxCurve(v.y * 0.85f, v.y * 1.15f);
                 }
             }
+        }
+
+        float mistSand = -1f;
+
+        /// <summary>The mist's puffs, grey-green, or the colour of sand in a sandstorm (changed only as the storm thickens or thins).</summary>
+        void TintMist(float sand)
+        {
+            if (mist == null || Mathf.Abs(sand - mistSand) < 0.05f) return;
+            mistSand = sand;
+            var main = mist.main;
+            main.startColor = new ParticleSystem.MinMaxGradient(
+                Color.Lerp(new Color(0.78f, 0.86f, 0.8f, 0.16f), new Color(0.9f, 0.74f, 0.5f, 0.32f), sand),
+                Color.Lerp(new Color(0.68f, 0.78f, 0.74f, 0.26f), new Color(0.78f, 0.6f, 0.38f, 0.42f), sand));
+        }
+
+        /// <summary>Big soft puffs of sand flying across the view with the wind (a sandstorm).</summary>
+        ParticleSystem MakeSand()
+        {
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            if (db == null || db.mistMaterial == null) return null;
+            var go = new GameObject("Sandstorm");
+            go.transform.SetParent(transform, false);
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.loop = true;
+            main.duration = 4f;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(1.6f, 2.6f);
+            main.startSpeed = 0f;
+            main.startSize = new ParticleSystem.MinMaxCurve(2.5f, 5f);
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+            main.startColor = new ParticleSystem.MinMaxGradient(new Color(0.92f, 0.76f, 0.5f, 0.3f), new Color(0.78f, 0.6f, 0.38f, 0.45f));
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = 260;
+            var emission = ps.emission;
+            emission.rateOverTime = 0f;
+            var shape = ps.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(48f, 30f, 1f);
+            var vel = ps.velocityOverLifetime;
+            vel.enabled = true;
+            vel.space = ParticleSystemSimulationSpace.World;
+            vel.x = new ParticleSystem.MinMaxCurve(sandSpeed, sandSpeed);
+            vel.y = new ParticleSystem.MinMaxCurve(0f, 0f);
+            vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+            var rot = ps.rotationOverLifetime;
+            rot.enabled = true;
+            rot.z = new ParticleSystem.MinMaxCurve(-1f, 1f);
+            var col = ps.colorOverLifetime;
+            col.enabled = true;
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                      new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.2f), new GradientAlphaKey(1f, 0.75f), new GradientAlphaKey(0f, 1f) });
+            col.color = new ParticleSystem.MinMaxGradient(g);
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = db.mistMaterial;
+            r.sortingLayerName = SortingLayerNames.Top;
+            r.sortingOrder = -3;
+            ps.Play();
+            return ps;
         }
 
         /// <summary>Thin white streaks of air flying across the view with the wind.</summary>

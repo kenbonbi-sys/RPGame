@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: hacphong_archers
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: hacphong_archers
+  title: "Truy N\xE3: Cung Th\u1EE7 H\u1EAFc Phong"
+  kind: 0
+  summary: "Cung th\u1EE7 H\u1EAFc Phong gi\u1EEF kho\u1EA3ng c\xE1ch v\xE0 \u0111\u1ECDc \u0111\u01B0\u1EE3c gi\xF3: t\xEAn b\u1EAFn \u0111\xF3n gi\xF3 v\u1EABn bay tr\xFAng \u0111\xEDch. Th\u1EA5y v\u1EA1ch l\xE0 t\xEAn s\u1EAFp t\u1EDBi; \xE1p s\xE1t th\xEC ch\xFAng nh\u1EA3y l\xF9i. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 24."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 1b56fef7894a10a41b11b05d17e39728, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: hp_archer
+    count: 5
+    text: "H\u1EA1 Cung Th\u1EE7 H\u1EAFc Phong"
+    countPrevious: 0
+    marker: hacphong
+  xp: 3600
+  gold: 340
+  items:
+  - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
+    count: 3
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: eabbafe3bd2e8714e8012d12e93e5d30, type: 2}

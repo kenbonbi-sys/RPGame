@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: hacphong_blades
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: hacphong_blades
+  title: "Truy N\xE3: \u0110ao Th\u1EE7 H\u1EAFc Phong"
+  kind: 0
+  summary: "\u0110ao th\u1EE7 H\u1EAFc Phong l\u01B0\u1EDBt qua ng\u01B0\u1EDDi r\u1ED3i quay l\u1EA1i ch\xE9m hai nh\xE1t. L\u01B0\u1EDBt kh\u1ECFi v\u1EA1ch, r\u1ED3i \u0111\xE1nh l\xFAc h\u1EAFn \u0111\u1EE9ng th\u1EDF sau \u0111\u01B0\u1EDDng \u0111ao: l\xFAc \u0111\xF3 h\u1EAFn h\u1EDF s\u01B0\u1EDDn. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 24."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 72d65043ca74c8247aa9f3817e9bf1c5, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: hp_blade
+    count: 5
+    text: "H\u1EA1 \u0110ao Th\u1EE7 H\u1EAFc Phong"
+    countPrevious: 0
+    marker: hacphong
+  xp: 3800
+  gold: 360
+  items:
+  - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
+    count: 3
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 906df882ccfdc0145b15dd7bcabf8800, type: 2}

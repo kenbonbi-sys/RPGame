@@ -391,6 +391,12 @@ namespace RPG.EditorTools
                 Item("eagle_feather", "Lông Ưng Đá", M, ItemRarity.Uncommon, "Chiếc lông xám như đá của Chim Ưng Đá. Thả ra là nó cưỡi gió bay đi.", 22),
                 Item("bison_horn", "Sừng Bò Rừng", M, ItemRarity.Uncommon, "Chiếc sừng cong, gốc to bằng cổ tay, còn vết húc vào đá.", 30),
                 Item("bison_hide", "Da Bò Rừng", M, ItemRarity.Common, "Tấm da dày lông xù của Bò Rừng, gió thảo nguyên không lọt qua.", 18),
+                // Hắc Phong (T62)
+                Item("scarecrow_straw", "Rơm Bù Nhìn", M, ItemRarity.Common, "Nắm rơm lấy từ bụng một Bù Nhìn Sống. Còn ấm, như có gì vừa rời đi.", 16),
+                Item("hp_badge", "Huy Hiệu Hắc Phong", M, ItemRarity.Uncommon, "Đĩa sắt đen khắc cơn lốc trắng, bọn cướp Hắc Phong đeo trước ngực.", 26),
+                Item("iron_horn", "Sừng Sắt", M, ItemRarity.Rare, "Sừng của Bò Rừng Sắt, bọc sắt tán đinh. Nó đã húc đổ bao nhiêu tảng đá?", 150),
+                Item("iron_plate", "Giáp Sắt Vụn", M, ItemRarity.Uncommon, "Mảnh giáp tán đinh bung ra khỏi lưng Bò Rừng Sắt, rỉ sét ở mép.", 40),
+                Item("blackwind_blade", "Mảnh Song Đao", M, ItemRarity.Epic, "Nửa lưỡi đao cong của Thủ Lĩnh Hắc Phong, chuôi còn quấn dây đỏ.", 380),
             };
         }
 
@@ -419,6 +425,9 @@ namespace RPG.EditorTools
                 Item("helm_eagle", "Mũ Lông Ưng", E, ItemRarity.Rare, "Mũ thép cài hai chiếc lông Ưng Đá. Người đội nó nhìn thấy chỗ hở trước khi đối thủ kịp che.", 560, maxStack: 1),
                 Item("armor_bison", "Áo Da Bò Rừng", E, ItemRarity.Epic, "Áo da bò rừng dày, vai đính sừng. Gió thảo nguyên và nanh vuốt đều trượt đi.", 980, maxStack: 1),
                 Item("boots_wind", "Giày Gió", E, ItemRarity.Epic, "Giày khâu bằng lông ưng: bước đi như có gió đẩy sau lưng.", 760, maxStack: 1),
+                Item("shield_iron", "Khiên Sừng Sắt", E, ItemRarity.Epic, "Khiên sắt tròn gắn sừng của Bò Rừng Sắt. Đỡ được cả một cú húc.", 900, maxStack: 1),
+                Item("boots_howl", "Ủng Gió Hú", E, ItemRarity.Epic, "Ủng da đen viền lông của Thủ Lĩnh Hắc Phong. Gió hú theo từng bước lướt.", 1400, maxStack: 1),
+                Item("scarf_blackwind", "Khăn Hắc Phong", E, ItemRarity.Epic, "Mũ trùm đen và khăn đỏ của Thủ Lĩnh Hắc Phong. Kẻ đội nó ra đòn trước khi bị thấy.", 1400, maxStack: 1),
             };
         }
 
@@ -485,6 +494,13 @@ namespace RPG.EditorTools
               Plus(StatId.Armor, 13), Plus(StatId.MaxHp, 90), Plus(StatId.ElementalResist, 0.08f));
             G("boots_wind", EquipSlot.Feet, 720, Parts(("eagle_feather", 4), ("bison_hide", 2)),
               Plus(StatId.Armor, 3), Plus(StatId.MaxHp, 30), Plus(StatId.DashCooldownReduction, 0.15f));
+            // Hắc Phong (22-26): the smith makes the iron bison's shield; the chief's boots and hood only drop
+            G("shield_iron", EquipSlot.Offhand, 1100, Parts(("iron_horn", 1), ("iron_plate", 3), ("hp_badge", 4)),
+              Plus(StatId.Armor, 12), Plus(StatId.MaxHp, 70), Plus(StatId.ElementalResist, 0.05f));
+            G("boots_howl", EquipSlot.Feet, 0, none,
+              Plus(StatId.Armor, 5), Plus(StatId.MaxHp, 50), Plus(StatId.DashCooldownReduction, 0.2f), Plus(StatId.Dexterity, 1));
+            G("scarf_blackwind", EquipSlot.Head, 0, none,
+              Plus(StatId.Armor, 7), Plus(StatId.CritChance, 0.07f), Plus(StatId.CritDamage, 0.2f));
         }
 
         // ------------------------------------------------------------------ abilities
@@ -1037,6 +1053,55 @@ namespace RPG.EditorTools
                 q.items.Add(Reward("potion_green", 3));
                 q.setFlags.Add("steppe_opened");
             });
+            // Hắc Phong (T62): the abandoned fields, the iron bison, then across Khe Vực to the bandits
+            var steppeScarecrows = Quest("steppe_scarecrows", "Ruộng Bỏ Hoang", QuestKind.Main, q =>
+            {
+                q.summary = "Dân du mục bỏ ruộng từ khi bù nhìn ngoài đó biết đi. Bù nhìn rơm thật lay theo gió; Bù Nhìn Sống thì đứng im và quay đầu nhìn theo người đi qua. Đánh nó lúc nó còn giả chết thì trúng đau hơn.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "scarecrow", 4, "Hạ Bù Nhìn Sống", "fields"));
+                q.xp = 3000;
+                q.gold = 280;
+                q.items.Add(Reward("potion_red", 3));
+            });
+            var steppeIronBison = Quest("steppe_ironbison", "Bò Rừng Sắt", QuestKind.Main, q =>
+            {
+                q.summary = "Bọn Hắc Phong bọc sắt một con bò rừng và thả nó canh lối vào trại, ở bãi đá bờ tây Khe Vực. Giáp sắt ở đầu và vai; dụ nó húc vào tảng sa thạch để giáp bung ra rồi đánh.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "ironbison", 1, "Đánh bại Bò Rừng Sắt", "ironbison"));
+                q.xp = 3400;
+                q.gold = 320;
+                q.items.Add(Reward("potion_red", 3));
+                q.items.Add(Reward("potion_blue", 2));
+            });
+            var hpArchers = Quest("hacphong_archers", "Truy Nã: Cung Thủ Hắc Phong", QuestKind.Main, q =>
+            {
+                q.summary = "Cung thủ Hắc Phong giữ khoảng cách và đọc được gió: tên bắn đón gió vẫn bay trúng đích. Thấy vạch là tên sắp tới; áp sát thì chúng nhảy lùi.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "hp_archer", 5, "Hạ Cung Thủ Hắc Phong", "hacphong"));
+                q.xp = 3600;
+                q.gold = 340;
+                q.items.Add(Reward("potion_blue", 3));
+            });
+            var hpBlades = Quest("hacphong_blades", "Truy Nã: Đao Thủ Hắc Phong", QuestKind.Main, q =>
+            {
+                q.summary = "Đao thủ Hắc Phong lướt qua người rồi quay lại chém hai nhát. Lướt khỏi vạch, rồi đánh lúc hắn đứng thở sau đường đao: lúc đó hắn hở sườn.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "hp_blade", 5, "Hạ Đao Thủ Hắc Phong", "hacphong"));
+                q.xp = 3800;
+                q.gold = 360;
+                q.items.Add(Reward("potion_green", 3));
+            });
+            var blackWind = Quest("slay_blackwind", "Thủ Lĩnh Hắc Phong", QuestKind.Main, q =>
+            {
+                q.summary = "Thủ Lĩnh Hắc Phong đợi trên đồi cối xay, nơi gió đổi hướng mỗi 12 giây. Lưỡi gió và lốc xoáy của hắn bay theo gió. Khi hắn nổi giận, cát nổi lên che kín đồi; lướt qua đúng nhát thứ ba của Lướt Gió Liên Hoàn để hắn mất thăng bằng. Xa hơn về phía bắc là Đỉnh Tuyết Vĩnh Hằng (sắp mở).";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "blackwind", 1, "Đánh bại Thủ Lĩnh Hắc Phong", "windmillhill"));
+                q.xp = 4200;
+                q.gold = 420;
+                q.items.Add(Reward("potion_red", 4));
+                q.items.Add(Reward("potion_blue", 3));
+                q.setFlags.Add("steppe_cleared");
+            });
             var caveMimic = Quest("cave_mimic", "Lời Đồn: Rương Biết Cắn", QuestKind.Bounty, q =>
             {
                 q.summary = "Thợ mỏ kể có một rương kho báu trong hang tự đổi chỗ. Kẻ nào mở nó thì mất vàng. Hạ nó trước khi nó chui xuống đất lần thứ ba để lấy lại gấp đôi.";
@@ -1110,7 +1175,12 @@ namespace RPG.EditorTools
             Link(steppeEnter, spiderQueen, steppeHyenas);
             Link(steppeHyenas, steppeEnter, steppeEagles);
             Link(steppeEagles, steppeHyenas, steppeBisons);
-            Link(steppeBisons, steppeEagles, null);   // T62: Hắc Phong and Bò Rừng Sắt go on from here
+            Link(steppeBisons, steppeEagles, steppeScarecrows);
+            Link(steppeScarecrows, steppeBisons, steppeIronBison);
+            Link(steppeIronBison, steppeScarecrows, hpArchers);
+            Link(hpArchers, steppeIronBison, hpBlades);
+            Link(hpBlades, hpArchers, blackWind);
+            Link(blackWind, hpBlades, null);   // the next region (Đỉnh Tuyết Vĩnh Hằng) will go on from here
             Link(caveMimic, caveEnter, null);   // a side bounty: the hidden boss
             // a quest made before the next region existed learns where it leads (kept assets included)
             void Lead(QuestDef q, QuestDef next, string oldText, string newText)
@@ -1131,6 +1201,10 @@ namespace RPG.EditorTools
             }
             Lead(spiderQueen, steppeEnter, "Xa hơn về phía tây bắc là Thảo Nguyên Gió (sắp mở).",
                  "Đường hầm phía tây Rừng Pha Lê dẫn ra Thảo Nguyên Gió.");
+            // the bisons' hunt was the steppe's last step before Hắc Phong came
+            Lead(steppeBisons, steppeScarecrows, null, null);
+            if (steppeScarecrows != null && !steppeScarecrows.requires.Contains(steppeBisons) && written.Contains(steppeScarecrows))
+                steppeScarecrows.requires.Add(steppeBisons);
             // the level each step is for, in its summary
             void Rec(QuestDef q, int level)
             {
@@ -1154,6 +1228,11 @@ namespace RPG.EditorTools
             Rec(steppeHyenas, 20);
             Rec(steppeEagles, 21);
             Rec(steppeBisons, 22);
+            Rec(steppeScarecrows, 22);
+            Rec(steppeIronBison, 23);
+            Rec(hpArchers, 24);
+            Rec(hpBlades, 24);
+            Rec(blackWind, 26);
             Rec(caveSlimes, 17);
             Rec(caveEyes, 18);
             Rec(crystalGolem, 18);
@@ -1163,7 +1242,7 @@ namespace RPG.EditorTools
             {
                 talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake, swampHunters, swampWisps,
                 caveEnter, caveBats, caveSpiders, caveGolems, caveBeetles, caveSlimes, caveEyes, crystalGolem, spiderQueen, caveMimic,
-                steppeEnter, steppeHyenas, steppeEagles, steppeBisons,
+                steppeEnter, steppeHyenas, steppeEagles, steppeBisons, steppeScarecrows, steppeIronBison, hpArchers, hpBlades, blackWind,
             };
         }
 

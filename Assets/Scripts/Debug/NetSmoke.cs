@@ -334,7 +334,8 @@ namespace RPG
                 yield break;
             }
             var other = Other(me);
-            Vector2 mine = west.Landing + new Vector2(-2.5f, -1.5f);
+            // on the far rim, out of the Hắc Phong archers' sight
+            Vector2 mine = west.Landing + new Vector2(-1f, 2f);
             me.motor.Teleport(mine);
             float wait = Time.realtimeSinceStartup + 15f;
             while (Time.realtimeSinceStartup < wait && (other == null || Vector2.Distance(other.transform.position, e) > 4f))
@@ -352,7 +353,12 @@ namespace RPG
             bool down = body != null && Mathf.Abs(body.localPosition.y - rest) < 0.05f;
             bool ok = arrived && down && top > WindColumn.CarryHeight * 0.6f;
             Debug.Log($"[NetSmoke] {role}: saw the other fly over Khe Vực, {top:0.00} above its shadow at most, {(arrived ? "landed" : "NOT landed")} on this rim, {(down ? "down" : "still raised")} → {(ok ? "ok" : "NOT")}");
-            result(ok);
+            // the Hắc Phong camp across the road: the server sends its bandits, this screen draws them in their looks
+            EnemyBase bandit = null;
+            yield return Until(() => (bandit = EnemyBase.All.Find(e => e != null && e.enemyId == "hp_archer" && e.gameObject.activeInHierarchy)) != null, 5f);
+            bool dressed = bandit != null && bandit.anim != null && bandit.anim.set != null && bandit.anim.set.name.EndsWith("_dressed");
+            Debug.Log($"[NetSmoke] {role}: a Hắc Phong archer {(bandit != null ? "in sight" : "NOT in sight")}, {(dressed ? "drawn in its look" : "NOT dressed")}");
+            result(ok && dressed);
         }
 
         /// <summary>Keeps <paramref name="me"/> at <paramref name="spot"/> against the wind for <paramref name="seconds"/> (0: one frame).</summary>

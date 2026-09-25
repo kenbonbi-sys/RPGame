@@ -588,6 +588,22 @@ def proj_shard():
     return cv
 
 
+def proj_windblade():
+    """A crescent of wind cut loose by a blade, flying right: pale, bright at its leading edge."""
+    cv = Canvas(12, 18)
+    cols = [hx("#6a8a9a"), hx("#9ab8c4"), hx("#c8e0e8"), hx("#f0fbff")]
+    for y in range(18):
+        t = (y - 8.5) / 8.5
+        x_out = 9 + (1 - t * t) * 2.2
+        thick = (1 - t * t) * 4.2
+        for x in range(12):
+            d = x_out - x
+            if 0 <= d <= thick:
+                k = int((1 - d / max(thick, 0.01)) * 3.99)
+                cv.px(x, y, cols[max(0, min(3, k))])
+    return cv
+
+
 def build():
     smooth = {
         "glow": glow(), "glow_hard": glow_hard(), "ring": ring(), "ring_thick": ring_thick(),
@@ -601,7 +617,7 @@ def build():
         ("ice_shard", ice_shard()), ("magic_circle", magic_circle()), ("crack", crack_decal()),
         ("debris_0", debris(1)), ("debris_1", debris(2)),
         ("proj_arrow", proj_arrow()), ("proj_knife", proj_knife()), ("proj_axe", proj_axe()), ("proj_note", proj_note()),
-        ("proj_shard", proj_shard()),
+        ("proj_shard", proj_shard()), ("proj_windblade", proj_windblade()),
     ]
     flipbooks = {
         "slash": slash_frames(), "claw": claw_frames(), "fire": fire_frames(),

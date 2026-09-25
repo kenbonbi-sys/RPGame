@@ -709,7 +709,8 @@ namespace RPG
             var db = GameManager.I != null ? GameManager.I.db : null;
             if (db == null) return;
             var prefab = m.id == "spore" ? db.sporePrefab : m.id == "venom" ? db.venomPrefab : m.id == "web" ? db.webPrefab
-                       : m.id == "fireball" ? db.fireballPrefab : m.id == "shard" ? db.shardPrefab : null;
+                       : m.id == "fireball" ? db.fireballPrefab : m.id == "shard" ? db.shardPrefab
+                       : m.id == "arrow" ? db.arrowPrefab : m.id == "windblade" ? db.windBladePrefab : m.id == "tornado" ? db.tornadoPrefab : null;
             if (prefab == null) return;
             var go = Pool.Get(prefab, m.pos, Quaternion.identity);
             var fx = go.GetComponent<PooledFX>();
@@ -726,7 +727,8 @@ namespace RPG
             pr.lifetime = m.b;
             pr.shake = m.c;
             pr.explodeRadius = m.d;
-            pr.pierce = false;
+            // a wind blade or a whirlwind goes on through whoever it passes, on the server and here
+            pr.pierce = m.id == "windblade" || m.id == "tornado";
             pr.hitVfx = cues.Length > 0 ? cues[0] : "";
             pr.hitSfx = cues.Length > 1 ? cues[1] : "";
             pr.Launch(m.pos2, null, false);

@@ -35,6 +35,17 @@ namespace RPG
         [Range(0f, 1f)] public float underground;
         [Tooltip("How hard the wind blows here, 0-1 (Thảo Nguyên Gió): it pushes walkers and bends shots (Wind).")]
         [Range(0f, 1f)] public float windy;
+        [Tooltip("Seconds between two turns of the wind here (0: the steppe's own). The windmill hill's turns every 12 s.")]
+        public float windCycle;
+
+        /// <summary>
+        /// A sandstorm raised over this place right now, 0-1 (Thủ Lĩnh Hắc Phong's rage): sand hides it,
+        /// whatever else the region's mood is. Every machine sets it from what it knows (the boss's rage).
+        /// </summary>
+        [System.NonSerialized] public float storm;
+
+        /// <summary>The light under a sandstorm.</summary>
+        public static readonly Color SandTint = new Color(1f, 0.76f, 0.5f);
 
         void OnEnable()
         {
@@ -102,6 +113,22 @@ namespace RPG
                 mist = z.mist;
                 underground = z.underground;
             }
+            // a sandstorm over a place hides it, whatever the region around it
+            float sand = StormAt(pos);
+            if (sand > 0f)
+            {
+                mist = Mathf.Max(mist, sand * 0.9f);
+                tint = Color.Lerp(tint, SandTint, sand * 0.55f);
+            }
+        }
+
+        /// <summary>How thick a sandstorm is at a point, 0-1 (<see cref="storm"/>).</summary>
+        public static float StormAt(Vector2 pos)
+        {
+            float s = 0f;
+            foreach (var z in All)
+                if (z.storm > s && z.Contains(pos)) s = z.storm;
+            return s;
         }
 
         /// <summary>Checks which area a hero is in; entering a new one counts as reaching it.</summary>

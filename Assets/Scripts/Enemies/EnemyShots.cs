@@ -5,7 +5,8 @@ namespace RPG
     /// <summary>
     /// The enemies' shots, shared by their creatures: the swamp's poison spit (Cóc Độc, the snake
     /// mother) and lobbed glob that leaves a poison pool (Cóc Tía), the cave's balls of web and
-    /// splinters of crystal, and beams of light that bounce off rock (Mắt Hang, the cave's bosses).
+    /// splinters of crystal, beams of light that bounce off rock (Mắt Hang, the cave's bosses), and
+    /// the steppe's arrows, wind blades and whirlwinds (Hắc Phong), which the wind bends like any shot.
     /// The copy fired where the world's rules run deals the damage; players' screens get one to watch.
     /// </summary>
     public static class EnemyShots
@@ -126,6 +127,92 @@ namespace RPG
             pr.Launch(target - start, source);
             NetCues.Projectile("shard", start, target - start, pr.speed, pr.lifetime, Team.Enemy, pr.hitVfx, pr.hitSfx, pr.shake, 0f);
             return pr;
+        }
+
+        // ------------------------------------------------------------------ Thảo Nguyên Gió
+        /// <summary>
+        /// Fires <paramref name="prefab"/> as the shot <paramref name="key"/> (every screen shows it the
+        /// same way, <see cref="NetWorld.ShowProjectile"/>). Where the rules run it deals the damage.
+        /// </summary>
+        static Projectile Fire(GameObject prefab, string key, GameObject source, Vector2 start, Vector2 dir, float damage, float speed,
+                               float lifetime, float radius, bool pierce, float knockback, StatusHit status, string hitVfx, string hitSfx,
+                               float shake, string skill)
+        {
+            if (prefab == null) return null;
+            var go = Pool.Get(prefab, start, Quaternion.identity);
+            var fx = go.GetComponent<PooledFX>();
+            if (fx != null) fx.Persistent = true;
+            var pr = go.GetComponent<Projectile>();
+            pr.team = Team.Enemy;
+            pr.damage = damage;
+            pr.speed = speed;
+            pr.damageType = DamageType.Physical;
+            pr.status = status;
+            pr.hitVfx = hitVfx;
+            pr.hitSfx = hitSfx;
+            pr.shake = shake;
+            pr.lifetime = lifetime;
+            pr.radius = radius;
+            pr.critChance = 0f;
+            pr.explodeRadius = 0f;
+            pr.knockback = knockback;
+            pr.pierce = pierce;
+            pr.skillName = skill;
+            pr.Launch(dir, source);
+            NetCues.Projectile(key, start, dir, pr.speed, pr.lifetime, Team.Enemy, pr.hitVfx, pr.hitSfx, pr.shake, 0f);
+            return pr;
+        }
+
+        /// <summary>A Hắc Phong arrow from <paramref name="start"/> along <paramref name="dir"/> (aim it with <see cref="IntoTheWind"/> to allow for the wind).</summary>
+        public static Projectile Arrow(GameObject source, Vector2 start, Vector2 dir, float damage, float speed, string skill = null, float lifetime = 1.4f)
+        {
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            return Fire(db != null ? db.arrowPrefab : null, "arrow", source, start, dir, damage, speed, lifetime, 0.25f, false, 2f,
+                        default, "hit_spark", "sfx_arrow_hit", 0.04f, skill);
+        }
+
+        /// <summary>
+        /// A crescent of wind cut loose by Thủ Lĩnh Hắc Phong's blades: it flies through everyone in
+        /// its way (each once) until it meets rock or runs out.
+        /// </summary>
+        public static Projectile WindBlade(GameObject source, Vector2 start, Vector2 dir, float damage, float speed, string skill, float lifetime = 1.1f)
+        {
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            return Fire(db != null ? db.windBladePrefab : null, "windblade", source, start, dir, damage, speed, lifetime, 0.55f, true, 5f,
+                        default, "slash", "sfx_hit", 0.08f, skill);
+        }
+
+        /// <summary>
+        /// Lốc Xoáy: a whirlwind that crawls along <paramref name="dir"/>, drifting with the wind; whoever
+        /// it runs over is thrown off their feet (<paramref name="stun"/> seconds), each once. Rock breaks it.
+        /// </summary>
+        public static Projectile Tornado(GameObject source, Vector2 start, Vector2 dir, float damage, float speed, float lifetime, float stun,
+                                         string skill)
+        {
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            return Fire(db != null ? db.tornadoPrefab : null, "tornado", source, start, dir, damage, speed, lifetime, 0.85f, true, 7f,
+                        new StatusHit { stun = stun }, "dash_burst", "sfx_gust", 0.12f, skill);
+        }
+
+        /// <summary>
+        /// Which way to shoot at <paramref name="speed"/> from <paramref name="from"/> so that the wind there
+        /// carries the shot onto <paramref name="to"/> (the steppe's archers read the wind). Straight at it
+        /// when there is no wind, or when the wind is too strong to aim against.
+        /// </summary>
+        public static Vector2 IntoTheWind(Vector2 from, Vector2 to, float speed)
+        {
+            Vector2 d = to - from;
+            if (d.sqrMagnitude < 0.0001f) return Vector2.right;
+            Vector2 u = d.normalized;
+            Vector2 w = Wind.At(from) * Wind.ShotDrift;
+            if (w.sqrMagnitude < 0.0001f || speed <= 0f) return u;
+            // flying at dir * speed + w must head along u: find k > 0 with |k u - w| = speed
+            float uw = Vector2.Dot(u, w);
+            float disc = uw * uw - w.sqrMagnitude + speed * speed;
+            if (disc < 0f) return u;
+            float k = uw + Mathf.Sqrt(disc);
+            if (k <= 0f) return u;
+            return ((k * u - w) / speed).normalized;
         }
 
         /// <summary>

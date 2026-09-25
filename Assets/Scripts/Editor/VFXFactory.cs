@@ -146,7 +146,7 @@ namespace RPG.EditorTools
             EditorUtil.Assign(ref db.webPrefab, BuildWebShot());
             EditorUtil.Assign(ref db.shardPrefab, BuildShardShot());
             // the classes' projectiles (the abilities find them by path)
-            BuildBolt("Arrow", "proj_arrow", false, Color.white, new Color(1f, 0.9f, 0.7f), 1f, true, 0f, 0f);
+            var arrow = BuildBolt("Arrow", "proj_arrow", false, Color.white, new Color(1f, 0.9f, 0.7f), 1f, true, 0f, 0f);
             BuildBolt("ThrownKnife", "proj_knife", false, Color.white, new Color(0.85f, 0.9f, 1f), 1f, true, 0f, 0f);
             BuildBolt("ThrownAxe", "proj_axe", false, Color.white, new Color(1f, 0.8f, 0.6f), 1.1f, false, -900f, 0f);
             BuildBolt("NoteBolt", "proj_note", false, PinkC, PinkC, 0.9f, false, 0f, 1.1f);
@@ -157,6 +157,10 @@ namespace RPG.EditorTools
             BuildBolt("ChaosBolt", "spark4", true, new Color(1f, 0.6f, 1f), new Color(0.9f, 0.4f, 1f), 0.6f, false, -720f, 1.6f);
             EditorUtil.Assign(ref db.mistMaterial, Mat("smoke", false, 1f));
             EditorUtil.Assign(ref db.windMaterial, Mat("streak", true, 1.1f));
+            // Hắc Phong's shots: the archers' arrows are the heroes' own, the chief's blades and whirlwinds
+            EditorUtil.Assign(ref db.arrowPrefab, arrow);
+            EditorUtil.Assign(ref db.windBladePrefab, BuildWindBlade());
+            EditorUtil.Assign(ref db.tornadoPrefab, BuildTornado());
             EditorUtil.Assign(ref db.rockProjectilePrefab, BuildRockProjectile());
             EditorUtil.Assign(ref db.telegraphPrefab, BuildTelegraph());
             EditorUtility.SetDirty(db);
@@ -1024,6 +1028,61 @@ namespace RPG.EditorTools
             }
             beam.glow = Line("Glow", CrystalCyan, 1);
             beam.core = Line("Core", Color.white, 2);
+        }
+
+        /// <summary>A crescent of wind cut loose by Thủ Lĩnh Hắc Phong's blades (<see cref="EnemyShots.WindBlade"/>).</summary>
+        static GameObject BuildWindBlade()
+        {
+            var root = new GameObject("WindBlade");
+            root.layer = Layers.Projectile;
+            var fx = root.AddComponent<PooledFX>();
+            fx.lifetime = 0f;
+            fx.stopLinger = 0.4f;
+            var p = root.AddComponent<Projectile>();
+            p.rotateToDirection = true;
+            Spr(root, "Core", "proj_windblade", Mat("proj_windblade", true, 1.8f), Color.white, scale: 1.5f, order: 1);
+            Spr(root, "Glow", "glow", Mat("glow", true, 1.3f), A(Wind, 0.4f), scale: 1.4f, order: -1);
+            PS(root, "Trail", Mat("streak", true, 1.4f), SortingLayerNames.VFX, -2).Loop().Rate(40).Life(0.15f, 0.3f).Size(0.1f, 0.22f)
+                .Col(A(Wind, 0.8f), A(Color.white, 0.3f)).Circle(0.35f).Fade();
+            Light(root, Wind, 1.6f, 0.7f, pulse: false);
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/WindBlade.prefab");
+        }
+
+        /// <summary>
+        /// Lốc Xoáy (<see cref="EnemyShots.Tornado"/>): a funnel of dust swirling up and out from a
+        /// narrow foot, grit whipping round it, a trail of dust left on the ground behind.
+        /// </summary>
+        static GameObject BuildTornado()
+        {
+            var root = new GameObject("Tornado");
+            root.layer = Layers.Projectile;
+            var fx = root.AddComponent<PooledFX>();
+            fx.lifetime = 0f;
+            fx.stopLinger = 0.9f;
+            var p = root.AddComponent<Projectile>();
+            p.rotateToDirection = false;
+            var sand = new Color(0.94f, 0.84f, 0.62f);
+            var cream = new Color(1f, 0.96f, 0.86f);
+            // a dark whirl of dust at its foot, turning
+            var foot = Spr(root, "Foot", "smoke", Mat("smoke", false, 1f), new Color(0.3f, 0.24f, 0.16f, 0.55f), SortingLayerNames.VFX, -1, 1.5f);
+            foot.transform.localScale = new Vector3(1.5f, 0.75f, 1f);
+            foot.gameObject.AddComponent<Spinner>().degreesPerSecond = -540f;
+            // the funnel itself, spinning in four frames (Tools/ArtGen: gen_steppe_creatures.tornado)
+            var body = Spr(root, "Funnel", "tornado_spin_0", AssetFactory.SpriteLit, Color.white, SortingLayerNames.Default, 0, 1.3f);
+            var spin = body.gameObject.AddComponent<SpriteAnimator>();
+            spin.set = ArtImporter.AnimSet("tornado");
+            spin.target = body;
+            spin.startClip = "spin";
+            PS(root, "Dust", Mat("smoke", false, 1f), SortingLayerNames.VFX, 1).Loop().Local().Rate(40).Life(0.8f, 1.1f).Size(0.4f, 0.7f)
+                .Col(A(sand, 0.95f), A(cream, 0.8f)).Circle(0.2f).Vel(-0.25f, 0.25f, 2.4f, 3.2f, true).Noise(1.1f, 1.6f)
+                .SizeLife(0, 0.45f, 1, 2.4f).Rot().Fade(0.1f);
+            PS(root, "Grit", Mat("px_square", true, 1.5f), SortingLayerNames.VFX, 2).Loop().Local().Rate(40).Life(0.35f, 0.7f).Size(0.06f, 0.12f)
+                .Col(sand, Color.white).Circle(0.8f).Orbit(9f, -0.4f).Fade();
+            PS(root, "Streaks", Mat("streak", true, 1.6f), SortingLayerNames.VFX, 3).Loop().Local().Rate(30).Life(0.4f, 0.7f).Size(0.12f, 0.22f)
+                .Col(A(Color.white, 0.85f), A(cream, 0.6f)).Circle(0.3f).Vel(-0.6f, 0.6f, 1.8f, 3f, true).Noise(1.6f, 2.2f).Fade();
+            PS(root, "Trail", Mat("smoke", false, 1f), SortingLayerNames.VFX, -1).Loop().Rate(10).Life(0.6f, 1f).Size(0.5f, 0.9f)
+                .Col(A(Dust, 0.45f), A(sand, 0.3f)).Circle(0.4f).SizeLife(0, 0.7f, 1, 1.3f).Rot().Fade(0.15f);
+            return EditorUtil.SavePrefab(root, $"{GameplayFolder}/Tornado.prefab");
         }
 
         /// <summary>A splinter of crystal in flight (<see cref="EnemyShots.Shard"/>).</summary>

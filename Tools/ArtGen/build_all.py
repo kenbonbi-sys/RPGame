@@ -210,6 +210,16 @@ def build_chars():
     grid_sheet("eagle", gen_steppe_creatures.build_eagle(), cave_order, 40, 28, (20, 25), os.path.join(ART, "Characters", "eagle.png"), eafps)
     bifps = lambda k: {"idle": (2, True), "move": (7, True), "windup": (6, True), "attack": (10, True), "hurt": (1, False), "dead": (4, False)}[k]
     grid_sheet("bison", gen_steppe_creatures.build_bison(), cave_order, 44, 34, (22, 32), os.path.join(ART, "Characters", "bison.png"), bifps)
+    scfps = lambda k: {"still": (1, True), "wake": (8, False), "idle": (4, True), "move": (8, True), "windup": (6, True),
+                       "attack": (16, True), "hurt": (1, False), "dead": (5, False)}[k]
+    grid_sheet("scarecrow", gen_steppe_creatures.build_scarecrow(), ["still", "wake", "idle", "move", "windup", "attack", "hurt", "dead"],
+               32, 38, (15, 36), os.path.join(ART, "Characters", "scarecrow.png"), scfps)
+    ibfps = lambda k: {"idle": (2, True), "walk": (6, True), "windup": (6, True), "attack": (10, True), "roar": (4, True),
+                       "hurt": (1, False), "dead": (4, False)}[k]
+    grid_sheet("ironbison", gen_steppe_creatures.build_iron_bison(), ["idle", "walk", "windup", "attack", "roar", "hurt", "dead"],
+               44, 34, (22, 32), os.path.join(ART, "Characters", "ironbison.png"), ibfps)
+    grid_sheet("tornado", gen_steppe_creatures.build_tornado(), ["spin"], 34, 46, (17, 44),
+               os.path.join(ART, "Characters", "tornado.png"), lambda k: (14, True))
 
 
 def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):

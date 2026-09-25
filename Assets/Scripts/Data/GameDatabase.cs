@@ -69,6 +69,12 @@ namespace RPG
         public Material mistMaterial;
         [Tooltip("The steppe's streaks of wind (AmbientParticles).")]
         public Material windMaterial;
+        [Tooltip("A Hắc Phong archer's arrow (EnemyShots.Arrow).")]
+        public GameObject arrowPrefab;
+        [Tooltip("A crescent of wind from Thủ Lĩnh Hắc Phong's blades (EnemyShots.WindBlade).")]
+        public GameObject windBladePrefab;
+        [Tooltip("Lốc Xoáy, a crawling whirlwind (EnemyShots.Tornado).")]
+        public GameObject tornadoPrefab;
 
         [Header("Online (Docs/KeHoach-Online.md)")]
         [Tooltip("The hero spawned for every player of an online session (Prefabs/Characters/NetHero).")]

@@ -1,0 +1,522 @@
+fileFormatVersion: 2
+guid: ddd295e2bfcffc04cb2da87278c39759
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7741192526743235980
+    second: ironbison_0
+  - first:
+      213: -5740094592546761670
+    second: ironbison_1
+  - first:
+      213: 61008698226228333
+    second: ironbison_2
+  - first:
+      213: -2432994338216933473
+    second: ironbison_3
+  - first:
+      213: 6972622955291237724
+    second: ironbison_4
+  - first:
+      213: 1889325926465480858
+    second: ironbison_5
+  - first:
+      213: 175623227161882757
+    second: ironbison_6
+  - first:
+      213: 9108703826444906570
+    second: ironbison_7
+  - first:
+      213: 4928758816194154110
+    second: ironbison_8
+  - first:
+      213: 34114437282599372
+    second: ironbison_9
+  - first:
+      213: -3510898227716490307
+    second: ironbison_10
+  - first:
+      213: -4554680533516104150
+    second: ironbison_11
+  - first:
+      213: -4203990135083804275
+    second: ironbison_12
+  - first:
+      213: -3325242362093496660
+    second: ironbison_13
+  - first:
+      213: 1044655331275502786
+    second: ironbison_14
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ironbison_idle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 204
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ec81b03d5dda07a9c6ae73b1f39e682
+      internalID: -1414672887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_idle_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 204
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e0afd25b48872d17a180b4ad4061ef2
+      internalID: -474019086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_walk_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 170
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2b48ed7e1c5e5226a7703080a8458f3
+      internalID: 442460950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_walk_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 170
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c60e1a6fda03e75cbc76d74c446cb9a
+      internalID: -779536159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_walk_2
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 170
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 597cd3697df23f8a225f54bd3177f5fa
+      internalID: 1619316271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_walk_3
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 170
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 837e25ada35c31fe402d29cb77914922
+      internalID: -1391302127
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_windup_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 136
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e9e2f6a3820e789b51f514722266dbd
+      internalID: -408072245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_windup_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 136
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a0533e093739f294ed163e5964cfc97b
+      internalID: 511934145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_attack_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 102
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71ef62c660a9842046b40a8eebe35012
+      internalID: 1818612599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_attack_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 102
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: da999e8f413e51169fdf3fe44d2f1718
+      internalID: 786175508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_roar_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 68
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9513616c5cb15e8800697fc458c3625f
+      internalID: 1656712261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_roar_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 68
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: adae5b8340b0cf4a1369b57ab9d4d490
+      internalID: -2051775880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_hurt_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 34
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6865b376f14377d7d08fb12fe574590c
+      internalID: 174035598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_dead_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39e88bb0f30695386e037fbc41bd289e
+      internalID: 452097378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ironbison_dead_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 0
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a038eb98f35ae076b052b0285949adf0
+      internalID: 441783423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 18c062e96eb997746a1f63ab73c3e13b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ironbison_attack_0: 1818612599
+      ironbison_attack_1: 786175508
+      ironbison_dead_0: 452097378
+      ironbison_dead_1: 441783423
+      ironbison_hurt_0: 174035598
+      ironbison_idle_0: -1414672887
+      ironbison_idle_1: -474019086
+      ironbison_roar_0: 1656712261
+      ironbison_roar_1: -2051775880
+      ironbison_walk_0: 442460950
+      ironbison_walk_1: -779536159
+      ironbison_walk_2: 1619316271
+      ironbison_walk_3: -1391302127
+      ironbison_windup_0: -408072245
+      ironbison_windup_1: 511934145
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: rpg:13f42bea8493aec64238dad49e66f321
+  assetBundleName: 
+  assetBundleVariant: 

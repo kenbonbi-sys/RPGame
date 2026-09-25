@@ -8,12 +8,13 @@ namespace RPG
 {
     /// <summary>
     /// Automated showcase used for testing builds: start the player with
-    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep|classes|ui|steppe]
+    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep|classes|ui|steppe|hacphong]
     /// It plays a scripted tour (dialogue, skills, boss attacks, the swamp and its bosses, the
     /// world map, night), saves screenshots and quits; -autoshotOnly swamp tours the swamp alone,
     /// -autoshotOnly cave the crystal cave, -autoshotOnly deep its deeper creatures and bosses,
     /// -autoshotOnly ui the character screen, the forge and a waystone's prompt, -autoshotOnly steppe
-    /// Thảo Nguyên Gió (the wind, the wind columns, the hyenas, eagles and bisons).
+    /// Thảo Nguyên Gió (the wind, the wind columns, the hyenas, eagles and bisons), -autoshotOnly hacphong
+    /// its west (the living scarecrows, Hắc Phong's archers and blades, Bò Rừng Sắt, Thủ Lĩnh Hắc Phong).
     /// Add -autoshotOffscreen to render to a texture (a hidden window or a graphical batch player).
     /// Exit code: 0 = clean run, 1 = errors or exceptions were logged, 2 = the tour did not finish
     /// within the timeout (CI reads it). Does nothing in normal play.
@@ -421,6 +422,185 @@ namespace RPG
                 yield return Shot("world_map_steppe");
                 WorldMapUI.I.Close();
             }
+        }
+
+        /// <summary>
+        /// Hắc Phong (-autoshotOnly hacphong): the abandoned fields and a scarecrow waking among the
+        /// straw ones, its hop; Bò Rừng Sắt ramming sandstone; the bandits' camp, an archer's aimed
+        /// shot, volley and leap, a blade's dash, combo and open flank; Thủ Lĩnh Hắc Phong on his
+        /// windmill hill: his blades and wind crescents, a whirlwind, his archers, the sandstorm of his
+        /// rage, his three dashes and his loss of balance; the camp by night.
+        /// </summary>
+        IEnumerator HacPhong(PlayerController p, DayNightCycle dn)
+        {
+            var zone = ZoneRoot.Current;
+            Vector2 Spot(string id)
+            {
+                var t = zone != null ? zone.SpotOf(id) : null;
+                return t != null ? (Vector2)t.position : Vector2.zero;
+            }
+            if (dn != null) dn.time = 0.42f;
+            CharacterChoice.Apply(p, new HeroLook { cls = "fighter", race = "human", weapon = "sword", hair = 1, hairColor = 2 });
+            p.stats.AddXp(p.stats.Config.TotalXpTo(24));
+            HUD.I.help.Close();
+            Wind.Override = new Vector2(0.8f, 0.3f);
+
+            // the abandoned fields: which one is alive?
+            var fields = Spot("fields");
+            Place(p, fields + new Vector2(0f, -6f));
+            yield return Wait(1.6f);
+            yield return Shot("hp_fields");
+            var sc = FindEnemy("scarecrow", fields) as ScarecrowAI;
+            if (sc != null)
+            {
+                Place(p, (Vector2)sc.transform.position + new Vector2(3.4f, -0.8f));
+                yield return Wait(1f);
+                yield return Shot("scarecrow_still");
+                sc.DebugWake(p);
+                yield return Wait(0.35f);
+                yield return Shot("scarecrow_wake");
+                yield return Wait(0.8f);
+                Place(p, (Vector2)sc.transform.position + new Vector2(3.8f, -0.6f));
+                sc.DebugAttack(p, true);
+                yield return Wait(0.35f);
+                yield return Shot("scarecrow_hop_mark");
+                yield return Wait(0.35f);
+                yield return Shot("scarecrow_hop");
+                yield return Wait(1f);
+                Place(p, (Vector2)sc.transform.position + new Vector2(1.2f, -0.4f));
+                sc.DebugAttack(p, false);
+                yield return Wait(0.3f);
+                yield return Shot("scarecrow_spin_warning");
+                yield return Wait(0.35f);
+                yield return Shot("scarecrow_spin");
+                yield return Wait(1f);
+            }
+
+            // Bò Rừng Sắt: into the sandstone
+            Wind.Override = Vector2.zero;
+            var ib = BossBase.Find("ironbison") as BossIronBison;
+            if (ib != null)
+            {
+                Vector2 c = ib.Home;
+                Vector2 toRock = Util.FromAngle(30f);
+                Place(p, c + toRock * 3.6f);
+                yield return Wait(1.2f);
+                yield return Shot("ironbison");
+                ib.DebugForce("charge");
+                yield return Wait(0.5f);
+                yield return Shot("ironbison_charge_warning");
+                yield return Wait(0.55f);
+                yield return Shot("ironbison_charge");
+                yield return Wait(0.7f);
+                yield return Shot("ironbison_dazed");
+                yield return Wait(3f);
+                ib.DebugForce("stomp");
+                yield return Wait(0.4f);
+                yield return Shot("ironbison_stomp_warning");
+                yield return Wait(0.5f);
+                yield return Shot("ironbison_stomp");
+                yield return Wait(1.5f);
+            }
+
+            // the bandits' camp: an archer and a blade
+            Wind.Override = new Vector2(0.9f, -0.2f);
+            var camp = Spot("hacphong");
+            Place(p, camp + new Vector2(0f, -6.5f));
+            yield return Wait(1.5f);
+            yield return Shot("hacphong_camp");
+            var ar = FindEnemy("hp_archer", camp) as BanditArcherAI;
+            if (ar != null)
+            {
+                Place(p, (Vector2)ar.transform.position + new Vector2(-5.5f, -1.5f));
+                yield return Wait(0.8f);
+                ar.DebugShoot(p);
+                yield return Wait(0.45f);
+                yield return Shot("archer_aim");
+                yield return Wait(0.45f);
+                yield return Shot("archer_arrow");
+                yield return Wait(1.2f);
+                ar.DebugShoot(p, true);
+                yield return Wait(0.6f);
+                yield return Shot("archer_volley");
+                yield return Wait(1.2f);
+                Place(p, (Vector2)ar.transform.position + new Vector2(-1.8f, 0f));
+                yield return Wait(0.3f);
+                ar.DebugLeap(p);
+                yield return Wait(0.15f);
+                yield return Shot("archer_leap");
+                yield return Wait(1f);
+            }
+            var bl = FindEnemy("hp_blade", camp) as BanditBladeAI;
+            if (bl != null)
+            {
+                Place(p, (Vector2)bl.transform.position + new Vector2(4.5f, -0.5f));
+                yield return Wait(0.8f);
+                bl.DebugCombo(p);
+                yield return Wait(0.3f);
+                yield return Shot("blade_windup");
+                yield return Wait(0.3f);
+                yield return Shot("blade_dash");
+                yield return Wait(0.5f);
+                yield return Shot("blade_combo");
+                yield return Wait(0.6f);
+                yield return Shot("blade_open");
+                yield return Wait(1.2f);
+            }
+
+            // Thủ Lĩnh Hắc Phong on his hill
+            var bw = BossBase.Find("blackwind") as BossBlackWind;
+            if (bw != null)
+            {
+                Wind.Override = null;
+                Vector2 hill = bw.Home;
+                Place(p, hill + new Vector2(-4f, -1f));
+                yield return Wait(0.2f);
+                Place(p, hill + new Vector2(-4f, -1f));
+                yield return Wait(1f);
+                yield return Shot("windmill_hill");
+                Place(p, hill + new Vector2(0.5f, -4.5f));
+                yield return Wait(2.8f);   // he wakes and roars
+                yield return Shot("chief_intro");
+                Place(p, hill + new Vector2(0.5f, -4.5f));
+                bw.DebugForce("blades");
+                yield return Wait(0.35f);
+                yield return Shot("chief_blades_warning");
+                yield return Wait(0.4f);
+                yield return Shot("chief_windblades");
+                yield return Wait(1.2f);
+                Place(p, hill + new Vector2(0.5f, -5.5f));
+                bw.DebugForce("tornado");
+                yield return Wait(1.3f);
+                yield return Shot("chief_tornado");
+                yield return Wait(1.5f);
+                Place(p, hill + new Vector2(0.5f, -4.5f));
+                bw.DebugForce("archers");
+                yield return Wait(1.5f);
+                yield return Shot("chief_archers");
+                yield return Wait(0.5f);
+                bw.health.hp = bw.health.maxHp * 0.45f;   // he rages: the sand rises
+                yield return Wait(1.8f);
+                Place(p, hill + new Vector2(0.5f, -4.5f));
+                yield return Wait(1.8f);
+                yield return Shot("chief_sandstorm");
+                Place(p, hill + new Vector2(0.5f, -4.5f));
+                bw.DebugForce("dashes");
+                yield return Wait(0.3f);
+                yield return Shot("chief_dash_warning");
+                yield return Wait(0.35f);
+                yield return Shot("chief_dash");
+                yield return Wait(1.6f);
+                bw.DebugOffBalance();
+                yield return Wait(0.3f);
+                yield return Shot("chief_off_balance");
+                yield return Wait(2.5f);
+            }
+            // the camp by night
+            if (dn != null) dn.time = 0.95f;
+            Place(p, camp + new Vector2(0.5f, -6f));
+            yield return Wait(1.6f);
+            yield return Shot("hacphong_night");
+            if (dn != null) dn.time = 0.45f;
         }
 
         /// <summary>The part of the tour asked for with -autoshotOnly (null: all of it).</summary>
@@ -982,6 +1162,12 @@ namespace RPG
             if (Only == "steppe")
             {
                 yield return Steppe(p, dn);
+                Finish();
+                yield break;
+            }
+            if (Only == "hacphong")
+            {
+                yield return HacPhong(p, dn);
                 Finish();
                 yield break;
             }

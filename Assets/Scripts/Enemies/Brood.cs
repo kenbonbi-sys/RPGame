@@ -39,9 +39,10 @@ namespace RPG
 
         /// <summary>
         /// Calls up to <paramref name="count"/> waiting members around <paramref name="at"/>, going for
-        /// <paramref name="target"/> when there is one. Returns how many came (0 where the rules do not run).
+        /// <paramref name="target"/> when there is one, each arriving in <paramref name="vfx"/> (a splash
+        /// out of the water; the bandits' dust). Returns how many came (0 where the rules do not run).
         /// </summary>
-        public int Release(Vector2 at, int count, PlayerController target = null, float spread = 0.9f)
+        public int Release(Vector2 at, int count, PlayerController target = null, float spread = 0.9f, string vfx = "water_splash")
         {
             if (!GameSession.IsAuthority) return 0;
             int n = 0;
@@ -51,21 +52,21 @@ namespace RPG
                 if (m == null || m.gameObject.activeSelf) continue;
                 Vector2 spot = at + Util.RandomInCircle(spread);
                 m.Revive(spot);
-                NetCues.Vfx("water_splash", spot);
+                NetCues.Vfx(vfx, spot);
                 m.Alert(target);
                 n++;
             }
             return n;
         }
 
-        /// <summary>Sends every member back to waiting (the fight that called them was reset).</summary>
-        public void Dismiss()
+        /// <summary>Sends every member back to waiting (the fight that called them was reset), each leaving in <paramref name="vfx"/>.</summary>
+        public void Dismiss(string vfx = "water_splash")
         {
             if (!GameSession.IsAuthority) return;
             foreach (var m in members)
             {
                 if (m == null || !m.gameObject.activeSelf) continue;
-                NetCues.Vfx("water_splash", m.transform.position);
+                NetCues.Vfx(vfx, m.transform.position);
                 m.gameObject.SetActive(false);
             }
         }

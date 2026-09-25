@@ -52,9 +52,36 @@ namespace RPG
             Spawn("+" + Mathf.RoundToInt(amount), h.HeadPosition + Vector3.left * 0.3f, Palette.Heal, 0.95f, FloatingText.Style.Rise);
         }
 
+        // status words that pop together at one spot (a hero and the bison that rammed it, both
+        // "Choáng!") stack up instead of printing over each other
+        struct Recent
+        {
+            public Vector2 at;
+            public float t;
+        }
+
+        readonly List<Recent> recent = new List<Recent>();
+
         void OnWorldText(string text, Vector3 pos, Color c)
         {
-            Spawn(text, pos, c, 1.05f, FloatingText.Style.Status);
+            float now = Time.unscaledTime;
+            recent.RemoveAll(r => now - r.t > 0.7f);
+            // above every word still showing over the same head
+            float y = pos.y;
+            bool moved = true;
+            for (int guard = 0; moved && guard < 8; guard++)
+            {
+                moved = false;
+                foreach (var r in recent)
+                    if (Mathf.Abs(r.at.x - pos.x) < 1.8f && Mathf.Abs(r.at.y - y) < 0.4f)
+                    {
+                        y = r.at.y + 0.42f;
+                        moved = true;
+                    }
+            }
+            var at = new Vector3(pos.x, y, pos.z);
+            recent.Add(new Recent { at = at, t = now });
+            Spawn(text, at, c, 1.05f, FloatingText.Style.Status);
         }
 
         public void Spawn(string text, Vector3 world, Color c, float scale, FloatingText.Style style)

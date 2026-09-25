@@ -12,7 +12,7 @@ namespace RPG
     /// </summary>
     public static class NetProtocol
     {
-        public const int Version = 11;
+        public const int Version = 12;
 
         /// <summary>First id of the replicated objects of a zone (enemies, boss, rocks); heroes use their NetworkObject id, below it.</summary>
         public const int SceneIdBase = 1000000;

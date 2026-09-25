@@ -43,7 +43,7 @@ $common = @('-batchmode', '-nographics', '-projectPath', $project)
 $xml = Join-Path $Out 'tests.xml'
 Invoke-Phase 'Steppe, cave and quest tests' $Unity ($common + @(
     '-runTests', '-testPlatform', 'EditMode',
-    '-testFilter', 'RPG.EditorTools.Tests.SteppeTests;RPG.EditorTools.Tests.CaveTests;RPG.EditorTools.Tests.QuestRoadTests',
+    '-testFilter', 'RPG.EditorTools.Tests.SteppeTests;RPG.EditorTools.Tests.HacPhongTests;RPG.EditorTools.Tests.CaveTests;RPG.EditorTools.Tests.QuestRoadTests',
     '-testResults', $xml, '-logFile', (Join-Path $Out 'tests.log')
 )) 300
 [xml]$results = Get-Content -LiteralPath $xml

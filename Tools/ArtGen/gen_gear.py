@@ -289,6 +289,40 @@ def boots_wind():
     return done(cv)
 
 
+def shield_iron():
+    """Khiên Sừng Sắt: a round iron shield with the iron bison's horn across it."""
+    cv = Canvas(16, 16)
+    iron = [hx("#2e3240"), hx("#4a5064"), hx("#6e7690"), hx("#9aa2ba"), hx("#c8cedc")]
+    shaded_ellipse(cv, 8, 8, 6.5, 6.5, iron, dither=0.15, bias=0.1)
+    for (x, y) in ((8, 2), (2, 8), (14, 8), (8, 14), (4, 4), (12, 4), (4, 12), (12, 12)):
+        if cv.opaque(x, y):
+            cv.px(x, y, iron[4])
+    horn = [hx("#5a5244"), hx("#8e8470"), hx("#c2b89e"), hx("#e6dec8")]
+    for i in range(9):
+        t = i / 8
+        cv.px(int(4 + t * 8), int(10 - math.sin(t * math.pi) * 4), horn[1 + i % 3])
+    return done(cv)
+
+
+def boots_howl():
+    """Ủng Gió Hú: black leather boots with grey fur cuffs, wind-lines streaming off the heel."""
+    dark = [hx("#0e0e14"), hx("#1c1c26"), hx("#2c2c3a"), hx("#40404e"), hx("#5a5a6a")]
+    cv = paint(BOOT, dark, [hx("#8a8a96"), hx("#b4b4c0"), hx("#dcdce6"), hx("#f4f4fa")])
+    for (x, y) in ((1, 8), (2, 8), (0, 10), (1, 10), (2, 11)):
+        cv.px(x, y, hx("#c8e0e8"))
+    return done(cv)
+
+
+def scarf_blackwind():
+    """Khăn Hắc Phong: the chief's black hood and red scarf."""
+    hood = [hx("#0e0e14"), hx("#1c1c26"), hx("#2c2c3a"), hx("#40404e"), hx("#56566a")]
+    cv = paint(CAP, hood, [hx("#4a0e1a"), hx("#7c1a26"), hx("#b52a34"), hx("#e04a44")])
+    # the scarf's tails
+    for (x, y) in ((12, 11), (13, 12), (13, 13), (12, 13)):
+        cv.px(x, y, hx("#b52a34"))
+    return done(cv)
+
+
 def icons():
     return [
         ("helm_leather", helm_leather()),
@@ -306,6 +340,10 @@ def icons():
         ("helm_eagle", helm_eagle()),
         ("armor_bison", armor_bison()),
         ("boots_wind", boots_wind()),
+        # Hắc Phong
+        ("shield_iron", shield_iron()),
+        ("boots_howl", boots_howl()),
+        ("scarf_blackwind", scarf_blackwind()),
     ]
 
 

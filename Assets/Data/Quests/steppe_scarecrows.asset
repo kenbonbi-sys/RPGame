@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: steppe_scarecrows
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: steppe_scarecrows
+  title: "Ru\u1ED9ng B\u1ECF Hoang"
+  kind: 0
+  summary: "D\xE2n du m\u1EE5c b\u1ECF ru\u1ED9ng t\u1EEB khi b\xF9 nh\xECn ngo\xE0i \u0111\xF3 bi\u1EBFt \u0111i. B\xF9 nh\xECn r\u01A1m th\u1EADt lay theo gi\xF3; B\xF9 Nh\xECn S\u1ED1ng th\xEC \u0111\u1EE9ng im v\xE0 quay \u0111\u1EA7u nh\xECn theo ng\u01B0\u1EDDi \u0111i qua. \u0110\xE1nh n\xF3 l\xFAc n\xF3 c\xF2n gi\u1EA3 ch\u1EBFt th\xEC tr\xFAng \u0111au h\u01A1n. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 22."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: dba0358d54638b847a8b7d9d2e1b6a42, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: scarecrow
+    count: 4
+    text: "H\u1EA1 B\xF9 Nh\xECn S\u1ED1ng"
+    countPrevious: 0
+    marker: fields
+  xp: 3000
+  gold: 280
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 3
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 1b56fef7894a10a41b11b05d17e39728, type: 2}

@@ -1,9 +1,27 @@
 title: GiaTang
 tags: npc:giatang
 ---
-// Già Tăng — nhà sư già dẫn đầu trại du mục ở Thảo Nguyên Gió; chỉ đường qua gió, Cột Gió và bầy thú.
+// Già Tăng — nhà sư già dẫn đầu trại du mục ở Thảo Nguyên Gió; chỉ đường qua gió, Cột Gió, bầy thú và bọn cướp Hắc Phong.
 // Markup: [k]phím[/k] tô vàng, [warn]chiêu nguy hiểm[/warn] tô đỏ.
-<<if quest_status("steppe_hyenas") == "active">>
+<<if quest_status("slay_blackwind") == "active">>
+    Già Tăng: Thủ Lĩnh Hắc Phong ở trên đồi cối xay, phía tây bắc trại chúng. Trên đỉnh đồi gió đổi hướng nhanh gấp đôi, mười hai giây một lần. #line:giatang_chief_1
+    Già Tăng: Hai lưỡi đao của hắn chém ra [warn]lưỡi gió[/warn], còn [warn]Lốc Xoáy[/warn] thì bò theo gió. Nhìn cỏ rạp để biết chúng sẽ trôi về đâu. #line:giatang_chief_2
+    Già Tăng: Khi hắn nổi giận, cát bay kín đồi. Hắn sẽ [warn]Lướt Gió[/warn] ba lần liền. Nhát thứ ba, bấm [k]Space[/k] lướt xuyên qua đúng lúc đó: hắn sẽ mất thăng bằng. #line:giatang_chief_3
+<<elseif quest_status("hacphong_blades") == "active">>
+    Già Tăng: Đao thủ của chúng lướt xuyên qua người rồi quay lại chém hai nhát. Đừng đứng trên vạch. #line:giatang_blade_1
+    Già Tăng: Sau đường đao, hắn phải đứng thở một lúc. Lúc đó hắn [k]hở sườn[/k]: đánh đi. #line:giatang_blade_2
+<<elseif quest_status("hacphong_archers") == "active">>
+    Già Tăng: Cung thủ Hắc Phong sinh ra trên thảo nguyên. Chúng bắn đón gió, tên vẫn bay trúng như trời lặng. #line:giatang_archer_1
+    Già Tăng: Vạch dưới đất là đường tên sẽ bay. Còn [warn]Mưa Tên[/warn] thì bắn thẳng, gió bẻ cong đến đâu thì chịu. Áp sát là chúng nhảy lùi, nên dồn chúng vào tảng đá. #line:giatang_archer_2
+<<elseif quest_status("steppe_ironbison") == "active">>
+    Già Tăng: Bọn Hắc Phong bọc sắt một con bò rừng và thả nó canh lối vào trại, ở bãi đá phía tây nam, bên kia Khe Vực. #line:giatang_iron_1
+    Già Tăng: Chém vào đầu nó chỉ tóe lửa. Đứng trước một tảng sa thạch, đợi nó [warn]Lao Húc[/warn] rồi né: nó đâm vào đá, choáng váng, giáp bung ra. #line:giatang_iron_2
+    Già Tăng: Qua Khe Vực thì bước vào [k]Cột Gió[/k]. Ba cặp cột nằm ở ba chỗ dọc khe. #line:giatang_iron_3
+<<elseif quest_status("steppe_scarecrows") == "active">>
+    Già Tăng: Ruộng của chúng ta ở phía tây trại, giữa hai con đường. Từ khi bọn Hắc Phong tới, bù nhìn ngoài đó biết đi. #line:giatang_crow_1
+    Già Tăng: Bù nhìn rơm thật lay theo gió. Con biết đi thì đứng im như tượng, và đầu nó quay theo ngươi. #line:giatang_crow_2
+    Già Tăng: Đánh nó lúc nó còn giả chết thì trúng đau hơn. Tỉnh rồi, nó sẽ [warn]Nhảy Vồ[/warn] vào vòng dưới chân ngươi và [warn]Liềm Xoay[/warn] quanh mình. #line:giatang_crow_3
+<<elseif quest_status("steppe_hyenas") == "active">>
     Già Tăng: Linh Cẩu Gió không bao giờ đánh một mình. Chúng vây quanh con mồi, rồi từng con lao vào cắn. #line:giatang_hyena_1
     Già Tăng: Vạch dưới đất là đường nó sắp lao: [k]Space[/k] lướt sang bên, rồi đánh lúc nó quay đầu chạy. #line:giatang_hyena_2
 <<elseif quest_status("steppe_eagles") == "active">>
@@ -13,6 +31,9 @@ tags: npc:giatang
     Già Tăng: Bò Rừng cào đất rồi [warn]Lao Húc[/warn] thẳng một đường. Đầu sừng nó cứng như đá. #line:giatang_bison_1
     Già Tăng: Đứng trước một tảng đá, đợi nó lao tới rồi né: nó húc vào đá sẽ choáng váng. #line:giatang_bison_2
     Già Tăng: Đồng Bò Rừng ở phía nam trại. Phía tây Khe Vực cũng có một đàn. #line:giatang_bison_3
+<<elseif quest_status("slay_blackwind") == "done">>
+    Già Tăng: Gió trên đồi cối xay đã lặng. Bọn Hắc Phong còn sót lại sẽ tìm thủ lĩnh mới, rồi hắn cũng sẽ quay lại thôi. #line:giatang_won_1
+    Già Tăng: Phía bắc, sau dãy núi, là Đỉnh Tuyết Vĩnh Hằng. Chưa ai từ đó trở về để kể. #line:giatang_won_2
 <<elseif quest_status("steppe_bisons") == "done">>
     Già Tăng: Thảo nguyên đã nhận ngươi là người của gió. #line:giatang_done_1
     Già Tăng: Nhưng phía tây, bọn cướp Hắc Phong đang dựng trại. Chúng sẽ còn quay lại... #line:giatang_done_2

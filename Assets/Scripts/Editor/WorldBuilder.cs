@@ -186,6 +186,7 @@ namespace RPG.EditorTools
             ("cuagio", "Cửa Gió", new Vector2(93.5f, 89.2f)),
             ("traidumuc", "Trại Du Mục", new Vector2(86.5f, 101.5f)),
             ("tayvuc", "Bờ Tây Khe Vực", new Vector2(38.5f, 95.5f)),
+            ("coixay", "Chân Đồi Cối Xay", new Vector2(28.5f, 110.5f)),
         };
 
         // the cave (north of the swamp): chambers joined by tunnels, solid rock everywhere else
@@ -226,6 +227,31 @@ namespace RPG.EditorTools
         static readonly Vector2 WindGate = new Vector2(95f, 91.5f);
         static readonly Vector2 NomadCamp = new Vector2(80f, 106f);
         static readonly Vector2 BisonField = new Vector2(74f, 74f);
+        // Hắc Phong (T62): the nomads' abandoned fields east of the ravine; west of it the iron bison's
+        // ground, the bandits' camp across the road and their chief's windmill hill
+        static readonly Vector2 Fields = new Vector2(66f, 104f);
+        static readonly Vector2 IronBisonGround = new Vector2(16f, 75.5f);
+        static readonly Vector2 BanditCamp = new Vector2(23f, 95f);
+        static readonly Vector2 WindmillHill = new Vector2(16f, 113f);
+        /// <summary>Where the living scarecrows stand among the straw ones (their posts).</summary>
+        static readonly Vector2[] ScarecrowPosts =
+        {
+            new Vector2(62.5f, 106.5f), new Vector2(69.5f, 107f), new Vector2(64.5f, 101.5f), new Vector2(70.5f, 101f),
+        };
+        /// <summary>The straw scarecrows of the fields (they sway in the wind).</summary>
+        static readonly Vector2[] StrawScarecrows =
+        {
+            new Vector2(60.5f, 103f), new Vector2(66.5f, 107.5f), new Vector2(67f, 103.5f), new Vector2(72.5f, 104.5f),
+            new Vector2(61.5f, 100f), new Vector2(68.5f, 99.5f), new Vector2(64f, 104.5f),
+        };
+        static readonly SwampCamp[] BanditCamps =
+        {
+            new SwampCamp { name = "HacPhong_Archers", at = new Vector2(28f, 93.5f), radius = 3f, count = 3, kind = "archer" },
+            new SwampCamp { name = "HacPhong_Blades", at = new Vector2(20f, 95.5f), radius = 3f, count = 3, kind = "blade" },
+            new SwampCamp { name = "HacPhong_Lookout", at = new Vector2(30f, 104.5f), radius = 2f, count = 2, kind = "archer" },
+            new SwampCamp { name = "HacPhong_Road", at = new Vector2(28.5f, 85.5f), radius = 2f, count = 2, kind = "blade" },
+        };
+
         /// <summary>Heights where a Cột Gió on each rim carries across Khe Vực.</summary>
         static readonly float[] Crossings = { 77f, 96f, 115f };
         /// <summary>Dirt tracks across the steppe: from the gate to the camp and to each crossing's east rim.</summary>
@@ -236,17 +262,20 @@ namespace RPG.EditorTools
             new[] { new Vector2(80f, 104f), new Vector2(72f, 110f), new Vector2(64f, 114f), new Vector2(60f, 115f) },
             new[] { new Vector2(86f, 96f), new Vector2(84f, 88f), new Vector2(76f, 82f), new Vector2(66f, 78f), new Vector2(59f, 77f) },
             new[] { new Vector2(41f, 96f), new Vector2(34f, 97f), new Vector2(24f, 99f), new Vector2(14f, 103f) },
+            // west of the ravine: down to the iron bison's ground, up to the windmill hill
+            new[] { new Vector2(34f, 97f), new Vector2(30f, 89f), new Vector2(24f, 82f), new Vector2(19f, 78.5f) },
+            new[] { new Vector2(24f, 99f), new Vector2(22f, 104f), new Vector2(19f, 107f) },
         };
         static readonly SwampCamp[] SteppeCamps =
         {
             new SwampCamp { name = "Hyenas_Gate", at = new Vector2(76f, 86f), radius = 3f, count = 3, kind = "hyena" },
             new SwampCamp { name = "Hyenas_North", at = new Vector2(69f, 117f), radius = 3f, count = 3, kind = "hyena" },
-            new SwampCamp { name = "Hyenas_West", at = new Vector2(24f, 84f), radius = 3f, count = 3, kind = "hyena" },
+            new SwampCamp { name = "Hyenas_West", at = new Vector2(34f, 80f), radius = 3f, count = 3, kind = "hyena" },
             new SwampCamp { name = "Eagles_Rocks", at = new Vector2(88f, 78f), radius = 3f, count = 2, kind = "eagle", flies = true },
             new SwampCamp { name = "Eagles_North", at = new Vector2(62f, 121f), radius = 3f, count = 2, kind = "eagle", flies = true },
-            new SwampCamp { name = "Eagles_West", at = new Vector2(29f, 115f), radius = 3f, count = 2, kind = "eagle", flies = true },
+            new SwampCamp { name = "Eagles_West", at = new Vector2(36f, 120f), radius = 3f, count = 2, kind = "eagle", flies = true },
             new SwampCamp { name = "Bisons_Field", at = BisonField, radius = 3.2f, count = 3, kind = "bison" },
-            new SwampCamp { name = "Bisons_West", at = new Vector2(19f, 105f), radius = 3f, count = 2, kind = "bison" },
+            new SwampCamp { name = "Bisons_West", at = new Vector2(39f, 108f), radius = 3f, count = 2, kind = "bison" },
         };
 
         static System.Random rnd;
@@ -349,8 +378,19 @@ namespace RPG.EditorTools
             if (DistToSteppeTracks(p) < 1.15f + wob * 0.4f) return true;
             if (Vector2.Distance(p, NomadCamp) < 5.5f + wob) return true;
             if (Vector2.Distance(p, WindGate) < 3.2f + wob) return true;
+            // Hắc Phong: the bandits' trampled camp, the bare top of the windmill hill, the iron bison's ground
+            if (Vector2.Distance(p, BanditCamp) < 5.5f + wob) return true;
+            if (Vector2.Distance(p, WindmillHill) < 7.5f + wob * 1.5f) return true;
+            if (Vector2.Distance(p, IronBisonGround) < 4f + wob) return true;
+            // the abandoned fields: furrows of bare earth, a row in every two
+            if (Mathf.Abs(p.x - Fields.x) < 6.8f && Mathf.Abs(p.y - Fields.y) < 4.6f && Mathf.Repeat(p.y + 0.5f, 2f) < 1f) return true;
             return false;
         }
+
+        /// <summary>Hắc Phong's places, kept clear of random props and tall grass.</summary>
+        static bool BanditReserved(Vector2 p) =>
+            Vector2.Distance(p, BanditCamp) < 8f || Vector2.Distance(p, WindmillHill) < 10.5f || Vector2.Distance(p, IronBisonGround) < 8.5f ||
+            (Mathf.Abs(p.x - Fields.x) < 8f && Mathf.Abs(p.y - Fields.y) < 6f);
 
         /// <summary>
         /// Solid rock at a grid corner: the whole north of the map but the cave's chambers and
@@ -1156,6 +1196,8 @@ namespace RPG.EditorTools
                 if (Place(n, at, t) != null) Mark(at);
             }
             foreach (var camp in SteppeCamps) Mark(camp.at);
+            foreach (var camp in BanditCamps) Mark(camp.at);
+            foreach (var post in ScarecrowPosts) Mark(post);
             // the nomads' camp
             var c = NomadCamp;
             P("campfire", c + new Vector2(0f, -1.2f));
@@ -1192,9 +1234,10 @@ namespace RPG.EditorTools
                 EditorUtility.SetDirty(wc);
                 foreach (var go in new[] { east, west }) Mark(go.transform.position);
             }
+            PlaceBandits(res, P);
             bool Open(Vector2 p, float spacing)
             {
-                if (!OnSteppe(p) || NearWall(p, 1) || NearRavine(p, 2) || !Free(p, spacing)) return false;
+                if (!OnSteppe(p) || NearWall(p, 1) || NearRavine(p, 2) || !Free(p, spacing) || BanditReserved(p)) return false;
                 if (DistToSteppeTracks(p) < 1.6f || Vector2.Distance(p, NomadCamp) < 7f || Vector2.Distance(p, WindGate) < 3.5f) return false;
                 foreach (var st in Stones) if (Vector2.Distance(p, st.at) < 2.6f) return false;
                 return true;
@@ -1225,11 +1268,50 @@ namespace RPG.EditorTools
                 float n = Noise(p.x + 70f, p.y + 40f, 0.12f);
                 if (n < 0.5f && R() > 0.08f) continue;
                 if (!OnSteppe(p) || NearWall(p, 0) || NearRavine(p, 1) || DistToSteppeTracks(p) < 1.3f || Vector2.Distance(p, NomadCamp) < 6f) continue;
+                if (BanditReserved(p) && !(Mathf.Abs(p.x - Fields.x) < 8f && Mathf.Abs(p.y - Fields.y) < 6f && R() < 0.35f)) continue;
                 if (!Free(p, 0.9f)) continue;
                 var go = Place(R() < 0.8f ? $"steppegrass_{rnd.Next(3)}" : "steppegrass_s", p, t);
                 if (go != null) Occupied.Add(p);
                 placed++;
             }
+        }
+
+        /// <summary>
+        /// Hắc Phong (T62): the straw scarecrows and haystacks of the abandoned fields, the ring of
+        /// sandstone on the iron bison's ground, the bandits' black tents, fences and banners across
+        /// the road, and the windmill on their chief's hill.
+        /// </summary>
+        static void PlaceBandits(Result res, System.Action<string, Vector2> P)
+        {
+            foreach (var at in StrawScarecrows) P("scarecrow", at);
+            P("haystack", Fields + new Vector2(-5.5f, 4.5f));
+            P("haystack", Fields + new Vector2(6.5f, -4.8f));
+            P("haystack", Fields + new Vector2(3.5f, 5.2f));
+            P("signpost", Fields + new Vector2(-7.5f, -5f));
+            // the iron bison's ground: six blocks of sandstone around it to ram
+            for (int k = 0; k < 6; k++)
+            {
+                float a = (k * 60f + 30f) * Mathf.Deg2Rad;
+                P(k % 2 == 0 ? "sandrock_big_0" : "sandrock_big_1", IronBisonGround + new Vector2(Mathf.Cos(a), Mathf.Sin(a) * 0.85f) * 5.6f);
+            }
+            P("hp_banner", IronBisonGround + new Vector2(6.8f, 5.6f));
+            // the bandits' camp across the road west of the ravine
+            var c = BanditCamp;
+            P("campfire", c + new Vector2(0f, -0.4f));
+            P("blacktent", c + new Vector2(-4.2f, 3.2f));
+            P("blacktent", c + new Vector2(4.5f, 3.6f));
+            P("blacktent", c + new Vector2(-1f, -4.6f));
+            P("hp_banner", c + new Vector2(2.2f, 1.4f));
+            P("hp_banner", c + new Vector2(-6.5f, -2f));
+            P("crate", c + new Vector2(3.4f, -2.6f));
+            P("barrel", c + new Vector2(4.2f, -2f));
+            // stakes on the ravine side, open where the road runs through
+            foreach (float y in new[] { 88.5f, 90.8f, 93f, 101.5f, 103.8f }) P("stakefence", new Vector2(31.5f, y));
+            // the windmill on the hilltop, banners at the way up
+            P("windmill", WindmillHill + new Vector2(0f, 4.8f));
+            P("hp_banner", WindmillHill + new Vector2(5.5f, -7f));
+            P("hp_banner", WindmillHill + new Vector2(-4.5f, -7.5f));
+            P("cairn", WindmillHill + new Vector2(8f, 4f));
         }
 
         static void PlaceBounds(Transform root)
@@ -1473,6 +1555,39 @@ namespace RPG.EditorTools
                 var prefab = c.kind == "hyena" ? PrefabFactory.Hyena : c.kind == "eagle" ? PrefabFactory.Eagle : PrefabFactory.Bison;
                 if (prefab != null) Camp(c.name, prefab, c.at, c.count, c.radius);
             }
+            // Hắc Phong: the living scarecrows on their posts, the bandits' camps, the iron bison and the chief
+            if (PrefabFactory.Scarecrow != null)
+                for (int i = 0; i < ScarecrowPosts.Length; i++)
+                    Camp($"Scarecrow_Post_{i}", PrefabFactory.Scarecrow, ScarecrowPosts[i], 1, 0.01f);
+            foreach (var c in BanditCamps)
+            {
+                var prefab = c.kind == "archer" ? PrefabFactory.BanditArcher : PrefabFactory.BanditBlade;
+                if (prefab != null) Camp(c.name, prefab, c.at, c.count, c.radius);
+            }
+            if (PrefabFactory.IronBison != null)
+            {
+                var ground = new GameObject("IronBisonArena").transform;
+                ground.SetParent(root, false);
+                ground.position = IronBisonGround;
+                var ib = Spawn(PrefabFactory.IronBison, IronBisonGround + new Vector2(0f, 0.6f), ground, "Bo Rung Sat").GetComponent<BossIronBison>();
+                ib.arenaCenter = ground;
+                EditorUtility.SetDirty(ib);
+            }
+            if (PrefabFactory.BlackWind != null)
+            {
+                var hill = new GameObject("WindmillHillArena").transform;
+                hill.SetParent(root, false);
+                hill.position = WindmillHill;
+                var chief = Spawn(PrefabFactory.BlackWind, WindmillHill + new Vector2(0f, 1.5f), hill, "Thu Linh Hac Phong").GetComponent<BossBlackWind>();
+                chief.arenaCenter = hill;
+                if (PrefabFactory.BanditArcher != null) chief.archers = MakeBrood(hill, "Archers", PrefabFactory.BanditArcher, 4, WindmillHill + new Vector2(0f, -7f));
+                // the hill's area (its own wind, the sandstorm) is made with the zones: linked by name there
+                EditorUtility.SetDirty(chief);
+            }
+            res.spots.Add(("fields", Marker(actors, "FieldsSpot", Fields)));
+            res.spots.Add(("ironbison", Marker(actors, "IronBisonSpot", IronBisonGround)));
+            res.spots.Add(("hacphong", Marker(actors, "BanditCampSpot", BanditCamp)));
+            res.spots.Add(("windmillhill", Marker(actors, "WindmillHillSpot", WindmillHill)));
             res.spots.Add(("windgate", Marker(actors, "WindGateSpot", WindGate)));
             res.spots.Add(("nomadcamp", Marker(actors, "NomadCampSpot", NomadCamp)));
             res.spots.Add(("hyenas", Marker(actors, "HyenasSpot", SteppeCamps[0].at)));
@@ -1546,6 +1661,19 @@ namespace RPG.EditorTools
             foreach (var (name, at, r, prio) in new[] { ("Cửa Gió", WindGate, 6f, 2), ("Trại Du Mục", NomadCamp, 9f, 2),
                                                          ("Đồng Bò Rừng", BisonField, 9f, 2) })
                 Z(name, at, r, prio).music = "";
+            // Hắc Phong
+            foreach (var (name, at, r, prio) in new[] { ("Ruộng Bỏ Hoang", Fields, 7.5f, 2), ("Bãi Sừng Sắt", IronBisonGround, 9f, 3),
+                                                         ("Trại Hắc Phong", BanditCamp, 9f, 2) })
+                Z(name, at, r, prio).music = "";
+            var hill = Z("Đồi Cối Xay", WindmillHill, 13f, 3);   // the whole fight: the storm covers it
+            hill.music = "";
+            hill.windy = 1f;
+            hill.windCycle = 12f;   // on the hilltop the wind turns twice as often
+            foreach (var chief in root.GetComponentsInChildren<BossBlackWind>(true))
+            {
+                chief.hill = hill;
+                EditorUtility.SetDirty(chief);
+            }
             var rav = Z("Khe Vực", new Vector2(RavineX(96f), 96f), 0f, 2);
             rav.size = new Vector2(16f, SteppeY1 - SteppeY0);
             rav.music = "";

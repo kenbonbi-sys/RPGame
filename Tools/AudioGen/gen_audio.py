@@ -2223,6 +2223,73 @@ def _bison(rng):
     return 0.6 * snort + bellow
 
 
+# ---------------------------------------------------------------- Hắc Phong (T62)
+@sfx("sfx_bow_draw")
+def _bow_draw(rng):
+    """A bow drawn back: the limbs creak, the string strains a rising note."""
+    n = ns(0.45)
+    t = tvec(n)
+    creak = grains(n, rng, np.sort(rng.uniform(0.02, 0.38, 9)), rng.uniform(300, 700, 9), rng.uniform(0.01, 0.025, 9),
+                   rng.uniform(0.4, 1.0, 9), q=6.0)
+    f = seg_sweep([(0, 180), (1, 260)], n)
+    strain = rmsn(bp(osc("saw", f, n), 900, 2.0)) * env_hump(n, 0.8, 2.0, 1.5) * 0.25
+    return rmsn(creak) * 0.7 + strain
+
+
+@sfx("sfx_bow")
+def _bow(rng):
+    """A bow loosed: the string's twang, a short whip of air after the arrow."""
+    n = ns(0.5)
+    t = tvec(n)
+    f = 150 * (1 + 0.6 * np.exp(-t / 0.02))
+    twang = (osc("saw", f, n) + 0.5 * osc("square", f * 2, n)) * env_perc(n, 0.001, 0.09)
+    twang = lp(twang, 2400)
+    air = whoosh(n, rng, [(0, 3000), (0.3, 1200), (1, 600)], q=1.4, peak=0.2, rise=1.0, fall=3.0)
+    return rmsn(twang) + 0.5 * air
+
+
+@sfx("sfx_arrow_hit")
+def _arrow_hit(rng):
+    """An arrow striking: a dry thunk into flesh or leather, the shaft quivering."""
+    n = ns(0.3)
+    t = tvec(n)
+    thunk = thump(n, 900, 180, 0.03)
+    quiver = osc("sine", 420 * (1 + 0.04 * np.sin(TAU * 38 * t)), n) * env_exp(n, 0.07) * 0.3
+    tick = rmsn(hp(white(n, rng), 2500)) * env_perc(n, 0.0005, 0.006) * 0.6
+    return rmsn(thunk) + quiver + tick
+
+
+@sfx("sfx_iron")
+def _iron(rng):
+    """A blow glancing off riveted iron: a dull clang with a few ringing partials."""
+    n = ns(0.7)
+    body = partials(n, [310, 742, 1180, 1705, 2390], [1.0, 0.6, 0.45, 0.3, 0.2], [0.35, 0.22, 0.15, 0.1, 0.07], rng=rng)
+    hit = rmsn(bp(white(n, rng), 1800, 1.2)) * env_perc(n, 0.0005, 0.015)
+    return reverb(rmsn(body) * 0.8 + 0.6 * hit, 0.18, 0.5, seed=61)
+
+
+@sfx("sfx_scarecrow")
+def _scarecrow(rng):
+    """A scarecrow jerking alive: straw rustling hard, the post creaking, a dry breathy hiss."""
+    n = ns(0.8)
+    rustle = rmsn(hp(white(n, rng), 3500)) * (0.4 + 0.6 * np.abs(smooth_rand(n, 30, rng))) * env_hump(n, 0.3, 1.2, 2.0)
+    creak = grains(n, rng, np.sort(rng.uniform(0.05, 0.6, 7)), rng.uniform(180, 420, 7), rng.uniform(0.02, 0.05, 7),
+                   rng.uniform(0.5, 1.0, 7), q=8.0)
+    hiss = rmsn(bp(white(n, rng), 1400, 2.0)) * env_hump(n, 0.6, 2.0, 1.5) * 0.3
+    return 0.7 * rustle + 0.6 * rmsn(creak) + hiss
+
+
+@sfx("sfx_tornado")
+def _tornado(rng):
+    """A whirlwind rising: a deep roar that swirls, sand hissing through it."""
+    n = ns(1.4)
+    t = tvec(n)
+    roar = rmsn(lp(brown(n, rng), 300 + 200 * np.sin(TAU * 3.2 * t) ** 2)) * env_hump(n, 0.35, 1.5, 2.0)
+    swirl = rmsn(bp(pink(n, rng), 700 + 450 * np.sin(TAU * 4.5 * t), 3.0)) * env_hump(n, 0.4, 1.6, 2.0)
+    sand = rmsn(hp(white(n, rng), 5000)) * env_hump(n, 0.5, 2.0, 2.0) * 0.25
+    return 0.8 * roar + 0.5 * swirl + sand
+
+
 def inst_bowed(f, dur, sr, rng, vib=5.5, tail=0.3):
     """A two-stringed fiddle (morin khuur): bowed saw through a warm body, a slow vibrato."""
     n = int((dur + tail) * sr)
@@ -2329,6 +2396,7 @@ SFX_NAMES = [
     "sfx_chest_appear", "sfx_chest_open",
     "sfx_crystal", "sfx_crystal_break", "sfx_reflect", "sfx_beam", "sfx_mimic",
     "sfx_gust", "sfx_hyena", "sfx_eagle", "sfx_bison",
+    "sfx_bow_draw", "sfx_bow", "sfx_arrow_hit", "sfx_iron", "sfx_scarecrow", "sfx_tornado",
 ]
 # name, builder, allowed duration range (s), target peak dBFS
 MUSIC = [

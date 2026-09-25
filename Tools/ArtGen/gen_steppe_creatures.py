@@ -1,9 +1,13 @@
 """
 Creatures of Thảo Nguyên Gió: Linh Cẩu Gió (wind hyena, hunts in packs), Chim Ưng Đá (stone eagle,
-swoops from high up) and Bò Rừng (steppe bison, charges head down). Procedural shaded shapes like
-gen_cave_creatures, facing right. Every build_* returns {animation: [Canvas frames]}.
+swoops from high up), Bò Rừng (steppe bison, charges head down), Bò Rừng Sắt (the bison clad in
+the bandits' iron) and Bù Nhìn Sống (a scarecrow that stands still among the straw ones, then
+wakes with sickles in its sleeves). Procedural shaded shapes like gen_cave_creatures, facing
+right. Every build_* returns {animation: [Canvas frames]}; scarecrow_still() is also the straw
+scarecrow prop, pixel for pixel.
 """
 import math
+import random
 
 from pixelkit import Canvas, P, OUTLINE, hx, ramp, mix, shaded_ellipse, shade_index, shaded_poly, point_in_poly
 from gen_enemies import shaded_capsule, layer, comp
@@ -25,6 +29,14 @@ C = {
     "shag": ramp("#140c06", "#22160c", "#342214", "#46301c"),
     "horn": ramp("#5a5244", "#8e8470", "#c2b89e", "#e6dec8"),
     "hoof": ramp("#0e0a08", "#1c1612", "#2c241c"),
+    # scarecrow: grey weathered wood, burlap, a faded red shirt, straw
+    "post": ramp("#2a2018", "#40322a", "#584638", "#6e5a48"),
+    "sack": ramp("#5a4830", "#7c6644", "#9c845a", "#bca476", "#d6c294"),
+    "shirt": ramp("#3a1a18", "#5a2a24", "#7a3c30", "#98543e", "#b06e50"),
+    "patch": ramp("#2a3a4a", "#3e5468", "#587088"),
+    "hat": ramp("#5a4420", "#7e6230", "#a08040", "#c2a058", "#dcbe74"),
+    "straw": ramp("#8a6e2c", "#b08e3c", "#d2b050", "#ecd072"),
+    "sickle": ramp("#3a3e4c", "#5c6272", "#8a92a4", "#c4cad8", "#eef0f6"),
 }
 EYE_AMBER = (hx("#ffb030"), hx("#fff0a0"))
 EYE_RED = (hx("#ff5a3a"), hx("#ffb070"))
@@ -283,14 +295,19 @@ def bison(step=0, lower=0.0, paw=False, charge=0.0, eyes="open", dead=0.0, iron=
         for d in range(3):
             if hp.opaque(x, y0 + d):
                 hp.px(x, y0 + d, sg[0] if d == 2 else sg[1])
-    if iron:
-        # riveted plates over the hump
-        for (dx, dy) in ((-3, -4), (1, -5), (4, -3), (-1, -1), (3, 0)):
-            x, y = int(hump_x + dx), int(hump_y + dy)
-            if hp.opaque(x, y):
-                hp.px(x, y, br[5])
-                hp.px(x + 1, y + 1, br[1])
     comp(cv, hp, OUT)
+    if iron:
+        # riveted iron plates over the hump and shoulders, rust at their edges
+        pl = layer(FW, FH)
+        iron_r = ramp("#2e3240", "#4a5064", "#6e7690", "#9aa2ba", "#c8cedc")
+        for (dx0, dy0, w, h) in ((-6, -7, 6, 4), (0, -8, 6, 4), (5, -5, 5, 5), (-3, -3, 7, 3)):
+            x0, y0 = hump_x + dx0, hump_y + dy0
+            shaded_poly(pl, [(x0, y0 + 1), (x0 + 1, y0), (x0 + w, y0), (x0 + w, y0 + h - 1), (x0 + w - 1, y0 + h), (x0, y0 + h)],
+                        iron_r, grad_dir=(0.3, 1.0), dither=0.15)
+            for (rx, ry) in ((x0 + 1, y0 + 1), (x0 + w - 1, y0 + 1)):
+                pl.px(int(rx), int(ry), iron_r[4])
+            pl.px(int(x0 + w // 2), int(y0 + h), hx("#7a3a1a"))
+        comp(cv, pl, OUT)
     # the head: low, broad, bearded, with horns curving up
     hd = layer(FW, FH)
     hx0 = hump_x + 8.5 + lower * 1.5 + fx * 0.3
@@ -304,10 +321,18 @@ def bison(step=0, lower=0.0, paw=False, charge=0.0, eyes="open", dead=0.0, iron=
         hd.px(int(hx0), int(hy0 + 3.5 + d * 0.7), sg[1])
     # muzzle
     shaded_ellipse(hd, hx0 + 3, hy0 + 1.2, 1.8, 1.5, br[1:4], dither=0.1)
+    if iron:
+        # an iron mask over the brow, a spike on it
+        mask = ramp("#3a4050", "#5c6478", "#8a92a8", "#b8c0d2")
+        shaded_poly(hd, [(hx0 - 2, hy0 - 3), (hx0 + 3, hy0 - 3.5), (hx0 + 4.5, hy0 - 0.5), (hx0 + 1, hy0 + 0.5), (hx0 - 2, hy0 - 0.5)],
+                    mask, grad_dir=(0.4, 1.0), dither=0.1)
+        hd.px(int(hx0 + 1), int(hy0 - 2), mask[3])
+        hd.px(int(hx0 + 4), int(hy0 - 4), mask[3])
+        hd.px(int(hx0 + 4), int(hy0 - 3), mask[2])
     comp(cv, hd, OUT)
     # horns: from the top of the head, out and up
     hn = layer(FW, FH)
-    hr = C["horn"]
+    hr = C["horn"] if not iron else ramp("#3a3e4c", "#5c6272", "#8a92a4", "#c4cad8")
     for side, dx in ((1, 0.8), (-1, -1.2)):
         x0, y0 = hx0 + dx, hy0 - 3
         pts = [(x0, y0), (x0 + 1.5 * side + 0.8, y0 - 1.5), (x0 + 1.8 * side + 1.5, y0 - 3.2)]
@@ -333,12 +358,220 @@ def build_bison(iron=False):
     return A
 
 
+# ============================================================================
+# Bù Nhìn Sống
+# ============================================================================
+
+def scarecrow(tilt=0.0, arms=0.0, lift=0.0, spin=0.0, sickles=0.0, eyes="stitch", slump=0.0, dead=0.0, hop=0):
+    """A scarecrow on its post: a burlap head under a straw hat, a faded shirt on the crossbar,
+    straw bristling from the sleeves. tilt: the head's lean (−1..1); arms: the crossbar raised (−)
+    or dropped (+); spin: the arms swung round (0..1: one side toward the viewer); sickles: blades
+    out of the sleeves (0..1); eyes: "stitch" (sewn, a straw one), "glow" (alive), "x" (fallen);
+    slump: sagging on its post; dead: a heap of straw; hop: 0..3, the post bouncing."""
+    FW, FH = 32, 38
+    cv = Canvas(FW, FH)
+    cx = 15
+    base = FH - 2
+    bob = [0, -1, -2, -1][hop % 4] if hop else 0
+    if dead > 0.5:
+        # the heap: the shirt and hat on a pile of straw, the post snapped
+        pile = layer(FW, FH)
+        shaded_ellipse(pile, cx, base - 3, 10, 3.5, C["straw"], dither=0.4, bias=0.05)
+        for k in range(12):
+            x = cx - 9 + k * 1.6
+            pile.line(x, base - 4, x + (1 if k % 2 else -1), base - 7 - (k % 3), C["straw"][2 + k % 2])
+        comp(cv, pile, OUT)
+        sh = layer(FW, FH)
+        shaded_poly(sh, [(cx - 7, base - 3), (cx - 1, base - 7), (cx + 5, base - 5), (cx + 2, base - 1), (cx - 6, base - 1)], C["shirt"][1:], dither=0.3)
+        comp(cv, sh, OUT)
+        pt = layer(FW, FH)
+        pt.line(cx - 12, base - 2, cx - 2, base - 5, C["post"][2], 2)
+        comp(cv, pt, OUT)
+        hd = layer(FW, FH)
+        shaded_ellipse(hd, cx + 8, base - 5, 3.5, 3, C["sack"][1:], dither=0.2)
+        comp(cv, hd, OUT)
+        hat = layer(FW, FH)
+        shaded_ellipse(hat, cx + 9, base - 8, 5, 1.6, C["hat"][1:], dither=0.2)
+        comp(cv, hat, OUT)
+        if dead < 1.0:
+            for k in range(6):
+                cv.px(cx - 6 + k * 3, base - 9 - (k % 2) * 2, C["straw"][3])
+        return cv
+    # the post: from the ground up behind the shirt
+    pt = layer(FW, FH)
+    top = 9 + bob + slump * 2
+    for y in range(int(top), base + 1):
+        pt.px(cx, y, C["post"][2])
+        pt.px(cx + 1, y, C["post"][1])
+    # the crossbar (the arms): level, raised or dropped, or swung round in the spin
+    ay = 15 + bob + arms * 3 + slump * 2
+    reach = 11 * (1 - 0.55 * math.sin(spin * math.pi)) if spin else 11
+    lean = (arms * 2.0) if not spin else math.cos(spin * math.pi * 2) * 3
+    pt.line(cx - reach, ay + lean, cx + reach, ay - lean, C["post"][3], 2)
+    comp(cv, pt, OUT)
+    # the shirt: body and sleeves on the crossbar, tattered hem, a blue patch
+    shirt = layer(FW, FH)
+    body_top, body_bot = ay - 1, ay + 10 - slump
+    shaded_poly(shirt, [(cx - 5, body_top), (cx + 6, body_top), (cx + 5, body_bot), (cx + 2, body_bot + 1), (cx - 1, body_bot - 1),
+                        (cx - 3, body_bot + 1), (cx - 5, body_bot)], C["shirt"], grad_dir=(0.6, 1.0), dither=0.3)
+    for side in (-1, 1):
+        x_end = cx + side * reach
+        y_end = ay - side * lean
+        shaded_poly(shirt, [(cx + side * 3, ay - 2), (x_end - side * 1, y_end - 2), (x_end - side * 1, y_end + 2), (cx + side * 4, ay + 3)],
+                    C["shirt"][1:], grad_dir=(0.3 * side, 1.0), dither=0.3)
+    for (x, y) in ((cx - 3, ay + 4), (cx - 2, ay + 4), (cx - 3, ay + 5), (cx - 2, ay + 5)):
+        x, y = int(x), int(y)
+        if shirt.opaque(x, y):
+            shirt.px(x, y, C["patch"][1 + (x + y) % 2])
+    # a rope belt
+    shirt.hline(cx - 4, cx + 5, int(ay + 6), C["sack"][1])
+    comp(cv, shirt, OUT)
+    # straw from the sleeves, the collar and under the hem
+    st = layer(FW, FH)
+    for side in (-1, 1):
+        x_end = cx + side * reach
+        y_end = ay - side * lean
+        # a fan of bristles out of the cuff
+        for k in range(3):
+            st.line(x_end, y_end - 1 + k, x_end + side * 3, y_end - 3 + k * 2.6, C["straw"][1 + k])
+    for k in range(5):
+        x = cx - 3 + k * 1.6
+        st.line(x, body_bot, x + (k % 2) - 0.5, body_bot + 2 + (k % 2), C["straw"][2])
+    comp(cv, st, None)
+    # sickles sliding out of the sleeves
+    if sickles > 0:
+        sk = layer(FW, FH)
+        for side in (-1, 1):
+            x_end = cx + side * reach
+            y_end = ay - side * lean
+            length = 5 * sickles
+            pts = []
+            for i in range(8):
+                t = i / 7
+                a = -math.pi / 2 + t * math.pi * 0.9
+                pts.append((x_end + side * (1 + math.cos(a) * length * 0.8 + length * 0.2), y_end + math.sin(a) * length))
+            for i in range(len(pts) - 1):
+                sk.line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], C["sickle"][3 if i < 4 else 2])
+            sk.px(int(pts[0][0]), int(pts[0][1]), C["sickle"][4])
+        comp(cv, sk, OUT)
+    # the head: a stuffed sack, tied at the neck, leaning
+    hd = layer(FW, FH)
+    hx0 = cx + 0.5 + tilt * 1.6
+    hy0 = ay - 5 + abs(tilt) * 0.6 + slump
+    shaded_ellipse(hd, hx0, hy0, 4.2, 4.0, C["sack"], dither=0.25, bias=0.05)
+    hd.hline(int(hx0 - 2), int(hx0 + 2), int(hy0 + 4), C["sack"][0])
+    comp(cv, hd, OUT)
+    # the face: sewn eyes and a stitched grin, or eyes glowing when it wakes
+    ex, ey = int(hx0 + 0.5), int(hy0 - 0.5)
+    if eyes == "glow":
+        for (x, y) in ((ex - 2, ey), (ex + 1, ey)):
+            cv.px(x, y, hx("#ffb030"))
+            cv.px(x + 1, y, hx("#fff0a0"))
+    elif eyes == "x":
+        for x in (ex - 2, ex + 1):
+            cv.px(x, ey, OUTLINE)
+            cv.px(x + 1, ey + 1, OUTLINE)
+    else:
+        for x in (ex - 2, ex + 1):
+            cv.px(x, ey, OUT)
+            cv.px(x + 1, ey, OUT)
+    for k in range(5):
+        cv.px(ex - 2 + k, ey + 2 + (1 if k in (0, 4) else 0), OUT if k % 2 == 0 else C["sack"][1])
+    # the straw hat, wide brim
+    hat = layer(FW, FH)
+    hat_y = hy0 - 3.5
+    shaded_ellipse(hat, hx0 + tilt * 0.8, hat_y + 0.6, 7, 1.6, C["hat"][1:], dither=0.2)
+    shaded_ellipse(hat, hx0 + tilt * 1.1, hat_y - 1.2, 3.4, 2.2, C["hat"], dither=0.2, bias=0.1)
+    hat.hline(int(hx0 - 3 + tilt), int(hx0 + 3 + tilt), int(hat_y - 0.2), C["shirt"][2])
+    comp(cv, hat, OUT)
+    return cv
+
+
+def scarecrow_still():
+    """The straw scarecrow as it stands (the prop, and the living one pretending)."""
+    return scarecrow(tilt=0.35)
+
+
+def build_scarecrow():
+    A = {}
+    A["still"] = [scarecrow_still()]
+    A["wake"] = [scarecrow(tilt=-0.4, eyes="glow", slump=0.5), scarecrow(tilt=0.6, eyes="glow", arms=-0.5, sickles=0.5),
+                 scarecrow(tilt=0.0, eyes="glow", arms=-0.8, sickles=1.0)]
+    A["idle"] = [scarecrow(tilt=0.2, eyes="glow", sickles=1.0, hop=1), scarecrow(tilt=0.0, eyes="glow", sickles=1.0, hop=2, arms=0.3)]
+    A["move"] = [scarecrow(tilt=0.3, eyes="glow", sickles=1.0, hop=k, arms=0.4 if k % 2 else -0.2) for k in range(4)]
+    A["windup"] = [scarecrow(tilt=-0.5, eyes="glow", sickles=1.0, arms=-1.0), scarecrow(tilt=-0.6, eyes="glow", sickles=1.0, arms=-1.2)]
+    A["attack"] = [scarecrow(tilt=0.2, eyes="glow", sickles=1.0, spin=k / 4.0) for k in range(4)]
+    A["hurt"] = [scarecrow(tilt=0.9, eyes="x", sickles=0.6, slump=1.0)]
+    A["dead"] = [scarecrow(dead=0.7), scarecrow(dead=1.0)]
+    return A
+
+
+# ============================================================================
+# Lốc Xoáy (Thủ Lĩnh Hắc Phong's whirlwind)
+# ============================================================================
+
+def tornado(frame=0):
+    """A whirlwind of sand, seen from the side: a funnel wide at the top and thin at its foot,
+    bands of dust spiralling round it (shifted a quarter turn each frame), grit flying off."""
+    FW, FH = 34, 46
+    cv = Canvas(FW, FH)
+    cx = FW / 2
+    sand = ramp("#6a5030", "#8e6e42", "#b08e5a", "#ceae78", "#e8d09c", "#f8ecc8")
+    top, foot = 3, FH - 3
+    for y in range(top, foot + 1):
+        t = (y - top) / (foot - top)            # 0 at the top, 1 at the foot
+        half = 14 * (1 - t) ** 1.25 + 1.6
+        sway = math.sin(t * 5.0 + frame * 0.6) * 2.2 * (1 - t) + math.sin(t * 9 + frame) * 0.6
+        for x in range(FW):
+            d = (x + 0.5 - (cx + sway)) / half
+            if abs(d) > 1:
+                continue
+            # the spiral bands: phase runs down the funnel and round it
+            band = math.sin((t * 13.0 - d * 3.2 + frame * math.pi / 2))
+            inten = 0.5 - d * 0.4 + (0.38 if band > 0.35 else -0.2 if band < -0.5 else 0.05)
+            i = max(0, min(len(sand) - 1, int((inten + 0.2) * (len(sand) - 1))))
+            if abs(d) > 0.86 and (x + y + frame) % 3 == 0:
+                continue   # a ragged edge
+            if y < top + 3 and (x * 7 + y * 3 + frame) % 4 == 0:
+                continue   # the cloud it rises into, torn
+            cv.px(x, y, sand[i])
+    # grit flung off the sides
+    rnd = random.Random(frame * 7 + 3)
+    for k in range(10):
+        t = rnd.uniform(0.05, 0.8)
+        y = int(top + t * (foot - top))
+        side = 1 if k % 2 else -1
+        x = int(cx + side * (14 * (1 - t) ** 1.25 + 3 + rnd.uniform(0, 3)))
+        cv.px(x, y, sand[4 + (k % 2)])
+    cv.outline(OUT)
+    # a dust cloud at the foot
+    for k in range(7):
+        x = cx - 6 + k * 2 + (frame % 2)
+        cv.px(int(x), foot, sand[2])
+        cv.px(int(x) + 1, foot - 1, sand[3])
+    return cv
+
+
+def build_tornado():
+    return {"spin": [tornado(f) for f in range(4)]}
+
+
+def build_iron_bison():
+    """Bò Rừng Sắt: the bison clad in iron, with the clips a boss needs (walk, roar)."""
+    A = build_bison(iron=True)
+    A["walk"] = A.pop("move")
+    A["roar"] = [bison(lower=0.0, eyes="wide", iron=True), bison(lower=-0.4, eyes="wide", iron=True, paw=True, step=1)]
+    order = ["idle", "walk", "windup", "attack", "roar", "hurt", "dead"]
+    return {k: A[k] for k in order}
+
+
 if __name__ == "__main__":
     import os
     import sys
     from pixelkit import preview, pack_grid
     out = sys.argv[1] if len(sys.argv) > 1 else "."
-    for name, fn in (("hyena", build_hyena), ("eagle", build_eagle), ("bison", build_bison)):
+    for name, fn in (("hyena", build_hyena), ("eagle", build_eagle), ("bison", build_bison), ("scarecrow", build_scarecrow),
+                     ("ironbison", build_iron_bison), ("tornado", build_tornado)):
         A = fn()
         frames = [f for k in A for f in A[k]]
         preview(pack_grid(frames, 8).to_image(), 5, os.path.join(out, f"steppe_{name}.png"))

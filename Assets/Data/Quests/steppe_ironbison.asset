@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: steppe_ironbison
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: steppe_ironbison
+  title: "B\xF2 R\u1EEBng S\u1EAFt"
+  kind: 0
+  summary: "B\u1ECDn H\u1EAFc Phong b\u1ECDc s\u1EAFt m\u1ED9t con b\xF2 r\u1EEBng v\xE0 th\u1EA3 n\xF3 canh l\u1ED1i v\xE0o tr\u1EA1i, \u1EDF b\xE3i \u0111\xE1 b\u1EDD t\xE2y Khe V\u1EF1c. Gi\xE1p s\u1EAFt \u1EDF \u0111\u1EA7u v\xE0 vai; d\u1EE5 n\xF3 h\xFAc v\xE0o t\u1EA3ng sa th\u1EA1ch \u0111\u1EC3 gi\xE1p bung ra r\u1ED3i \u0111\xE1nh. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 23."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: da57a811f581e5b44b748e7ceab871bc, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: ironbison
+    count: 1
+    text: "\u0110\xE1nh b\u1EA1i B\xF2 R\u1EEBng S\u1EAFt"
+    countPrevious: 0
+    marker: ironbison
+  xp: 3400
+  gold: 320
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 3
+  - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
+    count: 2
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 72d65043ca74c8247aa9f3817e9bf1c5, type: 2}

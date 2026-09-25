@@ -7,7 +7,7 @@ namespace RPG.EditorTools.Tests
     /// The main quests are one road (players' feedback, 25/09/2026): every step needs the one
     /// before and leads to the next, the levels they are for only go up, and the last step of a
     /// region leads into the next region (the bear → the swamp's road, the snake mother → the cave,
-    /// the spider queen → the steppe).
+    /// the spider queen → the steppe, Hắc Phong's chief → the snow peaks, when they open).
     /// </summary>
     public class QuestRoadTests
     {
@@ -18,6 +18,7 @@ namespace RPG.EditorTools.Tests
             "cave_enter", "cave_bats", "cave_spiders", "cave_golems", "cave_beetles", "cave_slimes", "cave_eyes",
             "slay_crystalgolem", "slay_queen",
             "steppe_enter", "steppe_hyenas", "steppe_eagles", "steppe_bisons",
+            "steppe_scarecrows", "steppe_ironbison", "hacphong_archers", "hacphong_blades", "slay_blackwind",
         };
 
         static int Recommended(QuestDef q)

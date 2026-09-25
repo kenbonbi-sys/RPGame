@@ -61,39 +61,51 @@ namespace RPG
             return Mathf.Lerp(1f, 0.15f, Mathf.SmoothStep(0f, 1f, (phase - 0.82f) / 0.18f));
         }
 
-        /// <summary>The wind now: its heading times its strength (length 0..1), wherever it blows.</summary>
-        public static Vector2 Current
+        /// <summary>The wind now on the steppe's own cycle: its heading times its strength (length 0..1), wherever it blows.</summary>
+        public static Vector2 Current => CurrentFor(CycleSeconds);
+
+        /// <summary>
+        /// The wind now on a cycle of <paramref name="cycle"/> seconds (0: the steppe's). A place where
+        /// it turns faster (the windmill hill: every 12 s) keeps its own count on the same clock.
+        /// </summary>
+        public static Vector2 CurrentFor(float cycle)
         {
-            get
+            if (Override.HasValue) return Override.Value;
+            if (cycle <= 0f) cycle = CycleSeconds;
+            float clock = Clock;
+            int k = Mathf.FloorToInt(clock / cycle);
+            float phase = clock / cycle - k;
+            // a little flutter in the gust
+            float s = StrengthAt(phase) * (0.92f + 0.08f * Mathf.Sin(clock * 2.3f));
+            return Util.FromAngle(HeadingOf(k)) * s;
+        }
+
+        /// <summary>The windy area that rules a point: the windiest, the higher priority of two as windy; null out of them.</summary>
+        static ZoneArea WindiestAt(Vector2 pos)
+        {
+            ZoneArea best = null;
+            for (int i = 0; i < Windy.Count; i++)
             {
-                if (Override.HasValue) return Override.Value;
-                float clock = Clock;
-                int k = Mathf.FloorToInt(clock / CycleSeconds);
-                float phase = clock / CycleSeconds - k;
-                // a little flutter in the gust
-                float s = StrengthAt(phase) * (0.92f + 0.08f * Mathf.Sin(clock * 2.3f));
-                return Util.FromAngle(HeadingOf(k)) * s;
+                var z = Windy[i];
+                if (z == null || z.windy <= 0f || !z.Contains(pos)) continue;
+                if (best == null || z.windy > best.windy || (z.windy == best.windy && z.priority > best.priority)) best = z;
             }
+            return best;
         }
 
         /// <summary>How windy a point is, 0..1 (the windiest area around it).</summary>
         public static float WindinessAt(Vector2 pos)
         {
-            float w = 0f;
-            for (int i = 0; i < Windy.Count; i++)
-            {
-                var z = Windy[i];
-                if (z != null && z.windy > w && z.Contains(pos)) w = z.windy;
-            }
-            return w;
+            var z = WindiestAt(pos);
+            return z != null ? z.windy : 0f;
         }
 
         /// <summary>The wind at a point (heading × strength × windiness; zero out of the windy areas).</summary>
         public static Vector2 At(Vector2 pos)
         {
             if (Windy.Count == 0) return Vector2.zero;
-            float w = WindinessAt(pos);
-            return w > 0f ? Current * w : Vector2.zero;
+            var z = WindiestAt(pos);
+            return z != null ? CurrentFor(z.windCycle) * z.windy : Vector2.zero;
         }
 
         /// <summary>"Đông Bắc": where the wind blows from, as a sailor says it.</summary>

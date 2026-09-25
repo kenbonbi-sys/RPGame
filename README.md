@@ -36,7 +36,8 @@ Một thế giới chung, luôn bật, cho khoảng 20 người (kế hoạch: `
 ## Nội dung đã có
 
 - **Bản đồ** liền mạch 200×128 tile: Làng Lá Xanh → Rừng Thì Thầm → Đầm Lầy Sương Mù → Hang Pha Lê → Thảo Nguyên Gió. Có vùng + tên khu vực, minimap, bản đồ thế giới, chu kỳ ngày/đêm (đèn 2D: lửa trại, đèn lồng, cửa sổ nhà, ánh sáng quanh nhân vật).
-- **Thảo Nguyên Gió (T61):** đường hầm phía tây Rừng Pha Lê dẫn ra cao nguyên cỏ vàng, cây keo và trại du mục của Già Tăng. Gió đổi hướng, xô nhân vật và bẻ đường đạn; cỏ nghiêng theo gió. Khe Vực có va chạm, ba cặp Cột Gió đưa qua hai bờ. Linh Cẩu Gió săn theo bầy, Chim Ưng Đá đánh dấu rồi bổ nhào, Bò Rừng húc vào đá sẽ choáng. Chuỗi nhiệm vụ nối tiếp Nhện Chúa; ba Đá Truyền Tống và trang bị chế tạo mới. Chi tiết và phần còn lại của T62: `Docs/ThaoNguyen.md`.
+- **Thảo Nguyên Gió (T61):** đường hầm phía tây Rừng Pha Lê dẫn ra cao nguyên cỏ vàng, cây keo và trại du mục của Già Tăng. Gió đổi hướng, xô nhân vật và bẻ đường đạn; cỏ nghiêng theo gió. Khe Vực có va chạm, ba cặp Cột Gió đưa qua hai bờ. Linh Cẩu Gió săn theo bầy, Chim Ưng Đá đánh dấu rồi bổ nhào, Bò Rừng húc vào đá sẽ choáng. Chuỗi nhiệm vụ nối tiếp Nhện Chúa; ba Đá Truyền Tống và trang bị chế tạo mới.
+- **Hắc Phong (T62):** phía tây Khe Vực. Bù Nhìn Sống đứng lẫn giữa bù nhìn rơm (bù nhìn rơm lay theo gió, con sống thì không). Cung thủ bắn đón gió, đao thủ lướt chém. Mini-boss Bò Rừng Sắt bung giáp khi húc vào đá. Thủ Lĩnh Hắc Phong đứng trên đồi cối xay: gió ở đó đổi hướng mỗi 12 giây, hắn tung lưỡi gió và lốc xoáy, gọi cung thủ, nổi bão cát, và mất thăng bằng nếu bị Lướt Hoàn Hảo đúng nhát thứ ba. Chi tiết: `Docs/ThaoNguyen.md`.
 - **Người chơi:** 4 hướng, animation idle/walk/attack/cast/dash/hurt/dead, 8 skill có VFX riêng, combo chém 3 đòn, crit, hit-stop, rung màn hình.
 - **Cấp độ & chỉ số:** cấp 1–40, XP từ quái (theo cấp và bậc quái) và nhiệm vụ; mỗi cấp +3 điểm chỉ số cho Sức Mạnh, Trí Tuệ, Nhanh Nhẹn, Thể Chất (bảng C). Mọi con số nằm trong `Assets/Data/Progression.asset`.
 - **Quái:** Slime Rêu (nhảy lao tới), Nấm Độc (bắn bào tử làm chậm). Có AI tuần tra / đuổi / quay về, rớt đồ, hồi sinh theo bãi.
@@ -94,7 +95,7 @@ Tools/
 - **Nhiều người chơi (chuẩn bị online):** code không còn giả định chỉ có một nhân vật. Logic game dùng nhân vật cụ thể hoặc `Players.All`; `Players.Local` chỉ dành cho HUD, camera và phím bấm. Dữ liệu của nhân vật (chỉ số, túi đồ, nhiệm vụ, Bách Khoa Trùm) nằm trên nhân vật. Kế hoạch và quy tắc: `Docs/KeHoach-Online.md`.
 - **Kiểm tra online tự động:** chạy cùng lúc `RungThiTham.exe -host -netsmoke` và `RungThiTham.exe -client 127.0.0.1 -netsmoke -batchmode -nographics`; mỗi bên đi qua lại, phải thấy nhân vật bên kia đi, rồi thoát (mã 0 là đạt).
 - **Chạy test tự động:** `RungThiTham.exe -autoshot -autoshotDir "D:\shots"` sẽ tự chơi một vòng, chụp màn hình rồi thoát. Mã thoát 0 là sạch, 1 là có lỗi trong log, 2 là quá thời hạn (`-autoshotTimeout`, mặc định 480 giây).
-- **Tour thảo nguyên:** thêm `-autoshotOnly steppe` để chụp cửa hang, trại, gió, Cột Gió, ba loài quái, cảnh đêm và bản đồ. Test cơ chế: `SteppeTests`; đường nhiệm vụ: `QuestRoadTests` (EditMode, tự vào Play Mode).
+- **Tour thảo nguyên:** thêm `-autoshotOnly steppe` để chụp cửa hang, trại, gió, Cột Gió, ba loài quái, cảnh đêm và bản đồ. Thêm `-autoshotOnly hacphong` để chụp bù nhìn, bọn cướp, Bò Rừng Sắt và mọi đòn của Thủ Lĩnh Hắc Phong. Test cơ chế: `SteppeTests`, `HacPhongTests`; đường nhiệm vụ: `QuestRoadTests` (EditMode, tự vào Play Mode).
 - **CI (GitHub Actions):** mỗi lần push đều biên dịch thử C#; test Unity, bản build Windows mỗi đêm và AutoShot chạy khi repo có secret giấy phép Unity. Xem `Docs/CI.md`.
 
 ## Giấy phép

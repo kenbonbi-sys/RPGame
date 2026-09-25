@@ -94,6 +94,12 @@ Năm ô: **Mũ, Giáp, Giày, Tay Phụ, Nhẫn**. Vũ khí không phải vật 
 | Áo Tơ Pha Lê | Giáp | +11 Giáp, +60 Máu, +10% Kháng hệ | 800 vàng, 2 Tơ Pha Lê, 5 Tơ Nhện Hang, 1 Lõi Pha Lê Cổ |
 | Nhẫn Mắt Hang | Nhẫn | +5% Chí mạng, +15% sát thương chí mạng | 400 vàng, 3 Thủy Tinh Thể Mắt Hang, 1 Lam Ngọc |
 | Nhẫn Răng Mimic | Nhẫn | +1 Sức Hút, +25% vàng | 350 vàng, 1 Răng Mimic, 1 Hồng Ngọc |
+| Mũ Lông Ưng | Mũ | +6 Giáp, +5% Chí mạng, +40 Máu | 600 vàng, 6 Lông Ưng Đá, 3 Nanh Linh Cẩu |
+| Áo Da Bò Rừng | Giáp | +13 Giáp, +90 Máu, +8% Kháng hệ | 950 vàng, 5 Da Bò Rừng, 2 Sừng Bò Rừng, 4 Nanh Linh Cẩu |
+| Giày Gió | Giày | +3 Giáp, +30 Máu, +15% hồi Lướt | 720 vàng, 4 Lông Ưng Đá, 2 Da Bò Rừng |
+| Khiên Sừng Sắt | Tay Phụ | +12 Giáp, +70 Máu, +5% Kháng hệ | 1100 vàng, 1 Sừng Sắt, 3 Giáp Sắt Vụn, 4 Huy Hiệu Hắc Phong |
+| Ủng Gió Hú | Giày | +5 Giáp, +50 Máu, +20% hồi Lướt, +1 Khéo Léo | chỉ rơi từ Thủ Lĩnh Hắc Phong (30%) |
+| Khăn Hắc Phong | Mũ | +7 Giáp, +7% Chí mạng, +20% sát thương chí mạng | chỉ rơi từ Thủ Lĩnh Hắc Phong (30%) |
 
 Số liệu nằm trên từng `ItemDef` (`slot`, `bonuses`, `craftGold`, `craftItems`), đặt trong `Editor/AssetFactory.cs` (`DressGear`).
 

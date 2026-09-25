@@ -10,7 +10,9 @@ Tiles (16x16):
   Details: straw_i, stones_s, flowers_s_i, skull_s
 Props return (Canvas, pivot) like gen_props: tall grass tufts (they sway with the wind in Unity),
 an acacia, sandstone rocks, a cairn with prayer flags, nomad yurts, a wind column's stone ring,
-and the Hắc Phong's banner.
+and the Hắc Phong's banner; for T62 the straw scarecrow of the abandoned fields (the same pixels
+as a Bù Nhìn Sống standing still), a haystack, the bandits' black tents and stake fence, and the
+windmill on their chief's hill (the tower, and its sails a quarter turn apart in four frames).
 """
 import math
 import random
@@ -396,6 +398,164 @@ def banner(seed=0):
     return cv, (x0, H - 1)
 
 
+def scarecrow_prop(seed=0):
+    """The straw scarecrow: pixel for pixel the Bù Nhìn Sống standing still (they must look alike)."""
+    import gen_steppe_creatures
+    cv = gen_steppe_creatures.scarecrow_still()
+    return cv, (15, cv.h - 2)
+
+
+def haystack(seed=0):
+    """A haystack left in the field: a dome of straw, a few loose wisps."""
+    W, H = 26, 18
+    cv = Canvas(W, H)
+    rnd = random.Random(seed)
+    shaded_ellipse(cv, W / 2, H - 7, 11, 7, C["straw"], dither=0.35, bias=0.05)
+    for k in range(18):
+        x = rnd.uniform(3, W - 3)
+        y = rnd.uniform(4, H - 4)
+        if cv.opaque(int(x), int(y)):
+            cv.line(x, y, x + rnd.choice((-1, 1)), y + 2, C["straw"][rnd.randint(0, 1)])
+    cv.hline(4, W - 5, H - 2, C["straw"][1])
+    cv.outline(STEPPE_OUT)
+    return cv, (W // 2, H - 2)
+
+
+def black_tent(seed=0):
+    """A Hắc Phong tent: black hides on poles, a peak with a whirlwind painted on the flap, guy ropes."""
+    W, H = 40, 36
+    cv = Canvas(W, H)
+    hide = ramp("#0e0e12", "#18181e", "#24242c", "#32323c", "#44444e")
+    cx = W // 2
+    # the ropes and pegs
+    for side in (-1, 1):
+        cv.line(cx + side * 4, 6, cx + side * 18, H - 3, C["wood"][2])
+        cv.px(cx + side * 18, H - 2, C["wood"][1])
+    # the tent: a wide cone of hides
+    pts = [(cx, 4), (cx + 15, H - 4), (cx - 15, H - 4)]
+    shaded_poly(cv, pts, hide, grad_dir=(0.8, 0.4), dither=0.35)
+    # seams of the hides
+    for k in (-8, -3, 3, 8):
+        cv.line(cx, 6, cx + k * 1.6, H - 5, hide[0])
+    # the open flap, dark inside, a firelight glow at its foot
+    flap = [(cx, 16), (cx + 5, H - 4), (cx - 3, H - 4)]
+    for y in range(16, H - 4):
+        for x in range(cx - 4, cx + 6):
+            if point_in_poly(x + 0.5, y + 0.5, flap):
+                cv.px(x, y, hx("#060608") if y < H - 7 else hx("#5a2a10"))
+    # a white whirlwind on the side
+    for i in range(12):
+        t = i / 12
+        a = t * math.tau * 1.3
+        r = 1 + t * 3.2
+        cv.px(int(cx - 7 + math.cos(a) * r), int(H - 12 + math.sin(a) * r), P["white"][2])
+    # the pole's peak and a scrap of red cloth
+    cv.vline(cx, 1, 5, C["wood"][3])
+    cv.px(cx + 1, 2, P["red"][2])
+    cv.px(cx + 2, 2, P["red"][3])
+    cv.px(cx + 2, 3, P["red"][2])
+    cv.hline(cx - 15, cx + 15, H - 4, hide[0])
+    cv.outline(STEPPE_OUT)
+    return cv, (cx, H - 3)
+
+
+def stake_fence(seed=0):
+    """A stretch of the bandits' stake fence: sharpened posts lashed together."""
+    W, H = 34, 22
+    cv = Canvas(W, H)
+    rnd = random.Random(seed)
+    w = C["wood"]
+    for i in range(6):
+        x = 2 + i * 5.4
+        top = rnd.randint(1, 4)
+        for y in range(top + 2, H - 1):
+            cv.px(int(x), y, w[2])
+            cv.px(int(x) + 1, y, w[3])
+            cv.px(int(x) + 2, y, w[1])
+        cv.px(int(x) + 1, top, w[4])
+        cv.px(int(x), top + 1, w[3])
+        cv.px(int(x) + 2, top + 1, w[2])
+    # the lashing, two rows of rope
+    for y in (9, 15):
+        cv.hline(1, W - 2, y, C["straw"][1])
+    cv.outline(STEPPE_OUT)
+    return cv, (W // 2, H - 2)
+
+
+def windmill(seed=0):
+    """The windmill on the Hắc Phong's hill: a tapering tower of stone and planks, a thatched cap,
+    a door and a small window, the hub of the sails at the top (the sails are their own sprite)."""
+    W, H = 36, 60
+    cv = Canvas(W, H)
+    cx = W // 2
+    st = C["sand"]
+    w = C["wood"]
+    base_w, top_w = 12, 7
+    top_y, base_y = 16, H - 2
+    for y in range(top_y, base_y + 1):
+        t = (y - top_y) / (base_y - top_y)
+        half = top_w + (base_w - top_w) * t
+        for x in range(int(cx - half), int(cx + half) + 1):
+            u = (x - (cx - half)) / (2 * half)
+            inten = 0.5 - u * 1.2
+            if y > base_y - 16:
+                # stone footing: courses of blocks
+                c = st[shade_index(inten, len(st) - 1, x, y, 0.2) + 1]
+                if y % 4 == 0 or (x + (y // 4) * 3) % 6 == 0:
+                    c = st[1]
+            else:
+                # plank walls above
+                c = w[shade_index(inten, len(w) - 1, x, y, 0.15) + 1]
+                if (x - int(cx - half)) % 3 == 0:
+                    c = w[1]
+            cv.px(x, y, c)
+    # the door and a window
+    for y in range(base_y - 9, base_y + 1):
+        for x in range(cx - 2, cx + 3):
+            cv.px(x, y, hx("#140c08") if y > base_y - 8 else w[1])
+    for y in range(28, 32):
+        for x in range(cx + 1, cx + 4):
+            cv.px(x, y, hx("#ffcc70") if (x + y) % 3 else hx("#d08a30"))
+    # the thatched cap
+    cap = [(cx - 10, top_y + 2), (cx, top_y - 10), (cx + 10, top_y + 2)]
+    shaded_poly(cv, cap, C["straw"], grad_dir=(0.7, 0.6), dither=0.35)
+    for k in range(-8, 9, 3):
+        cv.line(cx, top_y - 9, cx + k, top_y + 1, C["straw"][0])
+    # the hub
+    shaded_ellipse(cv, cx, top_y + 2, 2.2, 2.2, w[2:], dither=0.1)
+    # a black banner on the cap
+    cv.vline(cx, top_y - 16, top_y - 10, w[3])
+    for y in range(top_y - 16, top_y - 12):
+        for x in range(cx + 1, cx + 6):
+            cv.px(x, y, hx("#16161e") if (x + y) % 2 else hx("#22222c"))
+    cv.outline(STEPPE_OUT)
+    return cv, (cx, H - 2)
+
+
+def windmill_sails(frame=0):
+    """The four lattice sails, turned frame × 22.5° (they repeat every quarter turn)."""
+    S = 57
+    cv = Canvas(S, S)
+    c = S / 2
+    w = C["wood"]
+    cloth = C["felt"]
+    for k in range(4):
+        a = math.radians(frame * 22.5 + k * 90)
+        dx, dy = math.cos(a), math.sin(a)
+        nx, ny = -dy, dx
+        # the stock
+        cv.line(c, c, c + dx * 27, c + dy * 27, w[2], 2)
+        # the lattice sail beside it
+        for t in range(7, 27):
+            for s_ in range(1, 7):
+                x, y = c + dx * t + nx * s_, c + dy * t + ny * s_
+                lat = t % 4 == 0 or s_ == 6
+                cv.px(int(round(x)), int(round(y)), w[3] if lat else cloth[1 + (t + s_) % 3])
+    shaded_ellipse(cv, c, c, 3, 3, w[2:], dither=0.1)
+    cv.outline(STEPPE_OUT)
+    return cv, (int(c), int(c))
+
+
 def props():
     items = []
     for i in range(3):
@@ -404,7 +564,10 @@ def props():
     items += [("acacia_0", acacia(1)), ("acacia_1", acacia(2)),
               ("sandrock_big_0", sand_rock(3, True)), ("sandrock_big_1", sand_rock(4, True)),
               ("sandrock_small", sand_rock(5, False)), ("cairn", cairn(6)), ("yurt", yurt(7)),
-              ("windring", wind_ring(8)), ("hp_banner", banner(9))]
+              ("windring", wind_ring(8)), ("hp_banner", banner(9)),
+              ("scarecrow", scarecrow_prop(10)), ("haystack", haystack(11)), ("blacktent", black_tent(12)),
+              ("stakefence", stake_fence(13)), ("windmill", windmill(14))]
+    items += [(f"windmill_sails_{i}", windmill_sails(i)) for i in range(4)]
     return [(name, cv, piv) for name, (cv, piv) in items]
 
 
@@ -469,8 +632,83 @@ def icon_bison_hide():
     return _done(cv)
 
 
+def icon_straw():
+    """Rơm Bù Nhìn: a bundle of straw tied with twine, a glint of an ember in it."""
+    cv = Canvas(16, 16)
+    st = C["straw"]
+    for k in range(9):
+        x0 = 4 + k
+        cv.line(x0, 13, x0 + (k - 4) * 0.5 + 1, 2, st[1 + k % 4])
+    cv.hline(4, 12, 8, hx("#5a3a1c"))
+    cv.hline(4, 12, 9, hx("#7a5228"))
+    cv.px(9, 4, hx("#ffb030"))
+    return _done(cv)
+
+
+def icon_hp_badge():
+    """Huy Hiệu Hắc Phong: a black iron disc with the band's white whirlwind."""
+    cv = Canvas(16, 16)
+    iron = ramp("#0e0e14", "#1c1c26", "#2c2c3a", "#40404e", "#5a5a6a")
+    shaded_ellipse(cv, 8, 8, 6, 6, iron, dither=0.1, bias=0.1)
+    for i in range(14):
+        t = i / 14
+        a = t * math.tau * 1.4
+        r = 0.8 + t * 4
+        cv.px(int(8 + math.cos(a) * r), int(8 + math.sin(a) * r), P["white"][3])
+    cv.px(5, 4, iron[4])
+    return _done(cv)
+
+
+def icon_iron_horn():
+    """Sừng Sắt: the iron-capped horn of Bò Rừng Sắt."""
+    cv = Canvas(16, 16)
+    h = ramp("#3a3e4c", "#5c6272", "#8a92a4", "#c4cad8", "#eef0f6")
+    for i in range(12):
+        t = i / 11
+        x = 3 + t * 9 + math.sin(t * 2.5) * 1.5
+        y = 12 - t * 10 + (1 - t) * 1
+        r = 2.4 * (1 - t) + 0.6
+        shaded_ellipse(cv, x, y, r, r, h, dither=0.1)
+    for (x, y) in ((4, 11), (6, 9)):
+        cv.px(x, y, h[4])
+    cv.px(3, 12, hx("#7a3a1a"))
+    return _done(cv)
+
+
+def icon_iron_plate():
+    """Giáp Sắt Vụn: a riveted plate torn off the bison, rust at the edges."""
+    cv = Canvas(16, 16)
+    iron = ramp("#2e3240", "#4a5064", "#6e7690", "#9aa2ba", "#c8cedc")
+    pts = [(3, 4), (12, 3), (13, 11), (8, 13), (3, 11)]
+    shaded_poly(cv, pts, iron, grad_dir=(0.4, 1.0), dither=0.2)
+    for (x, y) in ((4, 5), (11, 4), (12, 10), (4, 10)):
+        cv.px(x, y, iron[4])
+    for (x, y) in ((8, 12), (9, 12), (3, 8)):
+        cv.px(x, y, hx("#7a3a1a"))
+    return _done(cv)
+
+
+def icon_blackwind_blade():
+    """Mảnh Song Đao: the broken half of the chief's curved blade, a red cord on its hilt."""
+    cv = Canvas(16, 16)
+    m = P["metal"]
+    for i in range(10):
+        t = i / 9
+        x = 4 + t * 8
+        y = 12 - t * 9 + math.sin(t * 3) * 1.6
+        cv.px(int(x), int(y), m[4])
+        cv.px(int(x), int(y) + 1, m[2])
+    cv.line(2, 14, 4, 12, hx("#1c1c26"))
+    cv.px(3, 12, P["red"][3])
+    cv.px(2, 12, P["red"][2])
+    cv.px(12, 3, m[5])
+    return _done(cv)
+
+
 def icons():
-    return [("hyena_fang", icon_hyena_fang()), ("eagle_feather", icon_eagle_feather()),
+    return [("scarecrow_straw", icon_straw()), ("hp_badge", icon_hp_badge()), ("iron_horn", icon_iron_horn()),
+            ("iron_plate", icon_iron_plate()), ("blackwind_blade", icon_blackwind_blade()),
+            ("hyena_fang", icon_hyena_fang()), ("eagle_feather", icon_eagle_feather()),
             ("bison_horn", icon_bison_horn()), ("bison_hide", icon_bison_hide())]
 
 
