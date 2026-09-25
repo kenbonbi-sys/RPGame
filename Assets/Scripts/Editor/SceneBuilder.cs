@@ -166,6 +166,16 @@ namespace RPG.EditorTools
             Debug.Log("[RPG] Zone scenes rebuilt");
         }
 
+        /// <summary>Regenerates the Core scene alone (managers, hero, camera, the HUD) from the prefabs on disk; the zones and the title stay.</summary>
+        public static void RebuildCoreOnly()
+        {
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            PrefabFactory.LoadExisting();
+            BuildCore();
+            UpdateBuildSettings();
+            Debug.Log("[RPG] Core scene rebuilt");
+        }
+
         /// <summary>Builds the missing scenes (or all of them when <paramref name="all"/>), then the build settings.</summary>
         static void BuildScenes(bool all)
         {

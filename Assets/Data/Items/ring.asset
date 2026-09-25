@@ -23,3 +23,35 @@ MonoBehaviour:
   healAmount: 0
   energyAmount: 0
   cleanse: 0
+  slot: 4
+  bonuses:
+  - stat: 0
+    kind: 0
+    value: 1
+    tag: 
+  - stat: 2
+    kind: 0
+    value: 1
+    tag: 
+  - stat: 3
+    kind: 0
+    value: 1
+    tag: 
+  - stat: 1
+    kind: 0
+    value: 1
+    tag: 
+  - stat: 16
+    kind: 0
+    value: 1
+    tag: 
+  - stat: 17
+    kind: 0
+    value: 1
+    tag: 
+  - stat: 20
+    kind: 0
+    value: 0.05
+    tag: 
+  craftGold: 0
+  craftItems: []

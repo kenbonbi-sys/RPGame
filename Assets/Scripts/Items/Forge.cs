@@ -8,8 +8,10 @@ namespace RPG
     /// another their class carries (free), temper it from +0 to +10 (each level +8% attack, a
     /// glow from +7) with gold and what the monsters of each region drop — the forest's for the
     /// first levels, the bear's claw for +3, the swamp's, Cóc Tía's crown and Xà Mẫu's scales, the
-    /// cave's — and give it another metal, the rarer ones once it is tempered enough. Applied where
-    /// the world's rules run (offline, the server), only next to the smith.
+    /// cave's — and give it another metal, the rarer ones once it is tempered enough. The smith
+    /// also makes gear (<see cref="ItemDef.craftGold"/>, <see cref="ItemDef.craftItems"/>) from
+    /// those same materials. Applied where the world's rules run (offline, the server), only next
+    /// to the smith.
     /// </summary>
     public static class Forge
     {
@@ -53,6 +55,26 @@ namespace RPG
                 case 6: return new Cost { gold = 300, level = 9, items = new[] { ("gem_red", 1) } };               // Huyết Thạch
                 default: return new Cost { gold = 0, level = 0, items = new (string, int)[0] };                    // Thép, Đồng, Hắc Thiết
             }
+        }
+
+        /// <summary>What making <paramref name="item"/> costs (its recipe, <see cref="ItemDef.craftGold"/> and <see cref="ItemDef.craftItems"/>).</summary>
+        public static Cost CraftCost(ItemDef item)
+        {
+            var parts = item != null && item.craftItems != null ? item.craftItems : new ItemCount[0];
+            var items = new (string, int)[parts.Length];
+            for (int i = 0; i < parts.Length; i++) items[i] = (parts[i].id, parts[i].count);
+            return new Cost { gold = item != null ? item.craftGold : 0, items = items };
+        }
+
+        /// <summary>Every piece of gear the smith makes, in the database's order.</summary>
+        public static List<ItemDef> Recipes()
+        {
+            var list = new List<ItemDef>();
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            if (db == null) return list;
+            foreach (var it in db.items)
+                if (it != null && it.IsGear && it.Craftable) list.Add(it);
+            return list;
         }
 
         /// <summary>The smith, if <paramref name="hero"/> stands close enough.</summary>
@@ -139,7 +161,27 @@ namespace RPG
             return null;
         }
 
-        public enum Action : byte { Upgrade = 1, Metal = 2, Weapon = 3 }
+        /// <summary>Makes a piece of gear from its recipe into the bag; null when done, else why not.</summary>
+        public static string Craft(PlayerController hero, string itemId)
+        {
+            if (hero == null || hero.stats == null || !hero.stats.HasClass) return "Chưa có lớp nhân vật.";
+            if (SmithNear(hero) == null) return "Phải đứng cạnh Thợ Rèn.";
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            var item = db != null ? db.Item(itemId) : null;
+            if (item == null || !item.IsGear || !item.Craftable) return "Thợ Rèn không làm món này.";
+            var cost = CraftCost(item);
+            string why = Missing(hero, cost);
+            if (why != null) return why;
+            if (!hero.inventory.HasRoomFor(item)) return "Túi đầy.";
+            Pay(hero, cost);
+            hero.inventory.Add(item, 1, false);
+            NetCues.Vfx("chest_open", (Vector2)hero.transform.position + Vector2.up * 0.6f, 0f, 0.8f);
+            NetCues.Sound("sfx_levelup", 0.7f, 0f, hero.transform.position);
+            Notify.Log(hero, $"Chế tạo xong: {item.displayName}! Mở bảng Nhân Vật (B) để mặc.", Palette.Xp);
+            return null;
+        }
+
+        public enum Action : byte { Upgrade = 1, Metal = 2, Weapon = 3, Craft = 4 }
 
         /// <summary>This screen's hero asks the forge (offline done here, online the server is asked).</summary>
         public static string Ask(Action what, int value = 0, string text = null)
@@ -157,7 +199,15 @@ namespace RPG
         /// <summary>The rules' side of a forge request (offline, the server).</summary>
         public static string Apply(PlayerController hero, Action what, int value, string text)
         {
-            string why = what == Action.Upgrade ? Upgrade(hero) : what == Action.Metal ? ChangeMetal(hero, value) : ChangeWeapon(hero, text);
+            string why;
+            switch (what)
+            {
+                case Action.Upgrade: why = Upgrade(hero); break;
+                case Action.Metal: why = ChangeMetal(hero, value); break;
+                case Action.Weapon: why = ChangeWeapon(hero, text); break;
+                case Action.Craft: why = Craft(hero, text); break;
+                default: why = "Không đổi gì."; break;
+            }
             if (why != null && hero != null) Notify.WorldText(hero, why, hero.health.HeadPosition + Vector3.up * 0.4f, new Color(1f, 0.6f, 0.5f));
             return why;
         }

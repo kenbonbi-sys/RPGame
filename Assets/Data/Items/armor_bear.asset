@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: armor_bear
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: armor_bear
+  displayName: "\xC1o Da G\u1EA5u"
+  description: "\xC1o may t\u1EEB da G\u1EA5u Ma, c\u1ED5 vi\u1EC1n l\xF4ng \u0111en. \u1EA4m, v\xE0 dai nh\u01B0 th\xE9p."
+  icon: {fileID: -1726186531, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 3
+  rarity: 1
+  maxStack: 1
+  value: 180
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: 1
+  bonuses:
+  - stat: 6
+    kind: 0
+    value: 4
+    tag: 
+  - stat: 4
+    kind: 0
+    value: 30
+    tag: 
+  craftGold: 150
+  craftItems:
+  - id: pelt
+    count: 1
+  - id: claw
+    count: 1

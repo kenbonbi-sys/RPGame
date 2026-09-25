@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: ring_mimic
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: ring_mimic
+  displayName: "Nh\u1EABn R\u0103ng Mimic"
+  description: "R\u0103ng c\u1EE7a Mimic Tham Lam tr\xEAn m\u1ED9t v\xF2ng v\xE0ng. V\xE0ng c\u1EE9 th\u1EBF r\u01A1i v\xE0o t\xFAi."
+  icon: {fileID: 204497140, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 3
+  rarity: 3
+  maxStack: 1
+  value: 600
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: 4
+  bonuses:
+  - stat: 17
+    kind: 0
+    value: 1
+    tag: 
+  - stat: 20
+    kind: 0
+    value: 0.25
+    tag: 
+  craftGold: 350
+  craftItems:
+  - id: mimic_tooth
+    count: 1
+  - id: gem_red
+    count: 1

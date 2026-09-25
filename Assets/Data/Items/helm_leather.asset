@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: helm_leather
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: helm_leather
+  displayName: "M\u0169 Da"
+  description: "M\u0169 da thu\u1ED9c kh\xE2u tay, hai v\u1EA1t che tai. Th\u1EE3 R\xE8n ph\u1EBFt gel slime cho da kh\xF4ng n\u1EE9t."
+  icon: {fileID: 1621600588, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 3
+  rarity: 0
+  maxStack: 1
+  value: 40
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: 0
+  bonuses:
+  - stat: 6
+    kind: 0
+    value: 2
+    tag: 
+  - stat: 4
+    kind: 0
+    value: 15
+    tag: 
+  craftGold: 60
+  craftItems:
+  - id: gel
+    count: 6
+  - id: shroom_cap
+    count: 2

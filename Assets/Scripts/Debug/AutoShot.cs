@@ -7,10 +7,11 @@ namespace RPG
 {
     /// <summary>
     /// Automated showcase used for testing builds: start the player with
-    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep]
+    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep|classes|ui]
     /// It plays a scripted tour (dialogue, skills, boss attacks, the swamp and its bosses, the
     /// world map, night), saves screenshots and quits; -autoshotOnly swamp tours the swamp alone,
-    /// -autoshotOnly cave the crystal cave, -autoshotOnly deep its deeper creatures and bosses.
+    /// -autoshotOnly cave the crystal cave, -autoshotOnly deep its deeper creatures and bosses,
+    /// -autoshotOnly ui the character screen, the forge and a waystone's prompt.
     /// Exit code: 0 = clean run, 1 = errors or exceptions were logged, 2 = the tour did not finish
     /// within the timeout (CI reads it). Does nothing in normal play.
     /// </summary>
@@ -148,6 +149,86 @@ namespace RPG
                     yield return Shot($"{cls.id}_{p.skills.slots[slot].id}");
                     yield return Wait(1.2f);
                 }
+            }
+        }
+
+        /// <summary>
+        /// The windows (-autoshotOnly ui): the character screen with gear put on, the bag scrolled
+        /// and filtered, an item's tooltip, every tab of the forge, and a Đá Truyền Tống's prompt.
+        /// </summary>
+        IEnumerator Screens(PlayerController p, DayNightCycle dn)
+        {
+            var db = GameManager.I.db;
+            if (dn != null) dn.time = 0.45f;
+            CharacterChoice.Apply(p, new HeroLook { cls = "barbarian", race = "halforc", weapon = "axe", hair = 4, hairColor = 1, upgrade = 4, metal = 2 });
+            p.stats.AddXp(p.stats.Config.TotalXpTo(19) + 900);
+            var bag = p.inventory;
+            bag.gold = 1980;
+            foreach (var id in new[] { "shield", "ring", "helm_leather", "boots_toad", "armor_scale", "ring_eye", "gel", "shroom_cap", "toad_skin",
+                                       "leech_tooth", "mud_core", "snake_scale", "crystal_shard", "bat_wing", "spider_silk", "golem_core", "beetle_shell",
+                                       "eye_lens", "pelt", "claw", "bone", "herb", "meat", "bread", "lotus", "gem_blue", "gem_red", "toad_crown",
+                                       "dragonfly_wing", "wsnake_skin", "poison_gland", "crystal_jelly", "ancient_core", "venom_sac", "wisp_essence" })
+            {
+                var it = db.Item(id);
+                if (it != null) bag.Add(it, it.maxStack > 1 ? 3 + id.Length % 9 : 1, false);
+            }
+            HUD.I.help.Close();
+            yield return Wait(0.3f);
+
+            var panel = HUD.I.heroPanel;
+            panel.Show();
+            yield return Wait(0.8f);
+            yield return Shot("hero_panel");
+            foreach (var id in new[] { "helm_leather", "armor_scale", "boots_toad", "shield", "ring" })
+                if (db.Item(id) != null) bag.Equip(db.Item(id));
+            yield return Wait(0.5f);
+            yield return Shot("hero_panel_gear");
+            panel.DebugScroll(0f);
+            yield return Wait(0.4f);
+            yield return Shot("hero_panel_scrolled");
+            panel.DebugFilter(1);
+            yield return Wait(0.4f);
+            var tipItem = db.Item("ring_eye");
+            if (tipItem != null && HUD.I.tooltip != null)
+            {
+                var t = ItemTips.For(tipItem, p, "Bấm để mặc vào.");
+                HUD.I.tooltip.Show(t.title, t.body, t.color);
+            }
+            yield return Wait(0.4f);
+            yield return Shot("hero_panel_filter_tip");
+            if (HUD.I.tooltip != null) HUD.I.tooltip.Hide();
+            panel.DebugFilter(0);
+            panel.Close();
+            yield return Wait(0.4f);
+
+            // the forge, every tab
+            var smith = NPC.All.Find(n => n != null && n.forge);
+            if (smith != null && ForgeUI.I != null)
+            {
+                Place(p, (Vector2)smith.transform.position + new Vector2(0f, -1.3f));
+                yield return Wait(0.6f);
+                yield return Shot("smith_prompt");
+                ForgeUI.I.Open();
+                for (int tab = 0; tab < 4; tab++)
+                {
+                    ForgeUI.I.DebugTab(tab, 1);
+                    yield return Wait(0.6f);
+                    yield return Shot("forge_tab" + tab);
+                }
+                ForgeUI.I.Close();
+                yield return Wait(0.3f);
+            }
+
+            // a Đá Truyền Tống: its name and "[F] Dịch chuyển" when the hero stands at it
+            var stone = Waystone.Find("village") ?? (Waystone.All.Count > 0 ? Waystone.All[0] : null);
+            if (stone != null)
+            {
+                Place(p, (Vector2)stone.transform.position + new Vector2(-4.5f, -1.5f));
+                yield return Wait(0.8f);
+                yield return Shot("waystone_near");
+                Place(p, stone.Arrival);
+                yield return Wait(0.8f);
+                yield return Shot("waystone_prompt");
             }
         }
 
@@ -713,6 +794,12 @@ namespace RPG
                 Finish();
                 yield break;
             }
+            if (Only == "ui")
+            {
+                yield return Screens(p, dn);
+                Finish();
+                yield break;
+            }
             yield return Shot("village");
             HUD.I.help.Show();
             yield return Wait(0.6f);
@@ -820,10 +907,6 @@ namespace RPG
             }
 
             // --- UI panels
-            HUD.I.inventory.Show();
-            yield return Wait(0.6f);
-            yield return Shot("inventory");
-            HUD.I.inventory.Close();
             HUD.I.journal.Show();
             yield return Wait(0.6f);
             yield return Shot("journal");
@@ -836,12 +919,12 @@ namespace RPG
                 p.stats.AddXp(p.stats.XpToNext + 20);
                 yield return Wait(0.5f);
                 yield return Shot("level_up");
-                if (HUD.I.character != null)
+                if (HUD.I.heroPanel != null)
                 {
-                    HUD.I.character.Show();
+                    HUD.I.heroPanel.Show();
                     yield return Wait(0.6f);
                     yield return Shot("character");
-                    HUD.I.character.Close();
+                    HUD.I.heroPanel.Close();
                     yield return Wait(0.3f);
                 }
             }

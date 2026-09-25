@@ -23,3 +23,17 @@ MonoBehaviour:
   healAmount: 0
   energyAmount: 0
   cleanse: 0
+  slot: 3
+  bonuses:
+  - stat: 7
+    kind: 0
+    value: 2
+    tag: 
+  - stat: 11
+    kind: 0
+    value: 0.04
+    tag: 
+  craftGold: 80
+  craftItems:
+  - id: gel
+    count: 5

@@ -214,6 +214,19 @@ namespace RPG
                 Debug.Log($"[NetSmoke] {role}: sees the other as {(other != null ? other.stats.look.race + " " + other.stats.look.cls : "-")} → {(classOk ? "ok" : "NOT")}");
             }
 
+            // ---------------------------------------------------------------- gear, through the server
+            // SmokeA puts the starting kit's Kiếm Sắt in its off hand (the server does it, sends the
+            // bag back and saves it); coming back, it must still be worn
+            bool gearOk = true;
+            if (LoginInfo.Name != null && LoginInfo.Name.EndsWith("A"))
+            {
+                var sword = GameManager.I.db.Item("sword");
+                if (expect == null && me.inventory.Worn(EquipSlot.Offhand) != sword) me.inventory.AskEquip(sword);
+                yield return Until(() => me.inventory.Worn(EquipSlot.Offhand) == sword, 8f);
+                gearOk = me.inventory.Worn(EquipSlot.Offhand) == sword && me.inventory.Count(sword) == 0;
+                Debug.Log($"[NetSmoke] {role}: off hand {(me.inventory.Worn(EquipSlot.Offhand) != null ? me.inventory.Worn(EquipSlot.Offhand).id : "-")} → {(gearOk ? "ok" : "NOT")}");
+            }
+
             // ---------------------------------------------------------------- playing together
             bool together = false;
             bool again = expect != null || Array.IndexOf(Environment.GetCommandLineArgs(), "-netsmokeAgain") >= 0;
@@ -268,7 +281,8 @@ namespace RPG
             yield return Shot(again ? "_again" : "");
             // the other player keeps fighting a little longer: stay so they still see this hero
             yield return Wait(GameSession.HasScreen ? 3f : 1f);
-            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk, $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}");
+            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk && gearOk,
+                   $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}, gear {gearOk}");
         }
 
         /// <summary>

@@ -9,7 +9,9 @@ namespace RPG
     /// stone is where the hero gets up after a fall (the last one they touched), and standing at
     /// any woken stone they can travel to any other (F at the stone, or the world map, M). Each
     /// hero keeps their own stones (<see cref="WaystoneLog"/>): the stone glows on a screen once
-    /// its hero has woken it. Waking and travelling happen where the world's rules run.
+    /// its hero has woken it. Its name floats over it, and a hero close by is told what to do
+    /// ("lại gần để đánh thức", then "[F] Dịch chuyển"). Waking and travelling happen where the
+    /// world's rules run.
     /// </summary>
     public class Waystone : MonoBehaviour
     {
@@ -24,8 +26,15 @@ namespace RPG
 
         public static readonly List<Waystone> All = new List<Waystone>();
 
+        /// <summary>How close the hero on this screen is told what the stone does.</summary>
+        public const float HintRadius = 6f;
+
         float nextCheck;
         bool shownLit;
+        NameplateUI plate;
+
+        /// <summary>What the hero on this screen is told over the stone (null: nothing).</summary>
+        public string Prompt { get; private set; }
         static readonly List<PlayerController> Near = new List<PlayerController>();
 
         /// <summary>Where a traveller or a fallen hero appears: just in front of the stone.</summary>
@@ -70,13 +79,34 @@ namespace RPG
             if (GameSession.HasScreen)
             {
                 var me = Players.Local;
-                Show(me != null && me.waystones != null && me.waystones.Knows(stoneId), false);
+                bool known = me != null && me.waystones != null && me.waystones.Knows(stoneId);
+                Show(known, false);
+                ShowPrompt(me, known);
             }
             if (!GameSession.IsAuthority || Time.time < nextCheck) return;
             nextCheck = Time.time + 0.25f;
             Players.Within(transform.position, TouchRadius, Near);
             foreach (var p in Near)
                 if (p.waystones != null) p.waystones.Touch(this);
+        }
+
+        /// <summary>The stone's name over it, and what the hero on this screen can do here.</summary>
+        void ShowPrompt(PlayerController me, bool known)
+        {
+            // made lazily: a zone opened on its own in the editor starts before the Core UI
+            if (plate == null && HUD.I != null)
+                plate = HUD.I.CreateNameplate(transform, "Đá Truyền Tống", false, new Color(0.6f, 1f, 0.95f), null, 2.2f);
+            if (plate == null || me == null) return;
+            float d = Vector2.Distance(me.transform.position, transform.position);
+            string prompt = null;
+            if (!me.IsDead && d <= HintRadius)
+            {
+                if (!known) prompt = "Lại gần để đánh thức";
+                else if (At(me.transform.position, 0f) == this) prompt = "[F] Dịch chuyển";
+                else prompt = "Lại gần: [F] Dịch chuyển";
+            }
+            plate.SetPrompt(prompt);
+            Prompt = prompt;
         }
 
         void Show(bool on, bool force)

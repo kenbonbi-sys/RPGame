@@ -57,6 +57,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 98e04122ed19d864cae4c392113d9526, type: 2}
   - {fileID: 11400000, guid: 2dde40785894b4c458fc25309b79c457, type: 2}
   - {fileID: 11400000, guid: ca3ceab021e021c40a45ec59ed92772a, type: 2}
+  - {fileID: 11400000, guid: 8df04e573f3d6aa458f44148bdcd88f3, type: 2}
+  - {fileID: 11400000, guid: b54a1e70210bcc647a7f7c94d9273142, type: 2}
+  - {fileID: 11400000, guid: cf5a5802bb663ad459a1e44977987ed3, type: 2}
+  - {fileID: 11400000, guid: 2db19c107c0178c489a8fdd17bbc2556, type: 2}
+  - {fileID: 11400000, guid: 5dc75a9ebad241e4b926805109000f15, type: 2}
+  - {fileID: 11400000, guid: 1109272e0d290f44fb7410861af7b1c7, type: 2}
+  - {fileID: 11400000, guid: 6c0bb5ba45473bf49ae18b94e5fcc933, type: 2}
+  - {fileID: 11400000, guid: 07081574b0cd49c4dae6c624fb475b7a, type: 2}
+  - {fileID: 11400000, guid: d38673c325583b84e88a79ae8c77a396, type: 2}
+  - {fileID: 11400000, guid: a3337e63a36077e48b264be7730a1d9f, type: 2}
+  - {fileID: 11400000, guid: 831fe498185ba194bba93a51875b1499, type: 2}
   abilities:
   - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
   - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}

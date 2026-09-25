@@ -68,8 +68,41 @@ namespace RPG
             var h = pc != null ? pc.health : GetComponent<Health>();
             if (h != null) baseResist = h.resistances;
             Stats.Changed += OnStatsChanged;
+            var bag = pc != null ? pc.inventory : GetComponent<Inventory>();
+            if (bag != null)
+            {
+                gearBag = bag;
+                bag.Changed += WearGear;
+            }
+            WearGear();
             Recalculate();
             FillUp();
+        }
+
+        void OnDestroy()
+        {
+            if (gearBag != null) gearBag.Changed -= WearGear;
+        }
+
+        // ------------------------------------------------------------------ gear
+        Inventory gearBag;
+        readonly ItemDef[] wornNow = new ItemDef[Gear.SlotCount];
+        readonly System.Collections.Generic.List<StatModifier> gearMods = new System.Collections.Generic.List<StatModifier>();
+
+        /// <summary>The worn gear's bonuses as modifiers of <see cref="Stats"/> (only when what is worn changed).</summary>
+        void WearGear()
+        {
+            if (gearBag == null) return;
+            bool same = true;
+            for (int i = 0; i < wornNow.Length; i++)
+                if (wornNow[i] != gearBag.equipped[i])
+                {
+                    same = false;
+                    wornNow[i] = gearBag.equipped[i];
+                }
+            if (same && gearMods.Count > 0) return;
+            Gear.Collect(wornNow, gearBag, gearMods);
+            Stats.ReplaceFrom(gearBag, gearMods);
         }
 
         void FixAllocated()

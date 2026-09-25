@@ -9,6 +9,8 @@ namespace RPG
     {
         public TextMeshProUGUI nameText;
         public TextMeshProUGUI promptText;
+        [Tooltip("The prompt with its backing (hidden and shown as one); empty: the text alone.")]
+        public GameObject promptRoot;
         public Image star;
         public RectTransform bar;
         public Image barFill;
@@ -39,7 +41,7 @@ namespace RPG
             alwaysShowBar = showStar;
             if (bar != null) bar.gameObject.SetActive(h != null && alwaysShowBar);
             if (barFill != null) barFill.color = barColor;
-            if (promptText != null) promptText.gameObject.SetActive(false);
+            if (PromptObject != null) PromptObject.SetActive(false);
             chip = h != null ? h.Fraction : 1f;
             LateUpdate();
         }
@@ -58,12 +60,16 @@ namespace RPG
             if (nameText != null) nameText.text = label;
         }
 
+        GameObject PromptObject => promptRoot != null ? promptRoot : promptText != null ? promptText.gameObject : null;
+
+        /// <summary>What the hero can do here ("[F] Nói chuyện"), over the name; null or empty hides it.</summary>
         public void SetPrompt(string s)
         {
-            if (promptText == null) return;
+            var go = PromptObject;
+            if (go == null || promptText == null) return;
             bool on = !string.IsNullOrEmpty(s);
-            if (promptText.gameObject.activeSelf != on) promptText.gameObject.SetActive(on);
-            if (on) promptText.text = s;
+            if (go.activeSelf != on) go.SetActive(on);
+            if (on && promptText.text != s) promptText.text = s;
         }
 
         void LateUpdate()

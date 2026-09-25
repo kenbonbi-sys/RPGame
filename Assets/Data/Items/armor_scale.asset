@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: armor_scale
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: armor_scale
+  displayName: "Gi\xE1p V\u1EA3y X\xE0"
+  description: "Gi\xE1p l\u01B0\u1EDBi \u0111an t\u1EEB v\u1EA3y X\xE0 M\u1EABu v\xE0 da R\u1EAFn N\u01B0\u1EDBc, c\u1EE9ng h\u01A1n th\xE9p m\xE0 nh\u1EB9 nh\u01B0 v\u1EA3i."
+  icon: {fileID: -1205049373, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 3
+  rarity: 2
+  maxStack: 1
+  value: 420
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: 1
+  bonuses:
+  - stat: 6
+    kind: 0
+    value: 8
+    tag: 
+  - stat: 4
+    kind: 0
+    value: 40
+    tag: 
+  - stat: 13
+    kind: 0
+    value: 0.05
+    tag: 
+  craftGold: 380
+  craftItems:
+  - id: snake_scale
+    count: 2
+  - id: wsnake_skin
+    count: 4
+  - id: mud_core
+    count: 2

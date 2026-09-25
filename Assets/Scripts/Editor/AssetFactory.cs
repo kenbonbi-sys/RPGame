@@ -314,6 +314,14 @@ namespace RPG.EditorTools
 
         static List<ItemDef> CreateItems()
         {
+            var items = BaseItems();
+            items.AddRange(GearItems());
+            DressGear(items);
+            return items;
+        }
+
+        static List<ItemDef> BaseItems()
+        {
             var C = ItemKind.Consumable;
             var M = ItemKind.Material;
             return new List<ItemDef>
@@ -337,8 +345,8 @@ namespace RPG.EditorTools
                 Item("bone", "Xương", M, ItemRarity.Common, "Một khúc xương cũ.", 1),
                 Item("key", "Chìa Khóa Cổ", ItemKind.Quest, ItemRarity.Uncommon, "Chìa khóa bằng đồng, khắc hoa văn lạ.", 0, maxStack: 1),
                 Item("scroll", "Cuộn Giấy Cổ", ItemKind.Quest, ItemRarity.Uncommon, "Ghi chép về Rừng Già Cổ Thụ.", 0, maxStack: 1),
-                Item("sword", "Kiếm Sắt", ItemKind.Equipment, ItemRarity.Common, "Thanh kiếm sắt đáng tin cậy.", 30, maxStack: 1),
-                Item("shield", "Khiên Gỗ", ItemKind.Equipment, ItemRarity.Common, "Chiếc khiên gỗ bọc sắt.", 25, maxStack: 1),
+                Item("sword", "Kiếm Sắt", ItemKind.Equipment, ItemRarity.Common, "Thanh kiếm sắt đáng tin cậy, cầm ở tay phụ: đánh nhanh hơn một chút.", 30, maxStack: 1),
+                Item("shield", "Khiên Gỗ", ItemKind.Equipment, ItemRarity.Common, "Chiếc khiên gỗ bọc sắt, cầm ở tay phụ.", 25, maxStack: 1),
                 // Đầm Lầy Sương Mù
                 Item("toad_skin", "Da Cóc", M, ItemRarity.Common, "Da cóc sần sùi, vẫn còn rịn nhựa độc.", 4),
                 Item("poison_gland", "Tuyến Độc", M, ItemRarity.Uncommon, "Túi độc nhỏ của Cóc Độc. Bà lang nào cũng muốn có.", 10),
@@ -365,6 +373,88 @@ namespace RPG.EditorTools
                 Item("crystal_silk", "Tơ Pha Lê", M, ItemRarity.Rare, "Tơ của Nhện Chúa, óng ánh bụi pha lê, không lưỡi dao nào cắt đứt.", 120),
                 Item("mimic_tooth", "Răng Mimic", M, ItemRarity.Epic, "Chiếc răng cong của Mimic Tham Lam, một đồng vàng vẫn còn dính trên đó.", 300),
             };
+        }
+
+        // ------------------------------------------------------------------ gear
+        /// <summary>The gear the smith makes (Lò Rèn, tab Chế Tạo), a set for each region's materials.</summary>
+        static List<ItemDef> GearItems()
+        {
+            var E = ItemKind.Equipment;
+            return new List<ItemDef>
+            {
+                // Rừng Thì Thầm
+                Item("helm_leather", "Mũ Da", E, ItemRarity.Common, "Mũ da thuộc khâu tay, hai vạt che tai. Thợ Rèn phết gel slime cho da không nứt.", 40, maxStack: 1),
+                Item("boots_leather", "Giày Da", E, ItemRarity.Common, "Đôi giày da mềm, đế mỏng: bước nhẹ, lướt nhanh.", 40, maxStack: 1),
+                Item("armor_bear", "Áo Da Gấu", E, ItemRarity.Uncommon, "Áo may từ da Gấu Ma, cổ viền lông đen. Ấm, và dai như thép.", 180, maxStack: 1),
+                // Đầm Lầy Sương Mù
+                Item("boots_toad", "Giày Da Cóc", E, ItemRarity.Uncommon, "Giày da cóc sần sùi, không thấm nước: lướt trên bùn như trên đất khô.", 160, maxStack: 1),
+                Item("armor_scale", "Giáp Vảy Xà", E, ItemRarity.Rare, "Giáp lưới đan từ vảy Xà Mẫu và da Rắn Nước, cứng hơn thép mà nhẹ như vải.", 420, maxStack: 1),
+                Item("crown_toad", "Vương Miện Cóc", E, ItemRarity.Rare, "Vương miện của Cóc Tía, Thợ Rèn nắn lại cho vừa đầu người. Vàng tự tìm tới người đội nó.", 380, maxStack: 1),
+                // Hang Pha Lê
+                Item("helm_crystal", "Mũ Pha Lê", E, ItemRarity.Rare, "Mũ thép gắn mào pha lê, sáng mờ trong bóng tối. Đầu óc tỉnh táo lạ thường.", 460, maxStack: 1),
+                Item("shield_beetle", "Khiên Vỏ Bọ", E, ItemRarity.Rare, "Khiên làm từ mai Bọ Giáp Đá, lấm tấm pha lê.", 480, maxStack: 1),
+                Item("armor_silk", "Áo Tơ Pha Lê", E, ItemRarity.Epic, "Áo dệt từ tơ của Nhện Chúa: không lưỡi dao nào cắt đứt, phép thuật trượt đi trên nó.", 900, maxStack: 1),
+                Item("ring_eye", "Nhẫn Mắt Hang", E, ItemRarity.Rare, "Nhẫn bạc gắn thủy tinh thể của Mắt Hang. Nhìn qua nó, thấy ngay chỗ yếu.", 400, maxStack: 1),
+                Item("ring_mimic", "Nhẫn Răng Mimic", E, ItemRarity.Epic, "Răng của Mimic Tham Lam trên một vòng vàng. Vàng cứ thế rơi vào túi.", 600, maxStack: 1),
+            };
+        }
+
+        static StatModifier Plus(StatId stat, float value) => new StatModifier(stat, ModKind.Flat, value);
+
+        static ItemCount[] Parts(params (string id, int n)[] parts)
+        {
+            var list = new ItemCount[parts.Length];
+            for (int i = 0; i < parts.Length; i++) list[i] = new ItemCount(parts[i].id, parts[i].n);
+            return list;
+        }
+
+        /// <summary>
+        /// Where each piece of gear is worn, what it adds and what the smith asks to make it. Also
+        /// run over the items made before gear existed (the ring, the sword, the shield): authoring
+        /// mode fills them once, while their slot is still empty, and keeps hand edits after that.
+        /// </summary>
+        static void DressGear(List<ItemDef> items)
+        {
+            void G(string id, EquipSlot slot, int gold, ItemCount[] parts, params StatModifier[] bonuses)
+            {
+                var it = items.Find(x => x != null && x.id == id);
+                if (it == null || (it.slot != EquipSlot.None && !EditorUtil.Overwrite)) return;
+                it.kind = ItemKind.Equipment;
+                it.maxStack = 1;
+                it.slot = slot;
+                it.bonuses = bonuses;
+                it.craftGold = gold;
+                it.craftItems = parts ?? new ItemCount[0];
+                EditorUtility.SetDirty(it);
+            }
+            var none = new ItemCount[0];
+            // Rừng Thì Thầm (levels 1-8)
+            G("helm_leather", EquipSlot.Head, 60, Parts(("gel", 6), ("shroom_cap", 2)), Plus(StatId.Armor, 2), Plus(StatId.MaxHp, 15));
+            G("boots_leather", EquipSlot.Feet, 60, Parts(("gel", 4), ("herb", 3)), Plus(StatId.Armor, 1), Plus(StatId.DashCooldownReduction, 0.06f));
+            G("shield", EquipSlot.Offhand, 50, Parts(("gel", 3), ("herb", 2)), Plus(StatId.Armor, 3));
+            G("sword", EquipSlot.Offhand, 80, Parts(("gel", 5)), Plus(StatId.PhysicalAttack, 2), Plus(StatId.AttackSpeed, 0.04f));
+            G("armor_bear", EquipSlot.Body, 150, Parts(("pelt", 1), ("claw", 1)), Plus(StatId.Armor, 4), Plus(StatId.MaxHp, 30));
+            G("ring", EquipSlot.Ring, 0, none,
+              Plus(StatId.Strength, 1), Plus(StatId.Dexterity, 1), Plus(StatId.Constitution, 1),
+              Plus(StatId.Intelligence, 1), Plus(StatId.Wisdom, 1), Plus(StatId.Charisma, 1), Plus(StatId.GoldFind, 0.05f));
+            // Đầm Lầy Sương Mù (8-14)
+            G("boots_toad", EquipSlot.Feet, 180, Parts(("toad_skin", 5), ("leech_tooth", 3)),
+              Plus(StatId.Armor, 2), Plus(StatId.MaxHp, 20), Plus(StatId.DashCooldownReduction, 0.1f));
+            G("armor_scale", EquipSlot.Body, 380, Parts(("snake_scale", 2), ("wsnake_skin", 4), ("mud_core", 2)),
+              Plus(StatId.Armor, 8), Plus(StatId.MaxHp, 40), Plus(StatId.ElementalResist, 0.05f));
+            G("crown_toad", EquipSlot.Head, 300, Parts(("toad_crown", 1), ("dragonfly_wing", 3), ("poison_gland", 2)),
+              Plus(StatId.Armor, 3), Plus(StatId.Charisma, 2), Plus(StatId.GoldFind, 0.12f));
+            // Hang Pha Lê (14-20)
+            G("helm_crystal", EquipSlot.Head, 450, Parts(("crystal_shard", 10), ("bat_wing", 3), ("golem_core", 1)),
+              Plus(StatId.Armor, 5), Plus(StatId.MaxEnergy, 15), Plus(StatId.CooldownReduction, 0.06f));
+            G("shield_beetle", EquipSlot.Offhand, 480, Parts(("beetle_shell", 4), ("crystal_jelly", 3)),
+              Plus(StatId.Armor, 7), Plus(StatId.MaxHp, 40));
+            G("armor_silk", EquipSlot.Body, 800, Parts(("crystal_silk", 2), ("spider_silk", 5), ("ancient_core", 1)),
+              Plus(StatId.Armor, 11), Plus(StatId.MaxHp, 60), Plus(StatId.ElementalResist, 0.1f));
+            G("ring_eye", EquipSlot.Ring, 400, Parts(("eye_lens", 3), ("gem_blue", 1)),
+              Plus(StatId.CritChance, 0.05f), Plus(StatId.CritDamage, 0.15f));
+            G("ring_mimic", EquipSlot.Ring, 350, Parts(("mimic_tooth", 1), ("gem_red", 1)),
+              Plus(StatId.Charisma, 1), Plus(StatId.GoldFind, 0.25f));
         }
 
         // ------------------------------------------------------------------ abilities

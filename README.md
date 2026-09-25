@@ -28,7 +28,7 @@ Một thế giới chung, luôn bật, cho khoảng 20 người (kế hoạch: `
 | **Space** | Lướt (bất tử trong chốc lát, dùng để né vòng đỏ) |
 | **1 2 3** | Bình Máu · Bình Năng Lượng · Thuốc Thảo Mộc |
 | **F** | Nói chuyện với NPC |
-| **B / I** · **C** · **J** · **Tab** | Túi đồ · Nhân vật (phân bổ điểm) · Bách Khoa Trùm · Đổi nhiệm vụ đang theo dõi |
+| **B / I / C** · **J** · **Tab** | Nhân vật: chỉ số, trang bị và túi đồ trong một cửa sổ · Bách Khoa Trùm · Đổi nhiệm vụ đang theo dõi |
 | **F1** · **Esc** | Hướng dẫn · Tạm dừng (Lưu game / Tải game) |
 | **F5–F9** (cheat) | Hồi đầy · Tua giờ · Tới boss · Về làng · Hạ quái gần |
 | **`** (cheat) | Bảng lệnh: `help`, `level 10`, `give potion_red 5`, `tp boss`, `zone <id>`, `quest <id> start`, `hitbox`, `ttk`, `status lanh 4` (gây trạng thái lên quái gần nhất, thêm `me` cho bản thân), `save 1`… |

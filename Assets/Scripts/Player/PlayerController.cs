@@ -406,6 +406,31 @@ namespace RPG
                 OnlineSession.Ask(new ActRequest { kind = ActKind.Potion, value = slot });
                 return true;
             }
+            Consume(item);
+            return true;
+        }
+
+        /// <summary>
+        /// Eats or drinks something from the bag (the bag's right click): a potion, an apple, the
+        /// swamp's lotus. Shares the potions' cooldown. Online a player's machine asks the server.
+        /// </summary>
+        public bool UseItem(ItemDef item)
+        {
+            if (item == null || item.kind != ItemKind.Consumable || IsDead || Time.time < potionReadyAt) return false;
+            if (inventory == null || inventory.Count(item) <= 0) return false;
+            potionReadyAt = Time.time + potionCooldown;
+            if (!GameSession.IsAuthority)
+            {
+                OnlineSession.Ask(new ActRequest { kind = ActKind.UseItem, text = item.id });
+                return true;
+            }
+            Consume(item);
+            return true;
+        }
+
+        /// <summary>The bottle or the bite itself (where the rules run).</summary>
+        void Consume(ItemDef item)
+        {
             inventory.Remove(item, 1);
             if (item.healAmount > 0) health.Heal(item.healAmount);
             if (item.energyAmount > 0)
@@ -415,10 +440,9 @@ namespace RPG
                 NetCues.WorldText($"+{Mathf.RoundToInt(energy - before)}", health.HeadPosition + Vector3.right * 0.4f, Palette.Energy);
             }
             if (item.cleanse && status != null) status.Cleanse();
-            string fx = slot == 0 ? "potion_red" : slot == 1 ? "potion_blue" : "potion_green";
+            string fx = item.cleanse ? "potion_green" : item.energyAmount > 0 && item.healAmount <= 0 ? "potion_blue" : "potion_red";
             NetCues.VfxOn(fx, this);
             NetCues.Sound("sfx_potion", 0.8f, 0.06f, transform.position);
-            return true;
         }
 
         // ------------------------------------------------------------------ this machine's input

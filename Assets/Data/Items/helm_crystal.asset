@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: helm_crystal
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: helm_crystal
+  displayName: "M\u0169 Pha L\xEA"
+  description: "M\u0169 th\xE9p g\u1EAFn m\xE0o pha l\xEA, s\xE1ng m\u1EDD trong b\xF3ng t\u1ED1i. \u0110\u1EA7u \xF3c t\u1EC9nh t\xE1o l\u1EA1 th\u01B0\u1EDDng."
+  icon: {fileID: 357661629, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 3
+  rarity: 2
+  maxStack: 1
+  value: 460
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: 0
+  bonuses:
+  - stat: 6
+    kind: 0
+    value: 5
+    tag: 
+  - stat: 5
+    kind: 0
+    value: 15
+    tag: 
+  - stat: 18
+    kind: 0
+    value: 0.06
+    tag: 
+  craftGold: 450
+  craftItems:
+  - id: crystal_shard
+    count: 10
+  - id: bat_wing
+    count: 3
+  - id: golem_core
+    count: 1

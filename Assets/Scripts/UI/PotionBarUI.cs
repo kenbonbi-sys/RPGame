@@ -15,7 +15,7 @@ namespace RPG
         void Start()
         {
             if (bagButton != null)
-                bagButton.onClick.AddListener(() => { if (HUD.I != null && HUD.I.inventory != null) HUD.I.inventory.Toggle(); });
+                bagButton.onClick.AddListener(() => { if (HUD.I != null && HUD.I.heroPanel != null) HUD.I.heroPanel.Toggle(); });
         }
 
         void Update()

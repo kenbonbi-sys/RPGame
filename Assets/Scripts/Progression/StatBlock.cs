@@ -103,6 +103,20 @@ namespace RPG
             return n;
         }
 
+        /// <summary>Puts <paramref name="fresh"/> in place of every modifier from <paramref name="source"/>, telling once.</summary>
+        public void ReplaceFrom(object source, IReadOnlyList<StatModifier> fresh)
+        {
+            int removed = mods.RemoveAll(m => Equals(m.source, source));
+            if (fresh != null)
+                for (int i = 0; i < fresh.Count; i++)
+                {
+                    var m = fresh[i];
+                    m.source = source;
+                    mods.Add(m);
+                }
+            if (removed > 0 || (fresh != null && fresh.Count > 0)) Changed?.Invoke();
+        }
+
         /// <summary>Final value. Untagged modifiers always count; tagged ones only for a matching tag.</summary>
         public float Get(StatId s, string tag = null) => Compute(s, tag, null);
 

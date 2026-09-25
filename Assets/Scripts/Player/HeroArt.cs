@@ -70,6 +70,60 @@ namespace RPG
             return clip != null && clip.frames.Length > 0 ? clip.frames[0] : null;
         }
 
+        static readonly Dictionary<string, Sprite> WeaponIcons = new Dictionary<string, Sprite>();
+
+        /// <summary>
+        /// The look's weapon alone as a small square icon, in its metal and glowing from +7, cropped
+        /// and outlined like the item icons (the weapon slot of the character screen, the forge).
+        /// Null for bare fists.
+        /// </summary>
+        public static Sprite WeaponIcon(HeroLook look)
+        {
+            if (look == null) return null;
+            string key = $"{look.cls}|{look.weapon}|{look.metal}|{(look.upgrade >= 7 ? 1 : 0)}";
+            if (WeaponIcons.TryGetValue(key, out var cached)) return cached;
+            const int S = 24;
+            var drawn = new Doll(look).WeaponAlone(S);
+            int x0 = S, y0 = S, x1 = -1, y1 = -1;
+            for (int y = 0; y < S; y++)
+                for (int x = 0; x < S; x++)
+                    if (drawn.Opaque(x, y))
+                    {
+                        x0 = Mathf.Min(x0, x); y0 = Mathf.Min(y0, y);
+                        x1 = Mathf.Max(x1, x); y1 = Mathf.Max(y1, y);
+                    }
+            Sprite sprite = null;
+            if (x1 >= 0)
+            {
+                // cropped to a square around the weapon, then a dark rim: it fills its slot
+                int n = Mathf.Max(8, Mathf.Max(x1 - x0 + 1, y1 - y0 + 1) + 2);
+                int ox = (n - (x1 - x0 + 1)) / 2 - x0, oy = (n - (y1 - y0 + 1)) / 2 - y0;
+                var cv = new Px(n, n);
+                cv.Blit(drawn, ox, oy);
+                var rim = new Color32(30, 18, 22, 255);
+                var buf = new Color32[n * n];
+                for (int y = 0; y < n; y++)
+                    for (int x = 0; x < n; x++)
+                    {
+                        var c = cv.Get(x, y);
+                        if (c.a == 0 && (cv.Opaque(x - 1, y) || cv.Opaque(x + 1, y) || cv.Opaque(x, y - 1) || cv.Opaque(x, y + 1))) c = rim;
+                        buf[(n - 1 - y) * n + x] = c;
+                    }
+                var tex = new Texture2D(n, n, TextureFormat.RGBA32, false)
+                {
+                    filterMode = FilterMode.Point,
+                    wrapMode = TextureWrapMode.Clamp,
+                    name = "weapon_" + look.weapon
+                };
+                tex.SetPixels32(buf);
+                tex.Apply();
+                sprite = Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), Ppu, 0, SpriteMeshType.FullRect);
+                sprite.name = tex.name;
+            }
+            WeaponIcons[key] = sprite;
+            return sprite;
+        }
+
         // ================================================================== the sheet
         static readonly (string name, float fps, bool loop)[] Clips =
         {
@@ -1118,6 +1172,14 @@ namespace RPG
                 return bow ? new[] { (0, 0f), (0, 0f), (0, 0f) }
                     : thrust ? new[] { (0, -20f), (0, 0f), (0, 5f) }
                     : new[] { (0, -120f), (0, -10f), (0, 50f) };
+            }
+
+            /// <summary>The weapon alone, pointing up and to the right (the weapon slot's icon).</summary>
+            public Px WeaponAlone(int size)
+            {
+                var cv = new Px(size, size);
+                Weapon(cv, size / 2 - 4, size / 2 + 4, -45f, false);
+                return cv;
             }
 
             public Dictionary<string, List<Px>> All()

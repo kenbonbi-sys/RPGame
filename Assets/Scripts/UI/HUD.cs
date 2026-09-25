@@ -20,12 +20,12 @@ namespace RPG
         public BannerUI banner;
         public FloatingTextManager floating;
         public TooltipUI tooltip;
-        public InventoryUI inventory;
+        /// <summary>Nhân Vật: the sheet, the hero's gear and the bag in one window (B, I, C).</summary>
+        public HeroPanelUI heroPanel;
         public HelpPanelUI help;
         public PauseMenuUI pause;
         public DeathScreenUI death;
         public JournalUI journal;
-        public CharacterUI character;
         public CharacterCreatorUI creator;
         public XpBarUI xpBar;
         public SaveSlotsUI saves;

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: ring_eye
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: ring_eye
+  displayName: "Nh\u1EABn M\u1EAFt Hang"
+  description: "Nh\u1EABn b\u1EA1c g\u1EAFn th\u1EE7y tinh th\u1EC3 c\u1EE7a M\u1EAFt Hang. Nh\xECn qua n\xF3, th\u1EA5y ngay ch\u1ED7 y\u1EBFu."
+  icon: {fileID: -332636150, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 3
+  rarity: 2
+  maxStack: 1
+  value: 400
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: 4
+  bonuses:
+  - stat: 9
+    kind: 0
+    value: 0.05
+    tag: 
+  - stat: 10
+    kind: 0
+    value: 0.15
+    tag: 
+  craftGold: 400
+  craftItems:
+  - id: eye_lens
+    count: 3
+  - id: gem_blue
+    count: 1

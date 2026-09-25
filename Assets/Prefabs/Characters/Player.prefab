@@ -608,7 +608,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RPG.Inventory
   gold: 25
-  capacity: 20
+  capacity: 48
   stacks:
   - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
     count: 4

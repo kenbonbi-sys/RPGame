@@ -9,6 +9,7 @@ namespace RPG.EditorTools
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildAll
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.ForceBuildAll
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildScene
+    ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildCore
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.RebuildZones
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.MoveHeroState
     ///   Unity.exe -batchmode -quit -projectPath . -executeMethod RPG.EditorTools.Batch.BuildOnline
@@ -40,6 +41,12 @@ namespace RPG.EditorTools
         public static void RebuildScene()
         {
             SceneBuilder.RebuildSceneOnly();
+        }
+
+        /// <summary>Regenerates only the Core scene (the HUD lives there) from the prefabs on disk; the zones and the title stay.</summary>
+        public static void RebuildCore()
+        {
+            SceneBuilder.RebuildCoreOnly();
         }
 
         /// <summary>Regenerates only the zone scenes (the world map) from the prefabs on disk; Core and the title stay.</summary>

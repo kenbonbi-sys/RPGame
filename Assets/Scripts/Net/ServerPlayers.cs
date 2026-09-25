@@ -461,6 +461,12 @@ namespace RPG
                 case ActKind.Forge:
                     Forge.Apply(hero, (Forge.Action)r.id, r.value, r.text);
                     return;
+                case ActKind.Equip:
+                    if (hero.inventory != null && (r.text == null || r.text.Length < 64)) hero.inventory.ApplyEquip(r.text, (EquipSlot)r.value);
+                    return;
+                case ActKind.UseItem:
+                    if (!hero.IsDead && r.text != null && r.text.Length < 64 && GameManager.I != null) hero.UseItem(GameManager.I.db.Item(r.text));
+                    return;
                 case ActKind.ChooseLook:
                     if (hero.stats != null) CharacterChoice.Apply(hero, HeroLook.FromJson(r.text));
                     return;

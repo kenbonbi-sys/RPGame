@@ -160,9 +160,8 @@ namespace RPG.EditorTools
             BuildBuffBar(root, hud);
             BuildBanner(root, hud);
             BuildDialogue(root);
-            hud.inventory = BuildInventory(root);
+            hud.heroPanel = BuildHeroPanel(root);
             hud.journal = BuildJournal(root);
-            hud.character = BuildCharacter(root);
             hud.help = BuildHelp(root);
             hud.pause = BuildPause(root);
             hud.saves = BuildSaves(root);
@@ -206,7 +205,20 @@ namespace RPG.EditorTools
             np.barFill = Img(fill, "bar_fill", new Color(1f, 0.7f, 0.25f), Image.Type.Filled);
             np.barFill.fillMethod = Image.FillMethod.Horizontal;
             np.bar = bar;
-            np.promptText = Txt(rt, "Prompt", "[F] Nói chuyện", 19, new Color(1f, 0.95f, 0.6f), TextAlignmentOptions.Center, C, C, new Vector2(0, 42), new Vector2(260, 26));
+            // what the hero can do here, on a dark pill that fits the words, growing up from over the name
+            var prompt = Rect(rt, "Prompt", C, new Vector2(0.5f, 0f), new Vector2(0, 32), new Vector2(200, 32));
+            Img(prompt, "white", new Color(0.05f, 0.03f, 0.08f, 0.8f));
+            var fit = prompt.gameObject.AddComponent<HorizontalLayoutGroup>();
+            fit.padding = new RectOffset(12, 12, 3, 4);
+            fit.childAlignment = TextAnchor.MiddleCenter;
+            fit.childControlWidth = true;
+            fit.childControlHeight = true;
+            var pfit = prompt.gameObject.AddComponent<ContentSizeFitter>();
+            pfit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            pfit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            np.promptText = Txt(prompt, "Text", "[F] Nói chuyện", 21, new Color(1f, 0.93f, 0.55f), TextAlignmentOptions.Center, C, C, Vector2.zero, new Vector2(240, 28));
+            np.promptText.textWrappingMode = TextWrappingModes.NoWrap;
+            np.promptRoot = prompt.gameObject;
             rt.gameObject.SetActive(false);
             return np;
         }
@@ -609,32 +621,24 @@ namespace RPG.EditorTools
             return w;
         }
 
-        static InventoryUI BuildInventory(Transform root)
+        /// <summary>Nhân Vật (B / I / C): the sheet, the hero's gear and the bag, a full-screen panel that builds its own widgets (<see cref="HeroPanelUI"/>).</summary>
+        static HeroPanelUI BuildHeroPanel(Transform root)
         {
-            var w = Window(root, "Inventory", new Vector2(540, 600), new Vector2(380, 30), out var g, "Túi Đồ");
-            var ui = w.parent.gameObject.AddComponent<InventoryUI>();
+            var rt = Stretch(root, "HeroPanel");
+            var g = Group(rt.gameObject, true);
+            var ui = rt.gameObject.AddComponent<HeroPanelUI>();
             ui.group = g;
-            ui.window = w;
-            var grid = Rect(w, "Grid", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -100), new Vector2(460, 370));
-            var gl = grid.gameObject.AddComponent<GridLayoutGroup>();
-            gl.cellSize = new Vector2(84, 84);
-            gl.spacing = new Vector2(10, 10);
-            gl.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            gl.constraintCount = 5;
-            ui.grid = grid;
-            var slot = Rect(grid, "SlotTemplate", C, C, Vector2.zero, new Vector2(84, 84));
-            Img(slot, "slot", Color.white, Image.Type.Sliced, true);
-            var s = slot.gameObject.AddComponent<InventorySlotUI>();
-            s.rarity = Img(slot, "Rarity", "glow", Color.clear, C, Vector2.zero, new Vector2(78, 78));
-            s.icon = Img(slot, "Icon", null, Color.white, C, Vector2.zero, new Vector2(64, 64));
-            s.count = Txt(slot, "Count", "", 20, Color.white, TextAlignmentOptions.BottomRight, C, C, new Vector2(-4, -4), new Vector2(76, 76));
-            s.highlight = Img(slot, "Highlight", "slot_highlight", Color.white, C, Vector2.zero, new Vector2(84, 84), Image.Type.Sliced);
-            s.highlight.enabled = false;
-            slot.gameObject.SetActive(false);
-            ui.slotPrefab = s;
-            ui.goldText = Txt(w, "Gold", "0 vàng", 24, Cream, TextAlignmentOptions.Left, new Vector2(0, 0), new Vector2(0, 0), new Vector2(40, 64), new Vector2(300, 34));
-            ui.countText = Txt(w, "Count", "0/20", 20, Muted, TextAlignmentOptions.Right, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-40, 64), new Vector2(200, 34));
-            Txt(w, "Hint", "[B] Đóng  ·  Chuột phải: dùng", 18, Muted, TextAlignmentOptions.Center, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(480, 26), false);
+            ui.window = rt;
+            ui.font = font;
+            ui.fontOutline = outline;
+            ui.windowSprite = ArtImporter.S("frame_wood");
+            ui.panelSprite = ArtImporter.S("frame_panel");
+            ui.slotSprite = ArtImporter.S("slot");
+            ui.highlightSprite = ArtImporter.S("slot_highlight");
+            ui.dividerSprite = ArtImporter.S("divider");
+            ui.whiteSprite = ArtImporter.S("white");
+            ui.glowSprite = ArtImporter.S("glow");
+            ui.portraitSprite = ArtImporter.S("portrait_frame");
             return ui;
         }
 
@@ -646,46 +650,6 @@ namespace RPG.EditorTools
             ui.window = w;
             ui.body = Txt(w, "Body", "", 23, Cream, TextAlignmentOptions.TopLeft, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -104), new Vector2(560, 440), false);
             Txt(w, "Hint", "[J] Đóng", 18, Muted, TextAlignmentOptions.Center, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(480, 26), false);
-            return ui;
-        }
-
-        static CharacterUI BuildCharacter(Transform root)
-        {
-            var w = Window(root, "Character", new Vector2(660, 900), new Vector2(-360, 10), out var g, "Nhân Vật");
-            var ui = w.parent.gameObject.AddComponent<CharacterUI>();
-            ui.group = g;
-            ui.window = w;
-            var top = new Vector2(0.5f, 1f);
-            ui.header = Txt(w, "Header", "Cấp 1  ·  0 / 50 XP", 24, new Color(0.86f, 0.8f, 1f), TextAlignmentOptions.Center, top, top, new Vector2(0, -92), new Vector2(580, 32));
-            ui.identity = Txt(w, "Identity", "", 21, Gold, TextAlignmentOptions.Center, top, top, new Vector2(0, -124), new Vector2(600, 30), false);
-            // D&D's sheet order: STR DEX CON INT WIS CHA
-            string[] hints =
-            {
-                "Vũ khí nặng · Trấn Áp",
-                "Vũ khí khéo, cung · chí mạng · tốc đánh · Lướt",
-                "+10 máu · giáp",
-                "Phép của Pháp Sư · giảm hồi chiêu",
-                "Phép Tu Sĩ, Tế Sư, Du Hiệp, Võ Tăng · hồi máu · kháng",
-                "Phép Thi Sĩ, Thuật Sĩ, Khế Ước Sư, Hiệp Sĩ Thánh · vàng",
-            };
-            for (int i = 0; i < CoreStats.Count; i++)
-            {
-                var a = CoreStats.SheetOrder[i];
-                float y = -172 - i * 56;
-                var row = Rect(w, "Attr_" + i, top, top, new Vector2(0, y), new Vector2(580, 52));
-                Img(row, "white", new Color(0.05f, 0.03f, 0.07f, 0.35f));
-                ui.names[i] = Txt(row, "Name", CoreStats.Name(a) + " <size=16><color=#9a93a8>" + CoreStats.Short(a) + "</color></size>", 23, Gold,
-                    TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, 8), new Vector2(300, 28));
-                Txt(row, "Hint", hints[i], 15, Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(18, -14), new Vector2(420, 20), false);
-                ui.values[i] = Txt(row, "Value", "10", 25, Cream, TextAlignmentOptions.MidlineRight, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-72, 0), new Vector2(180, 40));
-                ui.plusButtons[i] = Btn(row, "Plus", "+", new Vector2(1, 0.5f), new Vector2(-30, 0), new Vector2(42, 42), 28);
-            }
-            ui.pointsText = Txt(w, "Points", "Điểm chỉ số: 0", 21, Cream, TextAlignmentOptions.Center, top, top, new Vector2(-80, -508), new Vector2(420, 30), false);
-            ui.looksButton = Btn(w, "Looks", "Ngoại hình", top, new Vector2(210, -508), new Vector2(170, 40), 19);
-            Img(w, "Divider2", "divider", Color.white, top, new Vector2(0, -538), new Vector2(360, 12));
-            ui.derivedText = Txt(w, "Derived", "", 18, Cream, TextAlignmentOptions.TopLeft, top, top, new Vector2(0, -552), new Vector2(580, 270), false);
-            Txt(w, "Hint", "[C] Đóng  ·  ★ kháng theo lớp nhân vật (D&D: saving throw)", 16, Muted, TextAlignmentOptions.Center,
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(620, 24), false);
             return ui;
         }
 
@@ -720,6 +684,10 @@ namespace RPG.EditorTools
             ui.windowSprite = ArtImporter.S("frame_wood");
             ui.buttonSprite = ArtImporter.S("frame_panel");
             ui.whiteSprite = ArtImporter.S("white");
+            ui.slotSprite = ArtImporter.S("slot");
+            ui.highlightSprite = ArtImporter.S("slot_highlight");
+            ui.glowSprite = ArtImporter.S("glow");
+            ui.dividerSprite = ArtImporter.S("divider");
             return ui;
         }
 
@@ -737,8 +705,8 @@ namespace RPG.EditorTools
                 $"{K}Kỹ năng{E}\n  Q W E R A S D: kỹ năng của lớp nhân vật\n  (di chuột lên ô kỹ năng để xem)\n  Space: Lướt (bất tử trong chốc lát)\n\n" +
                 $"{K}Bình thuốc{E}\n  1 Máu · 2 Năng lượng · 3 Thảo mộc";
             string right =
-                $"{K}Tương tác{E}\n  F: Nói chuyện · B: Túi đồ · C: Nhân vật\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  T: Tự động đánh quái · M: Bản đồ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +
-                $"{K}Mẹo chiến đấu{E}\n  Vòng đỏ dưới đất = đòn sắp đánh.\n  Lướt (Space) ra ngoài vòng!\n  Gấu Ma lao vào Tảng Đá Lớn sẽ bị choáng.\n\n" +
+                $"{K}Tương tác{E}\n  F: Nói chuyện · Lò Rèn · Đá Truyền Tống\n  B / C: Nhân vật, trang bị và túi đồ\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  T: Tự động đánh quái · M: Bản đồ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +
+                $"{K}Mẹo chiến đấu{E}\n  Vòng đỏ dưới đất = đòn sắp đánh.\n  Lướt (Space) ra ngoài vòng!\n\n" +
                 $"{K}Phím thử nghiệm{E}\n  F5 hồi đầy · F6 đổi giờ · F7 tới Boss\n  F8 về làng · F9 hạ quái gần";
             Txt(w, "Left", left, 22, Cream, TextAlignmentOptions.TopLeft, new Vector2(0, 1), new Vector2(0, 1), new Vector2(50, -104), new Vector2(460, 460), false);
             Txt(w, "Right", right, 22, Cream, TextAlignmentOptions.TopLeft, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-50, -104), new Vector2(460, 460), false)
@@ -803,6 +771,10 @@ namespace RPG.EditorTools
         {
             var rt = Rect(root, "Tooltip", new Vector2(0.5f, 0.5f), new Vector2(0, 0), Vector2.zero, new Vector2(400, 160));
             var g = Group(rt.gameObject);
+            // a solid backing under the frame: tooltips open over busy windows (the bag, the forge)
+            var back = Stretch(rt, "Backing", 5);
+            Img(back, "white", new Color(0.07f, 0.05f, 0.09f, 0.97f));
+            back.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
             Img(rt, "frame_panel", Color.white, Image.Type.Sliced);
             var vl = rt.gameObject.AddComponent<VerticalLayoutGroup>();
             vl.padding = new RectOffset(22, 22, 18, 20);
@@ -834,7 +806,7 @@ namespace RPG.EditorTools
 
         static void BuildHint(Transform root)
         {
-            Txt(root, "HelpHint", "F1: Hướng dẫn   ·   B: Túi đồ   ·   C: Nhân vật   ·   J: Bách Khoa Trùm", 17, new Color(0.8f, 0.78f, 0.85f, 0.7f),
+            Txt(root, "HelpHint", "F1: Hướng dẫn   ·   B / C: Nhân vật & túi đồ   ·   J: Bách Khoa Trùm   ·   M: Bản đồ", 17, new Color(0.8f, 0.78f, 0.85f, 0.7f),
                 TextAlignmentOptions.Left, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, -14), new Vector2(700, 26), false);
         }
     }

@@ -136,18 +136,16 @@ namespace RPG
             if (InputReader.Cancel)
             {
                 if (map != null && map.IsOpen) map.Close();
-                else if (hud.inventory != null && hud.inventory.IsOpen) hud.inventory.Close();
+                else if (hud.heroPanel != null && hud.heroPanel.IsOpen) hud.heroPanel.Close();
                 else if (hud.journal != null && hud.journal.IsOpen) hud.journal.Close();
-                else if (hud.character != null && hud.character.IsOpen) hud.character.Close();
                 else if (hud.saves != null && hud.saves.IsOpen) hud.saves.Close();
                 else if (hud.help != null && hud.help.IsOpen) hud.help.Close();
                 else if (!dialogue && hud.pause != null) hud.pause.Toggle();
             }
             if (dialogue || cinematic) return;
             if (InputReader.ToggleHelp && hud.help != null) hud.help.Toggle();
-            if (InputReader.ToggleBag && hud.inventory != null) hud.inventory.Toggle();
+            if ((InputReader.ToggleBag || InputReader.ToggleCharacter) && hud.heroPanel != null) hud.heroPanel.Toggle();
             if (InputReader.ToggleJournal && hud.journal != null) hud.journal.Toggle();
-            if (InputReader.ToggleCharacter && hud.character != null) hud.character.Toggle();
             var me = Players.Local;
             if (InputReader.ToggleQuest && me != null && me.quests != null) me.quests.CycleFocus();
             if (map != null && me != null)
