@@ -237,6 +237,7 @@ namespace RPG.EditorTools
             root.mud = res.mud;
             root.water = res.water;
             root.walls = res.walls;
+            root.chasm = res.chasm;
             root.terrain = res.terrain;
             root.terrainWidth = res.terrainWidth;
             root.obstacles = res.props;

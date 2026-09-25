@@ -33,6 +33,17 @@ namespace RPG
         [Tooltip("Seconds of Choáng after it rams rock.")]
         public float wallStun = 2.2f;
 
+        [Header("Words (a bison uses the beetle's ways)")]
+        public string guardText = "Giáp chặn!";
+        public string backText = "Trúng lưng!";
+        public string biteName = "Kẹp Hàm";
+        public string chargeName = "Húc Giáp";
+        [Tooltip("The sound as it starts its charge (a bison's snort).")]
+        public string chargeSound = "sfx_boss_leap";
+        [Tooltip("Its last sound, and whether it falls to rock chips (a beetle's shell).")]
+        public string deathSound = "sfx_rock_impact";
+        public bool rockChips = true;
+
         enum Step { Bite, Charge }
         Step step;
         bool acted;
@@ -55,7 +66,7 @@ namespace RPG
         {
             base.Awake();
             own = GetComponentsInChildren<Collider2D>(true);
-            health.Guard = Guard;
+            if (frontGuard < 1f || backBonus > 1f) health.Guard = Guard;
         }
 
         protected override void OnEnable()
@@ -76,7 +87,7 @@ namespace RPG
                 if (Time.time >= nextText)
                 {
                     nextText = Time.time + 0.7f;
-                    NetCues.WorldText("Giáp chặn!", health.HeadPosition + Vector3.up * 0.2f, new Color(0.75f, 0.8f, 0.9f));
+                    NetCues.WorldText(guardText, health.HeadPosition + Vector3.up * 0.2f, new Color(0.75f, 0.8f, 0.9f));
                     NetCues.Vfx("hit_spark", d.point, 0f, 0.8f);
                 }
                 return frontGuard;
@@ -86,7 +97,7 @@ namespace RPG
                 if (Time.time >= nextText)
                 {
                     nextText = Time.time + 0.7f;
-                    NetCues.WorldText("Trúng lưng!", health.HeadPosition + Vector3.up * 0.2f, Palette.Crit);
+                    NetCues.WorldText(backText, health.HeadPosition + Vector3.up * 0.2f, Palette.Crit);
                 }
                 return backBonus;
             }
@@ -179,7 +190,7 @@ namespace RPG
                     if (anim != null) anim.Play("attack", true);
                     NetCues.Sound("sfx_boss_swipe", 0.6f, 0.1f, transform.position);
                     var d = DamageInfo.Make(biteDamage, Team.Enemy, gameObject, Pos, aim, DamageType.Physical, 4f);
-                    d.skillName = "Kẹp Hàm";
+                    d.skillName = biteName;
                     Combat.DamageCone(Pos + Vector2.up * 0.2f, aim, biteRadius, 90f, d);
                 }
                 if (stateTime > 0.95f)
@@ -202,7 +213,7 @@ namespace RPG
                 rammed.Clear();
                 if (anim != null) anim.Play("move", true);
                 if (anim != null) anim.speed = 2f;
-                NetCues.Sound("sfx_boss_leap", 0.6f, 0.1f, transform.position);
+                NetCues.Sound(chargeSound, 0.7f, 0.1f, transform.position);
             }
             float t = stateTime - chargeWindup;
             if (t < chargeSeconds && Rush()) return;
@@ -242,13 +253,16 @@ namespace RPG
             }
             Vector2 next = Pos + aim * stepLen;
             if (Vector2.Distance(next, home) > leashRange) return false;
+            // the steppe's ravine: it stops at the edge rather than run into the drop
+            var zone = ZoneRoot.Current;
+            if (zone != null && zone.IsChasm(next + aim * 0.5f)) return false;
             motor.Teleport(next);
             foreach (var h in Players.All)
             {
                 if (h == null || h.IsDead || rammed.Contains(h) || Vector2.Distance(h.transform.position, Pos) > 0.9f) continue;
                 rammed.Add(h);
                 var d = DamageInfo.Make(chargeDamage, Team.Enemy, gameObject, h.transform.position, aim, DamageType.Physical, 8f);
-                d.skillName = "Húc Giáp";
+                d.skillName = chargeName;
                 d.feedback = true;
                 if (h.health.TakeDamage(d) > 0f) Combat.OnHitFeedback(h.health, d);
             }
@@ -269,8 +283,8 @@ namespace RPG
             if (anim != null) anim.speed = 1f;
             base.OnDied(d);
             if (!GameSession.HasScreen) return;
-            AudioManager.Play("sfx_rock_impact", 0.6f, 0.15f, transform.position);
-            VFX.Spawn("rock_chips", transform.position + Vector3.up * 0.3f, Quaternion.identity, 1.3f);
+            AudioManager.Play(deathSound, 0.6f, 0.15f, transform.position);
+            if (rockChips) VFX.Spawn("rock_chips", transform.position + Vector3.up * 0.3f, Quaternion.identity, 1.3f);
         }
     }
 }

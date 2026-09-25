@@ -93,6 +93,7 @@ namespace RPG
             {
                 anim = Enemy.anim;
                 body = Enemy.body;
+                lift = Enemy.lift;
             }
             else if (Boss != null)
             {

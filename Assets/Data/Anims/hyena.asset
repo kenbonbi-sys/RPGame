@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6218c6fb14ae18c4e9ac4cd7543b02b3, type: 3}
+  m_Name: hyena
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.SpriteAnimSet
+  clips:
+  - name: idle
+    frames:
+    - {fileID: -1559128373, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    - {fileID: 295790686, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    fps: 3
+    loop: 1
+  - name: move
+    frames:
+    - {fileID: -1511778195, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    - {fileID: -365390594, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    - {fileID: -264619325, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    - {fileID: 1351763670, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    fps: 12
+    loop: 1
+  - name: windup
+    frames:
+    - {fileID: -1284531961, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    - {fileID: 1874192809, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    fps: 8
+    loop: 1
+  - name: attack
+    frames:
+    - {fileID: 1524466195, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    - {fileID: 190922304, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    fps: 10
+    loop: 0
+  - name: hurt
+    frames:
+    - {fileID: -1366185733, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    fps: 1
+    loop: 0
+  - name: dead
+    frames:
+    - {fileID: 2107484096, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    - {fileID: 1392724606, guid: b264cdea7632321489be2279a7d3c295, type: 3}
+    fps: 5
+    loop: 0

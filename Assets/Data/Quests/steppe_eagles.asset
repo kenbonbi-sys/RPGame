@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: steppe_eagles
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: steppe_eagles
+  title: "Truy N\xE3: Chim \u01AFng \u0110\xE1"
+  kind: 0
+  summary: "Chim \u01AFng \u0110\xE1 l\u01B0\u1EE3n tr\xEAn cao r\u1ED3i b\u1ED5 nh\xE0o xu\u1ED1ng ch\u1ED7 \u0111\xE3 \u0111\xE1nh d\u1EA5u. Ra kh\u1ECFi v\xF2ng tr\u01B0\u1EDBc khi n\xF3 r\u01A1i xu\u1ED1ng, r\u1ED3i \u0111\xE1nh l\xFAc n\xF3 c\xF2n \u0111\u1EADu d\u01B0\u1EDBi \u0111\u1EA5t. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 21."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 8d6442bf283a0524ca48d9c476fb0ac8, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: eagle
+    count: 4
+    text: "H\u1EA1 Chim \u01AFng \u0110\xE1"
+    countPrevious: 0
+    marker: eagles
+  xp: 2600
+  gold: 240
+  items:
+  - item: {fileID: 11400000, guid: 70ad6d84c1a250648a5653244f4188d4, type: 2}
+    count: 3
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: dba0358d54638b847a8b7d9d2e1b6a42, type: 2}

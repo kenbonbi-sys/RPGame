@@ -156,6 +156,7 @@ namespace RPG.EditorTools
             BuildBolt("FireBolt", "glow_hard", true, new Color(1f, 0.55f, 0.2f), new Color(1f, 0.45f, 0.15f), 0.45f, false, 0f, 1.3f);
             BuildBolt("ChaosBolt", "spark4", true, new Color(1f, 0.6f, 1f), new Color(0.9f, 0.4f, 1f), 0.6f, false, -720f, 1.6f);
             EditorUtil.Assign(ref db.mistMaterial, Mat("smoke", false, 1f));
+            EditorUtil.Assign(ref db.windMaterial, Mat("streak", true, 1.1f));
             EditorUtil.Assign(ref db.rockProjectilePrefab, BuildRockProjectile());
             EditorUtil.Assign(ref db.telegraphPrefab, BuildTelegraph());
             EditorUtility.SetDirty(db);

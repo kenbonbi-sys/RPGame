@@ -22,6 +22,10 @@ namespace RPG.EditorTools
         public static Material SpriteLitFX => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/SpriteLitFX.mat");
         public static Material Additive => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/SpriteAdditive.mat");
         public static Material AlphaUnlit => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/SpriteAlphaUnlit.mat");
+        /// <summary>Thảo Nguyên Gió's tall grass: sways with the wind (RPG/Sprite Lit Wind).</summary>
+        public static Material GrassWind => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/GrassWind.mat");
+        /// <summary>Thảo Nguyên Gió's ground: light bands roll over it with the wind.</summary>
+        public static Material GroundWind => AssetDatabase.LoadAssetAtPath<Material>(MatFolder + "/GroundWind.mat");
         public static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Fonts/Inter SDF.asset");
         public static Material FontOutline => AssetDatabase.LoadAssetAtPath<Material>("Assets/Fonts/Inter SDF - Outline.mat");
         public static Material FontShadow => AssetDatabase.LoadAssetAtPath<Material>("Assets/Fonts/Inter SDF - Shadow.mat");
@@ -83,6 +87,16 @@ namespace RPG.EditorTools
             MakeMat("SpriteLitFX", "RPG/Sprite Lit FX");
             MakeMat("SpriteAdditive", "RPG/VFX Additive", m => m.SetFloat("_Intensity", 1.6f));
             MakeMat("SpriteAlphaUnlit", "RPG/VFX Alpha", m => m.SetFloat("_Intensity", 1f));
+            MakeMat("GrassWind", "RPG/Sprite Lit Wind", m =>
+            {
+                m.SetFloat("_Sway", 0.22f);
+                m.SetFloat("_Wave", 0f);
+            });
+            MakeMat("GroundWind", "RPG/Sprite Lit Wind", m =>
+            {
+                m.SetFloat("_Sway", 0f);
+                m.SetFloat("_Wave", 0.14f);
+            });
         }
 
         // ------------------------------------------------------------------ font
@@ -372,6 +386,11 @@ namespace RPG.EditorTools
                 Item("queen_eye", "Mắt Nhện Chúa", M, ItemRarity.Epic, "Con mắt đỏ rực của Nhện Chúa Pha Lê, nằm giữa một vòng pha lê.", 360),
                 Item("crystal_silk", "Tơ Pha Lê", M, ItemRarity.Rare, "Tơ của Nhện Chúa, óng ánh bụi pha lê, không lưỡi dao nào cắt đứt.", 120),
                 Item("mimic_tooth", "Răng Mimic", M, ItemRarity.Epic, "Chiếc răng cong của Mimic Tham Lam, một đồng vàng vẫn còn dính trên đó.", 300),
+                // Thảo Nguyên Gió
+                Item("hyena_fang", "Nanh Linh Cẩu", M, ItemRarity.Common, "Chiếc nanh vàng ố của Linh Cẩu Gió, mòn vì gặm xương.", 14),
+                Item("eagle_feather", "Lông Ưng Đá", M, ItemRarity.Uncommon, "Chiếc lông xám như đá của Chim Ưng Đá. Thả ra là nó cưỡi gió bay đi.", 22),
+                Item("bison_horn", "Sừng Bò Rừng", M, ItemRarity.Uncommon, "Chiếc sừng cong, gốc to bằng cổ tay, còn vết húc vào đá.", 30),
+                Item("bison_hide", "Da Bò Rừng", M, ItemRarity.Common, "Tấm da dày lông xù của Bò Rừng, gió thảo nguyên không lọt qua.", 18),
             };
         }
 
@@ -396,6 +415,10 @@ namespace RPG.EditorTools
                 Item("armor_silk", "Áo Tơ Pha Lê", E, ItemRarity.Epic, "Áo dệt từ tơ của Nhện Chúa: không lưỡi dao nào cắt đứt, phép thuật trượt đi trên nó.", 900, maxStack: 1),
                 Item("ring_eye", "Nhẫn Mắt Hang", E, ItemRarity.Rare, "Nhẫn bạc gắn thủy tinh thể của Mắt Hang. Nhìn qua nó, thấy ngay chỗ yếu.", 400, maxStack: 1),
                 Item("ring_mimic", "Nhẫn Răng Mimic", E, ItemRarity.Epic, "Răng của Mimic Tham Lam trên một vòng vàng. Vàng cứ thế rơi vào túi.", 600, maxStack: 1),
+                // Thảo Nguyên Gió
+                Item("helm_eagle", "Mũ Lông Ưng", E, ItemRarity.Rare, "Mũ thép cài hai chiếc lông Ưng Đá. Người đội nó nhìn thấy chỗ hở trước khi đối thủ kịp che.", 560, maxStack: 1),
+                Item("armor_bison", "Áo Da Bò Rừng", E, ItemRarity.Epic, "Áo da bò rừng dày, vai đính sừng. Gió thảo nguyên và nanh vuốt đều trượt đi.", 980, maxStack: 1),
+                Item("boots_wind", "Giày Gió", E, ItemRarity.Epic, "Giày khâu bằng lông ưng: bước đi như có gió đẩy sau lưng.", 760, maxStack: 1),
             };
         }
 
@@ -455,6 +478,13 @@ namespace RPG.EditorTools
               Plus(StatId.CritChance, 0.05f), Plus(StatId.CritDamage, 0.15f));
             G("ring_mimic", EquipSlot.Ring, 350, Parts(("mimic_tooth", 1), ("gem_red", 1)),
               Plus(StatId.Charisma, 1), Plus(StatId.GoldFind, 0.25f));
+            // Thảo Nguyên Gió (20-26)
+            G("helm_eagle", EquipSlot.Head, 600, Parts(("eagle_feather", 6), ("hyena_fang", 3)),
+              Plus(StatId.Armor, 6), Plus(StatId.CritChance, 0.05f), Plus(StatId.MaxHp, 40));
+            G("armor_bison", EquipSlot.Body, 950, Parts(("bison_hide", 5), ("bison_horn", 2), ("hyena_fang", 4)),
+              Plus(StatId.Armor, 13), Plus(StatId.MaxHp, 90), Plus(StatId.ElementalResist, 0.08f));
+            G("boots_wind", EquipSlot.Feet, 720, Parts(("eagle_feather", 4), ("bison_hide", 2)),
+              Plus(StatId.Armor, 3), Plus(StatId.MaxHp, 30), Plus(StatId.DashCooldownReduction, 0.15f));
         }
 
         // ------------------------------------------------------------------ abilities
@@ -968,6 +998,45 @@ namespace RPG.EditorTools
                 q.items.Add(Reward("potion_blue", 3));
                 q.setFlags.Add("cave_cleared");
             });
+            // Thảo Nguyên Gió, north-west through the crystal forest
+            var steppeEnter = Quest("steppe_enter", "Thảo Nguyên Gió", QuestKind.Main, q =>
+            {
+                q.summary = "Sau Nhện Chúa, gió lùa qua một đường hầm phía tây Rừng Pha Lê. Cuối hầm là một cao nguyên cỏ vàng, gió đổi hướng từng hồi. Dân du mục dựng trại ở đó.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Reach, "Cửa Gió", 1, "Theo đường hầm phía tây Rừng Pha Lê ra Cửa Gió", "windgate"));
+                q.objectives.Add(Obj(ObjectiveKind.Reach, "Trại Du Mục", 1, "Tới Trại Du Mục", "nomadcamp"));
+                q.xp = 2200;
+                q.gold = 200;
+                q.items.Add(Reward("potion_red", 3));
+            });
+            var steppeHyenas = Quest("steppe_hyenas", "Truy Nã: Linh Cẩu Gió", QuestKind.Main, q =>
+            {
+                q.summary = "Linh Cẩu Gió đi thành bầy, vây quanh con mồi rồi thay nhau lao vào cắn và chạy ra. Thấy vạch dưới đất là con sắp lao: Lướt sang bên.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "hyena", 6, "Hạ Linh Cẩu Gió", "hyenas"));
+                q.xp = 2400;
+                q.gold = 220;
+                q.items.Add(Reward("potion_red", 3));
+            });
+            var steppeEagles = Quest("steppe_eagles", "Truy Nã: Chim Ưng Đá", QuestKind.Main, q =>
+            {
+                q.summary = "Chim Ưng Đá lượn trên cao rồi bổ nhào xuống chỗ đã đánh dấu. Ra khỏi vòng trước khi nó rơi xuống, rồi đánh lúc nó còn đậu dưới đất.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "eagle", 4, "Hạ Chim Ưng Đá", "eagles"));
+                q.xp = 2600;
+                q.gold = 240;
+                q.items.Add(Reward("potion_blue", 3));
+            });
+            var steppeBisons = Quest("steppe_bisons", "Truy Nã: Bò Rừng", QuestKind.Main, q =>
+            {
+                q.summary = "Bò Rừng cào đất rồi lao thẳng. Đầu sừng của nó cứng như đá: đứng trước một tảng đá rồi né, để nó húc vào đá mà choáng váng. Khe Vực chỉ qua được nhờ Cột Gió.";
+                q.autoStart = true;
+                q.objectives.Add(Obj(ObjectiveKind.Kill, "bison", 4, "Hạ Bò Rừng", "bisons"));
+                q.xp = 2800;
+                q.gold = 260;
+                q.items.Add(Reward("potion_green", 3));
+                q.setFlags.Add("steppe_opened");
+            });
             var caveMimic = Quest("cave_mimic", "Lời Đồn: Rương Biết Cắn", QuestKind.Bounty, q =>
             {
                 q.summary = "Thợ mỏ kể có một rương kho báu trong hang tự đổi chỗ. Kẻ nào mở nó thì mất vàng. Hạ nó trước khi nó chui xuống đất lần thứ ba để lấy lại gấp đôi.";
@@ -1037,8 +1106,31 @@ namespace RPG.EditorTools
             Link(caveSlimes, caveBeetles, caveEyes);
             Link(caveEyes, caveSlimes, crystalGolem);
             Link(crystalGolem, caveEyes, spiderQueen);
-            Link(spiderQueen, crystalGolem, null);   // the next region (Thảo Nguyên Gió) will go on from here
+            Link(spiderQueen, crystalGolem, steppeEnter);   // on to Thảo Nguyên Gió
+            Link(steppeEnter, spiderQueen, steppeHyenas);
+            Link(steppeHyenas, steppeEnter, steppeEagles);
+            Link(steppeEagles, steppeHyenas, steppeBisons);
+            Link(steppeBisons, steppeEagles, null);   // T62: Hắc Phong and Bò Rừng Sắt go on from here
             Link(caveMimic, caveEnter, null);   // a side bounty: the hidden boss
+            // a quest made before the next region existed learns where it leads (kept assets included)
+            void Lead(QuestDef q, QuestDef next, string oldText, string newText)
+            {
+                if (q == null || next == null) return;
+                bool changed = false;
+                if (!q.followUps.Contains(next))
+                {
+                    q.followUps.Add(next);
+                    changed = true;
+                }
+                if (oldText != null && q.summary != null && q.summary.Contains(oldText))
+                {
+                    q.summary = q.summary.Replace(oldText, newText);
+                    changed = true;
+                }
+                if (changed) EditorUtility.SetDirty(q);
+            }
+            Lead(spiderQueen, steppeEnter, "Xa hơn về phía tây bắc là Thảo Nguyên Gió (sắp mở).",
+                 "Đường hầm phía tây Rừng Pha Lê dẫn ra Thảo Nguyên Gió.");
             // the level each step is for, in its summary
             void Rec(QuestDef q, int level)
             {
@@ -1058,6 +1150,10 @@ namespace RPG.EditorTools
             Rec(caveSpiders, 15);
             Rec(caveGolems, 16);
             Rec(caveBeetles, 17);
+            Rec(steppeEnter, 20);
+            Rec(steppeHyenas, 20);
+            Rec(steppeEagles, 21);
+            Rec(steppeBisons, 22);
             Rec(caveSlimes, 17);
             Rec(caveEyes, 18);
             Rec(crystalGolem, 18);
@@ -1067,6 +1163,7 @@ namespace RPG.EditorTools
             {
                 talk, forest, bear, mushrooms, swampRoad, swampToads, swampMud, toadKing, snake, swampHunters, swampWisps,
                 caveEnter, caveBats, caveSpiders, caveGolems, caveBeetles, caveSlimes, caveEyes, crystalGolem, spiderQueen, caveMimic,
+                steppeEnter, steppeHyenas, steppeEagles, steppeBisons,
             };
         }
 

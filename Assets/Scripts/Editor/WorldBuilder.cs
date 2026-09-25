@@ -15,9 +15,12 @@ namespace RPG.EditorTools
     /// Mẫu's lake with its four mounds — reached by a road through the forest's eastern edge to a
     /// stilt-hut outpost. North of it all a wall of rock; behind the swamp a trail climbs to the
     /// mouth of Hang Pha Lê, a dark cave of chambers and tunnels (solid rock between them) lit by
-    /// crystals. Đá Truyền Tống stand in the village, at the arena's gate, around the swamp and in
-    /// the cave. Tiles are painted into Tilemaps, props are prefab instances — everything can be
-    /// edited by hand afterwards.
+    /// crystals. West of the cave a tunnel opens onto Thảo Nguyên Gió, a windy plateau in the
+    /// mountains' north-west: golden grass, acacias and sandstone, the nomads' camp, and Khe Vực,
+    /// a ravine from end to end that only the wind columns carry heroes across. Đá Truyền Tống
+    /// stand in the village, at the arena's gate, around the swamp, in the cave and on the steppe.
+    /// Tiles are painted into Tilemaps, props are prefab instances — everything can be edited by
+    /// hand afterwards.
     /// </summary>
     public static class WorldBuilder
     {
@@ -30,7 +33,7 @@ namespace RPG.EditorTools
 
         public class Result
         {
-            public Tilemap ground, tall, dirt, mud, water, details, walls;
+            public Tilemap ground, tall, dirt, mud, water, details, walls, steppe, chasm;
             public Transform props;
             public Transform playerSpawn, chief, girl, forestSpot, bossSpot;
             public Transform outpost, swampSpot, mudField, toadPond, snakeLair, snakePools, dragonflies, wisps;
@@ -179,6 +182,10 @@ namespace RPG.EditorTools
             ("cuahang", "Cửa Hang Pha Lê", new Vector2(172.6f, 70.6f)),
             ("rungphale", "Rừng Pha Lê", new Vector2(131f, 90.5f)),
             ("nhenchua", "Cổng Hang Nhện Chúa", new Vector2(125f, 103.8f)),
+            // Thảo Nguyên Gió
+            ("cuagio", "Cửa Gió", new Vector2(93.5f, 89.2f)),
+            ("traidumuc", "Trại Du Mục", new Vector2(86.5f, 101.5f)),
+            ("tayvuc", "Bờ Tây Khe Vực", new Vector2(38.5f, 95.5f)),
         };
 
         // the cave (north of the swamp): chambers joined by tunnels, solid rock everywhere else
@@ -210,8 +217,37 @@ namespace RPG.EditorTools
             new[] { new Vector2(185, 95), new Vector2(187, 100), new Vector2(186, 106) },                 // mine → crystal hall
             new[] { new Vector2(163, 108), new Vector2(170, 110.5f), new Vector2(178, 111.5f) },          // nest → hall: a loop
             new[] { new Vector2(127, 101), new Vector2(124, 105), new Vector2(121, 107) },                // forest → the queen's hall
+            new[] { new Vector2(125, 94.5f), new Vector2(117, 93.5f), new Vector2(108, 92.5f), new Vector2(98.5f, 91.5f) },   // forest → the steppe
         };
         const float TunnelHalfWidth = 2.1f;
+
+        // Thảo Nguyên Gió (the north-west): a plateau under the sky, walled by the mountains
+        const float SteppeX0 = 5f, SteppeX1 = 98f, SteppeY0 = 67.5f, SteppeY1 = 124f;
+        static readonly Vector2 WindGate = new Vector2(95f, 91.5f);
+        static readonly Vector2 NomadCamp = new Vector2(80f, 106f);
+        static readonly Vector2 BisonField = new Vector2(74f, 74f);
+        /// <summary>Heights where a Cột Gió on each rim carries across Khe Vực.</summary>
+        static readonly float[] Crossings = { 77f, 96f, 115f };
+        /// <summary>Dirt tracks across the steppe: from the gate to the camp and to each crossing's east rim.</summary>
+        static readonly Vector2[][] SteppeTracks =
+        {
+            new[] { new Vector2(98.5f, 91.5f), new Vector2(92f, 92f), new Vector2(86f, 96f), new Vector2(82f, 101f), new Vector2(80f, 104f) },
+            new[] { new Vector2(86f, 96f), new Vector2(76f, 96f), new Vector2(66f, 96f), new Vector2(60f, 96f) },
+            new[] { new Vector2(80f, 104f), new Vector2(72f, 110f), new Vector2(64f, 114f), new Vector2(60f, 115f) },
+            new[] { new Vector2(86f, 96f), new Vector2(84f, 88f), new Vector2(76f, 82f), new Vector2(66f, 78f), new Vector2(59f, 77f) },
+            new[] { new Vector2(41f, 96f), new Vector2(34f, 97f), new Vector2(24f, 99f), new Vector2(14f, 103f) },
+        };
+        static readonly SwampCamp[] SteppeCamps =
+        {
+            new SwampCamp { name = "Hyenas_Gate", at = new Vector2(76f, 86f), radius = 3f, count = 3, kind = "hyena" },
+            new SwampCamp { name = "Hyenas_North", at = new Vector2(69f, 117f), radius = 3f, count = 3, kind = "hyena" },
+            new SwampCamp { name = "Hyenas_West", at = new Vector2(24f, 84f), radius = 3f, count = 3, kind = "hyena" },
+            new SwampCamp { name = "Eagles_Rocks", at = new Vector2(88f, 78f), radius = 3f, count = 2, kind = "eagle", flies = true },
+            new SwampCamp { name = "Eagles_North", at = new Vector2(62f, 121f), radius = 3f, count = 2, kind = "eagle", flies = true },
+            new SwampCamp { name = "Eagles_West", at = new Vector2(29f, 115f), radius = 3f, count = 2, kind = "eagle", flies = true },
+            new SwampCamp { name = "Bisons_Field", at = BisonField, radius = 3.2f, count = 3, kind = "bison" },
+            new SwampCamp { name = "Bisons_West", at = new Vector2(19f, 105f), radius = 3f, count = 2, kind = "bison" },
+        };
 
         static System.Random rnd;
 
@@ -230,6 +266,7 @@ namespace RPG.EditorTools
             PlaceForest(res);
             PlaceSwamp(res);
             PlaceCave(res);
+            PlaceSteppe(res);
             PlaceBounds(worldRoot);
             PlaceActors(worldRoot, res);
             PlaceZones(worldRoot);
@@ -278,14 +315,52 @@ namespace RPG.EditorTools
             return false;
         }
 
+        /// <summary>The steppe's open ground (Thảo Nguyên Gió): a plateau whose rock edges wander.</summary>
+        static bool SteppeFloor(Vector2 p)
+        {
+            float wob = (Noise(p.x * 0.8f + 700f, p.y * 0.8f, 0.2f) - 0.5f) * 3.2f;
+            if (p.x < SteppeX0 + wob || p.x > SteppeX1 + wob * 0.6f) return false;
+            if (p.y < SteppeY0 + wob * 0.5f || p.y > SteppeY1 + wob * 0.5f) return false;
+            // rounded corners
+            float cx = Mathf.Clamp(p.x, SteppeX0 + 6f, SteppeX1 - 6f), cy = Mathf.Clamp(p.y, SteppeY0 + 6f, SteppeY1 - 6f);
+            return Vector2.Distance(p, new Vector2(cx, cy)) < 6f + wob * 0.4f;
+        }
+
+        /// <summary>The middle of Khe Vực at height <paramref name="y"/>: it winds north to south across the steppe.</summary>
+        static float RavineX(float y) => 50f + 3.5f * Mathf.Sin(y * 0.11f) + 1.5f * Mathf.Sin(y * 0.31f + 1f);
+
+        static float RavineHalfWidth(float y) => 2.7f + 0.6f * Mathf.Sin(y * 0.23f) + (Noise(900f, y, 0.4f) - 0.5f) * 0.6f;
+
+        /// <summary>Khe Vực: the drop, from the steppe's south rock to its north rock (and a little into both).</summary>
+        static bool InRavine(Vector2 p) => p.y > SteppeY0 - 2f && p.y < SteppeY1 + 2.5f && Mathf.Abs(p.x - RavineX(p.y)) < RavineHalfWidth(p.y);
+
+        static bool OnSteppe(Vector2 p) => p.y >= LowH && p.x < ForestW + 1f && SteppeFloor(p);
+
+        static float DistToSteppeTracks(Vector2 p)
+        {
+            float d = float.MaxValue;
+            foreach (var t in SteppeTracks) d = Mathf.Min(d, DistToPath(p, t));
+            return d;
+        }
+
+        static bool SteppeDirt(Vector2 p)
+        {
+            float wob = (Noise(p.x, p.y + 300f, 0.35f) - 0.5f) * 1f;
+            if (DistToSteppeTracks(p) < 1.15f + wob * 0.4f) return true;
+            if (Vector2.Distance(p, NomadCamp) < 5.5f + wob) return true;
+            if (Vector2.Distance(p, WindGate) < 3.2f + wob) return true;
+            return false;
+        }
+
         /// <summary>
         /// Solid rock at a grid corner: the whole north of the map but the cave's chambers and
-        /// tunnels, and a cliff along the top of the forest and the swamp.
+        /// tunnels and the steppe, and a cliff along the top of the forest and the swamp.
         /// </summary>
         static bool IsWallAt(Vector2 p)
         {
             float edge = LowH - 1.2f + (Noise(p.x, 900f, 0.35f) - 0.5f) * 2.2f;
             if (p.y < edge) return false;
+            if (SteppeFloor(p)) return false;
             return !CaveFloor(p);
         }
 
@@ -397,10 +472,10 @@ namespace RPG.EditorTools
         /// tiles are down: a tilemap collider shapes later tiles a frame later, a frame a batch build
         /// never gives it before it saves the scene (the rock would then load with no collider).
         /// </summary>
-        static void MakeSolid(Tilemap map)
+        static void MakeSolid(Tilemap map, int layer = Layers.Obstacle)
         {
             var go = map.gameObject;
-            go.layer = Layers.Obstacle;
+            go.layer = layer;
             go.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             var tiles = go.AddComponent<TilemapCollider2D>();
             // compositeOperation = Merge, through its field: the compile check's Unity reference predates the property
@@ -432,6 +507,11 @@ namespace RPG.EditorTools
             res.water = MakeMap(gridGo.transform, "Water", 4);
             res.details = MakeMap(gridGo.transform, "Details", 5);
             res.walls = MakeMap(gridGo.transform, "Walls", 6);
+            // the steppe's ground over the base (light bands roll over it in the wind), its ravine above both
+            res.steppe = MakeMap(gridGo.transform, "SteppeGround", 1);
+            var groundWind = AssetFactory.GroundWind;
+            if (groundWind != null) res.steppe.GetComponent<TilemapRenderer>().sharedMaterial = groundWind;
+            res.chasm = MakeMap(gridGo.transform, "Chasm", 4);
 
             var grass = Tiles("grass", 8);
             var swampGround = Tiles("swamp", 8);
@@ -454,17 +534,31 @@ namespace RPG.EditorTools
             var wallFull = Enumerable.Range(0, 4).Select(i => MakeTile($"cavewallfull_{i}", true)).ToArray();
             string[] caveDetailNames = { "shards_0", "shards_1", "shards_2", "pebbles_c", "pebbles_c", "crack_0", "crack_1", "glowcap_0", "cavepuddle_0" };
             var caveDetails = caveDetailNames.Select(n => MakeTile(n)).ToArray();
+            var steppeGround = Tiles("steppe", 8);
+            // a ravine cell is solid when at least two of its corners are over the drop
+            var chasmMs = Enumerable.Range(0, 16).Select(i => i == 0 ? null : MakeTile($"chasm_{i}", Bits(i) >= 2)).ToArray();
+            var chasmFull = Enumerable.Range(0, 4).Select(i => MakeTile($"chasmfull_{i}", true)).ToArray();
+            string[] steppeDetailNames = { "straw_0", "straw_1", "straw_2", "straw_0", "stones_s", "flowers_s_0", "flowers_s_1", "skull_s" };
+            var steppeDetails = steppeDetailNames.Select(n => MakeTile(n)).ToArray();
 
             var dirtV = new bool[W + 1, H + 1];
             var tallV = new bool[W + 1, H + 1];
             var waterV = new bool[W + 1, H + 1];
             var mudV = new bool[W + 1, H + 1];
             var wallV = new bool[W + 1, H + 1];
+            var chasmV = new bool[W + 1, H + 1];
             for (int y = 0; y <= H; y++)
                 for (int x = 0; x <= W; x++)
                 {
                     var p = new Vector2(x, y);
                     wallV[x, y] = IsWallAt(p);
+                    if (y >= LowH && x <= ForestW)
+                    {
+                        // the steppe: its ravine cuts through the rock at both ends too, so nobody walks round it
+                        chasmV[x, y] = InRavine(p) && (SteppeFloor(p) || wallV[x, y] && (p.y < SteppeY0 + 3f || p.y > SteppeY1 - 3f));
+                        if (chasmV[x, y]) wallV[x, y] = false;
+                        dirtV[x, y] = !wallV[x, y] && !chasmV[x, y] && SteppeFloor(p) && SteppeDirt(p);
+                    }
                     if (y > LowH + 2) continue;   // the cave and the mountain: rock and cave floor only
                     dirtV[x, y] = !wallV[x, y] && IsDirt(p);
                     tallV[x, y] = !dirtV[x, y] && !wallV[x, y] && IsTallGrass(p);
@@ -499,7 +593,7 @@ namespace RPG.EditorTools
             for (int y = 0; y <= H; y++)
                 for (int x = 0; x <= W; x++)
                     res.terrain[y * (W + 1) + x] = (byte)((waterV[x, y] ? ZoneRoot.Water : 0) | (mudV[x, y] ? ZoneRoot.Mud : 0) |
-                                                          (wallV[x, y] ? ZoneRoot.Wall : 0));
+                                                          (wallV[x, y] ? ZoneRoot.Wall : 0) | (chasmV[x, y] ? ZoneRoot.Chasm : 0));
 
             var gPos = new List<Vector3Int>();
             var gTiles = new List<TileBase>();
@@ -515,6 +609,10 @@ namespace RPG.EditorTools
             var xTiles = new List<TileBase>();
             var kPos = new List<Vector3Int>();
             var kTiles = new List<TileBase>();
+            var sPos = new List<Vector3Int>();
+            var sTiles = new List<TileBase>();
+            var cPos = new List<Vector3Int>();
+            var cTiles = new List<TileBase>();
             for (int y = 0; y < H; y++)
                 for (int x = 0; x < W; x++)
                 {
@@ -532,6 +630,27 @@ namespace RPG.EditorTools
                     {
                         kPos.Add(c);
                         kTiles.Add(wallMs[ki]);
+                    }
+                    if (y >= LowH && x < ForestW && SteppeFloor(center) || Corners(chasmV, x, y) > 0)
+                    {
+                        // Thảo Nguyên Gió: golden grass (also under the base map's ground, for the minimap), dirt tracks, the ravine
+                        var g = steppeGround[Pick(steppeGround.Length, x, y)];
+                        gPos.Add(c);
+                        gTiles.Add(g);
+                        sPos.Add(c);
+                        sTiles.Add(g);
+                        int sdi = Corners(dirtV, x, y);
+                        if (sdi == 15) { dPos.Add(c); dTiles.Add(dirtFull[Pick(dirtFull.Length, x, y)]); }
+                        else if (sdi > 0) { dPos.Add(c); dTiles.Add(dirtMs[sdi]); }
+                        int ci = Corners(chasmV, x, y);
+                        if (ci == 15) { cPos.Add(c); cTiles.Add(chasmFull[Pick(chasmFull.Length, x, y)]); }
+                        else if (ci > 0) { cPos.Add(c); cTiles.Add(chasmMs[ci]); }
+                        if (ci == 0 && sdi == 0 && ki == 0 && rnd.NextDouble() < 0.12)
+                        {
+                            xPos.Add(c);
+                            xTiles.Add(steppeDetails[rnd.Next(steppeDetails.Length)]);
+                        }
+                        continue;
                     }
                     if (y >= LowH)
                     {
@@ -583,6 +702,11 @@ namespace RPG.EditorTools
             res.details.SetTiles(xPos.ToArray(), xTiles.ToArray());
             res.walls.SetTiles(kPos.ToArray(), kTiles.ToArray());
             MakeSolid(res.walls);
+            res.steppe.SetTiles(sPos.ToArray(), sTiles.ToArray());
+            res.chasm.SetTiles(cPos.ToArray(), cTiles.ToArray());
+            // the ravine stops walkers, not shots or sight: solid on the default layer, not the obstacles'
+            if (cPos.Count > 0) MakeSolid(res.chasm, 0);
+            chasmAt = (x, y) => x >= 0 && y >= 0 && x <= W && y <= H && chasmV[x, y];
             waterAt =(x, y) => x >= 0 && y >= 0 && x <= W && y <= H && waterV[x, y];
             wallAt = (x, y) => x < 0 || y < 0 || x > W || y > H || wallV[x, y];
         }
@@ -592,6 +716,19 @@ namespace RPG.EditorTools
 
         /// <summary>Rock at a grid corner of the map being built.</summary>
         static System.Func<int, int, bool> wallAt = (x, y) => false;
+
+        /// <summary>Khe Vực at a grid corner of the map being built.</summary>
+        static System.Func<int, int, bool> chasmAt = (x, y) => false;
+
+        /// <summary>Whether a prop at <paramref name="p"/> would stand in or at the edge of the ravine.</summary>
+        static bool NearRavine(Vector2 p, int reach)
+        {
+            int cx = Mathf.RoundToInt(p.x), cy = Mathf.RoundToInt(p.y);
+            for (int dy = -reach; dy <= reach; dy++)
+                for (int dx = -reach; dx <= reach; dx++)
+                    if (chasmAt(cx + dx, cy + dy)) return true;
+            return false;
+        }
 
         /// <summary>Whether a prop at <paramref name="p"/> would stand in or against the rock (a margin of <paramref name="reach"/> corners).</summary>
         static bool NearWall(Vector2 p, int reach)
@@ -1005,6 +1142,96 @@ namespace RPG.EditorTools
             return r < 0.6 ? $"deadtree_{rnd.Next(2)}" : $"willow_{rnd.Next(2)}";
         }
 
+        /// <summary>
+        /// Thảo Nguyên Gió: the wind gate at the tunnel's mouth, the nomads' yurts round their fire,
+        /// a cairn with prayer flags, the wind columns in pairs across Khe Vực, lone acacias,
+        /// sandstone (the bisons' field has plenty to ram), and tall grass in drifts.
+        /// </summary>
+        static void PlaceSteppe(Result res)
+        {
+            var t = res.props;
+            float R() => (float)rnd.NextDouble();
+            void P(string n, Vector2 at)
+            {
+                if (Place(n, at, t) != null) Mark(at);
+            }
+            foreach (var camp in SteppeCamps) Mark(camp.at);
+            // the nomads' camp
+            var c = NomadCamp;
+            P("campfire", c + new Vector2(0f, -1.2f));
+            P("yurt", c + new Vector2(-4.6f, 2.2f));
+            P("yurt", c + new Vector2(4.4f, 2.6f));
+            P("yurt", c + new Vector2(-0.2f, 5.2f));
+            P("cairn", c + new Vector2(6.5f, -3.4f));
+            P("barrel", c + new Vector2(-3f, -2.8f));
+            P("crate", c + new Vector2(-3.8f, -2.2f));
+            P("signpost", WindGate + new Vector2(-2.6f, -2.4f));
+            P("cairn", new Vector2(64f, 90f));
+            P("cairn", new Vector2(30f, 92f));
+            // the wind columns: a pair at each crossing, one on each rim
+            var windRoot = new GameObject("WindColumns").transform;
+            windRoot.SetParent(t.parent, false);
+            var ravine = res.chasm != null ? res.chasm.GetComponents<Collider2D>() : new Collider2D[0];
+            foreach (float y in Crossings)
+            {
+                float mid = RavineX(y), half = RavineHalfWidth(y);
+                var east = Place("windcolumn", new Vector2(mid + half + 2.4f, y), windRoot);
+                var west = Place("windcolumn", new Vector2(mid - half - 2.4f, y), windRoot);
+                if (east == null || west == null) continue;
+                var ec = east.GetComponent<WindColumn>();
+                var wc = west.GetComponent<WindColumn>();
+                ec.columnId = $"e{Mathf.RoundToInt(y)}";
+                wc.columnId = $"w{Mathf.RoundToInt(y)}";
+                ec.partner = wc;
+                wc.partner = ec;
+                ec.ravine = ravine;
+                wc.ravine = ravine;
+                east.name = "CotGio_" + ec.columnId;
+                west.name = "CotGio_" + wc.columnId;
+                EditorUtility.SetDirty(ec);
+                EditorUtility.SetDirty(wc);
+                foreach (var go in new[] { east, west }) Mark(go.transform.position);
+            }
+            bool Open(Vector2 p, float spacing)
+            {
+                if (!OnSteppe(p) || NearWall(p, 1) || NearRavine(p, 2) || !Free(p, spacing)) return false;
+                if (DistToSteppeTracks(p) < 1.6f || Vector2.Distance(p, NomadCamp) < 7f || Vector2.Distance(p, WindGate) < 3.5f) return false;
+                foreach (var st in Stones) if (Vector2.Distance(p, st.at) < 2.6f) return false;
+                return true;
+            }
+            // sandstone: many in the bisons' field (they stun themselves on it), a few elsewhere
+            for (int i = 0, placed = 0; i < 400 && placed < 7; i++)
+            {
+                var p = BisonField + new Vector2((R() - 0.5f) * 16f, (R() - 0.5f) * 9f);
+                if (!Open(p, 3.2f) || Vector2.Distance(p, BisonField) < 2.2f) continue;
+                P(R() < 0.6f ? $"sandrock_big_{rnd.Next(2)}" : "sandrock_small", p);
+                placed++;
+            }
+            P("sandrock_big_0", new Vector2(86.5f, 80.5f));   // the eagles' rocks
+            P("sandrock_big_1", new Vector2(90f, 76.5f));
+            P("sandrock_small", new Vector2(85.5f, 75.8f));
+            for (int i = 0, placed = 0; i < 1500 && placed < 34; i++)
+            {
+                var p = new Vector2(Mathf.Lerp(SteppeX0 + 2f, SteppeX1 - 2f, R()), Mathf.Lerp(SteppeY0 + 2f, SteppeY1 - 2f, R()));
+                if (!Open(p, 5f)) continue;
+                double r = rnd.NextDouble();
+                P(r < 0.4 ? $"acacia_{rnd.Next(2)}" : r < 0.75 ? $"sandrock_big_{rnd.Next(2)}" : "sandrock_small", p);
+                placed++;
+            }
+            // tall grass in drifts: patches where the noise is high, sparse elsewhere
+            for (int i = 0, placed = 0; i < 9000 && placed < 420; i++)
+            {
+                var p = new Vector2(Mathf.Lerp(SteppeX0 + 1f, SteppeX1 - 1f, R()), Mathf.Lerp(SteppeY0 + 1f, SteppeY1 - 1f, R()));
+                float n = Noise(p.x + 70f, p.y + 40f, 0.12f);
+                if (n < 0.5f && R() > 0.08f) continue;
+                if (!OnSteppe(p) || NearWall(p, 0) || NearRavine(p, 1) || DistToSteppeTracks(p) < 1.3f || Vector2.Distance(p, NomadCamp) < 6f) continue;
+                if (!Free(p, 0.9f)) continue;
+                var go = Place(R() < 0.8f ? $"steppegrass_{rnd.Next(3)}" : "steppegrass_s", p, t);
+                if (go != null) Occupied.Add(p);
+                placed++;
+            }
+        }
+
         static void PlaceBounds(Transform root)
         {
             var go = new GameObject("MapBounds");
@@ -1239,6 +1466,19 @@ namespace RPG.EditorTools
                 if (PrefabFactory.CaveSpider != null) queen.brood = MakeBrood(lair, "Brood", PrefabFactory.CaveSpider, 4, QueenHall + new Vector2(0f, 3.5f));
                 EditorUtility.SetDirty(queen);
             }
+            // Thảo Nguyên Gió: Già Tăng at the nomads' fire, the hyenas, eagles and bisons
+            if (PrefabFactory.GiaTang != null) Spawn(PrefabFactory.GiaTang, NomadCamp + new Vector2(-1.6f, -1.8f), actors, "Gia Tang");
+            foreach (var c in SteppeCamps)
+            {
+                var prefab = c.kind == "hyena" ? PrefabFactory.Hyena : c.kind == "eagle" ? PrefabFactory.Eagle : PrefabFactory.Bison;
+                if (prefab != null) Camp(c.name, prefab, c.at, c.count, c.radius);
+            }
+            res.spots.Add(("windgate", Marker(actors, "WindGateSpot", WindGate)));
+            res.spots.Add(("nomadcamp", Marker(actors, "NomadCampSpot", NomadCamp)));
+            res.spots.Add(("hyenas", Marker(actors, "HyenasSpot", SteppeCamps[0].at)));
+            res.spots.Add(("eagles", Marker(actors, "EaglesSpot", SteppeCamps[3].at)));
+            res.spots.Add(("bisons", Marker(actors, "BisonsSpot", BisonField)));
+            res.spots.Add(("ravine", Marker(actors, "RavineSpot", new Vector2(RavineX(96f) + RavineHalfWidth(96f) + 2.4f, 96f))));
             res.outpost = Marker(actors, "OutpostSpot", Outpost + new Vector2(0f, -2f));
             res.spots.Add(("cavemouth", Marker(actors, "CaveMouthSpot", MinersCamp)));
             res.spots.Add(("batcave", Marker(actors, "BatCaveSpot", BatCave)));
@@ -1296,6 +1536,19 @@ namespace RPG.EditorTools
                                                          ("Rừng Pha Lê", CrystalForest, 12.5f, 2), ("Tổ Nhện", SpiderNest, 9f, 2),
                                                          ("Điện Pha Lê", CrystalHall, 9.5f, 3), ("Hang Nhện Chúa", QueenHall, 12f, 3) })
                 Z(name, at, r, prio).music = "";   // the cave's music goes on (a boss brings its own)
+            // Thảo Nguyên Gió: sun-gold light, the wind blowing through all of it
+            var steppe = Z("Thảo Nguyên Gió", new Vector2(ForestW / 2f, (LowH + H) / 2f), 0f, 0);
+            steppe.size = new Vector2(ForestW, H - LowH);
+            steppe.music = "music_steppe";
+            steppe.ambience = "amb_steppe";
+            steppe.tint = new Color(1f, 0.95f, 0.82f);
+            steppe.windy = 1f;
+            foreach (var (name, at, r, prio) in new[] { ("Cửa Gió", WindGate, 6f, 2), ("Trại Du Mục", NomadCamp, 9f, 2),
+                                                         ("Đồng Bò Rừng", BisonField, 9f, 2) })
+                Z(name, at, r, prio).music = "";
+            var rav = Z("Khe Vực", new Vector2(RavineX(96f), 96f), 0f, 2);
+            rav.size = new Vector2(16f, SteppeY1 - SteppeY0);
+            rav.music = "";
         }
     }
 }

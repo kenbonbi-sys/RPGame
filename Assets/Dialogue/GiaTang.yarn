@@ -1,0 +1,26 @@
+title: GiaTang
+tags: npc:giatang
+---
+// Già Tăng — nhà sư già dẫn đầu trại du mục ở Thảo Nguyên Gió; chỉ đường qua gió, Cột Gió và bầy thú.
+// Markup: [k]phím[/k] tô vàng, [warn]chiêu nguy hiểm[/warn] tô đỏ.
+<<if quest_status("steppe_hyenas") == "active">>
+    Già Tăng: Linh Cẩu Gió không bao giờ đánh một mình. Chúng vây quanh con mồi, rồi từng con lao vào cắn. #line:giatang_hyena_1
+    Già Tăng: Vạch dưới đất là đường nó sắp lao: [k]Space[/k] lướt sang bên, rồi đánh lúc nó quay đầu chạy. #line:giatang_hyena_2
+<<elseif quest_status("steppe_eagles") == "active">>
+    Già Tăng: Chim Ưng Đá lượn cao đến nỗi chỉ thấy bóng. Khi nó rít lên, một vòng hiện dưới chân con mồi. #line:giatang_eagle_1
+    Già Tăng: Ra khỏi vòng trước khi nó [warn]Bổ Nhào[/warn]. Nó đậu lại dưới đất một lúc: đó là lúc chém. #line:giatang_eagle_2
+<<elseif quest_status("steppe_bisons") == "active">>
+    Già Tăng: Bò Rừng cào đất rồi [warn]Lao Húc[/warn] thẳng một đường. Đầu sừng nó cứng như đá. #line:giatang_bison_1
+    Già Tăng: Đứng trước một tảng đá, đợi nó lao tới rồi né: nó húc vào đá sẽ choáng váng. #line:giatang_bison_2
+    Già Tăng: Đồng Bò Rừng ở phía nam trại. Phía tây Khe Vực cũng có một đàn. #line:giatang_bison_3
+<<elseif quest_status("steppe_bisons") == "done">>
+    Già Tăng: Thảo nguyên đã nhận ngươi là người của gió. #line:giatang_done_1
+    Già Tăng: Nhưng phía tây, bọn cướp Hắc Phong đang dựng trại. Chúng sẽ còn quay lại... #line:giatang_done_2
+<<else>>
+    Già Tăng: Ngươi từ trong hang ra à? Gió thảo nguyên chào người lạ bằng cách xô họ ngã đấy. #line:giatang_intro_1
+    Già Tăng: Gió ở đây đổi hướng từng hồi. Nhìn cỏ rạp, hoặc mũi tên cạnh bản đồ nhỏ, là biết gió thổi về đâu. #line:giatang_intro_2
+    Già Tăng: Đi ngược gió thì chậm, xuôi gió thì nhanh. Tên và phép bay qua cũng bị gió bẻ cong. #line:giatang_intro_3
+    Già Tăng: Khe Vực chẻ đôi thảo nguyên. Không ai đi qua được, trừ khi bước vào [k]Cột Gió[/k]: vòng đá có gió cuộn. #line:giatang_intro_4
+    Già Tăng: Gió sẽ nhấc ngươi lên và thả xuống bờ bên kia. #line:giatang_intro_5
+<<endif>>
+===

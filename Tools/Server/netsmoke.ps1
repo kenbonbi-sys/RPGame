@@ -1,6 +1,7 @@
 ﻿# Kiểm tra online tự động với bản build (Debug/NetSmoke.cs): máy chủ và hai người chơi trên máy này.
 #   Vòng 1: SmokeA (có cửa sổ, chụp ảnh) và SmokeB (chạy nền) vào, thấy nhau đi, lập tổ đội, chat tổ đội, nhắn riêng,
-#           SmokeA kết bạn với SmokeB, mặc Kiếm Sắt vào tay phụ; mỗi người đánh chết một Slime Rêu, nhận XP từ máy chủ.
+#           SmokeA kết bạn với SmokeB, mặc Kiếm Sắt vào tay phụ, bay qua Khe Vực bằng Cột Gió (SmokeB đứng bờ bên kia
+#           phải thấy A bay lên rồi đáp xuống); mỗi người đánh chết một Slime Rêu, nhận XP từ máy chủ.
 #   Vòng 2: cả hai vào lại; SmokeA phải còn nguyên cấp và XP như lúc thoát (máy chủ đã lưu), còn bạn bè và còn mặc Kiếm Sắt.
 #   Vòng 3: hai kênh trên cùng dữ liệu; SmokeA vào kênh 1, gõ /kenh 2 và phải sang kênh 2 với đúng nhân vật.
 # Kết quả: mã thoát 0 = tất cả qua. Log và ảnh ở thư mục -Out.

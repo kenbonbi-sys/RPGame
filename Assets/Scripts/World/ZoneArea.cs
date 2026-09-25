@@ -6,8 +6,8 @@ namespace RPG
     /// <summary>
     /// A named region: a circle, or a rectangle when <see cref="size"/> is set. A hero entering it
     /// reaches that place (Reach objectives); for the hero on this screen it also shows the zone
-    /// title, updates the minimap label and brings in the place's music, ambience, light tint
-    /// and mist (the world is one seamless map: regions change as the hero walks).
+    /// title, updates the minimap label and brings in the place's music, ambience, light tint,
+    /// mist and wind (the world is one seamless map: regions change as the hero walks).
     /// </summary>
     public class ZoneArea : MonoBehaviour
     {
@@ -33,9 +33,20 @@ namespace RPG
         [Tooltip("Under the rock (a cave), 0–1: the tint is the whole light here, whatever the hour, and every " +
                  "lamp and the heroes' own light burn as they do at night.")]
         [Range(0f, 1f)] public float underground;
+        [Tooltip("How hard the wind blows here, 0-1 (Thảo Nguyên Gió): it pushes walkers and bends shots (Wind).")]
+        [Range(0f, 1f)] public float windy;
 
-        void OnEnable() => All.Add(this);
-        void OnDisable() => All.Remove(this);
+        void OnEnable()
+        {
+            All.Add(this);
+            if (windy > 0f) Wind.Register(this);
+        }
+
+        void OnDisable()
+        {
+            All.Remove(this);
+            Wind.Unregister(this);
+        }
 
         public bool Contains(Vector2 pos)
         {

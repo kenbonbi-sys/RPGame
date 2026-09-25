@@ -67,6 +67,8 @@ namespace RPG
         public GameObject chestPrefab;
         [Tooltip("Soft puff for the swamp's low mist (AmbientParticles).")]
         public Material mistMaterial;
+        [Tooltip("The steppe's streaks of wind (AmbientParticles).")]
+        public Material windMaterial;
 
         [Header("Online (Docs/KeHoach-Online.md)")]
         [Tooltip("The hero spawned for every player of an online session (Prefabs/Characters/NetHero).")]

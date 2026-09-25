@@ -14,6 +14,8 @@ namespace RPG
         public float knockbackResist = 1f;
         [Tooltip("Wades slower through swamp water (ZoneRoot.WaterSpeed). Off for swimmers: toads, leeches, snakes.")]
         public bool slowedByWater = true;
+        [Tooltip("Share of the steppe's wind (Wind.HeroPush) that pushes this character; creatures of the steppe lean into it.")]
+        public float windResponse = 1f;
 
         public Vector2 Facing { get; set; } = Vector2.down;
         /// <summary>Standing in swamp water (splashes, a swimmer's hiding).</summary>
@@ -90,8 +92,14 @@ namespace RPG
             current = Vector2.MoveTowards(current, Rooted ? Vector2.zero : desired * SpeedMultiplier * ground, acceleration * dt);
             knock = Vector2.MoveTowards(knock, Vector2.zero, knockbackDecay * dt);
             if (Rooted) dashUntil = 0f;
-            rb.linearVelocity = IsDashing ? dashVel : current + knock;
+            // the steppe's wind pushes whoever walks there (heavy characters less)
+            Vector2 wind = windResponse > 0f && !Rooted ? Wind.At(rb.position) * (Wind.HeroPush * windResponse * Mathf.Min(1f, knockbackResist)) : Vector2.zero;
+            WindPush = wind;
+            rb.linearVelocity = IsDashing ? dashVel : current + knock + wind;
         }
+
+        /// <summary>What the steppe's wind adds to this character's velocity now.</summary>
+        public Vector2 WindPush { get; private set; }
 
         void OnCollisionEnter2D(Collision2D c) => CheckWallSlam(c);
 

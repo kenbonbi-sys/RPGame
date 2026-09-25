@@ -140,17 +140,17 @@ namespace RPG
             Destroy(gameObject);
         }
 
-        /// <summary>The nearest spot to <paramref name="at"/> out of the water (the snake mother's arena is a pond).</summary>
+        /// <summary>The nearest spot to <paramref name="at"/> out of the water (the snake mother's arena is a pond), the rock and Khe Vực.</summary>
         static Vector2 DryLand(Vector2 at)
         {
             var zone = ZoneRoot.Current;
-            if (zone == null || (!zone.IsWater(at) && !zone.IsWall(at))) return at;
+            if (zone == null || (!zone.IsWater(at) && !zone.IsWall(at) && !zone.IsChasm(at))) return at;
             for (float r = 1f; r <= 12f; r += 1f)
                 for (int k = 0; k < 16; k++)
                 {
                     float a = k * Mathf.PI / 8f;
                     var p = at + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
-                    if (!zone.IsWater(p) && !zone.IsWall(p)) return p;
+                    if (!zone.IsWater(p) && !zone.IsWall(p) && !zone.IsChasm(p)) return p;
                 }
             return at;
         }

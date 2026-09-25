@@ -1,0 +1,470 @@
+fileFormatVersion: 2
+guid: 26c6cc8cebef040448c4f70b33880063
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6533308564561598074
+    second: bison_0
+  - first:
+      213: 2256679210984655495
+    second: bison_1
+  - first:
+      213: -7907447667075457074
+    second: bison_2
+  - first:
+      213: -4097578592525761397
+    second: bison_3
+  - first:
+      213: 609037921663306556
+    second: bison_4
+  - first:
+      213: 2939749876360679930
+    second: bison_5
+  - first:
+      213: -9113927469955810606
+    second: bison_6
+  - first:
+      213: -8723495336878401158
+    second: bison_7
+  - first:
+      213: -1960014012559591652
+    second: bison_8
+  - first:
+      213: -7236223721306805876
+    second: bison_9
+  - first:
+      213: 1205699435164552974
+    second: bison_10
+  - first:
+      213: -5531142561915765813
+    second: bison_11
+  - first:
+      213: -6018159654031649281
+    second: bison_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: bison_idle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 170
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f91d575b6f87c3fa6e19246209c032b
+      internalID: -1235814083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_idle_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 170
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d46243ce69d48f06a908b70515f3da59
+      internalID: -1496916220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_move_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 136
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8134eb8a6936067978d85f72df69a748
+      internalID: -350683040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_move_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 136
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6c6c4f73dc49c28e46f04edeba0901d
+      internalID: 30155736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_move_2
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 136
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e635df6466b7a3e6d7f8ac9b80cc0d3
+      internalID: -1931736539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_move_3
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 136
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c983f457343e4ab5da11a93a43606b6
+      internalID: -2029069500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_windup_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 102
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e8c921079851e4e10b45f1ccb98069ee
+      internalID: -926321476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_windup_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 102
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c01157db869cda0c2f1da0d14640da26
+      internalID: -492418566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_attack_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 68
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8012a9e052a575763b2e57254a93599c
+      internalID: -520124490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_attack_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 68
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e619623275dda03995dacf9df2e4856
+      internalID: 1503233589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_hurt_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 34
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2904d2b9168fa673e20d59244c17f29f
+      internalID: 406748137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_dead_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6aa16d36c11697455feba6b350434e2a
+      internalID: 418849206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bison_dead_1
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 0
+        width: 44
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.05882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 561311f7fadd8214506e61a44a7e1417
+      internalID: -624107725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: ef08d89d2872a0347a4ad3f0c6791834
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      bison_attack_0: -520124490
+      bison_attack_1: 1503233589
+      bison_dead_0: 418849206
+      bison_dead_1: -624107725
+      bison_hurt_0: 406748137
+      bison_idle_0: -1235814083
+      bison_idle_1: -1496916220
+      bison_move_0: -350683040
+      bison_move_1: 30155736
+      bison_move_2: -1931736539
+      bison_move_3: -2029069500
+      bison_windup_0: -926321476
+      bison_windup_1: -492418566
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: rpg:5d4a894cfba1742f08aad932e95109b5
+  assetBundleName: 
+  assetBundleVariant: 

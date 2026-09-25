@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: steppe_enter
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: steppe_enter
+  title: "Th\u1EA3o Nguy\xEAn Gi\xF3"
+  kind: 0
+  summary: "Sau Nh\u1EC7n Ch\xFAa, gi\xF3 l\xF9a qua m\u1ED9t \u0111\u01B0\u1EDDng h\u1EA7m ph\xEDa t\xE2y R\u1EEBng Pha L\xEA. Cu\u1ED1i h\u1EA7m l\xE0 m\u1ED9t cao nguy\xEAn c\u1ECF v\xE0ng, gi\xF3 \u0111\u1ED5i h\u01B0\u1EDBng t\u1EEBng h\u1ED3i. D\xE2n du m\u1EE5c d\u1EF1ng tr\u1EA1i \u1EDF \u0111\xF3. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 20."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: f4b2d0ee525aff34594e144284d8d96d, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 3
+    target: "C\u1EEDa Gi\xF3"
+    count: 1
+    text: "Theo \u0111\u01B0\u1EDDng h\u1EA7m ph\xEDa t\xE2y R\u1EEBng Pha L\xEA ra C\u1EEDa Gi\xF3"
+    countPrevious: 0
+    marker: windgate
+  - kind: 3
+    target: "Tr\u1EA1i Du M\u1EE5c"
+    count: 1
+    text: "T\u1EDBi Tr\u1EA1i Du M\u1EE5c"
+    countPrevious: 0
+    marker: nomadcamp
+  xp: 2200
+  gold: 200
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 3
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 8d6442bf283a0524ca48d9c476fb0ac8, type: 2}

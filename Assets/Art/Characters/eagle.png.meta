@@ -1,0 +1,519 @@
+fileFormatVersion: 2
+guid: 60aec1e238cefc44b9cd0f7e0a6e03af
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8963772635242594009
+    second: eagle_0
+  - first:
+      213: 3339101539683590651
+    second: eagle_1
+  - first:
+      213: 1357677009228010464
+    second: eagle_2
+  - first:
+      213: 3068035885758735201
+    second: eagle_3
+  - first:
+      213: -5563729720702692361
+    second: eagle_4
+  - first:
+      213: 4281091607678034713
+    second: eagle_5
+  - first:
+      213: 4456732012353057625
+    second: eagle_6
+  - first:
+      213: 6452145616242675475
+    second: eagle_7
+  - first:
+      213: -1416746480687393244
+    second: eagle_8
+  - first:
+      213: 6068050303977169042
+    second: eagle_9
+  - first:
+      213: -2402348829987122204
+    second: eagle_10
+  - first:
+      213: 8437556639653652218
+    second: eagle_11
+  - first:
+      213: 281397721099567674
+    second: eagle_12
+  - first:
+      213: 5370681111688192926
+    second: eagle_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: eagle_idle_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 140
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 400fe1bde70bb95deb1e1bd7e8ee755f
+      internalID: 474055618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_idle_1
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 140
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d5fb11e2645190d02180aac3e2d0521
+      internalID: 388231593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_idle_2
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 140
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a42db68fbe39905d0255759c79219dda
+      internalID: 242749734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_idle_3
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 140
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 666cfe12ea5abd3947ea8b0aec03e5c9
+      internalID: -256164950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_move_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 112
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54a86885eab0cdbb865e2a8c57936efa
+      internalID: -1996083078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_move_1
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 112
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b50e85048907530f1dce758d3b00e03c
+      internalID: -1510128463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_move_2
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 112
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 97362856d96f7c0d7370c8ab457e21d5
+      internalID: 800042231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_move_3
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 112
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e4a4d811c0ad410642408a006240177
+      internalID: -759623291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_windup_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 84
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b9039b3cbcdfc0ca6223ed43642eccd2
+      internalID: 1361220988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_windup_1
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 84
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06e3d9bce3df2d8e80c641901c04d5a7
+      internalID: -321926345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_attack_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 56
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: abf958638cfec2f525db42a460096c91
+      internalID: 1522335398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_attack_1
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 56
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc8c4a3cc78334f46cc1b702948b0baf
+      internalID: 1720246562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_hurt_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 28
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26876708d0a3943cb1e79607e0b59e73
+      internalID: -400263714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_dead_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 574e87b797aa8d6fb7703ba2a5db5b14
+      internalID: -2013160403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eagle_dead_1
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 0
+        width: 40
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5, y: 0.10714}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9181eb1124ddf6ddfbc1ab79411b3d73
+      internalID: 479216768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 7be84b5c7212d0f4cabd62d17ffa74ec
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      eagle_attack_0: 1522335398
+      eagle_attack_1: 1720246562
+      eagle_dead_0: -2013160403
+      eagle_dead_1: 479216768
+      eagle_hurt_0: -400263714
+      eagle_idle_0: 474055618
+      eagle_idle_1: 388231593
+      eagle_idle_2: 242749734
+      eagle_idle_3: -256164950
+      eagle_move_0: -1996083078
+      eagle_move_1: -1510128463
+      eagle_move_2: 800042231
+      eagle_move_3: -759623291
+      eagle_windup_0: 1361220988
+      eagle_windup_1: -321926345
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: rpg:f0e37bc8c9a7d6ef5cfc05bac6e0b99e
+  assetBundleName: 
+  assetBundleVariant: 

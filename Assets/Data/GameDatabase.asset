@@ -68,6 +68,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d38673c325583b84e88a79ae8c77a396, type: 2}
   - {fileID: 11400000, guid: a3337e63a36077e48b264be7730a1d9f, type: 2}
   - {fileID: 11400000, guid: 831fe498185ba194bba93a51875b1499, type: 2}
+  - {fileID: 11400000, guid: a6e648dc4a9cba04b9aa654601c4f742, type: 2}
+  - {fileID: 11400000, guid: bf31a925be6471842b55e70a393c7d1e, type: 2}
+  - {fileID: 11400000, guid: f6a3c1cdf120a7e4e9263f5d6b09c225, type: 2}
+  - {fileID: 11400000, guid: d995455a24d2db14d918583eec4ee525, type: 2}
+  - {fileID: 11400000, guid: 34b830add49483049b55b4dc2504e854, type: 2}
+  - {fileID: 11400000, guid: 52f056f65966f3840827d2f7381a2737, type: 2}
+  - {fileID: 11400000, guid: 316af3ca21a9fc447a1b33a060bf201c, type: 2}
   abilities:
   - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
   - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}
@@ -169,6 +176,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 592942e69aa798e479ae2944c9462c39, type: 2}
   - {fileID: 11400000, guid: f4b2d0ee525aff34594e144284d8d96d, type: 2}
   - {fileID: 11400000, guid: c96dae57d0fd44e4694ac1a418273ef6, type: 2}
+  - {fileID: 11400000, guid: 039cf855247e708458cd211d22c69c2d, type: 2}
+  - {fileID: 11400000, guid: 8d6442bf283a0524ca48d9c476fb0ac8, type: 2}
+  - {fileID: 11400000, guid: 0dbdf5bd58dc9054893307e495e071f7, type: 2}
+  - {fileID: 11400000, guid: dba0358d54638b847a8b7d9d2e1b6a42, type: 2}
   zones:
   - {fileID: 11400000, guid: 3f620a1fa510cea4491d33a12c163821, type: 2}
   races:
@@ -228,5 +239,6 @@ MonoBehaviour:
   shardPrefab: {fileID: 3814228701410162278, guid: b046854a7d2cb2a4d9925a9582b228c0, type: 3}
   chestPrefab: {fileID: 1402235809284517033, guid: 0c5855967a134f44fb7cfcff74dcbf4e, type: 3}
   mistMaterial: {fileID: 2100000, guid: 9151a6cf50d0f064183f54e52369e00a, type: 2}
+  windMaterial: {fileID: 2100000, guid: f7401321bb035144391874905fff7f18, type: 2}
   netHeroPrefab: {fileID: 4885084979465001528, guid: ae3e903ab7b28a648b5a6f37a73a1646, type: 3}
   networkManagerPrefab: {fileID: 3420617665053863353, guid: c2b98b4a3e3834f4db920baf9ec1f0d0, type: 3}

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: steppe_bisons
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: steppe_bisons
+  title: "Truy N\xE3: B\xF2 R\u1EEBng"
+  kind: 0
+  summary: "B\xF2 R\u1EEBng c\xE0o \u0111\u1EA5t r\u1ED3i lao th\u1EB3ng. \u0110\u1EA7u s\u1EEBng c\u1EE7a n\xF3 c\u1EE9ng nh\u01B0 \u0111\xE1: \u0111\u1EE9ng tr\u01B0\u1EDBc m\u1ED9t t\u1EA3ng \u0111\xE1 r\u1ED3i n\xE9, \u0111\u1EC3 n\xF3 h\xFAc v\xE0o \u0111\xE1 m\xE0 cho\xE1ng v\xE1ng. Khe V\u1EF1c ch\u1EC9 qua \u0111\u01B0\u1EE3c nh\u1EDD C\u1ED9t Gi\xF3. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 22."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 0dbdf5bd58dc9054893307e495e071f7, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: bison
+    count: 4
+    text: "H\u1EA1 B\xF2 R\u1EEBng"
+    countPrevious: 0
+    marker: bisons
+  xp: 2800
+  gold: 260
+  items:
+  - item: {fileID: 11400000, guid: 13adda1a47207744189185a706a32b4f, type: 2}
+    count: 3
+  setFlags:
+  - steppe_opened
+  followUps: []

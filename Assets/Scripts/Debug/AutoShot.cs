@@ -2,16 +2,19 @@ using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace RPG
 {
     /// <summary>
     /// Automated showcase used for testing builds: start the player with
-    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep|classes|ui]
+    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep|classes|ui|steppe]
     /// It plays a scripted tour (dialogue, skills, boss attacks, the swamp and its bosses, the
     /// world map, night), saves screenshots and quits; -autoshotOnly swamp tours the swamp alone,
     /// -autoshotOnly cave the crystal cave, -autoshotOnly deep its deeper creatures and bosses,
-    /// -autoshotOnly ui the character screen, the forge and a waystone's prompt.
+    /// -autoshotOnly ui the character screen, the forge and a waystone's prompt, -autoshotOnly steppe
+    /// Thảo Nguyên Gió (the wind, the wind columns, the hyenas, eagles and bisons).
+    /// Add -autoshotOffscreen to render to a texture (a hidden window or a graphical batch player).
     /// Exit code: 0 = clean run, 1 = errors or exceptions were logged, 2 = the tour did not finish
     /// within the timeout (CI reads it). Does nothing in normal play.
     /// </summary>
@@ -71,9 +74,73 @@ namespace RPG
         {
             yield return new WaitForEndOfFrame();
             string path = Path.Combine(dir, $"{index++:00}_{name}.png");
-            ScreenCapture.CaptureScreenshot(path);
+            // A previous tour's file must not make a failed capture look successful.
+            if (File.Exists(path)) File.Delete(path);
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-autoshotOffscreen") >= 0) CaptureOffscreen(path);
+            else ScreenCapture.CaptureScreenshot(path);
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (!File.Exists(path) && Time.realtimeSinceStartup < deadline) yield return null;
+            if (!File.Exists(path)) Debug.LogError("[AutoShot] screenshot was not written: " + path);
             Debug.Log("[AutoShot] " + path);
             yield return null;
+        }
+
+        /// <summary>
+        /// Hidden Windows players have no usable backbuffer. Ask URP to render the camera and
+        /// HUD explicitly, preserving each canvas's ordinary mode after the capture.
+        /// </summary>
+        static void CaptureOffscreen(string path)
+        {
+            var cam = CameraRig.MainCam;
+            if (cam == null) throw new InvalidOperationException("AutoShot needs the game camera.");
+            int width = Mathf.Max(1, Screen.width), height = Mathf.Max(1, Screen.height);
+            var target = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            var active = RenderTexture.active;
+            var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include);
+            var changed = new System.Collections.Generic.List<(Canvas canvas, Camera camera, float distance, int layer, int order)>();
+            int topLayer = 0, topValue = int.MinValue;
+            foreach (var layer in SortingLayer.layers)
+                if (layer.value > topValue) { topLayer = layer.id; topValue = layer.value; }
+            Texture2D pixels = null;
+            try
+            {
+                foreach (var canvas in canvases)
+                {
+                    if (!canvas.isRootCanvas || canvas.renderMode != RenderMode.ScreenSpaceOverlay) continue;
+                    changed.Add((canvas, canvas.worldCamera, canvas.planeDistance, canvas.sortingLayerID, canvas.sortingOrder));
+                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    canvas.worldCamera = cam;
+                    canvas.planeDistance = cam.nearClipPlane + 1f;
+                    // Preserve the overlay's position above every world sprite and particle.
+                    canvas.sortingLayerID = topLayer;
+                    canvas.sortingOrder = Mathf.Clamp(30000 + canvas.sortingOrder, 30000, 32767);
+                }
+                Canvas.ForceUpdateCanvases();
+                var request = new RenderPipeline.StandardRequest { destination = target };
+                if (!RenderPipeline.SupportsRenderRequest(cam, request))
+                    throw new InvalidOperationException("The render pipeline does not support offscreen AutoShot.");
+                RenderPipeline.SubmitRenderRequest(cam, request);
+                RenderTexture.active = target;
+                pixels = new Texture2D(width, height, TextureFormat.RGB24, false);
+                pixels.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                pixels.Apply();
+                File.WriteAllBytes(path, pixels.EncodeToPNG());
+            }
+            finally
+            {
+                foreach (var entry in changed)
+                {
+                    if (entry.canvas == null) continue;
+                    entry.canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    entry.canvas.worldCamera = entry.camera;
+                    entry.canvas.planeDistance = entry.distance;
+                    entry.canvas.sortingLayerID = entry.layer;
+                    entry.canvas.sortingOrder = entry.order;
+                }
+                RenderTexture.active = active;
+                if (pixels != null) UnityEngine.Object.Destroy(pixels);
+                RenderTexture.ReleaseTemporary(target);
+            }
         }
 
         static IEnumerator Wait(float s)
@@ -229,6 +296,130 @@ namespace RPG
                 Place(p, stone.Arrival);
                 yield return Wait(0.8f);
                 yield return Shot("waystone_prompt");
+            }
+        }
+
+        /// <summary>
+        /// Thảo Nguyên Gió (-autoshotOnly steppe): the tunnel's mouth and the wind gate, the nomads'
+        /// camp, the grass in a gust, a wind column carrying the hero over Khe Vực, a hyena's lunge,
+        /// an eagle's mark and swoop, a bison ramming sandstone, the steppe by night, the world map.
+        /// </summary>
+        IEnumerator Steppe(PlayerController p, DayNightCycle dn)
+        {
+            var zone = ZoneRoot.Current;
+            Vector2 Spot(string id)
+            {
+                var t = zone != null ? zone.SpotOf(id) : null;
+                return t != null ? (Vector2)t.position : Vector2.zero;
+            }
+            if (dn != null) dn.time = 0.42f;
+            CharacterChoice.Apply(p, new HeroLook { cls = "ranger", race = "elf", weapon = "bow", hair = 1, hairColor = 5 });
+            p.stats.AddXp(p.stats.Config.TotalXpTo(20));
+            HUD.I.help.Close();
+            Wind.Override = new Vector2(0.9f, 0.35f);
+
+            Place(p, new Vector2(101f, 91.8f));
+            yield return Wait(1.6f);
+            yield return Shot("steppe_tunnel");
+            Place(p, Spot("windgate") + new Vector2(-3f, 0f));
+            yield return Wait(1.6f);
+            yield return Shot("steppe_gate");
+            Place(p, Spot("nomadcamp") + new Vector2(-1.2f, -3.6f));
+            yield return Wait(1.6f);
+            yield return Shot("steppe_camp");
+            // a gust through the tall grass
+            Wind.Override = new Vector2(-1f, 0.1f);
+            Place(p, Spot("bisons") + new Vector2(-9f, 8f));
+            yield return Wait(1.5f);
+            yield return Shot("steppe_gust");
+
+            // a wind column across Khe Vực
+            var east = WindColumn.All.Find(c => c.columnId == "e96");
+            Wind.Override = Vector2.zero;
+            if (east != null)
+            {
+                Place(p, (Vector2)east.transform.position + new Vector2(1.8f, -1.2f));
+                yield return Wait(1.2f);
+                yield return Shot("windcolumn");
+                p.motor.Teleport(east.transform.position);
+                yield return Wait(0.55f);
+                yield return Shot("windcolumn_flight");
+                yield return Wait(1.6f);
+                yield return Shot("windcolumn_landed");
+            }
+
+            // a hyena pack
+            var hy = FindEnemy("hyena", Spot("hyenas")) as HyenaAI;
+            if (hy != null)
+            {
+                Place(p, (Vector2)hy.transform.position + new Vector2(3.4f, -0.6f));
+                yield return Wait(1.2f);
+                hy.DebugLunge(p);
+                yield return Wait(0.3f);
+                yield return Shot("hyena_lunge_windup");
+                yield return Wait(0.3f);
+                yield return Shot("hyena_lunge");
+                yield return Wait(1.4f);
+                yield return Shot("hyena_pack");
+                yield return Wait(1f);
+            }
+            // an eagle's swoop
+            var ea = FindEnemy("eagle", Spot("eagles")) as EagleAI;
+            if (ea != null)
+            {
+                Place(p, (Vector2)ea.transform.position + new Vector2(2.5f, -1.5f));
+                yield return Wait(1f);
+                ea.DebugSwoop(p);
+                yield return Wait(0.5f);
+                yield return Shot("eagle_mark");
+                yield return Wait(0.55f);
+                yield return Shot("eagle_dive");
+                yield return Wait(0.35f);
+                yield return Shot("eagle_grounded");
+                yield return Wait(1.5f);
+            }
+            // a bison into sandstone
+            var bi = FindEnemy("bison", Spot("bisons")) as StoneBeetleAI;
+            if (bi != null)
+            {
+                Vector2 b = bi.transform.position;
+                Vector2 dir = Vector2.right;
+                float wall = 5f;
+                for (int i = 0; i < 16; i++)
+                {
+                    var d = Util.FromAngle(i * 22.5f);
+                    var hit = Physics2D.Raycast(b + Vector2.up * 0.25f, d, 8.5f, Layers.ObstacleMask);
+                    if (hit.collider == null || hit.distance < 3.8f || hit.collider.GetComponentInParent<Health>() != null) continue;
+                    dir = d;
+                    wall = hit.distance;
+                    break;
+                }
+                Place(p, b + dir * Mathf.Min(3.2f, wall - 0.8f));
+                yield return Wait(1f);
+                bi.DebugCharge(p);
+                yield return Wait(0.6f);
+                yield return Shot("bison_windup");
+                yield return Wait(0.7f);
+                yield return Shot("bison_charge");
+                yield return Wait(0.8f);
+                yield return Shot("bison_dazed");
+                yield return Wait(1f);
+            }
+            // night on the steppe, then the map
+            Wind.Override = null;
+            if (dn != null) dn.time = 0.95f;
+            Place(p, Spot("nomadcamp") + new Vector2(2f, -4f));
+            yield return Wait(1.6f);
+            yield return Shot("steppe_night");
+            if (dn != null) dn.time = 0.45f;
+            foreach (var w in Waystone.All)
+                if (p.waystones != null) p.waystones.Touch(w);
+            if (WorldMapUI.I != null)
+            {
+                WorldMapUI.I.Show();
+                yield return Wait(0.8f);
+                yield return Shot("world_map_steppe");
+                WorldMapUI.I.Close();
             }
         }
 
@@ -785,6 +976,12 @@ namespace RPG
             if (Only == "deep")
             {
                 yield return Deep(p, dn);
+                Finish();
+                yield break;
+            }
+            if (Only == "steppe")
+            {
+                yield return Steppe(p, dn);
                 Finish();
                 yield break;
             }

@@ -6,7 +6,8 @@ namespace RPG.EditorTools.Tests
     /// <summary>
     /// The main quests are one road (players' feedback, 25/09/2026): every step needs the one
     /// before and leads to the next, the levels they are for only go up, and the last step of a
-    /// region leads into the next region (the bear → the swamp's road, the snake mother → the cave).
+    /// region leads into the next region (the bear → the swamp's road, the snake mother → the cave,
+    /// the spider queen → the steppe).
     /// </summary>
     public class QuestRoadTests
     {
@@ -16,6 +17,7 @@ namespace RPG.EditorTools.Tests
             "swamp_road", "swamp_toads", "swamp_hunters", "swamp_mud", "slay_toadking", "slay_snake",
             "cave_enter", "cave_bats", "cave_spiders", "cave_golems", "cave_beetles", "cave_slimes", "cave_eyes",
             "slay_crystalgolem", "slay_queen",
+            "steppe_enter", "steppe_hyenas", "steppe_eagles", "steppe_bisons",
         };
 
         static int Recommended(QuestDef q)
@@ -43,6 +45,7 @@ namespace RPG.EditorTools.Tests
             }
             Assert.AreEqual(ObjectiveKind.Reach, Q("swamp_road").objectives[0].kind, "after the bear, the road to the swamp");
             Assert.AreEqual(ObjectiveKind.Reach, Q("cave_enter").objectives[0].kind, "after the snake mother, the cave");
+            Assert.AreEqual(ObjectiveKind.Reach, Q("steppe_enter").objectives[0].kind, "after the spider queen, the steppe");
             Assert.AreNotEqual(QuestKind.Main, Q("swamp_wisps").kind, "the night's wisps are a side bounty, never in the way");
             Assert.AreNotEqual(QuestKind.Main, Q("cave_mimic").kind, "the hidden mimic is a rumour, never in the way");
         }

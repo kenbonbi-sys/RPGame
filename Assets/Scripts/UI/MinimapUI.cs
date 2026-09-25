@@ -19,7 +19,7 @@ namespace RPG
         public RawImage map;
         public RectTransform markerRoot;
         public RectTransform playerMarker;
-        public Tilemap ground, tallGrass, dirt, mud, water, walls;
+        public Tilemap ground, tallGrass, dirt, mud, water, walls, chasm;
         public Transform obstaclesRoot;
         public Vector2Int worldSize = new Vector2Int(100, 64);
         public Vector2 viewTiles = new Vector2(44, 22);
@@ -89,6 +89,7 @@ namespace RPG
             mud = zone.mud;
             water = zone.water;
             walls = zone.walls;
+            chasm = zone.chasm;
             obstaclesRoot = zone.obstacles;
             worldSize = new Vector2Int(Mathf.CeilToInt(zone.bounds.xMax), Mathf.CeilToInt(zone.bounds.yMax));
             if (tex != null) Destroy(tex);
@@ -135,6 +136,8 @@ namespace RPG
             Color32 mudC = new Color32(98, 82, 58, 255);
             Color32 waterC = new Color32(52, 92, 88, 255);
             Color32 caveFloor = new Color32(58, 62, 80, 255);
+            Color32 steppe = new Color32(138, 140, 72, 255);
+            Color32 ravine = new Color32(8, 10, 18, 255);
             Color32 rock = new Color32(16, 17, 24, 255);
             Color32 edge = new Color32(20, 30, 24, 255);
             var zone = ZoneRoot.Current;
@@ -148,7 +151,7 @@ namespace RPG
                     if (g != null)
                     {
                         if (!groundColors.TryGetValue(g, out c))
-                            groundColors[g] = c = g.name.StartsWith("swamp") ? swamp : g.name.StartsWith("cave") ? caveFloor : grass;
+                            groundColors[g] = c = g.name.StartsWith("swamp") ? swamp : g.name.StartsWith("cave") ? caveFloor : g.name.StartsWith("steppe") ? steppe : grass;
                     }
                     if (tallGrass != null && tallGrass.HasTile(p)) c = tall;
                     if (dirt != null && dirt.HasTile(p)) c = dirtC;
@@ -157,6 +160,8 @@ namespace RPG
                     if (water != null && water.HasTile(p) && (zone == null || zone.IsWater(new Vector2(x + 0.5f, y + 0.5f)))) c = waterC;
                     // the cave's rock where the middle of the cell is solid
                     if (walls != null && walls.HasTile(p) && (zone == null || zone.IsWall(new Vector2(x + 0.5f, y + 0.5f)))) c = rock;
+                    // the steppe's ravine where the middle of the cell is over the drop
+                    if (chasm != null && chasm.HasTile(p) && (zone == null || zone.IsChasm(new Vector2(x + 0.5f, y + 0.5f)))) c = ravine;
                     cols[y * w + x] = c;
                 }
             // obstacles (trees, rocks) as dark pixels
@@ -166,7 +171,9 @@ namespace RPG
                 {
                     int x = Mathf.FloorToInt(t.position.x), y = Mathf.FloorToInt(t.position.y);
                     if (x < 0 || y < 0 || x >= w || y >= h) continue;
-                    bool tree = t.name.StartsWith("pine") || t.name.StartsWith("oak") || t.name.StartsWith("deadtree") || t.name.StartsWith("willow");
+                    bool tree = t.name.StartsWith("pine") || t.name.StartsWith("oak") || t.name.StartsWith("deadtree") || t.name.StartsWith("willow") ||
+                            t.name.StartsWith("acacia");
+                    if (t.name.StartsWith("steppegrass")) continue;   // the steppe's grass is ground, not an obstacle
                     if (t.name.StartsWith("crystal"))
                     {
                         // the cave's crystals: little points of their own light
@@ -246,6 +253,10 @@ namespace RPG
             {
                 dn.GetPhase(out string label, out float prog, out bool isDay);
                 timeLabel.text = $"{label}  <color=#c8c0d0>{Mathf.RoundToInt(prog * 100)}%</color>";
+                // on the steppe: where the wind blows (Thảo Nguyên Gió)
+                Vector2 w = Wind.At(p.transform.position);
+                if (w.sqrMagnitude > 0.0001f)
+                    timeLabel.text += $"  <color=#bfe6f0>Gió {Wind.Arrow(w)}{(w.magnitude > 0.6f ? Wind.Arrow(w) : "")}</color>";
                 if (timeIcon != null) timeIcon.sprite = isDay ? sunIcon : moonIcon;
             }
         }

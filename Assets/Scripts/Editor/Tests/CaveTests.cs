@@ -80,7 +80,8 @@ namespace RPG.EditorTools.Tests
                 Assert.IsFalse(zone.IsWall(at), id + " is on the cave floor");
             }
             Assert.IsTrue(zone.IsWall(new Vector2(150f, 120f)), "solid rock between the chambers");
-            Assert.IsTrue(zone.IsWall(new Vector2(40f, 100f)), "the mountain north of the forest");
+            Assert.IsFalse(zone.IsWall(new Vector2(40f, 100f)), "the steppe now opens west of the cave");
+            Assert.IsTrue(zone.IsWall(new Vector2(40f, 65f)), "the southern cliff still separates the steppe from the forest");
             Assert.IsFalse(zone.IsWall(new Vector2(168f, 60f)), "the way up from the swamp is open");
             foreach (var id in new[] { "cuahang", "rungphale", "nhenchua" })
                 Assert.NotNull(Waystone.Find(id), id + " stone");

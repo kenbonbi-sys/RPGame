@@ -28,7 +28,11 @@ namespace RPG
         public float attackCooldown = 1.5f;
         public float contactDamage = 8f;
         public float wanderRadius = 2.5f;
+        [Tooltip("Share of the steppe's wind that pushes it (heroes: all of it); creatures lean into the wind.")]
+        public float windResponse = 0.25f;
         public List<LootEntry> loot = new List<LootEntry>();
+        [Tooltip("Optional: a child raised and lowered with the flight (an eagle's swoop); every screen draws its height.")]
+        public Transform lift;
 
         [Header("Refs")]
         public CharacterMotor motor;
@@ -86,6 +90,7 @@ namespace RPG
             if (status == null) status = GetComponent<StatusEffects>();
             colliders = GetComponentsInChildren<Collider2D>(true);
             if (style == null) style = GetComponentInChildren<SpriteStyle>();
+            if (motor != null) motor.windResponse = windResponse;
             health.Damaged += OnDamaged;
             health.Died += OnDied;
         }

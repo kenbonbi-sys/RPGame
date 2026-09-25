@@ -26,6 +26,8 @@ import gen_cave_creatures
 import gen_cave_deep
 import gen_class_icons
 import gen_gear
+import gen_steppe
+import gen_steppe_creatures
 from pixelkit import Canvas, pack_shelf
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -97,11 +99,12 @@ def build_terrain():
     forest, rects = gen_terrain.build()
     # the swamp's rows under the forest's (Đầm Lầy Sương Mù, east of the forest)
     T = gen_terrain.T
-    sheet = Canvas(forest.w, 16 * T)
+    # then the cave's (Hang Pha Lê, north of the swamp) and the steppe's (Thảo Nguyên Gió)
+    more = gen_swamp.tiles() + gen_cave.tiles() + gen_steppe.tiles()
+    sheet = Canvas(forest.w, forest.h + len(more) * T)
     sheet.blit(forest, 0, 0)
     y0 = forest.h
-    # then the cave's (Hang Pha Lê, north of the swamp)
-    for r, row in enumerate(gen_swamp.tiles() + gen_cave.tiles()):
+    for r, row in enumerate(more):
         for c, (name, tile) in enumerate(row):
             sheet.blit(tile, c * T, y0 + r * T)
             rects.append((name, c * T, y0 + r * T, T, T))
@@ -113,7 +116,7 @@ def build_terrain():
 
 
 def build_props():
-    items = gen_props.build() + gen_swamp.props() + gen_cave.props()
+    items = gen_props.build() + gen_swamp.props() + gen_cave.props() + gen_steppe.props()
     sheet, rects = pack_shelf(items, 256)
     img = sheet.to_image()
     path = os.path.join(ART, "Props", "props.png")
@@ -200,6 +203,13 @@ def build_chars():
                       "climb": (6, False), "air": (1, False), "land": (1, False), "roar": (5, True), "hurt": (1, False), "dead": (3, False)}[k]
     grid_sheet("queen", gen_cave_deep.build_queen(), ["idle", "walk", "windup", "bite", "cast", "climb", "air", "land", "roar", "hurt", "dead"],
                80, 64, (40, 61), os.path.join(ART, "Characters", "queen.png"), qfps)
+    # Thảo Nguyên Gió
+    hyfps = lambda k: {"idle": (3, True), "move": (12, True), "windup": (8, True), "attack": (10, False), "hurt": (1, False), "dead": (5, False)}[k]
+    grid_sheet("hyena", gen_steppe_creatures.build_hyena(), cave_order, 32, 24, (16, 22), os.path.join(ART, "Characters", "hyena.png"), hyfps)
+    eafps = lambda k: {"idle": (4, True), "move": (8, True), "windup": (6, True), "attack": (10, True), "hurt": (1, False), "dead": (5, False)}[k]
+    grid_sheet("eagle", gen_steppe_creatures.build_eagle(), cave_order, 40, 28, (20, 25), os.path.join(ART, "Characters", "eagle.png"), eafps)
+    bifps = lambda k: {"idle": (2, True), "move": (7, True), "windup": (6, True), "attack": (10, True), "hurt": (1, False), "dead": (4, False)}[k]
+    grid_sheet("bison", gen_steppe_creatures.build_bison(), cave_order, 44, 34, (22, 32), os.path.join(ART, "Characters", "bison.png"), bifps)
 
 
 def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):
@@ -217,7 +227,7 @@ def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):
 
 
 def build_icons():
-    simple_grid(gen_icons.build_items() + gen_swamp.icons() + gen_cave.icons() + gen_gear.icons(), 16, 16, os.path.join(ART, "Icons", "items.png"), ppu=16)
+    simple_grid(gen_icons.build_items() + gen_swamp.icons() + gen_cave.icons() + gen_gear.icons() + gen_steppe.icons(), 16, 16, os.path.join(ART, "Icons", "items.png"), ppu=16)
     simple_grid(gen_icons.build_skills() + gen_class_icons.build(), 24, 24, os.path.join(ART, "Icons", "skills.png"), ppu=16)
     simple_grid(gen_icons.build_status(), 10, 10, os.path.join(ART, "Icons", "status.png"), ppu=16)
 

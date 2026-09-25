@@ -16,6 +16,8 @@ namespace RPG
     /// invites SmokeB into a party, they talk on the party channel and whisper, SmokeA adds SmokeB
     /// as a friend and sees them playing), then steps next to a Slime Rêu of its own (the two split
     /// them) and hits it until the server says it fell, and checks the server gave it the XP.
+    /// On the first run SmokeA also flies over Khe Vực on a Cột Gió while SmokeB watches from the
+    /// far rim: B must see A rise above the ravine and come down on its side.
     /// With -netsmokeAgain (a second run) SmokeA checks its friend is still listed, and with
     /// -netsmokeExpect "level xp" it first checks the character came back as saved. With -netsmokeSwitch n a lone player
     /// changes to channel n (/kenh n) and checks its character came along. The server quits once
@@ -232,6 +234,10 @@ namespace RPG
             bool again = expect != null || Array.IndexOf(Environment.GetCommandLineArgs(), "-netsmokeAgain") >= 0;
             yield return Together(again, ok => together = ok);
 
+            // ---------------------------------------------------------------- a flight over Khe Vực
+            bool flightOk = true;
+            if (!again) yield return Flight(ok => flightOk = ok);
+
             // ---------------------------------------------------------------- a fight
             // each player takes a slime of its own (the two logins split them by id), steps next to
             // it (its own machine moves it, like a GM's tp) and hits it until the server says it fell
@@ -281,8 +287,85 @@ namespace RPG
             yield return Shot(again ? "_again" : "");
             // the other player keeps fighting a little longer: stay so they still see this hero
             yield return Wait(GameSession.HasScreen ? 3f : 1f);
-            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk && gearOk,
-                   $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}, gear {gearOk}");
+            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk && gearOk && flightOk,
+                   $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}, gear {gearOk}, flight {flightOk}");
+        }
+
+        /// <summary>
+        /// Thảo Nguyên Gió: SmokeA steps into the east Cột Gió of the middle crossing and its own
+        /// machine flies it over Khe Vực; SmokeB waits on the far rim and must see A's body rise
+        /// above the ravine (its screen draws that itself) and come down on B's side. Both hold
+        /// their spot against the steppe's wind while they wait.
+        /// </summary>
+        IEnumerator Flight(Action<bool> result)
+        {
+            var me = Players.Local;
+            var zone = ZoneRoot.Current;
+            var east = WindColumn.All.Find(c => c != null && c.columnId == "e96");
+            if (east == null || east.partner == null || zone == null)
+            {
+                Debug.LogError($"[NetSmoke] {role}: no Cột Gió e96 in the world");
+                result(false);
+                yield break;
+            }
+            var west = east.partner;
+            Vector2 e = east.transform.position, w = west.transform.position;
+            bool leads = (LoginInfo.Name ?? "").EndsWith("A");
+            if (leads)
+            {
+                Vector2 spot = e + Vector2.right * 3f;
+                me.motor.Teleport(spot);
+                yield return Hold(me, spot, 3f);   // B gets to the far rim and sees A arrive
+                float until = Time.realtimeSinceStartup + 6f;
+                while (!WindColumn.Carrying && Time.realtimeSinceStartup < until)
+                {
+                    Vector2 to = e - (Vector2)me.transform.position;
+                    me.SetIntent(new PlayerIntent { move = to.sqrMagnitude > 0.0001f ? to.normalized : Vector2.left });
+                    yield return null;
+                }
+                me.SetIntent(new PlayerIntent());
+                bool flew = WindColumn.Carrying;
+                yield return Until(() => !WindColumn.Carrying, 6f);
+                Vector2 landed = me.transform.position;
+                yield return Hold(me, landed, 2.5f);   // B watches the landing
+                bool across = me.transform.position.x < w.x + 1f && !zone.IsChasm(me.transform.position);
+                Debug.Log($"[NetSmoke] {role}: flew over Khe Vực {flew}, now at ({me.transform.position.x:0.0}, {me.transform.position.y:0.0}) → {(flew && across ? "across" : "NOT across")}");
+                result(flew && across);
+                yield break;
+            }
+            var other = Other(me);
+            Vector2 mine = west.Landing + new Vector2(-2.5f, -1.5f);
+            me.motor.Teleport(mine);
+            float wait = Time.realtimeSinceStartup + 15f;
+            while (Time.realtimeSinceStartup < wait && (other == null || Vector2.Distance(other.transform.position, e) > 4f))
+                yield return Hold(me, mine, 0f);
+            var body = other != null && other.anim != null ? other.anim.transform : null;
+            float rest = body != null ? body.localPosition.y : 0f, top = 0f;
+            float watch = Time.realtimeSinceStartup + 9f;
+            while (Time.realtimeSinceStartup < watch && other != null && other.transform.position.x > w.x + 1f)
+            {
+                if (body != null) top = Mathf.Max(top, body.localPosition.y - rest);
+                yield return Hold(me, mine, 0f);
+            }
+            yield return Hold(me, mine, 0.8f);
+            bool arrived = other != null && other.transform.position.x < w.x + 1f;
+            bool down = body != null && Mathf.Abs(body.localPosition.y - rest) < 0.05f;
+            bool ok = arrived && down && top > WindColumn.CarryHeight * 0.6f;
+            Debug.Log($"[NetSmoke] {role}: saw the other fly over Khe Vực, {top:0.00} above its shadow at most, {(arrived ? "landed" : "NOT landed")} on this rim, {(down ? "down" : "still raised")} → {(ok ? "ok" : "NOT")}");
+            result(ok);
+        }
+
+        /// <summary>Keeps <paramref name="me"/> at <paramref name="spot"/> against the wind for <paramref name="seconds"/> (0: one frame).</summary>
+        static IEnumerator Hold(PlayerController me, Vector2 spot, float seconds)
+        {
+            float end = Time.realtimeSinceStartup + seconds;
+            do
+            {
+                Vector2 to = spot - (Vector2)me.transform.position;
+                me.SetIntent(new PlayerIntent { move = to.magnitude > 0.3f ? to.normalized : Vector2.zero });
+                yield return null;
+            } while (Time.realtimeSinceStartup < end);
+            me.SetIntent(new PlayerIntent());
         }
 
         /// <summary>

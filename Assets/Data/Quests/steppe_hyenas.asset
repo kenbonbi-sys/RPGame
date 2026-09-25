@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04c5a587d60e8c4a8aeb87b5e7110c4, type: 3}
+  m_Name: steppe_hyenas
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.QuestDef
+  id: steppe_hyenas
+  title: "Truy N\xE3: Linh C\u1EA9u Gi\xF3"
+  kind: 0
+  summary: "Linh C\u1EA9u Gi\xF3 \u0111i th\xE0nh b\u1EA7y, v\xE2y quanh con m\u1ED3i r\u1ED3i thay nhau lao v\xE0o c\u1EAFn v\xE0 ch\u1EA1y ra. Th\u1EA5y v\u1EA1ch d\u01B0\u1EDBi \u0111\u1EA5t l\xE0 con s\u1EAFp lao: L\u01B0\u1EDBt sang b\xEAn. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 20."
+  giver: 
+  turnIn: 
+  turnInText: 
+  minLevel: 1
+  requires:
+  - {fileID: 11400000, guid: 039cf855247e708458cd211d22c69c2d, type: 2}
+  requiredFlags: []
+  autoStart: 1
+  availableText: 
+  objectives:
+  - kind: 1
+    target: hyena
+    count: 6
+    text: "H\u1EA1 Linh C\u1EA9u Gi\xF3"
+    countPrevious: 0
+    marker: hyenas
+  xp: 2400
+  gold: 220
+  items:
+  - item: {fileID: 11400000, guid: 2d3b56b6f62cbaf48a5cbc47284476e8, type: 2}
+    count: 3
+  setFlags: []
+  followUps:
+  - {fileID: 11400000, guid: 0dbdf5bd58dc9054893307e495e071f7, type: 2}

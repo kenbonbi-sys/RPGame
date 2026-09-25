@@ -347,6 +347,8 @@ namespace RPG
                     s.movesFresh = false;
                     continue;
                 }
+                // a Cột Gió flies its hero across Khe Vực: a crossing is allowed near one
+                if (WindColumn.Near(at) != null) s.moves.Dashed(now);
                 if (s.moves.Check(at, hero.TopWalkSpeed, now, out Vector2 back)) continue;
                 s.movesPutBack++;
                 Debug.LogWarning($"[Server] \"{s.Name}\" moved {s.moves.Moved:0.0} units in {MoveCheck.Window:0.#} s (at most {s.moves.Allowed:0.0}): put back ({s.movesPutBack} times)");

@@ -4,7 +4,8 @@ using UnityEngine;
 namespace RPG
 {
     /// <summary>
-    /// Straight-flying projectile (fireball, spores). Explodes on hit or on obstacles. Online, the
+    /// Straight-flying projectile (fireball, spores); the steppe's wind bends it (<see cref="Wind"/>).
+    /// Explodes on hit or on obstacles. Online, the
     /// server's copy deals the damage; a screen's copy (its own player's fireball shown at once,
     /// others' seen) only flies and bursts.
     /// </summary>
@@ -64,10 +65,15 @@ namespace RPG
             float dt = Time.deltaTime;
             age += dt;
             Vector2 pos = transform.position;
-            Vector2 next = pos + dir * (speed * dt);
+            // the steppe's wind bends the flight (every machine feels the same wind)
+            Vector2 vel = dir * speed + Wind.At(pos) * Wind.ShotDrift;
+            float step = vel.magnitude * dt;
+            Vector2 heading = step > 0f ? vel.normalized : dir;
+            Vector2 next = pos + vel * dt;
+            if (rotateToDirection) transform.rotation = Quaternion.Euler(0, 0, Util.Angle(heading));
 
             // obstacles without health stop the projectile
-            var hit = Physics2D.CircleCast(pos, radius * 0.6f, dir, speed * dt, Layers.ObstacleMask);
+            var hit = Physics2D.CircleCast(pos, radius * 0.6f, heading, step, Layers.ObstacleMask);
             if (hit.collider != null && hit.collider.GetComponentInParent<Health>() == null)
             {
                 transform.position = hit.point;

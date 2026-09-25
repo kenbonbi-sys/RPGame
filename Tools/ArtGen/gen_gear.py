@@ -258,6 +258,37 @@ def ring_mimic():
     return ring_with(P["gold"], None, tooth=True)
 
 
+def helm_eagle():
+    cv = paint(HELM, P["metal"], [hx("#3c424c"), hx("#6c7482"), hx("#c4bcae"), hx("#f0ece4")])
+    # two eagle feathers standing up from the crest
+    for (x, lean) in ((6, -1), (9, 1)):
+        for k in range(5):
+            cv.px(x + (lean if k > 2 else 0), 5 - k, hx("#e6e0d4") if k < 3 else hx("#525a66"))
+    return done(cv)
+
+
+def armor_bison():
+    hide = [hx("#1e120a"), hx("#342214"), hx("#4a3220"), hx("#62442c"), hx("#7c5a3a")]
+    cv = paint(TUNIC, hide, [hx("#5a5244"), hx("#8e8470"), hx("#c2b89e"), hx("#e6dec8")])
+    # horns on the shoulders
+    for (x, d) in ((2, -1), (13, 1)):
+        cv.px(x, 3, hx("#c2b89e"))
+        cv.px(x + d, 2, hx("#e6dec8"))
+    # the shaggy collar
+    for x in range(4, 12):
+        cv.px(x, 3, hide[0] if x % 2 else hide[1])
+    return done(cv)
+
+
+def boots_wind():
+    sky = [hx("#1e3a4c"), hx("#2e5a70"), hx("#4a86a0"), hx("#7ab8cc"), hx("#b8e4ee")]
+    cv = paint(BOOT, sky, [hx("#e6f4f8"), hx("#c8e0e8"), hx("#f0fbff"), hx("#9ab8c4")])
+    # a swirl of wind on the shaft
+    for (x, y) in ((5, 5), (6, 4), (7, 5), (6, 6), (8, 7)):
+        cv.px(x, y, hx("#f0fbff"))
+    return done(cv)
+
+
 def icons():
     return [
         ("helm_leather", helm_leather()),
@@ -271,6 +302,10 @@ def icons():
         ("armor_silk", armor_silk()),
         ("ring_eye", ring_eye()),
         ("ring_mimic", ring_mimic()),
+        # Thảo Nguyên Gió
+        ("helm_eagle", helm_eagle()),
+        ("armor_bison", armor_bison()),
+        ("boots_wind", boots_wind()),
     ]
 
 

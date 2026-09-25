@@ -15,7 +15,7 @@ MonoBehaviour:
   id: slay_queen
   title: "Nh\u1EC7n Ch\xFAa Pha L\xEA"
   kind: 0
-  summary: "T\u1EADn c\xF9ng Hang Pha L\xEA, Nh\u1EC7n Ch\xFAa gi\u0103ng t\u01A1 gi\u1EEFa s\xE1u c\u1ED9t pha l\xEA. Tia s\xE1ng c\u1EE7a n\xF3 d\u1ED9i qua c\xE1c c\u1ED9t: \u0111\u1EADp v\u1EE1 c\u1ED9t s\u1EAFp b\u1ECB tia ch\u1EA1m v\xE0o \u0111\u1EC3 tia d\u1ED9i ng\u01B0\u1EE3c v\xE0o n\xF3. Xa h\u01A1n v\u1EC1 ph\xEDa t\xE2y b\u1EAFc l\xE0 Th\u1EA3o Nguy\xEAn Gi\xF3 (s\u1EAFp m\u1EDF). C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 20."
+  summary: "T\u1EADn c\xF9ng Hang Pha L\xEA, Nh\u1EC7n Ch\xFAa gi\u0103ng t\u01A1 gi\u1EEFa s\xE1u c\u1ED9t pha l\xEA. Tia s\xE1ng c\u1EE7a n\xF3 d\u1ED9i qua c\xE1c c\u1ED9t: \u0111\u1EADp v\u1EE1 c\u1ED9t s\u1EAFp b\u1ECB tia ch\u1EA1m v\xE0o \u0111\u1EC3 tia d\u1ED9i ng\u01B0\u1EE3c v\xE0o n\xF3. \u0110\u01B0\u1EDDng h\u1EA7m ph\xEDa t\xE2y R\u1EEBng Pha L\xEA d\u1EABn ra Th\u1EA3o Nguy\xEAn Gi\xF3. C\u1EA5p \u0111\u1EC1 ngh\u1ECB: 20."
   giver: 
   turnIn: 
   turnInText: 
@@ -41,4 +41,5 @@ MonoBehaviour:
     count: 3
   setFlags:
   - cave_cleared
-  followUps: []
+  followUps:
+  - {fileID: 11400000, guid: 039cf855247e708458cd211d22c69c2d, type: 2}

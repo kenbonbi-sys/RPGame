@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: armor_bison
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: armor_bison
+  displayName: "\xC1o Da B\xF2 R\u1EEBng"
+  description: "\xC1o da b\xF2 r\u1EEBng d\xE0y, vai \u0111\xEDnh s\u1EEBng. Gi\xF3 th\u1EA3o nguy\xEAn v\xE0 nanh vu\u1ED1t \u0111\u1EC1u tr\u01B0\u1EE3t \u0111i."
+  icon: {fileID: -572891882, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 3
+  rarity: 3
+  maxStack: 1
+  value: 980
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: 1
+  bonuses:
+  - stat: 6
+    kind: 0
+    value: 13
+    tag: 
+  - stat: 4
+    kind: 0
+    value: 90
+    tag: 
+  - stat: 13
+    kind: 0
+    value: 0.08
+    tag: 
+  craftGold: 950
+  craftItems:
+  - id: bison_hide
+    count: 5
+  - id: bison_horn
+    count: 2
+  - id: hyena_fang
+    count: 4

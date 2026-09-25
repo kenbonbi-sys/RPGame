@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: eagle_feather
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: eagle_feather
+  displayName: "L\xF4ng \u01AFng \u0110\xE1"
+  description: "Chi\u1EBFc l\xF4ng x\xE1m nh\u01B0 \u0111\xE1 c\u1EE7a Chim \u01AFng \u0110\xE1. Th\u1EA3 ra l\xE0 n\xF3 c\u01B0\u1EE1i gi\xF3 bay \u0111i."
+  icon: {fileID: -1739175400, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 2
+  rarity: 1
+  maxStack: 99
+  value: 22
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: -1
+  bonuses: []
+  craftGold: 0
+  craftItems: []

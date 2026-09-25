@@ -2161,6 +2161,160 @@ def _mimic(rng):
     return reverb(y + coins, 0.25, 0.7, seed=55)
 
 
+
+# ---------------------------------------------------------------- Thảo Nguyên Gió
+@sfx("sfx_gust")
+def _gust(rng):
+    """A wind column taking hold: a rushing whoosh that rises and swirls."""
+    n = ns(1.1)
+    t = tvec(n)
+    body = whoosh(n, rng, [(0, 250), (0.45, 1400), (1, 700)], q=0.9, peak=0.5, rise=1.4, fall=2.2, color="pink")
+    swirl = rmsn(bp(white(n, rng), 1200 + 500 * np.sin(TAU * 5.5 * t), 4.0)) * env_hump(n, 0.5, 1.8, 2.0)
+    air = rmsn(hp(white(n, rng), 4500)) * env_hump(n, 0.4, 2.0, 2.5)
+    return body + 0.35 * swirl + 0.15 * air
+
+
+@sfx("sfx_hyena")
+def _hyena(rng):
+    """A wind hyena's cackle: short nasal whoops that jump up in pitch, breathy between."""
+    n = ns(0.75)
+    y = np.zeros(n)
+    t0 = 0.0
+    for k in range(5):
+        m = ns(rng.uniform(0.07, 0.1))
+        tt = tvec(m)
+        f0 = rng.uniform(520, 640) * (1.12 ** k)
+        f = f0 * (1 + 0.35 * np.sin(np.pi * tt / tt[-1]))
+        v = osc("saw", f, m) + 0.5 * osc("square", f * 0.5, m)
+        v = formant(v, [(900, 5, 1.0), (1700, 6, 0.6), (2900, 8, 0.3)])
+        place(y, rmsn(v) * env_hump(m, 0.3, 1.5, 2.0) * rng.uniform(0.7, 1.0), t0 * SR)
+        t0 += rng.uniform(0.11, 0.15)
+    breath = rmsn(bp(white(n, rng), 1800, 1.5)) * 0.15 * env_hump(n, 0.5, 1.2, 1.5)
+    return y + breath
+
+
+@sfx("sfx_eagle")
+def _eagle(rng):
+    """A stone eagle's scream from high up: a shrill falling cry with a rasp, a faint echo."""
+    n = ns(0.95)
+    t = tvec(n)
+    T = t[-1]
+    f = seg_sweep([(0, 2400), (0.12, 3100), (0.6, 2200), (1, 1500)], n) * (1 + 0.012 * np.sin(TAU * 38 * t))
+    tone = osc("saw", f, n) * 0.5 + osc("sine", f, n)
+    tone = formant(tone, [(2600, 3, 1.0), (4200, 5, 0.4)])
+    rasp = rmsn(bp(white(n, rng), f, 6.0))
+    env = env_pts([(0, 0), (0.04, 1.0), (0.55, 0.7), (T, 0.0)], n)
+    y = (rmsn(tone) + 0.35 * rasp) * env
+    return echo(y, 0.18, fb=0.25, taps=2, damp=3000)
+
+
+@sfx("sfx_bison")
+def _bison(rng):
+    """A steppe bison: a wet snort through the nose, then a short low bellow."""
+    n = ns(1.0)
+    snort = rmsn(bp(white(n, rng), 700, 1.4)) * env_perc(n, 0.004, 0.08)
+    m = ns(0.65)
+    tt = tvec(m)
+    f = 78 * (1 + 0.15 * np.sin(np.pi * tt / tt[-1])) * (1 + 0.02 * smooth_rand(m, 8, rng))
+    v = _beast_voice(m, rng, f, (-10, 0, 9), [(420, 4, 1.0), (900, 6, 0.5), (2200, 8, 0.2)],
+                     [(420, 3, 1.0), (900, 3, 0.4), (2200, 4, 0.2)], 24, 0.3)
+    bellow = np.zeros(n)
+    place(bellow, drive(v * env_hump(m, 0.3, 1.5, 2.2), 1.8), 0.28 * SR)
+    return 0.6 * snort + bellow
+
+
+def inst_bowed(f, dur, sr, rng, vib=5.5, tail=0.3):
+    """A two-stringed fiddle (morin khuur): bowed saw through a warm body, a slow vibrato."""
+    n = int((dur + tail) * sr)
+    t = tvec(n, sr)
+    vibrato = 1 + 0.006 * np.sin(TAU * vib * t) * np.minimum(1.0, t / 0.25)
+    x = osc("saw", f * vibrato, n, sr) + 0.35 * osc("saw", f * 1.003 * vibrato, n, sr)
+    x = formant(x, [(700, 3.0, 1.0), (1500, 4.0, 0.55), (2800, 6.0, 0.2)], sr)
+    bow = rmsn(bp(white(n, rng), f * 3, 8.0, sr)) * 0.06
+    env = env_note(n, dur, att=0.09, rel=tail * 0.8, sr=sr)
+    return (rmsn(x) + bow) * env
+
+
+def build_steppe():
+    """G mixolydian, 92 BPM, 16 bars: an open-fifth drone and a galloping dombra under a bowed
+    fiddle melody in the pentatonic, a frame drum at the gallop's heels. Wide and windswept."""
+    sr = MSR
+    S16 = 5217                       # samples per 16th -> 92.0 BPM at 32 kHz
+    NB = 16
+    N = NB * 16 * S16
+    rng = np.random.default_rng(seed_of("music_steppe"))
+    CH = {"G": "G2 D3 G3", "F": "F2 C3 F3", "C": "C3 G3 C4", "Em": "E2 B2 E3", "D": "D2 A2 D3"}
+    prog = ["G", "G", "F", "G", "C", "G", "F", "D",
+            "G", "Em", "C", "G", "F", "C", "D", "G"]
+    MEL = ["D5:6 E5:2 G5:4 E5:4", "D5:8 B4:4 A4:4", "C5:6 D5:2 F5:4 D5:4", "D5:12 -:4",
+           "E5:4 G5:4 C6:6 A5:2", "G5:6 E5:2 D5:8", "F5:4 D5:4 C5:4 A4:4", "A4:8 D5:8",
+           "G5:6 A5:2 B5:4 A5:4", "G5:4 E5:4 B4:8", "C5:4 E5:4 G5:4 E5:4", "D5:12 -:4",
+           "F5:6 G5:2 A5:4 F5:4", "E5:6 D5:2 C5:8", "D5:4 F#5:4 A5:4 C6:4", "B5:4 A5:4 G5:8"]
+
+    drone = Loop(N)
+    for b, ch in enumerate(prog):
+        sig = inst_pad([midi(x) for x in CH[ch].split()], 16 * S16 / sr, sr, rng, cutoff=700, att=0.6, rel=1.0, detune=6)
+        drone.add(sig, b * 16 * S16 - int(0.1 * sr))
+
+    dombra = Loop(N)
+    gallop = (0, 3, 4, 8, 11, 12)                        # da-da-DUM, da-da-DUM
+    for b, ch in enumerate(prog):
+        notes = [midi(x) + 12 for x in CH[ch].split()]
+        for i, st in enumerate(gallop):
+            m = notes[(i + (b % 2)) % len(notes)]
+            sig = inst_pluck(mtof(m), 1.2 * S16 / sr, sr, rng, bright=0.5, decay=0.35, tail=0.25)
+            dombra.add(sig, (b * 16 + st) * S16 + humanize(rng, 5, sr), 0.8 if st in (0, 8) else 0.5)
+
+    fiddle = Loop(N)
+    put_melody(fiddle, MEL, 0, S16, lambda f, d: inst_bowed(f, d, sr, rng), rng, gain=0.9, gate=0.97, jitter_ms=6)
+
+    drums = Loop(N)
+    kick = drum_softkick(sr, rng)
+    rim = drum_rim(sr, rng)
+    for b in range(NB):
+        base = b * 16
+        for p_, v in ((0, 0.9), (3, 0.45), (4, 0.7), (8, 0.8), (11, 0.4), (12, 0.65)):
+            drums.add(kick, (base + p_) * S16 + humanize(rng, 3, sr), 0.55 * v)
+        if b % 2 == 1:
+            drums.add(rim, (base + 14) * S16, 0.35)
+
+    G = {"fiddle": 0.62, "drone": 0.55, "dombra": 0.42, "drums": 0.8}
+    buses = {"fiddle": G["fiddle"] * circ_echo(fiddle.buf, 6 * S16, 0.28, 3, sr, damp=3200), "drone": G["drone"] * drone.buf,
+             "dombra": G["dombra"] * dombra.buf, "drums": G["drums"] * drums.buf}
+    dry = sum(buses.values())
+    send = buses["fiddle"] + 0.6 * buses["drone"] + 0.3 * buses["dombra"]
+    buses["wet"] = 0.55 * cconv(send, make_ir(2.6, MSR, predelay=0.03, damp=3000, seed=97))
+    mix = circ_shape(dry + buses["wet"], sr, lo=32.0, hi=10000.0)
+    return mix - mix.mean(), {"bars": NB, "bpm": 60.0 * sr / (4 * S16), "buses": buses}
+
+
+def build_steppe_ambience():
+    """20 s steppe bed: a strong wind that rises and falls in gusts, dry grass hissing in it, now
+    and then a far eagle. Cross-faded into its start like the others."""
+    sr = MSR
+    N = 20 * sr
+    X = 2 * sr
+    M = N + X
+    rng = np.random.default_rng(seed_of("amb_steppe"))
+    t = tvec(M, sr)
+    gust = 0.45 + 0.55 * (0.5 + 0.5 * smooth_rand(M, 0.18, rng, sr)) ** 1.5
+    fc = 380 + 420 * gust + 120 * np.sin(TAU * t / 7.7)
+    wind = rmsn(lp(pink(M, rng, sr), fc, 0.9, sr)) * gust
+    howl = rmsn(bp(pink(M, rng, sr), 600 + 500 * gust, 3.0, sr)) * gust ** 2
+    grass = rmsn(hp(white(M, rng), 3200, 0.707, sr)) * gust ** 2 * (0.6 + 0.4 * np.maximum(0.0, smooth_rand(M, 1.5, rng, sr)))
+    cries = np.zeros(M)
+    for t0 in (4.2, 14.6):
+        cry = _eagle(rng)
+        place(cries, lp1(cry, 3500, sr) * 0.35, t0 * sr)
+    cries = cries + 0.5 * fftconv(cries, make_ir(2.2, sr, 0.05, 3000, seed=99), M)
+    y = 0.85 * norm(wind) + 0.35 * norm(howl) + 0.22 * norm(grass) + 0.25 * norm(cries)
+    w = np.linspace(0.0, 1.0, X, endpoint=False)
+    out = y[:N].copy()
+    out[:X] = y[:X] * np.sin(0.5 * np.pi * w) + y[N:N + X] * np.cos(0.5 * np.pi * w)
+    out = circ_shape(out, sr, lo=30.0)
+    return out - out.mean(), {"crossfade_s": X / sr}
+
+
 SFX_NAMES = [
     "sfx_swing", "sfx_hit", "sfx_hit_heavy", "sfx_crit", "sfx_fireball_cast", "sfx_fireball_explode",
     "sfx_ice_cast", "sfx_ice_shatter", "sfx_thunder", "sfx_heal", "sfx_shield", "sfx_bladestorm",
@@ -2174,6 +2328,7 @@ SFX_NAMES = [
     "sfx_buzz", "sfx_wisp", "sfx_wisp_burst", "sfx_bat", "sfx_web",
     "sfx_chest_appear", "sfx_chest_open",
     "sfx_crystal", "sfx_crystal_break", "sfx_reflect", "sfx_beam", "sfx_mimic",
+    "sfx_gust", "sfx_hyena", "sfx_eagle", "sfx_bison",
 ]
 # name, builder, allowed duration range (s), target peak dBFS
 MUSIC = [
@@ -2184,6 +2339,8 @@ MUSIC = [
     ("amb_swamp", build_swamp_ambience, (19.5, 20.5), -12.0),
     ("music_cave", build_cave, (40.0, 64.0), -3.0),
     ("amb_cave", build_cave_ambience, (19.5, 20.5), -12.0),
+    ("music_steppe", build_steppe, (40.0, 64.0), -3.0),
+    ("amb_steppe", build_steppe_ambience, (19.5, 20.5), -12.0),
 ]
 
 

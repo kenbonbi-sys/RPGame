@@ -35,6 +35,8 @@ namespace RPG
         public Tilemap water;
         [Tooltip("The cave's rock (solid): its own colour on the map.")]
         public Tilemap walls;
+        [Tooltip("Khe Vực, the steppe's ravine (solid for walkers, open for shots): its own colour on the map.")]
+        public Tilemap chasm;
         [Tooltip("Parent of trees and rocks drawn as dots on the minimap.")]
         public Transform obstacles;
 
@@ -45,7 +47,7 @@ namespace RPG
         public int terrainWidth;
 
         /// <summary>Flags of <see cref="terrain"/>.</summary>
-        public const byte Water = 1, Mud = 2, Wall = 4;
+        public const byte Water = 1, Mud = 2, Wall = 4, Chasm = 8;
         /// <summary>Share of their speed characters keep while wading (swimmers keep all of it).</summary>
         public const float WaterSpeed = 0.6f;
 
@@ -63,6 +65,9 @@ namespace RPG
 
         /// <summary>Whether a point is inside the solid rock of the cave (or the mountains around it).</summary>
         public bool IsWall(Vector2 p) => Has(p, Wall);
+
+        /// <summary>Whether a point is over Khe Vực, the steppe's ravine (nobody stands there; a Cột Gió flies over it).</summary>
+        public bool IsChasm(Vector2 p) => Has(p, Chasm);
 
         /// <summary>Share of their speed a wader keeps at a point.</summary>
         public float SpeedAt(Vector2 p) => IsWater(p) ? WaterSpeed : 1f;

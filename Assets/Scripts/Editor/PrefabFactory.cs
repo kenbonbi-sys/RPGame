@@ -21,6 +21,8 @@ namespace RPG.EditorTools
         public static GameObject Toad, Leech, MudMan, Mudling, ToadKing, Snake, WaterSnake, Dragonfly, Wisp;
         // Hang Pha Lê
         public static GameObject Bat, CaveSpider, Golem, Beetle, CrystalSlime, CaveEye, Mimic, CrystalGolem, SpiderQueen, Pillar;
+        // Thảo Nguyên Gió
+        public static GameObject Hyena, Eagle, Bison, GiaTang;
 
         /// <summary>Abilities on Q W E R A S D Space.</summary>
         static readonly string[] DefaultSlots = { "slash", "fireball", "ice", "lightning", "heal", "shield", "bladestorm", "dash" };
@@ -56,6 +58,10 @@ namespace RPG.EditorTools
             Mimic = BuildMimic();
             CrystalGolem = BuildCrystalGolem();
             SpiderQueen = BuildSpiderQueen();
+            Hyena = BuildHyena();
+            Eagle = BuildEagle();
+            Bison = BuildBison();
+            GiaTang = BuildGiaTang();
             Boulder = BuildBoulder();
             Loot = BuildLoot();
             var chest = BuildChest();
@@ -189,6 +195,7 @@ namespace RPG.EditorTools
             });
             YarnNode("Chief", "Chief");
             YarnNode("Girl", "Mai");
+            YarnNode("GiaTang", "GiaTang");
             // characters get the dissolve / outline sprite (T22)
             foreach (var file in new[] { "Slime", "Shroom", "BossBear", "Chief", "Girl" })
             {
@@ -248,6 +255,10 @@ namespace RPG.EditorTools
             Mimic = L($"{CharFolder}/Mimic");
             CrystalGolem = L($"{CharFolder}/BossCrystalGolem");
             SpiderQueen = L($"{CharFolder}/BossSpiderQueen");
+            Hyena = L($"{CharFolder}/Hyena");
+            Eagle = L($"{CharFolder}/Eagle");
+            Bison = L($"{CharFolder}/Bison");
+            GiaTang = L($"{CharFolder}/GiaTang");
             Pillar = L($"{GameplayFolder}/CrystalPillar");
             Boulder = L($"{GameplayFolder}/TangDaLon");
             Loot = L($"{GameplayFolder}/Loot");
@@ -901,6 +912,193 @@ namespace RPG.EditorTools
             return EditorUtil.SavePrefab(root, $"{CharFolder}/Golem.prefab");
         }
 
+        // ================================================================== Thảo Nguyên Gió
+        static GameObject BuildHyena()
+        {
+            var (root, body) = Creature("Hyena", "hyena_idle_0", 1f, 0.34f, 0.25f, 4.6f, false, 1.4f);
+            var ai = root.AddComponent<HyenaAI>();
+            EnemyCommon(root, ai, body, "hyena", 1.15f, 330f);
+            ai.style = Style(root, body);
+            ai.enemyId = "hyena";
+            ai.displayName = "Linh Cẩu Gió";
+            ai.level = 20;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 2.6f;
+            ai.aggroRange = 8f;
+            ai.leashRange = 15f;
+            ai.wanderRadius = 3f;
+            ai.biteDamage = 32f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("hyena_fang", 0.5f), Drop("coin", 0.9f, 5, 10), Drop("potion_red", 0.06f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Hyena.prefab");
+        }
+
+        static GameObject BuildEagle()
+        {
+            // root (the shadow, hit there) → Lift (its height, drawn on every screen) → Air (a little bob) → Body
+            var (root, body, air) = Flyer("Eagle", "eagle_idle_0", 0.6f, 0.5f, 0.35f, 5.2f, 0f, 0.12f, 3f, 1.3f, AssetFactory.SpriteLit);
+            var lift = EditorUtil.Child(root, "Lift", new Vector3(0, 2.4f, 0));
+            air.transform.SetParent(lift.transform, false);
+            air.transform.localPosition = Vector3.zero;
+            root.GetComponent<CharacterMotor>().acceleration = 30f;
+            var ai = root.AddComponent<EagleAI>();
+            EnemyCommon(root, ai, body, "eagle", 1.1f, 260f);
+            root.GetComponent<Health>().head.SetParent(lift.transform, false);
+            root.GetComponent<Health>().head.localPosition = new Vector3(0, 0.9f, 0);
+            ai.lift = lift.transform;
+            ai.style = Style(root, body);
+            ai.enemyId = "eagle";
+            ai.displayName = "Chim Ưng Đá";
+            ai.level = 21;
+            ai.contactDamage = 0f;
+            ai.attackCooldown = 3.6f;
+            ai.aggroRange = 9f;
+            ai.leashRange = 16f;
+            ai.wanderRadius = 4f;
+            ai.strikeDamage = 38f;
+            ai.windResponse = 0.15f;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("eagle_feather", 0.55f), Drop("coin", 0.9f, 5, 11), Drop("potion_blue", 0.08f),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Eagle.prefab");
+        }
+
+        static GameObject BuildBison()
+        {
+            // the cave beetle's ways (turns slowly, charges, rams rock) under a shaggy hide
+            var (root, body) = Creature("Bison", "bison_idle_0", 5f, 0.6f, 0.4f, 2.6f, false, 2.6f);
+            root.GetComponent<CharacterMotor>().knockbackResist = 0.35f;
+            var ai = root.AddComponent<StoneBeetleAI>();
+            EnemyCommon(root, ai, body, "bison", 2.1f, 620f);
+            root.GetComponent<StatusEffects>().stunResist = 0.2f;
+            ai.style = Style(root, body);
+            ai.enemyId = "bison";
+            ai.displayName = "Bò Rừng";
+            ai.level = 22;
+            ai.contactDamage = 8f;
+            ai.attackRange = 1.6f;
+            ai.attackCooldown = 2.4f;
+            ai.aggroRange = 6.5f;
+            ai.leashRange = 14f;
+            ai.wanderRadius = 3f;
+            ai.windResponse = 0.1f;
+            ai.frontGuard = 0.7f;
+            ai.backBonus = 1.15f;
+            ai.turnDelay = 0.8f;
+            ai.biteDamage = 30f;
+            ai.biteRadius = 1.8f;
+            ai.chargeMinRange = 3f;
+            ai.chargeMaxRange = 9f;
+            ai.chargeWindup = 0.9f;
+            ai.chargeSpeed = 10.5f;
+            ai.chargeSeconds = 0.8f;
+            ai.chargeDamage = 42f;
+            ai.chargeCooldown = 6f;
+            ai.wallStun = 2.5f;
+            ai.guardText = "Sừng chặn!";
+            ai.backText = "Trúng sườn!";
+            ai.biteName = "Hất Sừng";
+            ai.chargeName = "Lao Húc";
+            ai.chargeSound = "sfx_bison";
+            ai.deathSound = "sfx_bison";
+            ai.rockChips = false;
+            ai.loot = new List<LootEntry>
+            {
+                Drop("bison_hide", 0.45f), Drop("bison_horn", 0.25f), Drop("meat", 0.5f, 1, 2), Drop("coin", 0.9f, 6, 12),
+            };
+            return EditorUtil.SavePrefab(root, $"{CharFolder}/Bison.prefab");
+        }
+
+        /// <summary>Già Tăng, the old monk who leads the nomads' camp: a human monk drawn by HeroArt.</summary>
+        static GameObject BuildGiaTang()
+        {
+            var go = BuildNPC("GiaTang", "giatang", "Già Tăng", "chief_idle", "chief_talk", "npc_chief_idle_0", false);
+            var look = go.AddComponent<HeroNpcLook>();
+            look.look = new HeroLook { race = "human", cls = "monk", weapon = "quarterstaff", hair = HeroLook.Bald, hairColor = 7, beard = 2, cloth = 4, skin = 2, bareHead = true };
+            return EditorUtil.SavePrefab(go, $"{CharFolder}/GiaTang.prefab");
+        }
+
+        /// <summary>Thảo Nguyên Gió: swaying grass, acacias, sandstone, a cairn, yurts, the wind columns' rings, a bandit banner.</summary>
+        static void BuildSteppeProps()
+        {
+            for (int i = 0; i < 3; i++) Grass($"steppegrass_{i}", $"steppegrass_{i}");
+            Grass("steppegrass_s", "steppegrass_s");
+            for (int i = 0; i < 2; i++) Prop($"acacia_{i}", $"acacia_{i}", new Vector2(0.5f, 0.3f), new Vector2(0, 0.15f), 3.2f, true);
+            for (int i = 0; i < 2; i++) Prop($"sandrock_big_{i}", $"sandrock_big_{i}", new Vector2(1.5f, 0.6f), new Vector2(0, 0.3f), 1.8f);
+            Prop("sandrock_small", "sandrock_small", new Vector2(0.7f, 0.35f), new Vector2(0, 0.15f), 0.9f);
+            Prop("cairn", "cairn", new Vector2(1.3f, 0.5f), new Vector2(0, 0.25f), 1.6f);
+            Prop("yurt", "yurt", new Vector2(2.4f, 0.8f), new Vector2(0, 0.4f), 2.8f, true, (go, sr) =>
+            {
+                var l = PointLight(go, new Color(1f, 0.72f, 0.4f), 2.6f, 0f, new Vector3(0, 0.5f, 0));
+                var nl = l.gameObject.AddComponent<NightLight>();
+                nl.target = l;
+                nl.dayIntensity = 0f;
+                nl.nightIntensity = 1f;
+                nl.flicker = 0.08f;
+            });
+            Prop("hp_banner", "hp_banner", new Vector2(0.3f, 0.2f), new Vector2(0, 0.1f), 0.5f);
+            // Cột Gió: a ring of stones flat on the ground, a column of rising air in it (drawn over everyone)
+            var rgo = new GameObject("windcolumn");
+            Sprite(rgo, "Sprite", "windring", AssetFactory.SpriteLit, SortingLayerNames.Decal);
+            rgo.AddComponent<WindColumn>();
+            var l2 = PointLight(rgo, new Color(0.6f, 0.9f, 1f), 3f, 0.5f, new Vector3(0, 1f, 0));
+            l2.gameObject.AddComponent<NightLight>().target = l2;
+            var pgo = EditorUtil.Child(rgo, "Updraft", new Vector3(0, 0.1f, 0));
+            var ps = pgo.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.loop = true;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.8f, 1.3f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(2.5f, 4f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.1f);
+            main.startColor = new ParticleSystem.MinMaxGradient(new Color(0.85f, 0.95f, 1f, 0.5f), new Color(1f, 1f, 1f, 0.8f));
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            main.maxParticles = 80;
+            var em = ps.emission;
+            em.rateOverTime = 30f;
+            var sh = ps.shape;
+            sh.enabled = true;
+            sh.shapeType = ParticleSystemShapeType.Circle;
+            sh.radius = 0.9f;
+            sh.rotation = new Vector3(-90, 0, 0);
+            var vel = ps.velocityOverLifetime;
+            vel.enabled = true;
+            vel.space = ParticleSystemSimulationSpace.Local;
+            vel.orbitalX = new ParticleSystem.MinMaxCurve(0f, 0f);
+            vel.orbitalY = new ParticleSystem.MinMaxCurve(0f, 0f);
+            vel.orbitalZ = new ParticleSystem.MinMaxCurve(3f, 4f);
+            vel.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+            vel.y = new ParticleSystem.MinMaxCurve(0f, 0f);
+            vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+            var col = ps.colorOverLifetime;
+            col.enabled = true;
+            col.color = new ParticleSystem.MinMaxGradient(EditorUtil.Grad((0f, new Color(1, 1, 1, 0)), (0.25f, Color.white), (1f, new Color(1, 1, 1, 0))));
+            var r = pgo.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = AssetFactory.Database != null && AssetFactory.Database.windMaterial != null
+                ? AssetFactory.Database.windMaterial
+                : AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/VFX/px_square_add_2_6.mat");
+            r.renderMode = ParticleSystemRenderMode.Stretch;
+            r.velocityScale = 0.08f;
+            r.lengthScale = 1.5f;
+            r.sortingLayerName = SortingLayerNames.VFX;
+            ps.Play();
+            Props["windcolumn"] = EditorUtil.SavePrefab(rgo, $"{PropFolder}/windcolumn.prefab");
+        }
+
+        /// <summary>Tall grass: no collider, swaying with the wind (the RPG/Sprite Lit Wind material).</summary>
+        static GameObject Grass(string name, string sprite)
+        {
+            return Prop(name, sprite, null, default, 0f, false, (go, sr) =>
+            {
+                go.layer = 0;
+                var mat = AssetFactory.GrassWind;
+                if (mat != null) sr.sharedMaterial = mat;
+            });
+        }
+
         // ================================================================== the deeper cave
         static GameObject BuildBeetle()
         {
@@ -1464,6 +1662,7 @@ namespace RPG.EditorTools
                 r.sortingLayerName = SortingLayerNames.VFX;
             });
             BuildCaveProps();
+            BuildSteppeProps();
         }
 
         /// <summary>A prop lying flat on the ground (mine rails): under everyone's feet, nothing to bump into.</summary>

@@ -1,6 +1,6 @@
 # Kế hoạch online — Rừng Thì Thầm (hướng C: thế giới online nhiều người)
 
-> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Thế giới lớn dần thành một bản đồ liền mạch (mục 13): Đầm Lầy Sương Mù đã nối vào phía đông và Hang Pha Lê phía bắc đầm, một máy chủ mỗi kênh giữ cả bản đồ, không cần máy chủ riêng cho từng vùng; giao thức 10 (trang bị: `ActKind.Equip`, ăn uống từ túi: `ActKind.UseItem`, chế tạo ở Lò Rèn). Còn lại: đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
+> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Thế giới lớn dần thành một bản đồ liền mạch (mục 13): Đầm Lầy Sương Mù đã nối vào phía đông và Hang Pha Lê phía bắc đầm, một máy chủ mỗi kênh giữ cả bản đồ, không cần máy chủ riêng cho từng vùng; giao thức 10 (trang bị: `ActKind.Equip`, ăn uống từ túi: `ActKind.UseItem`, chế tạo ở Lò Rèn), rồi 11 (Thảo Nguyên Gió phía tây hang). Còn lại: đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
 
 ## 1. Mục tiêu
 
@@ -276,7 +276,19 @@ Giao thức lên **8** (25/09): lớp nhân vật, chủng tộc và ngoại hì
 
 Giao thức lên **9** (25/09): phần sâu của Hang Pha Lê (bảng mục 10 của `KeHoach-RungThiTham.md`). Bản đồ có thêm quái, hai boss và 6 Cột Pha Lê. Cột là loại vật thể mới được chia sẻ, `NetEntityKind.Pillar`, đánh số theo thứ tự trong scene như quái. Bản sao ở máy người chơi theo máu của cột: vỡ thì thành gốc cụt, mọc lại thì nguyên. Tia sáng là một loại cue mới, `NetCues.Kind.Beam` (điểm đầu, điểm cuối, bề rộng, thời gian, màu); tia dội thành hai cue. Mảnh pha lê bay dùng khóa đạn `"shard"`. Mimic lấy và trả vàng ngay trên túi đồ của nhân vật ở máy chủ (như Lò Rèn), nên người chơi thấy qua phần `inventory`. Đã chạy: netsmoke (3 vòng, 0 lỗi), thử tải 10 bot.
 
+Giao thức lên **11** (26/09): Thảo Nguyên Gió (T61, `Docs/ThaoNguyen.md`). Bản đồ thêm Linh Cẩu Gió, Chim Ưng Đá, Bò Rừng và 3 đá truyền tống; không có tin nhắn mới.
+- **Gió** tính từ giờ trong ngày mà máy chủ vẫn gửi kèm mỗi gói thế giới, nên máy chủ và mọi người chơi thấy cùng một cơn gió. Máy người chơi đẩy nhân vật của mình, máy chủ đẩy quái, và mọi máy bẻ đường đạn giống nhau.
+- **Chim ưng** bay cao bằng phần `lift` sẵn có của `NetEntity` (như thân boss), nên mọi màn hình thấy nó sà xuống.
+- **Cột Gió** là việc của máy người chơi: nó tự bay nhân vật qua Khe Vực. Máy chủ cho phép đi nhanh gần một cột (`MoveCheck.Dashed`). Nhân vật người khác trên máy mình là bản sao kinematic, nên lướt qua vực mà không vướng va chạm. Màn hình tự vẽ cung bay, luồng gió và lúc đáp theo quãng bản sao đã bay qua (`WindColumn.WatchOthers`); không cần gửi thêm gì. Netsmoke kiểm tra: SmokeA bay qua, SmokeB đứng bờ bên kia phải thấy A lên cao rồi đáp xuống.
+
 Sửa kèm: chơi một mình thì intro, thanh máu, nhạc của boss và dòng "Kỹ năng: …" trên đầu quái không hiện (chúng tra số hiệu mạng, mà offline không có); nay máy có màn hình tự hiện, máy chủ vẫn gửi cho người chơi như cũ.
+
+### Đã kiểm tra (26/09, giao thức 11)
+
+- 184 test EditMode (2 test phông chữ bỏ qua như trước), trong đó `SteppeTests` có thêm bài: nhân vật người khác (bản sao kinematic do mạng dời) lướt qua Khe Vực thì màn hình này tự vẽ nó bay lên rồi đáp xuống; đứng yên trong vòng đá thì không bay.
+- `Tools/Server/netsmoke.ps1` 3 vòng, 0 lỗi: SmokeA bay qua Khe Vực, SmokeB ở bờ bên kia thấy A cao 1,8 ô trên bóng rồi đáp xuống.
+- `Tools/Server/loadtest.ps1` (10 bot, 120 giây): 10/10 người, máy chủ thấp nhất 36 FPS, trung bình 47, CPU nhiều nhất 22% một nhân, 258 MB; 0 lỗi, không ai bị kéo về, tắt đúng cách.
+- `RungThiTham.exe -autoshot -autoshotOnly steppe`: 18 ảnh (cửa hầm, trại, gió, Cột Gió trước/trong/sau, ba loài quái, ban đêm, bản đồ); 0 lỗi.
 
 ### Đã kiểm tra (25/09, giao thức 6)
 
