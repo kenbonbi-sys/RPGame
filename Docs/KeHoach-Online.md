@@ -303,7 +303,7 @@ Giao thức lên **13** (26/09): Sách Chiêu (T63, `Docs/NhanVat.md` mục Sác
 - `Tools/Server/netsmoke.ps1` 3 vòng, 0 lỗi. Thêm một bước: máy chủ đưa SmokeA (Du Hiệp) một Bí Kíp Băng Tiễn, A đọc sách và đặt Băng Tiễn lên W qua máy chủ, SmokeB thấy ô W của A đổi thành Băng Tiễn; vòng hai A vào lại vẫn còn chiêu ở W.
 - `Tools/Server/loadtest.ps1` (10 bot, 120 giây): 10/10 người, máy chủ thấp nhất 57.8 FPS, trung bình 58.3, CPU nhiều nhất 19% một nhân, 260 MB; 0 lỗi, không ai bị kéo về, tắt đúng cách.
 - Tour `-autoshotOnly spells` (22 ảnh): 0 lỗi.
-- SERVER_LINE
+- Máy chủ thật trên máy nhà đã lên giao thức 13 (26/09 lúc 16:20, không ai đang chơi, 5 tài khoản giữ nguyên). `RungThiTham.zip` trên Desktop đã đóng gói lại cùng bản build; game giao thức 12 sẽ được báo tải bản mới.
 
 ### Đã kiểm tra (26/09, giao thức 12)
 
