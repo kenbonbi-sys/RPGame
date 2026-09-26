@@ -28,6 +28,7 @@ import gen_class_icons
 import gen_gear
 import gen_steppe
 import gen_steppe_creatures
+import gen_spells
 from pixelkit import Canvas, pack_shelf
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -237,8 +238,9 @@ def simple_grid(items, fw, fh, path, ppu=16, filter_="point"):
 
 
 def build_icons():
-    simple_grid(gen_icons.build_items() + gen_swamp.icons() + gen_cave.icons() + gen_gear.icons() + gen_steppe.icons(), 16, 16, os.path.join(ART, "Icons", "items.png"), ppu=16)
-    simple_grid(gen_icons.build_skills() + gen_class_icons.build(), 24, 24, os.path.join(ART, "Icons", "skills.png"), ppu=16)
+    simple_grid(gen_icons.build_items() + gen_swamp.icons() + gen_cave.icons() + gen_gear.icons() + gen_steppe.icons() + gen_spells.tomes(),
+                16, 16, os.path.join(ART, "Icons", "items.png"), ppu=16)
+    simple_grid(gen_icons.build_skills() + gen_class_icons.build() + gen_spells.build(), 24, 24, os.path.join(ART, "Icons", "skills.png"), ppu=16)
     simple_grid(gen_icons.build_status(), 10, 10, os.path.join(ART, "Icons", "status.png"), ppu=16)
 
 

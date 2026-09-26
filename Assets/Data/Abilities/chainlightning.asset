@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: chainlightning
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: chainlightning
+  displayName: "X\xEDch L\xF4i"
+  description: "Tia s\xE9t nh\u1EA3y qua 4 k\u1EBB \u0111\u1ECBch, l\u1EA7n nh\u1EA3y sau y\u1EBFu h\u01A1n 15%; m\u1ED7i k\u1EBB tr\xFAng th\xEAm 1 T\xEDch \u0110i\u1EC7n."
+  icon: {fileID: -1824322459, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 2056
+  cooldown: 4
+  energyCost: 12
+  targeting: 0
+  maxRange: 9
+  lockTime: 0.3
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_lightning_charge
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735340
+  - rid: 8556425367783735341
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735340
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        vfx: cast_lightning
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425367783735341
+      type: {class: ChainEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        range: 9
+        jumpRange: 4.5
+        jumps: 4
+        falloff: 0.15
+        jumpDelay: 0.07
+        hit:
+          power: 1.15
+          type: 3
+          critChance: 0.12
+          knockback: 1
+          poise: 4
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 1
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        boltVfx: chain_bolt
+        hitVfx: hit_lightning
+        sfx: sfx_thunder

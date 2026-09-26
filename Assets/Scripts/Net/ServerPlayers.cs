@@ -472,6 +472,9 @@ namespace RPG
                 case ActKind.ChooseLook:
                     if (hero.stats != null) CharacterChoice.Apply(hero, HeroLook.FromJson(r.text));
                     return;
+                case ActKind.SetSkill:
+                    if (r.text == null || r.text.Length < 64) Spellbook.Set(hero, r.value, r.text);
+                    return;
                 case ActKind.TalkStart:
                 {
                     var npc = NPC.All.Find(n => n != null && n.npcId == r.text);

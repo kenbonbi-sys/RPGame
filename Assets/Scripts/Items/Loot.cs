@@ -56,6 +56,7 @@ namespace RPG
             {
                 foreach (var e in table)
                 {
+                    if (!Spellbook.Wanted(e.itemId, owner)) continue;
                     if (UnityEngine.Random.value > e.chance) continue;
                     int n = UnityEngine.Random.Range(e.min, e.max + 1);
                     if (e.itemId == "coin")
@@ -73,6 +74,7 @@ namespace RPG
             if (table == null || db == null) return result;
             foreach (var e in table)
             {
+                if (!Spellbook.Wanted(e.itemId, owner)) continue;
                 if (UnityEngine.Random.value > e.chance) continue;
                 var item = db.Item(e.itemId);
                 int n = UnityEngine.Random.Range(e.min, e.max + 1);

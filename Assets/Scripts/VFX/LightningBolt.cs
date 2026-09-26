@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace RPG
 {
-    /// <summary>Jagged, flickering lightning drawn with LineRenderers (core + glow).</summary>
+    /// <summary>Jagged, flickering lightning drawn with LineRenderers (core + glow): from the sky down to it, or between two points (<see cref="Between"/>).</summary>
     public class LightningBolt : MonoBehaviour
     {
         public LineRenderer core;
@@ -23,6 +23,14 @@ namespace RPG
             nextRefresh = 0;
             end = transform.position;
             start = end + new Vector3(Random.Range(-1.2f, 1.2f), height, 0);
+            Build();
+        }
+
+        /// <summary>Draws it from <paramref name="a"/> to <paramref name="b"/> instead of from the sky (a chain of lightning leaping between foes).</summary>
+        public void Between(Vector3 a, Vector3 b)
+        {
+            start = a;
+            end = b;
             Build();
         }
 

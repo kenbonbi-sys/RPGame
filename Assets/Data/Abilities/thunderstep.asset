@@ -1,0 +1,130 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: thunderstep
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: thunderstep
+  displayName: "Thi\u1EC3m B\u1ED9"
+  description: "H\xF3a th\xE0nh tia s\xE9t, hi\u1EC7n ra c\xE1ch \u0111\xF3 6 \xF4 v\u1EC1 ph\xEDa chu\u1ED9t. Ch\u1ED7 c\u0169 \u0111\u1EC3 l\u1EA1i m\u1ED9t qu\u1EA3 c\u1EA7u \u0111i\u1EC7n n\u1ED5 sau 0.5 gi\xE2y."
+  icon: {fileID: -1234613622, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 32776
+  cooldown: 8
+  energyCost: 10
+  targeting: 0
+  maxRange: 12
+  lockTime: 0.05
+  commitTime: 0.05
+  animBase: 
+  moveWhileCasting: 1
+  castSfx: sfx_thunder
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735317
+  - rid: 8556425367783735318
+  - rid: 8556425367783735319
+  - rid: 8556425367783735320
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735317
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 3
+          up: 0
+          forward: 0
+        vfx: thunder_step
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 1
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425367783735318
+      type: {class: DashEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        distance: 6
+        time: 0.05
+        invulnerableTime: 0.15
+        preferMoveDirection: 0
+        afterImages: 1
+        startVfx: hit_lightning
+        endVfx: hit_lightning
+        endVfxScale: 1.5
+        perfectDodge: 0
+        away: 0
+    - rid: 8556425367783735319
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.5
+        at:
+          from: 3
+          up: 0
+          forward: 0
+        vfx: lightning_burst
+        vfxScale: 0.8
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_thunder
+        sfxVolume: 0.6
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 1
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425367783735320
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.5
+        shape: 0
+        at:
+          from: 3
+          up: 0
+          forward: 0
+        radius: 2
+        angle: 120
+        hit:
+          power: 1.2
+          type: 3
+          critChance: 0.1
+          knockback: 3
+          poise: 6
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 1
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit: []

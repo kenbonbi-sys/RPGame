@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: stormfield
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: stormfield
+  displayName: "\u0110i\u1EC7n Tr\u01B0\u1EDDng"
+  description: "V\xF2ng \u0111i\u1EC7n 3 \xF4 quanh ch\u1ED7 ng\u01B0\u01A1i \u0111\u1EE9ng trong 5 gi\xE2y: gi\u1EADt v\xE0 l\xE0m ch\u1EADm k\u1EBB \u0111\u1ECBch; ng\u01B0\u01A1i ch\u1EA1y nhanh h\u01A1n 15%."
+  icon: {fileID: 693140979, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 4104
+  cooldown: 16
+  energyCost: 20
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.35
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_lightning_charge
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735311
+  - rid: 8556425367783735312
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735311
+      type: {class: PulseEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        duration: 5
+        interval: 0.5
+        at:
+          from: 3
+          up: 0
+          forward: 0
+        attachedVfx: storm_field
+        loopSfx: sfx_beam
+        loopSfxVolume: 0.3
+        loopSfxInterval: 1.2
+        each:
+        - rid: 8556425367783735313
+    - rid: 8556425367783735312
+      type: {class: BuffEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        buff:
+          id: stormfield
+          displayName: "\u0110i\u1EC7n Tr\u01B0\u1EDDng"
+          icon: {fileID: 693140979, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+          duration: 5
+          speedMultiplier: 1.15
+          damageTakenMultiplier: 1
+          stunImmune: 0
+          clearStun: 0
+          attachedVfx: 
+          endVfx: 
+          damageDealtMultiplier: 1
+          attackSpeedBonus: 0
+          imbuePower: 0
+          imbueCharge: 0
+          critBonus: 0
+          chillAttackers: 0
+        allies: 0
+    - rid: 8556425367783735313
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        shape: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        radius: 3
+        angle: 120
+        hit:
+          power: 0.3
+          type: 3
+          critChance: 0.05
+          knockback: 0
+          poise: 2
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0.2
+            slowDuration: 0.8
+            curse: 0
+            judgment: 0
+        onAnyHit: []

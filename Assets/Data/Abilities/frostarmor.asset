@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: frostarmor
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: frostarmor
+  displayName: "Gi\xE1p S\u01B0\u01A1ng"
+  description: "L\u1EDBp gi\xE1p s\u01B0\u01A1ng 6 gi\xE2y: nh\u1EADn \xEDt h\u01A1n 40% s\xE1t th\u01B0\u01A1ng, k\u1EBB \u0111\xE1nh ng\u01B0\u01A1i t\u1EEB g\u1EA7n b\u1ECB 1 t\u1EA7ng L\u1EA1nh."
+  icon: {fileID: 1283949638, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 65540
+  cooldown: 18
+  energyCost: 16
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.25
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_ice_cast
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735321
+  - rid: 8556425367783735322
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735321
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 0
+          up: 0
+          forward: 0
+        vfx: cast_ice
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425367783735322
+      type: {class: BuffEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        buff:
+          id: frostarmor
+          displayName: "Gi\xE1p S\u01B0\u01A1ng"
+          icon: {fileID: 1283949638, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+          duration: 6
+          speedMultiplier: 1
+          damageTakenMultiplier: 0.6
+          stunImmune: 0
+          clearStun: 0
+          attachedVfx: frost_aura
+          endVfx: hit_ice
+          damageDealtMultiplier: 1
+          attackSpeedBonus: 0
+          imbuePower: 0
+          imbueCharge: 0
+          critBonus: 0
+          chillAttackers: 1
+        allies: 0

@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: curse
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: curse
+  displayName: "L\u1EDDi Nguy\u1EC1n"
+  description: "\u1EA4n nguy\u1EC1n t\u1EA1i v\u1ECB tr\xED chu\u1ED9t: m\u1ECDi k\u1EBB \u0111\u1ECBch trong 3 \xF4 b\u1ECB Nguy\u1EC1n 8 gi\xE2y (g\xE2y \xEDt, ch\u1ECBu nhi\u1EC1u s\xE1t th\u01B0\u01A1ng h\u01A1n)."
+  icon: {fileID: 1644011058, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 4128
+  cooldown: 14
+  energyCost: 14
+  targeting: 1
+  maxRange: 9
+  lockTime: 0.35
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_wisp
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735348
+  - rid: 8556425367783735349
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735348
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: curse_sigil
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_wisp_burst
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 1
+        sfxMinInterval: 0.03
+        shake: 0.1
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425367783735349
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.1
+        shape: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        radius: 3
+        angle: 120
+        hit:
+          power: 0.6
+          type: 6
+          critChance: 0.05
+          knockback: 0
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 8
+            judgment: 0
+        onAnyHit: []

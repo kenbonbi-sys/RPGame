@@ -26,6 +26,9 @@ namespace RPG
             if (!first && (now.cls != look.cls || now.race != look.race)) return false;
             var chosen = look.Clone();
             chosen.upgrade = now.upgrade;
+            // the spells come from Bí Kíp and the bar from the Sách Chiêu, never from the creator
+            chosen.spells = now.spells != null ? (string[])now.spells.Clone() : new string[0];
+            chosen.bar = now.bar != null ? (string[])now.bar.Clone() : new string[0];
             if (!cls.Allows(chosen.weapon)) chosen.weapon = cls.DefaultWeapon;
             chosen.skin = Mathf.Clamp(chosen.skin, 0, Mathf.Max(0, (race.skins != null ? race.skins.Length : 1) - 1));
             chosen.hair = Mathf.Clamp(chosen.hair, 0, HeroLook.HairStyles.Length - 1);

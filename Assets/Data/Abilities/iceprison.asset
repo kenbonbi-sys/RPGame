@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: iceprison
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: iceprison
+  displayName: "Ng\u1EE5c B\u0103ng"
+  description: "Sau 0.6 gi\xE2y, c\u1ED9t b\u0103ng tr\u1ED3i l\xEAn quanh v\u1ECB tr\xED chu\u1ED9t (2.5 \xF4): s\xE1t th\u01B0\u01A1ng l\u1EDBn v\xE0 \u0110\xF3ng B\u0103ng m\u1ECDi k\u1EBB b\xEAn trong."
+  icon: {fileID: 1032807710, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 4100
+  cooldown: 15
+  energyCost: 22
+  targeting: 1
+  maxRange: 9
+  lockTime: 0.4
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_ice_cast
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735323
+  - rid: 8556425367783735324
+  - rid: 8556425367783735325
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735323
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: cast_ice
+        vfxScale: 2.2
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: 
+        sfxVolume: 0.8
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 1
+        sfxMinInterval: 0.03
+        shake: 0
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425367783735324
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.6
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        vfx: ice_prison
+        vfxScale: 1
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_ice_shatter
+        sfxVolume: 1
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 1
+        sfxMinInterval: 0.03
+        shake: 0.3
+        flashColor: {r: 1, g: 1, b: 1, a: 1}
+        flashStrength: 0
+        flashDuration: 0.2
+        impact: 0
+        impactDuration: 0.3
+    - rid: 8556425367783735325
+      type: {class: DamageEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.6
+        shape: 0
+        at:
+          from: 1
+          up: 0
+          forward: 0
+        radius: 2.5
+        angle: 120
+        hit:
+          power: 1.8
+          type: 2
+          critChance: 0.1
+          knockback: 2
+          poise: 20
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 4
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        onAnyHit: []

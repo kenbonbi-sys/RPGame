@@ -29,10 +29,33 @@ namespace RPG
         public int metal;
         /// <summary>Leaves off the class's hood or hat, showing the hair.</summary>
         public bool bareHead;
+        /// <summary>The spells of the schools (Băng, Lôi, Ám) learned from Bí Kíp: ability ids (<see cref="Spellbook"/>).</summary>
+        public string[] spells = new string[0];
+        /// <summary>
+        /// The skill bar's W E R A S D (slots 1–6): a learned spell put there, or "" for the class's
+        /// own (<see cref="Spellbook"/>). Every screen sets the bar from it, so another player's
+        /// cast shows the right skill.
+        /// </summary>
+        public string[] bar = new string[0];
 
         public bool HasClass => !string.IsNullOrEmpty(cls);
 
-        public HeroLook Clone() => (HeroLook)MemberwiseClone();
+        public HeroLook Clone()
+        {
+            var c = (HeroLook)MemberwiseClone();
+            c.spells = spells != null ? (string[])spells.Clone() : new string[0];
+            c.bar = bar != null ? (string[])bar.Clone() : new string[0];
+            return c;
+        }
+
+        /// <summary>What the look draws (the spells and the bar left out): the key of the drawn sheets.</summary>
+        public string ArtKey()
+        {
+            var c = (HeroLook)MemberwiseClone();
+            c.spells = null;
+            c.bar = null;
+            return JsonUtility.ToJson(c);
+        }
 
         public string ToJson() => JsonUtility.ToJson(this);
 

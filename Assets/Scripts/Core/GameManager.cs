@@ -136,6 +136,8 @@ namespace RPG
             if (InputReader.Cancel)
             {
                 if (map != null && map.IsOpen) map.Close();
+                else if (SpellbookUI.I != null && SpellbookUI.I.IsOpen) SpellbookUI.I.Close();
+                else if (ForgeUI.I != null && ForgeUI.I.IsOpen) ForgeUI.I.Close();
                 else if (hud.heroPanel != null && hud.heroPanel.IsOpen) hud.heroPanel.Close();
                 else if (hud.journal != null && hud.journal.IsOpen) hud.journal.Close();
                 else if (hud.saves != null && hud.saves.IsOpen) hud.saves.Close();
@@ -146,6 +148,7 @@ namespace RPG
             if (InputReader.ToggleHelp && hud.help != null) hud.help.Toggle();
             if ((InputReader.ToggleBag || InputReader.ToggleCharacter) && hud.heroPanel != null) hud.heroPanel.Toggle();
             if (InputReader.ToggleJournal && hud.journal != null) hud.journal.Toggle();
+            if (InputReader.ToggleSpellbook && SpellbookUI.I != null) SpellbookUI.I.Toggle();
             var me = Players.Local;
             if (InputReader.ToggleQuest && me != null && me.quests != null) me.quests.CycleFocus();
             if (map != null && me != null)

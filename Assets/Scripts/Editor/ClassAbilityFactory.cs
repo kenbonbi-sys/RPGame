@@ -21,6 +21,7 @@ namespace RPG.EditorTools
         static readonly Anchor Hand = new Anchor(Anchor.From.Caster, 0.55f, 0.5f);
         static readonly Anchor Point = new Anchor(Anchor.From.Point);
         static readonly Anchor Aim = new Anchor(Anchor.From.Aim);
+        static readonly Anchor Origin = new Anchor(Anchor.From.Origin);
 
         /// <summary>Skills drawn with an older icon (the bear's stomp and roar).</summary>
         static string IconOf(string id) => id == "slam" ? "sk_stomp" : id == "warcry" ? "sk_roar" : "sk_" + id;
@@ -160,6 +161,7 @@ namespace RPG.EditorTools
             var Po = DamageType.Poison;
             var Ho = DamageType.Holy;
             var Dk = DamageType.Dark;
+            var I = DamageType.Ice;
             var melee = AbilityTags.Physical | AbilityTags.Melee;
             var list = new List<AbilityDef>
             {
@@ -770,6 +772,197 @@ namespace RPG.EditorTools
                             duration = 3f, interval = 0.3f, at = Point, attachedVfx = "dark_aura",
                             each = { Circle(Point, 3f, Hit(0.5f, Dk, 0.05f, -4f, 2f)) }
                         });
+                    }),
+
+                // ============================================== Sách Chiêu (T63): learned from Bí Kíp, see Spellbook
+                // ---------------------------------------------- Băng
+                Ability("frostarrows", "Băng Tiễn", AbilityTags.Ice | AbilityTags.Projectile, 4f, 10f, "cast", 0.35f,
+                    "Ba mũi tên băng liên tiếp về phía chuột, mỗi mũi gây 1 tầng Lạnh.", a =>
+                    {
+                        a.maxRange = 11f;
+                        a.castSfx = "sfx_ice_cast";
+                        for (int i = 0; i < 3; i++)
+                            a.effects.Add(Bolt("FrostArrow", 15f, Hit(0.6f, I, 0.1f, 1.5f, 3f, Status(chill: 1)), "hit_ice", "sfx_ice_shatter", 0f, false, 0f, i * 0.12f));
+                    }),
+                Ability("frostarmor", "Giáp Sương", AbilityTags.Ice | AbilityTags.Support, 18f, 16f, "cast", 0.25f,
+                    "Lớp giáp sương 6 giây: nhận ít hơn 40% sát thương, kẻ đánh ngươi từ gần bị 1 tầng Lạnh.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Self;
+                        a.castSfx = "sfx_ice_cast";
+                        a.effects.Add(Cue(Caster, "cast_ice"));
+                        a.effects.Add(Buff("frostarmor", "Giáp Sương", 6f, b =>
+                        {
+                            b.damageTakenMultiplier = 0.6f;
+                            b.chillAttackers = 1;
+                            b.attachedVfx = "frost_aura";
+                            b.endVfx = "hit_ice";
+                        }));
+                    }),
+                Ability("iceprison", "Ngục Băng", AbilityTags.Ice | AbilityTags.Area, 15f, 22f, "cast", 0.4f,
+                    "Sau 0.6 giây, cột băng trồi lên quanh vị trí chuột (2.5 ô): sát thương lớn và Đóng Băng mọi kẻ bên trong.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Point;
+                        a.maxRange = 9f;
+                        a.castSfx = "sfx_ice_cast";
+                        a.effects.Add(Cue(Point, "cast_ice", null, 0.8f, 0f, 2.2f));
+                        a.effects.Add(new CueEffect { delay = 0.6f, at = Point, vfx = "ice_prison", sfx = "sfx_ice_shatter", sfxVolume = 1f, sfxAtPoint = true, shake = 0.3f });
+                        a.effects.Add(Circle(Point, 2.5f, Hit(1.8f, I, 0.1f, 2f, 20f, Status(chill: 4)), 0.6f));
+                    }),
+                Ability("blizzard", "Bão Tuyết", AbilityTags.Ice | AbilityTags.Area, 20f, 26f, "cast", 0.45f,
+                    "Bão tuyết 5 giây tại vị trí chuột (4 ô): sát thương liên tục, mỗi nhịp thêm 1 tầng Lạnh.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Point;
+                        a.maxRange = 10f;
+                        a.castSfx = "sfx_ice_cast";
+                        a.effects.Add(new PulseEffect
+                        {
+                            duration = 5f, interval = 0.5f, at = Point, attachedVfx = "blizzard", loopSfx = "sfx_gust", loopSfxVolume = 0.35f, loopSfxInterval = 1.1f,
+                            each = { Circle(Point, 4f, Hit(0.3f, I, 0.05f, 0f, 1f, Status(chill: 1))) }
+                        });
+                    }),
+                Ability("iceage", "Kỷ Băng Hà", AbilityTags.Ice | AbilityTags.Area | AbilityTags.Ultimate, 26f, 34f, "cast", 0.6f,
+                    "Mặt đất 7 ô quanh ngươi đóng băng: sát thương rất lớn và Đóng Băng mọi kẻ địch (boss ngắn hơn).", a =>
+                    {
+                        a.targeting = AbilityTargeting.Self;
+                        a.castSfx = "sfx_ice_cast";
+                        a.effects.Add(Cue(Caster, "cast_ice", null, 0.8f, 0f, 1.6f));
+                        a.effects.Add(new CueEffect
+                        {
+                            delay = 0.25f, at = Caster, vfx = "ice_age", sfx = "sfx_ice_shatter", sfxVolume = 1f, shake = 0.55f,
+                            flashColor = new Color(0.7f, 0.9f, 1f), flashStrength = 0.25f, flashDuration = 0.3f, impact = 0.7f
+                        });
+                        a.effects.Add(Circle(Caster, 7f, Hit(3.2f, I, 0.15f, 5f, 40f, Status(chill: 4)), 0.25f));
+                    }),
+                // ---------------------------------------------- Lôi
+                Ability("chainlightning", "Xích Lôi", AbilityTags.Lightning | AbilityTags.Projectile, 4f, 12f, "cast", 0.3f,
+                    "Tia sét nhảy qua 4 kẻ địch, lần nhảy sau yếu hơn 15%; mỗi kẻ trúng thêm 1 Tích Điện.", a =>
+                    {
+                        a.maxRange = 9f;
+                        a.castSfx = "sfx_lightning_charge";
+                        a.effects.Add(Cue(Hand, "cast_lightning"));
+                        a.effects.Add(new ChainEffect { range = 9f, jumpRange = 4.5f, jumps = 4, falloff = 0.15f, hit = Hit(1.15f, L, 0.12f, 1f, 4f, Status(charge: 1)) });
+                    }),
+                Ability("thunderstep", "Thiểm Bộ", AbilityTags.Lightning | AbilityTags.Movement, 8f, 10f, "", 0.05f,
+                    "Hóa thành tia sét, hiện ra cách đó 6 ô về phía chuột. Chỗ cũ để lại một quả cầu điện nổ sau 0.5 giây.", a =>
+                    {
+                        a.castSfx = "sfx_thunder";
+                        a.effects.Add(Cue(Origin, "thunder_step"));
+                        Dash(a, 6f, 0.05f, false, "hit_lightning", "hit_lightning");
+                        a.effects.Add(new CueEffect { delay = 0.5f, at = Origin, vfx = "lightning_burst", vfxScale = 0.8f, sfx = "sfx_thunder", sfxVolume = 0.6f, sfxAtPoint = true });
+                        a.effects.Add(Circle(Origin, 2f, Hit(1.2f, L, 0.1f, 3f, 6f, Status(charge: 1)), 0.5f));
+                    }),
+                Ability("lightningbrand", "Lôi Ấn", AbilityTags.Lightning | AbilityTags.Support, 18f, 14f, "cast", 0.25f,
+                    "Vũ khí nhiễm điện 8 giây: đòn Q mạnh hơn 35% và thêm 1 Tích Điện (đủ 3 thì phóng điện sang kẻ gần).", a =>
+                    {
+                        a.targeting = AbilityTargeting.Self;
+                        a.castSfx = "sfx_lightning_charge";
+                        a.effects.Add(Cue(Caster, "cast_lightning"));
+                        a.effects.Add(Buff("lightningbrand", "Lôi Ấn", 8f, b =>
+                        {
+                            b.imbuePower = 0.35f;
+                            b.imbueCharge = 1;
+                            b.attachedVfx = "lightning_imbue";
+                        }));
+                    }),
+                Ability("balllightning", "Lôi Cầu", AbilityTags.Lightning | AbilityTags.Projectile, 10f, 18f, "cast", 0.35f,
+                    "Quả cầu điện bay chậm về phía chuột, giật mọi kẻ trong 2 ô, rồi nổ ở cuối đường bay hoặc khi chạm đá.", a =>
+                    {
+                        a.maxRange = 9f;
+                        a.castSfx = "sfx_lightning_charge";
+                        a.effects.Add(Cue(Hand, "cast_lightning"));
+                        a.effects.Add(new OrbEffect
+                        {
+                            speed = 3.2f, duration = 2.6f, radius = 2f, interval = 0.3f, tick = Hit(0.4f, L, 0f, 0.5f, 1f),
+                            burstRadius = 2.6f, burst = Hit(2.5f, L, 0.15f, 5f, 15f, Status(charge: 1))
+                        });
+                    }),
+                Ability("stormfield", "Điện Trường", AbilityTags.Lightning | AbilityTags.Area, 16f, 20f, "cast", 0.35f,
+                    "Vòng điện 3 ô quanh chỗ ngươi đứng trong 5 giây: giật và làm chậm kẻ địch; ngươi chạy nhanh hơn 15%.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Self;
+                        a.castSfx = "sfx_lightning_charge";
+                        a.effects.Add(new PulseEffect
+                        {
+                            duration = 5f, interval = 0.5f, at = Origin, attachedVfx = "storm_field", loopSfx = "sfx_beam", loopSfxVolume = 0.3f, loopSfxInterval = 1.2f,
+                            each = { Circle(Point, 3f, Hit(0.3f, L, 0.05f, 0f, 2f, Status(slow: 0.2f, slowFor: 0.8f))) }
+                        });
+                        a.effects.Add(Buff("stormfield", "Điện Trường", 5f, b => b.speedMultiplier = 1.15f));
+                    }),
+                Ability("thunderstorm", "Cửu Thiên Lôi", AbilityTags.Lightning | AbilityTags.Area | AbilityTags.Ultimate, 24f, 32f, "cast", 0.55f,
+                    "Mây giông phủ vị trí chuột (4 ô): chín tia sét trời liên tiếp, mỗi tia gây choáng ngắn và 1 Tích Điện, ưu tiên đánh vào kẻ địch.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Point;
+                        a.maxRange = 10f;
+                        a.castSfx = "sfx_lightning_charge";
+                        a.effects.Add(Cue(Caster, "cast_lightning", null, 0.8f, 0f, 1.4f));
+                        a.effects.Add(new BurstEffect
+                        {
+                            center = Aim, radius = 4f, count = 9, chargeTime = 0.5f, interval = 0.16f, intervalJitter = 0.25f,
+                            preferTargets = 0.85f, firstAtCenter = true, areaVfx = "storm_circle", areaVfxScale = 4f / 2.5f,
+                            each =
+                            {
+                                new CueEffect
+                                {
+                                    at = Point, vfx = "lightning_strike", sfx = "sfx_thunder", sfxVolume = 0.75f, sfxPitchVariance = 0.12f,
+                                    sfxAtPoint = true, sfxMinInterval = 0.05f, shake = 0.25f,
+                                    flashColor = new Color(0.85f, 0.85f, 1f), flashStrength = 0.12f, flashDuration = 0.12f
+                                },
+                                Circle(Point, 1.2f, Hit(1.9f, L, 0.15f, 2f, 10f, Status(stun: 0.8f, charge: 1)))
+                            }
+                        });
+                    }),
+                // ---------------------------------------------- Ám
+                Ability("shadowknives", "Ám Tiễn", AbilityTags.Dark | AbilityTags.Projectile, 3f, 8f, "attack", 0.25f,
+                    "Phi ba dao bóng tối hình quạt về phía chuột, dễ chí mạng.", a =>
+                    {
+                        a.maxRange = 10f;
+                        a.castSfx = "sfx_swing";
+                        foreach (float angle in new[] { -12f, 0f, 12f })
+                            a.effects.Add(Bolt("ShadowKnife", 16f, Hit(0.75f, Dk, 0.25f, 2f, 3f), "dark_hit", "sfx_hit", 0f, false, angle));
+                    }),
+                Ability("curse", "Lời Nguyền", AbilityTags.Dark | AbilityTags.Area, 14f, 14f, "cast", 0.35f,
+                    "Ấn nguyền tại vị trí chuột: mọi kẻ địch trong 3 ô bị Nguyền 8 giây (gây ít, chịu nhiều sát thương hơn).", a =>
+                    {
+                        a.targeting = AbilityTargeting.Point;
+                        a.maxRange = 9f;
+                        a.castSfx = "sfx_wisp";
+                        a.effects.Add(Cue(Point, "curse_sigil", "sfx_wisp_burst", 0.8f, 0.1f));
+                        a.effects.Add(Circle(Point, 3f, Hit(0.6f, Dk, 0.05f, 0f, 3f, Status(curse: 8f)), 0.1f));
+                    }),
+                Ability("shadowclone", "Phân Thân", AbilityTags.Dark | AbilityTags.Summon, 20f, 18f, "cast", 0.3f,
+                    "Một bóng của ngươi bước ra đứng cạnh 8 giây, chém kẻ địch gần nó; hết giờ thì nổ thành khói đen.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Direction;
+                        a.maxRange = 3f;
+                        a.castSfx = "sfx_wisp";
+                        a.effects.Add(new CloneEffect
+                        {
+                            duration = 8f, interval = 0.8f, reach = 2.4f, hit = Hit(0.65f, Dk, 0.2f, 2f, 4f),
+                            burstRadius = 2.2f, burst = Hit(1.2f, Dk, 0.1f, 4f, 8f)
+                        });
+                    }),
+                Ability("soulsiphon", "Hút Hồn", AbilityTags.Dark | AbilityTags.Channel, 12f, 16f, "cast", 1.2f,
+                    "Tia hút hồn 2 giây vào kẻ địch gần chuột nhất; hồi cho ngươi 30% sát thương gây ra.", a =>
+                    {
+                        a.maxRange = 7f;
+                        a.moveWhileCasting = 0.35f;
+                        a.castSfx = "sfx_wisp";
+                        a.effects.Add(new BeamEffect { duration = 2f, interval = 0.2f, range = 7f, hit = Hit(0.3f, Dk, 0.05f, 0f, 1f), lifesteal = 0.3f });
+                    }),
+                Ability("eclipse", "Nhật Thực", AbilityTags.Dark | AbilityTags.Area | AbilityTags.Ultimate, 26f, 34f, "cast", 0.5f,
+                    "Mặt trời đen che trên đầu ngươi 6 giây: chí mạng +50%, sát thương +15%. Hết giờ, bóng tối nổ tung quanh ngươi (5 ô).", a =>
+                    {
+                        a.targeting = AbilityTargeting.Self;
+                        a.castSfx = "sfx_wisp_burst";
+                        a.effects.Add(new CueEffect { at = Caster, vfx = "dark_strike", vfxScale = 1.4f, shake = 0.3f, flashColor = new Color(0.1f, 0f, 0.15f), flashStrength = 0.45f, flashDuration = 0.6f });
+                        a.effects.Add(Buff("eclipse", "Nhật Thực", 6f, b =>
+                        {
+                            b.critBonus = 0.5f;
+                            b.damageDealtMultiplier = 1.15f;
+                            b.attachedVfx = "eclipse";
+                        }));
+                        a.effects.Add(new CueEffect { delay = 6f, at = Caster, vfx = "dark_strike", vfxScale = 2.4f, sfx = "sfx_wisp_burst", sfxVolume = 1f, shake = 0.5f, impact = 0.6f });
+                        a.effects.Add(Circle(Caster, 5f, Hit(3.5f, Dk, 0.2f, 6f, 20f), 6f));
                     }),
             };
             return list;

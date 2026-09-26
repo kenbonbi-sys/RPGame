@@ -1,0 +1,142 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: frostarrows
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: frostarrows
+  displayName: "B\u0103ng Ti\u1EC5n"
+  description: "Ba m\u0169i t\xEAn b\u0103ng li\xEAn ti\u1EBFp v\u1EC1 ph\xEDa chu\u1ED9t, m\u1ED7i m\u0169i g\xE2y 1 t\u1EA7ng L\u1EA1nh."
+  icon: {fileID: -178856918, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 2052
+  cooldown: 4
+  energyCost: 10
+  targeting: 0
+  maxRange: 11
+  lockTime: 0.35
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_ice_cast
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735337
+  - rid: 8556425367783735338
+  - rid: 8556425367783735339
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735337
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 6072315242717760974, guid: 16339ef422ecbc6478b2b09638c0b61e, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 15
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 0.6
+          type: 2
+          critChance: 0.1
+          knockback: 1.5
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 1
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        hitVfx: hit_ice
+        hitSfx: sfx_ice_shatter
+        hitShake: 0.08
+        angle: 0
+    - rid: 8556425367783735338
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.12
+        prefab: {fileID: 6072315242717760974, guid: 16339ef422ecbc6478b2b09638c0b61e, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 15
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 0.6
+          type: 2
+          critChance: 0.1
+          knockback: 1.5
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 1
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        hitVfx: hit_ice
+        hitSfx: sfx_ice_shatter
+        hitShake: 0.08
+        angle: 0
+    - rid: 8556425367783735339
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0.24
+        prefab: {fileID: 6072315242717760974, guid: 16339ef422ecbc6478b2b09638c0b61e, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 15
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 0.6
+          type: 2
+          critChance: 0.1
+          knockback: 1.5
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 1
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        hitVfx: hit_ice
+        hitSfx: sfx_ice_shatter
+        hitShake: 0.08
+        angle: 0

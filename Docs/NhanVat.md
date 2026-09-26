@@ -66,6 +66,35 @@ Q là đòn thường của vũ khí; với vật dẫn phép (trượng, đũa,
 
 Đòn thường theo vũ khí: Kiếm và Mã Tấu chém vòng cung; Rìu bổ rộng, chậm, hất lùi; Chùy và Côn nện, đòn cuối làm choáng; Giáo và Kiếm Mảnh đâm xa, hẹp; Dao đâm rất nhanh, dễ chí mạng; Quyền đấm liền tay, đòn cuối đá bay; Cung bắn tên. Hệ **Ám** (Khế Ước Sư) là hệ sát thương mới.
 
+## Sách Chiêu (K)
+
+Ngoài 6 chiêu của lớp, nhân vật học thêm chiêu của ba hệ **Băng**, **Lôi**, **Ám** (T63) từ **Bí Kíp**. Mỗi Bí Kíp dạy một chiêu, chỉ các lớp có phép tương ứng trong D&D 5e mới học được; chuột phải Bí Kíp trong túi để học (sách biến mất), lớp không học được thì sách ở lại. Bí Kíp rơi trong rương boss, mỗi người có công một lần gieo: chiêu thường 22%, Tuyệt kỹ 12%.
+
+| Hệ | Chiêu | Lớp học được | Boss giữ sách |
+|---|---|---|---|
+| Băng | Mũi Băng | Thuật Sĩ, Pháp Sư, Tế Sư | Cóc Tía |
+| Băng | Băng Tiễn: 3 mũi tên băng, mỗi mũi 1 tầng Lạnh | Thuật Sĩ, Pháp Sư, Du Hiệp | Cóc Tía |
+| Băng | Giáp Sương: 6 s nhận ít hơn 40%, kẻ đánh gần bị Lạnh | Khế Ước Sư, Pháp Sư, Thuật Sĩ, Cuồng Chiến Binh, Chiến Binh | Cóc Tía |
+| Băng | Ngục Băng: sau 0.6 s cột băng 2.5 ô, sát thương lớn và Đóng Băng | Tế Sư, Thuật Sĩ, Pháp Sư | Xà Mẫu |
+| Băng | Bão Tuyết: bão 4 ô trong 5 s, mỗi nhịp 1 tầng Lạnh | Tế Sư, Thuật Sĩ, Pháp Sư | Xà Mẫu |
+| Băng | *Kỷ Băng Hà* (Tuyệt kỹ): 7 ô quanh thân, sát thương rất lớn và Đóng Băng | Tế Sư, Thuật Sĩ, Pháp Sư | Xà Mẫu |
+| Lôi | Xích Lôi: tia sét nhảy qua 4 kẻ, mỗi lần yếu hơn 15%, +1 Tích Điện | Thuật Sĩ, Pháp Sư, Tế Sư, Du Hiệp | Golem Pha Lê Cổ |
+| Lôi | Thiểm Bộ: dịch chuyển 6 ô, chỗ cũ nổ điện sau 0.5 s | Thuật Sĩ, Khế Ước Sư, Pháp Sư, Chiến Binh | Golem Pha Lê Cổ |
+| Lôi | Lôi Ấn: 8 s đòn Q mạnh hơn 35% và thêm 1 Tích Điện | Chiến Binh, Du Hiệp, Hiệp Sĩ Thánh, Đạo Tặc, Cuồng Chiến Binh, Võ Tăng, Thi Sĩ | Golem Pha Lê Cổ |
+| Lôi | Lôi Cầu: cầu điện bay chậm giật mọi kẻ trong 2 ô rồi nổ | Thuật Sĩ, Pháp Sư, Khế Ước Sư | Nhện Chúa Pha Lê |
+| Lôi | Điện Trường: vòng điện 3 ô trong 5 s, giật và làm chậm; người dùng chạy nhanh hơn 15% | Tế Sư, Thuật Sĩ, Pháp Sư, Tu Sĩ, Cuồng Chiến Binh, Hiệp Sĩ Thánh | Nhện Chúa Pha Lê |
+| Lôi | *Cửu Thiên Lôi* (Tuyệt kỹ): 9 tia sét trời, mỗi tia Choáng và Tích Điện | Tế Sư, Thuật Sĩ, Pháp Sư, Tu Sĩ | Nhện Chúa Pha Lê |
+| Ám | Ám Tiễn: 3 dao bóng tối hình quạt, dễ chí mạng | Đạo Tặc, Khế Ước Sư, Võ Tăng | Bò Rừng Sắt |
+| Ám | Lời Nguyền: mọi kẻ trong 3 ô bị Nguyền 8 s | Thi Sĩ, Tu Sĩ, Pháp Sư, Khế Ước Sư, Hiệp Sĩ Thánh | Bò Rừng Sắt |
+| Ám | Bước Bóng | Võ Tăng, Khế Ước Sư, Thi Sĩ | Bò Rừng Sắt |
+| Ám | Phân Thân: bóng của nhân vật đứng cạnh 8 s chém kẻ gần, hết giờ nổ khói đen | Đạo Tặc, Thi Sĩ, Khế Ước Sư, Pháp Sư, Thuật Sĩ | Thủ Lĩnh Hắc Phong |
+| Ám | Hút Hồn: tia 2 s, hồi máu bằng 30% sát thương gây ra | Khế Ước Sư, Pháp Sư, Thuật Sĩ | Thủ Lĩnh Hắc Phong |
+| Ám | *Nhật Thực* (Tuyệt kỹ): 6 s chí mạng +50%, sát thương +15%, hết giờ bóng tối nổ 5 ô | Đạo Tặc, Khế Ước Sư, Võ Tăng | Thủ Lĩnh Hắc Phong |
+
+Phím **K** mở Sách Chiêu: trên là thanh W E R A S D với chiêu đang đặt (chiêu của lớp hay chiêu đã học, theo màu hệ), dưới là ba hệ, mỗi chiêu ghi đã học, đang ở ô nào, lớp khác hay chưa học và boss nào giữ sách. Bấm một chiêu đã học, các ô nhận được sẽ sáng lên; bấm ô để đặt. W E R A S nhận chiêu thường, **D chỉ nhận Tuyệt kỹ**. Chuột phải một ô để trả về chiêu của lớp. Chỉ đổi được khi không giao chiến (4 giây không bị đánh và không quái nào đang đuổi). Hồi chiêu đi theo chiêu: gỡ một Tuyệt kỹ vừa dùng rồi đặt lại không làm nó hồi sớm.
+
+Chiêu đã học và thanh chiêu nằm trong ngoại hình nhân vật (`HeroLook.spells`, `HeroLook.bar`, `Player/Spellbook.cs`), nên được lưu cùng nhân vật và gửi tới mọi máy. Online máy chủ làm việc học (người chơi xin `UseItem`) và đặt chiêu (`SetSkill`), kiểm tra lớp, Tuyệt kỹ và giao chiến; đổi kiểu tóc hay vũ khí không làm mất chiêu.
+
 ## Bảng Nhân Vật (B, I hoặc C)
 
 Một cửa sổ cho cả chỉ số, trang bị và túi đồ (góp ý 25/09: gộp túi đồ và nhân vật vào một nút, như túi đồ của Minecraft):

@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: soulsiphon
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: soulsiphon
+  displayName: "H\xFAt H\u1ED3n"
+  description: "Tia h\xFAt h\u1ED3n 2 gi\xE2y v\xE0o k\u1EBB \u0111\u1ECBch g\u1EA7n chu\u1ED9t nh\u1EA5t; h\u1ED3i cho ng\u01B0\u01A1i 30% s\xE1t th\u01B0\u01A1ng g\xE2y ra."
+  icon: {fileID: 175506130, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 8224
+  cooldown: 12
+  energyCost: 16
+  targeting: 0
+  maxRange: 7
+  lockTime: 1.2
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.35
+  castSfx: sfx_wisp
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735326
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735326
+      type: {class: BeamEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        duration: 2
+        interval: 0.2
+        range: 7
+        width: 0.35
+        hit:
+          power: 0.3
+          type: 6
+          critChance: 0.05
+          knockback: 0
+          poise: 1
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        lifesteal: 0.3
+        color: {r: 0.8, g: 0.2, b: 0.45, a: 1}
+        tickVfx: dark_hit
+        loopSfx: sfx_beam

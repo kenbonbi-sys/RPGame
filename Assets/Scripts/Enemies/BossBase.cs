@@ -127,6 +127,8 @@ namespace RPG
             if (style == null) style = GetComponentInChildren<SpriteStyle>();
             if (poise != null) poise.Broken += OnPoiseBroken;
             baseWalkSpeed = walkSpeed;
+            // the Bí Kíp of the Sách Chiêu its region keeps (T63)
+            Spellbook.AddBossBooks(bossId, loot);
             All.Add(this);
         }
 

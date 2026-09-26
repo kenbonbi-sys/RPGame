@@ -12,7 +12,7 @@ namespace RPG
     /// </summary>
     public static class NetProtocol
     {
-        public const int Version = 12;
+        public const int Version = 13;
 
         /// <summary>First id of the replicated objects of a zone (enemies, boss, rocks); heroes use their NetworkObject id, below it.</summary>
         public const int SceneIdBase = 1000000;
@@ -349,8 +349,10 @@ namespace RPG
         Forge = 21,
         /// <summary>Puts on the gear <see cref="ActRequest.text"/> from the bag, or (empty text) takes off what is worn in the slot <see cref="ActRequest.value"/>.</summary>
         Equip = 22,
-        /// <summary>Eats or drinks the item <see cref="ActRequest.text"/> from the bag (food, potions: the bag's right click).</summary>
-        UseItem = 23
+        /// <summary>Eats or drinks the item <see cref="ActRequest.text"/> from the bag (food, potions: the bag's right click; a Bí Kíp is read).</summary>
+        UseItem = 23,
+        /// <summary>Puts the learned spell <see cref="ActRequest.text"/> on bar slot <see cref="ActRequest.value"/> (empty text: the class's own, <see cref="Spellbook"/>).</summary>
+        SetSkill = 24
     }
 
     /// <summary>Client → server: everything else a player wants (potions, talking, dialogue commands, stat points, chat).</summary>

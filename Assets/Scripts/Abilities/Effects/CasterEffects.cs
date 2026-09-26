@@ -148,6 +148,14 @@ namespace RPG
         public float damageDealtMultiplier = 1f;
         [Tooltip("Attack speed added to the basic attack, 0.5 = half again as fast (Bùng Nổ Hành Động).")]
         public float attackSpeedBonus;
+        [Tooltip("The weapon is charged (Lôi Ấn): the basic attack (Q) hits this much harder, 0.35 = +35%.")]
+        public float imbuePower;
+        [Tooltip("Stacks of Tích Điện every charged basic attack adds.")]
+        public int imbueCharge;
+        [Tooltip("Crit chance added (Nhật Thực), 0.5 = +50%.")]
+        public float critBonus;
+        [Tooltip("Stacks of Lạnh on whoever strikes the hero from close by (Giáp Sương).")]
+        public int chillAttackers;
     }
 
     [System.Serializable]

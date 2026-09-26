@@ -54,6 +54,21 @@ namespace RPG
             Draw(0f);
         }
 
+        /// <summary>Moves a beam that is already drawn (a channelled one follows its caster and its foe), keeping its timing.</summary>
+        public void Move(Vector2 a, Vector2 b)
+        {
+            from = a;
+            to = b;
+            transform.position = a;
+            if (end != null) end.transform.position = b;
+            foreach (var lr in new[] { core, glow })
+            {
+                if (lr == null) continue;
+                lr.SetPosition(0, new Vector3(a.x, a.y, 0f));
+                lr.SetPosition(1, new Vector3(b.x, b.y, 0f));
+            }
+        }
+
         void Update()
         {
             t += Time.deltaTime;

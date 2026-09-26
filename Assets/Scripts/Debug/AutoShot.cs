@@ -8,13 +8,14 @@ namespace RPG
 {
     /// <summary>
     /// Automated showcase used for testing builds: start the player with
-    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep|classes|ui|steppe|hacphong]
+    ///   Game.exe -autoshot -autoshotDir "C:\shots" [-autoshotTimeout 480] [-autoshotOnly swamp|cave|deep|classes|ui|steppe|hacphong|spells]
     /// It plays a scripted tour (dialogue, skills, boss attacks, the swamp and its bosses, the
     /// world map, night), saves screenshots and quits; -autoshotOnly swamp tours the swamp alone,
     /// -autoshotOnly cave the crystal cave, -autoshotOnly deep its deeper creatures and bosses,
     /// -autoshotOnly ui the character screen, the forge and a waystone's prompt, -autoshotOnly steppe
     /// Thảo Nguyên Gió (the wind, the wind columns, the hyenas, eagles and bisons), -autoshotOnly hacphong
-    /// its west (the living scarecrows, Hắc Phong's archers and blades, Bò Rừng Sắt, Thủ Lĩnh Hắc Phong).
+    /// its west (the living scarecrows, Hắc Phong's archers and blades, Bò Rừng Sắt, Thủ Lĩnh Hắc Phong),
+    /// -autoshotOnly spells the Sách Chiêu (a Bí Kíp read, the window, every spell of the three schools cast).
     /// Add -autoshotOffscreen to render to a texture (a hidden window or a graphical batch player).
     /// Exit code: 0 = clean run, 1 = errors or exceptions were logged, 2 = the tour did not finish
     /// within the timeout (CI reads it). Does nothing in normal play.
@@ -603,6 +604,145 @@ namespace RPG
             if (dn != null) dn.time = 0.45f;
         }
 
+        /// <summary>
+        /// Sách Chiêu (-autoshotOnly spells): a Bí Kíp's tooltip and its reading, the window with a
+        /// spell picked, then every spell of the Băng, Lôi and Ám schools cast at three slimes that
+        /// stand still (a wizard, a warlock and a rogue between them).
+        /// </summary>
+        IEnumerator Spells(PlayerController p, DayNightCycle dn)
+        {
+            var db = GameManager.I.db;
+            if (dn != null) dn.time = 0.45f;
+            HUD.I.help.Close();
+            p.stats.look = new HeroLook();
+            CharacterChoice.Apply(p, new HeroLook { cls = "wizard", race = "elf", weapon = GameManager.I.db.Class("wizard").DefaultWeapon, hair = 2, hairColor = 3 });
+
+            // three slimes in a row that do not move nor die
+            var first = FindEnemy("slime", p.transform.position);
+            if (first == null) yield break;
+            Vector2 at = first.transform.position;
+            var dummies = new System.Collections.Generic.List<EnemyBase>();
+            foreach (var e in EnemyBase.All)
+                if (e != null && !e.IsDead && e.enemyId == "slime" && dummies.Count < 3) dummies.Add(e);
+            void Line()
+            {
+                for (int i = 0; i < dummies.Count; i++)
+                {
+                    dummies[i].motor.Teleport(at + new Vector2(i * 1.8f, (i % 2) * 0.5f));
+                    dummies[i].health.maxHp = dummies[i].health.hp = 100000f;
+                    dummies[i].status.Cleanse();
+                }
+            }
+            foreach (var e in dummies) e.enabled = false;
+            Line();
+            Vector2 stand = at + new Vector2(-3.5f, 0.2f);
+
+            // a book: its tooltip, then read
+            var tome = db.Item("tome_iceprison");
+            if (tome != null)
+            {
+                p.inventory.Add(tome, 1, false);
+                Place(p, stand);
+                HUD.I.heroPanel.Show();
+                HUD.I.heroPanel.DebugFilter(2);
+                yield return Wait(0.5f);
+                var t = ItemTips.For(tome, p, null);
+                HUD.I.tooltip.Show(t.title, t.body, t.color);
+                yield return Wait(0.4f);
+                yield return Shot("tome_tooltip");
+                HUD.I.tooltip.Hide();
+                HUD.I.heroPanel.DebugFilter(0);
+                HUD.I.heroPanel.Close();
+                p.UseItem(tome);
+                yield return Wait(0.8f);
+                yield return Shot("tome_read");
+            }
+
+            // every spell the three heroes may learn, known; the window
+            string[] all = Array.ConvertAll(Spellbook.All, e => e.id);
+            void Learn()
+            {
+                var look = p.stats.look.Clone();
+                look.spells = Array.FindAll(all, id => Spellbook.ClassMay(look.cls, Spellbook.Find(id)));
+                p.stats.SetLook(look);
+            }
+            void Bar(int slot, string id)
+            {
+                var look = p.stats.look.Clone();
+                var bar = new string[Spellbook.UltimateSlot];
+                for (int i = 0; i < bar.Length; i++) bar[i] = look.bar != null && i < look.bar.Length ? look.bar[i] ?? "" : "";
+                for (int i = 0; i < bar.Length; i++) if (bar[i] == id) bar[i] = "";
+                bar[slot - 1] = id;
+                look.bar = bar;
+                p.stats.SetLook(look);
+            }
+            Learn();
+            Bar(1, "chainlightning");
+            Bar(2, "iceprison");
+            Bar(6, "iceage");
+            if (SpellbookUI.I != null)
+            {
+                SpellbookUI.I.Show();
+                yield return Wait(0.7f);
+                yield return Shot("spellbook");
+                SpellbookUI.I.DebugPick("blizzard");
+                yield return Wait(0.5f);
+                yield return Shot("spellbook_pick");
+                SpellbookUI.I.Close();
+                yield return Wait(0.3f);
+            }
+
+            var casts = new (string cls, string id, float wait)[]
+            {
+                ("wizard", "frostarrows", 0.28f), ("wizard", "frostarmor", 0.5f), ("wizard", "iceprison", 0.75f),
+                ("wizard", "blizzard", 1.3f), ("wizard", "iceage", 0.45f),
+                ("wizard", "chainlightning", 0.16f), ("wizard", "thunderstep", 0.12f), ("wizard", "balllightning", 1.1f),
+                ("wizard", "stormfield", 1.1f), ("wizard", "thunderstorm", 1.1f),
+                ("warlock", "curse", 0.35f), ("warlock", "shadowclone", 1.2f), ("warlock", "soulsiphon", 0.9f),
+                ("rogue", "shadowknives", 0.16f), ("rogue", "lightningbrand", 0.5f), ("rogue", "eclipse", 1.2f),
+            };
+            string cls = "wizard";
+            foreach (var c in casts)
+            {
+                if (c.cls != cls)
+                {
+                    cls = c.cls;
+                    p.stats.look = new HeroLook();
+                    CharacterChoice.Apply(p, new HeroLook { cls = cls, race = cls == "rogue" ? "halfling" : "tiefling", weapon = db.Class(cls).DefaultWeapon, hair = 1, hairColor = 5 });
+                    Learn();
+                    yield return Wait(0.3f);
+                }
+                bool ult = Spellbook.IsUltimate(c.id);
+                int slot = ult ? Spellbook.UltimateSlot : 1;
+                Bar(slot, c.id);
+                Line();
+                Place(p, c.id == "stormfield" ? at + new Vector2(-1.4f, 0.2f) : stand);
+                Prep(p);
+                yield return Wait(0.35f);
+                Vector2 aim = c.id == "thunderstep" ? stand + new Vector2(0f, 5f) : c.id == "blizzard" || c.id == "thunderstorm" ? at + new Vector2(1.8f, 0f) : at;
+                p.skills.TryCast(slot, aim);
+                yield return Wait(c.wait);
+                yield return Shot("spell_" + c.id);
+                if (c.id == "lightningbrand")
+                {
+                    // a charged basic attack
+                    Place(p, at + new Vector2(-1.1f, 0f));
+                    Prep(p);
+                    yield return Wait(0.2f);
+                    p.skills.TryCast(0, at);
+                    yield return Wait(0.18f);
+                    yield return Shot("spell_lightningbrand_hit");
+                }
+                if (c.id == "eclipse")
+                {
+                    yield return Wait(6f - c.wait - 0.05f);
+                    yield return Shot("spell_eclipse_burst");
+                }
+                yield return Wait(c.id == "blizzard" || c.id == "stormfield" ? 4f : 1.2f);
+            }
+            foreach (var e in dummies) if (e != null) e.enabled = true;
+        }
+
         /// <summary>The part of the tour asked for with -autoshotOnly (null: all of it).</summary>
         static string Only
         {
@@ -1174,6 +1314,12 @@ namespace RPG
             if (Only == "classes")
             {
                 yield return Classes(p, dn);
+                Finish();
+                yield break;
+            }
+            if (Only == "spells")
+            {
+                yield return Spells(p, dn);
                 Finish();
                 yield break;
             }

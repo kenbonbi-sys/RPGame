@@ -163,6 +163,30 @@ MonoBehaviour:
     prefab: {fileID: 8963472643298870490, guid: 95d34925833ab2541bd3040cea2b6f25, type: 3}
   - id: coin_burst
     prefab: {fileID: 1912349664056764002, guid: dc79b363fdfd1a54ca9ef5e3c1ae5dd6, type: 3}
+  - id: ice_prison
+    prefab: {fileID: 5104677347138591245, guid: aee41e1047241204ea2658039d329903, type: 3}
+  - id: blizzard
+    prefab: {fileID: 2449822042727328952, guid: 4bc6ea0c435a34344a33c1a47f54bf89, type: 3}
+  - id: ice_age
+    prefab: {fileID: 5773257453378718766, guid: 6b3c63ff8ac41b9418dec34800f6ecf4, type: 3}
+  - id: frost_aura
+    prefab: {fileID: 128652198234310233, guid: 722d03073d5354043a6bfb52a6a1fc24, type: 3}
+  - id: chain_bolt
+    prefab: {fileID: 2244278117931374125, guid: 8fb8cd4dfe60e374ea80d241d30477ba, type: 3}
+  - id: lightning_orb
+    prefab: {fileID: 1987470701579408129, guid: df594439d204da245a20af2f3cfaba60, type: 3}
+  - id: lightning_burst
+    prefab: {fileID: 7147952747269267515, guid: 310ed95a5bbcfa347ac4fbcb51e96e9f, type: 3}
+  - id: thunder_step
+    prefab: {fileID: 4677703614729549268, guid: 3069f43f078acfa4893f203344a31067, type: 3}
+  - id: storm_field
+    prefab: {fileID: 4105970869621905139, guid: ea0c86bb35313064e8b4100af44f3b8d, type: 3}
+  - id: lightning_imbue
+    prefab: {fileID: 3780970679586081722, guid: 4c3120983884d8b4d8d6c70907532a37, type: 3}
+  - id: curse_sigil
+    prefab: {fileID: 4767206212614951428, guid: 6b68c320ed8397a41ab21c0c839d8f3c, type: 3}
+  - id: eclipse
+    prefab: {fileID: 8997331594301056987, guid: 048a44e701e27c94cbb91726df44f6e7, type: 3}
   particleBudget: 150
   lightBudget: 1
   ultimateIds:

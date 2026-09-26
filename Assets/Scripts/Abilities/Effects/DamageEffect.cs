@@ -20,10 +20,13 @@ namespace RPG
 
         public DamageInfo Make(AbilityContext ctx, Vector2 at, Vector2 dir)
         {
-            var d = ctx.MakeDamage(power, type, at, dir, knockback);
+            float p = power;
+            var st = status;
+            ctx.Imbue(ref p, ref st);
+            var d = ctx.MakeDamage(p, type, at, dir, knockback);
             d.poise = poise;
             d.hitStop = hitStop;
-            d.status = status;
+            d.status = st;
             return d;
         }
     }
@@ -60,6 +63,8 @@ namespace RPG
                 return;
             }
             var d = hit.Make(ctx, p, ctx.dir);
+            // a charged weapon (Lôi Ấn) crackles where it lands
+            if (d.status.charge > hit.status.charge && ctx.visual) VFX.Spawn("hit_lightning", p, Quaternion.identity, 0.7f);
             int n = shape == Shape.Cone
                 ? Combat.DamageCone(p, ctx.dir, r, angle, d, hit.critChance)
                 : Combat.DamageCircle(p, r, d, hit.critChance);
@@ -102,18 +107,21 @@ namespace RPG
                 return;
             }
             p.team = ctx.Team;
-            p.damage = hit.power * ctx.HitScale(hit.type);
+            float power = hit.power;
+            var status = hit.status;
+            bool charged = ctx.Imbue(ref power, ref status);
+            p.damage = power * ctx.HitScale(hit.type);
             p.attackScaled = true;
             p.skillName = ctx.ability.displayName;
             p.damageType = hit.type;
             p.critChance = hit.critChance;
             p.knockback = hit.knockback;
             p.poise = hit.poise;
-            p.status = hit.status;
+            p.status = status;
             p.speed = speed;
             p.explodeRadius = explodeRadius;
             p.pierce = pierce;
-            p.hitVfx = hitVfx;
+            p.hitVfx = charged ? "hit_lightning" : hitVfx;
             p.hitSfx = hitSfx;
             p.shake = hitShake;
             p.lifetime = lifetime > 0 ? lifetime : ctx.ability.maxRange / Mathf.Max(0.1f, speed);

@@ -114,6 +114,18 @@ namespace RPG
             return d;
         }
 
+        /// <summary>
+        /// A hero's basic attack (slot Q) while their weapon is charged (Lôi Ấn, <see cref="BuffSpec.imbuePower"/>):
+        /// more power and stacks of Tích Điện. True when it was charged.
+        /// </summary>
+        public bool Imbue(ref float power, ref StatusHit status)
+        {
+            if (!(caster is PlayerController pc) || pc.ImbuePower <= 0f || pc.skills == null || pc.skills.slots[0] != ability) return false;
+            power *= 1f + pc.ImbuePower;
+            status.charge += pc.ImbueCharge;
+            return true;
+        }
+
         public Coroutine Start(IEnumerator routine) => caster.Runner.StartCoroutine(routine);
 
         /// <summary>Runs blocks in order; blocks with a delay start on their own timer.</summary>
@@ -149,7 +161,7 @@ namespace RPG
     [System.Serializable]
     public struct Anchor
     {
-        public enum From { Caster, Point, Aim }
+        public enum From { Caster, Point, Aim, Origin }
 
         public From from;
         [Tooltip("World units up (e.g. 0.45 = chest height).")]
@@ -166,7 +178,7 @@ namespace RPG
 
         public Vector2 Resolve(AbilityContext ctx)
         {
-            Vector2 p = from == From.Caster ? ctx.CasterPosition : from == From.Aim ? ctx.aim : ctx.point;
+            Vector2 p = from == From.Caster ? ctx.CasterPosition : from == From.Aim ? ctx.aim : from == From.Origin ? ctx.origin : ctx.point;
             return p + Vector2.up * up + ctx.dir * forward;
         }
     }

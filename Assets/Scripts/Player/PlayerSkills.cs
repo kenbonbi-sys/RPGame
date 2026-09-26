@@ -114,13 +114,22 @@ namespace RPG
 
         /// <summary>
         /// Puts a class's skills on the bar: Q is the weapon's basic attack (a spellcaster's focus
-        /// leaves Q to the class's cantrip), W E R A S D the class's own, Space Lướt for everyone.
-        /// Slots whose skill is missing keep what they had.
+        /// leaves Q to the class's cantrip), W E R A S D the class's own (or the learned spells the
+        /// look puts there, <see cref="Spellbook"/>), Space Lướt for everyone. Slots whose skill is
+        /// missing keep what they had.
         /// </summary>
-        public void ApplyKit(ClassDef cls, WeaponKind weapon)
+        public void ApplyKit(ClassDef cls, WeaponKind weapon, HeroLook look = null)
         {
             var db = GameManager.I != null ? GameManager.I.db : null;
             if (cls == null || db == null) return;
+            // a skill's cooldown goes with the skill, not the slot: moving spells around the bar
+            // (Sách Chiêu) or forging a weapon must not make a Tuyệt kỹ ready again
+            var was = new AbilityDef[slots.Length];
+            for (int i = 0; i < slots.Length; i++)
+            {
+                was[i] = slots[i];
+                if (slots[i] != null && readyAt[i] > Time.time) heldCooldown[slots[i]] = (readyAt[i], cooldownOf[i]);
+            }
             for (int i = 0; i < 7; i++)
             {
                 string id = cls.kit != null && i < cls.kit.Length ? cls.kit[i] : null;
@@ -128,14 +137,36 @@ namespace RPG
                 var a = string.IsNullOrEmpty(id) ? null : db.Ability(id);
                 if (a != null) slots[i] = a;
             }
+            for (int i = Spellbook.FirstSlot; i <= Spellbook.UltimateSlot; i++)
+            {
+                var spell = Spellbook.BarAbility(look, i);
+                if (spell != null) slots[i] = spell;
+            }
             var dash = db.Ability("dash");
             if (dash != null) slots[7] = dash;
-            ResetCooldowns();
+            gcdUntil = 0;
+            commitUntil = 0;
+            bufferedSlot = -1;
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i] == was[i]) continue;
+                readyAt[i] = 0f;
+                if (slots[i] != null && heldCooldown.TryGetValue(slots[i], out var held) && held.ready > Time.time)
+                {
+                    readyAt[i] = held.ready;
+                    cooldownOf[i] = held.length;
+                }
+            }
         }
+
+        /// <summary>Cooldowns of skills that left the bar, so one put back is not ready early.</summary>
+        readonly System.Collections.Generic.Dictionary<AbilityDef, (float ready, float length)> heldCooldown =
+            new System.Collections.Generic.Dictionary<AbilityDef, (float ready, float length)>();
 
         public void ResetCooldowns()
         {
             for (int i = 0; i < readyAt.Length; i++) readyAt[i] = 0;
+            heldCooldown.Clear();
             gcdUntil = 0;
             commitUntil = 0;
             bufferedSlot = -1;

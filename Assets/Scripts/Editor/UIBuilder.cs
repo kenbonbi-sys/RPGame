@@ -168,6 +168,7 @@ namespace RPG.EditorTools
             hud.death = BuildDeath(root);
             hud.creator = BuildCreator(root);
             BuildForge(root);
+            BuildSpellbook(root);
             hud.tooltip = BuildTooltip(root);
             BuildHint(root);
             BuildLoading(root, refs);
@@ -691,6 +692,24 @@ namespace RPG.EditorTools
             return ui;
         }
 
+        /// <summary>Sách Chiêu (K): a full-screen panel that builds its own widgets (<see cref="SpellbookUI"/>).</summary>
+        static SpellbookUI BuildSpellbook(Transform root)
+        {
+            var rt = Stretch(root, "Spellbook");
+            var g = Group(rt.gameObject, true);
+            var ui = rt.gameObject.AddComponent<SpellbookUI>();
+            ui.group = g;
+            ui.window = rt;
+            ui.font = font;
+            ui.fontOutline = outline;
+            ui.windowSprite = ArtImporter.S("frame_wood");
+            ui.buttonSprite = ArtImporter.S("frame_panel");
+            ui.whiteSprite = ArtImporter.S("white");
+            ui.slotSprite = ArtImporter.S("slot");
+            ui.highlightSprite = ArtImporter.S("slot_highlight");
+            return ui;
+        }
+
         static HelpPanelUI BuildHelp(Transform root)
         {
             var w = Window(root, "Help", new Vector2(1040, 640), Vector2.zero, out var g, "Hướng Dẫn");
@@ -705,7 +724,7 @@ namespace RPG.EditorTools
                 $"{K}Kỹ năng{E}\n  Q W E R A S D: kỹ năng của lớp nhân vật\n  (di chuột lên ô kỹ năng để xem)\n  Space: Lướt (bất tử trong chốc lát)\n\n" +
                 $"{K}Bình thuốc{E}\n  1 Máu · 2 Năng lượng · 3 Thảo mộc";
             string right =
-                $"{K}Tương tác{E}\n  F: Nói chuyện · Lò Rèn · Đá Truyền Tống\n  B / C: Nhân vật, trang bị và túi đồ\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  T: Tự động đánh quái · M: Bản đồ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +
+                $"{K}Tương tác{E}\n  F: Nói chuyện · Lò Rèn · Đá Truyền Tống\n  B / C: Nhân vật, trang bị và túi đồ\n  J: Bách Khoa Trùm · Tab: Đổi nhiệm vụ\n  K: Sách Chiêu (chiêu học từ Bí Kíp)\n  T: Tự động đánh quái · M: Bản đồ\n  F1: Hướng dẫn · Esc: Tạm dừng\n\n" +
                 $"{K}Mẹo chiến đấu{E}\n  Vòng đỏ dưới đất = đòn sắp đánh.\n  Lướt (Space) ra ngoài vòng!\n\n" +
                 $"{K}Phím thử nghiệm{E}\n  F5 hồi đầy · F6 đổi giờ · F7 tới Boss\n  F8 về làng · F9 hạ quái gần";
             Txt(w, "Left", left, 22, Cream, TextAlignmentOptions.TopLeft, new Vector2(0, 1), new Vector2(0, 1), new Vector2(50, -104), new Vector2(460, 460), false);

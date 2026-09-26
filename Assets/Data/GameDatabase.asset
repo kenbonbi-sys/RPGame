@@ -83,6 +83,24 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e5434e550b7d0e5459ef1f47d4220870, type: 2}
   - {fileID: 11400000, guid: c0fbb6cf607d61d40a9adc044bdc6cd3, type: 2}
   - {fileID: 11400000, guid: a66ca1fedd0ab06439119f018a4119a8, type: 2}
+  - {fileID: 11400000, guid: ec999de03e85fcf4db606ef1257be80b, type: 2}
+  - {fileID: 11400000, guid: 2a7bc59ba21abfb418537e96fc67ff4d, type: 2}
+  - {fileID: 11400000, guid: 904d0327bb124ab4ea47ccddb0406983, type: 2}
+  - {fileID: 11400000, guid: c075da88feddb954997399c8e2e732a5, type: 2}
+  - {fileID: 11400000, guid: ec5ed2755ece31242baaf1190831a7a4, type: 2}
+  - {fileID: 11400000, guid: bdbe9c692071ddc4dab5d514ee1d70d7, type: 2}
+  - {fileID: 11400000, guid: 9a0847f96579c7a4ab37d7fdaeb5cffa, type: 2}
+  - {fileID: 11400000, guid: 29f38d18b43210c428427527c65ccfc6, type: 2}
+  - {fileID: 11400000, guid: b6c73fe8f73ffd5448e26591530d9c69, type: 2}
+  - {fileID: 11400000, guid: 49d1900b2aa782e4d991dce0779a811b, type: 2}
+  - {fileID: 11400000, guid: 5c541aca9cfa3a04d8af9f343ff77da7, type: 2}
+  - {fileID: 11400000, guid: 719c5d8af92883048bde12b4512ad235, type: 2}
+  - {fileID: 11400000, guid: fd0593b967e0e744d9df18ca14ae42f5, type: 2}
+  - {fileID: 11400000, guid: 56837f278bc3c1740bc2dd01775e0ba9, type: 2}
+  - {fileID: 11400000, guid: 9edafdefdca77344f8f83aadf4d16e47, type: 2}
+  - {fileID: 11400000, guid: 75eb6e3578c8fb34ea6901901facfe64, type: 2}
+  - {fileID: 11400000, guid: 1900b061d42cbe34b90c5acc4ae67d85, type: 2}
+  - {fileID: 11400000, guid: 19b93dfebed7cb540b06004c05f1158d, type: 2}
   abilities:
   - {fileID: 11400000, guid: 2c7922f773a728745825848e2732fef7, type: 2}
   - {fileID: 11400000, guid: 60a857d1c061a85468cab41eced1f013, type: 2}
@@ -160,6 +178,22 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 99cbe15e0b41aad49b5d949c1d04141d, type: 2}
   - {fileID: 11400000, guid: 4f8969241f3e0be4e9dab35a003b823a, type: 2}
   - {fileID: 11400000, guid: b768e4e19019fd043af6b3f58f070b5b, type: 2}
+  - {fileID: 11400000, guid: 0651a28e2b39f834b972dedd2d8dca90, type: 2}
+  - {fileID: 11400000, guid: bbb9003a55111b4408cbf4751a02f9aa, type: 2}
+  - {fileID: 11400000, guid: 837d9519da23617409bf6b2396734b3f, type: 2}
+  - {fileID: 11400000, guid: 12a4f7ed93ef19c43b03c247bce81d65, type: 2}
+  - {fileID: 11400000, guid: 9794891b94719c94ebbcae3a714f9e88, type: 2}
+  - {fileID: 11400000, guid: f8d791a1363ae9b428e7da0f25795790, type: 2}
+  - {fileID: 11400000, guid: bc460c1e9a16be14eaa86e66bdf51c11, type: 2}
+  - {fileID: 11400000, guid: 188ad59a46c88f54196025742d0b56d1, type: 2}
+  - {fileID: 11400000, guid: f94756982ef0d104eaffe07da5b6f5e4, type: 2}
+  - {fileID: 11400000, guid: aed2b00ac83dc9e41ae0dbb8296ad771, type: 2}
+  - {fileID: 11400000, guid: 7cafacda0621f004aa72a78f2574fc10, type: 2}
+  - {fileID: 11400000, guid: 083fe336bb8474045b5e10b8eb43c72a, type: 2}
+  - {fileID: 11400000, guid: 0f5e352a89b038f43967733ec197ab01, type: 2}
+  - {fileID: 11400000, guid: 338ff08e365facf44b079a7ea53e498f, type: 2}
+  - {fileID: 11400000, guid: 3291099549fe50a4897c7366adb55484, type: 2}
+  - {fileID: 11400000, guid: 787d9c303cd70514cb766aa8a81b6f40, type: 2}
   progression: {fileID: 11400000, guid: a0659d7ce1a0e5e4e934c9016c761110, type: 2}
   combat: {fileID: 11400000, guid: b3b37f6f76fe4f4ab54160f186cfe6c6, type: 2}
   quests:

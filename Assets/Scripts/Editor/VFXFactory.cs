@@ -134,6 +134,19 @@ namespace RPG.EditorTools
             Build("pounce_land", r => Shockwave(r, 0.6f), 2.5f);
             Build("rock_impact", RockImpact, 2.5f);
             Build("boss_death", BossDeath, 3.5f);
+            // the Sách Chiêu's schools (T63): Băng, Lôi, Ám
+            Build("ice_prison", IcePrison, 1.8f);
+            Build("blizzard", Blizzard, 0f);
+            Build("ice_age", IceAge, 2.6f);
+            Build("frost_aura", FrostAura, 0f);
+            Build("chain_bolt", ChainBolt, 0.35f);
+            Build("lightning_orb", LightningOrb, 0f);
+            Build("lightning_burst", LightningBurst, 1.2f);
+            Build("thunder_step", ThunderStep, 0.9f);
+            Build("storm_field", StormField, 0f);
+            Build("lightning_imbue", LightningImbue, 0f);
+            Build("curse_sigil", CurseSigil, 1.6f);
+            Build("eclipse", Eclipse, 0f);
 
             EditorUtility.SetDirty(lib);
 
@@ -147,6 +160,8 @@ namespace RPG.EditorTools
             EditorUtil.Assign(ref db.shardPrefab, BuildShardShot());
             // the classes' projectiles (the abilities find them by path)
             var arrow = BuildBolt("Arrow", "proj_arrow", false, Color.white, new Color(1f, 0.9f, 0.7f), 1f, true, 0f, 0f);
+            BuildBolt("FrostArrow", "proj_arrow", false, new Color(0.7f, 0.95f, 1f), IceA, 1.05f, true, 0f, 0.9f);
+            BuildBolt("ShadowKnife", "proj_knife", false, new Color(0.75f, 0.5f, 1f), DarkC, 1.1f, true, 0f, 0.8f);
             BuildBolt("ThrownKnife", "proj_knife", false, Color.white, new Color(0.85f, 0.9f, 1f), 1f, true, 0f, 0f);
             BuildBolt("ThrownAxe", "proj_axe", false, Color.white, new Color(1f, 0.8f, 0.6f), 1.1f, false, -900f, 0f);
             BuildBolt("NoteBolt", "proj_note", false, PinkC, PinkC, 0.9f, false, 0f, 1.1f);
@@ -1028,6 +1043,218 @@ namespace RPG.EditorTools
             }
             beam.glow = Line("Glow", CrystalCyan, 1);
             beam.core = Line("Core", Color.white, 2);
+        }
+
+        // ================================================================== the Sách Chiêu (T63)
+        /// <summary>Ngục Băng (radius 2.5 at scale 1): a ring of frost, then ice pillars burst up all over it.</summary>
+        static void IcePrison(GameObject r)
+        {
+            Ring(r, "Frost", A(IceA, 0.9f), 0.4f, 5f, 0.5f, "ring", SortingLayerNames.Decal, 0.55f);
+            var floor = Spr(r, "Floor", "glow", Mat("glow", true, 1.2f), A(IceA, 0.45f), SortingLayerNames.Decal, 1, 5.2f);
+            floor.transform.localScale = new Vector3(5.2f, 2.8f, 1f);
+            SFX(floor, 1.6f, C(0, 1, 1, 1), C(0, 0, 0.1f, 1, 0.7f, 1, 1, 0));
+            for (int i = 0; i < 7; i++)
+            {
+                float a = i * Mathf.PI * 2f / 7f + 0.3f;
+                float d = i == 0 ? 0f : 1.5f;
+                var spike = Spr(r, "Pillar" + i, "ice_spike_0", AssetFactory.SpriteUnlit, Color.white, SortingLayerNames.Default, 0, i == 0 ? 1.4f : 1.1f,
+                                Mathf.Cos(a) * d, Mathf.Sin(a) * d * 0.55f);
+                Flip(spike, "ice_spike", 1f, false);
+                var fade = spike.gameObject.AddComponent<SpriteFX>();
+                fade.sr = spike;
+                fade.lifetime = 1.7f;
+                fade.scale = C(0, 1, 1, 1);
+                fade.alpha = C(0, 1, 0.8f, 1, 1, 0);
+            }
+            PS(r, "Shards", Mat("ice_shard", false, 1.4f)).Burst(20).Life(0.4f, 0.9f).Speed(2f, 6f).Size(0.2f, 0.4f)
+                .Col(IceB, IceA).Circle(1.8f).Grav(2.2f).Rot().Spin(-300, 300).Fade();
+            PS(r, "Mist", Mat("smoke", true, 0.8f), SortingLayerNames.VFX, -1).Burst(8).Life(0.8f, 1.4f).Speed(0.2f, 0.8f).Size(1f, 1.8f)
+                .Col(A(IceA, 0.4f)).Circle(1.8f).Fade(0.2f);
+            Light(r, IceA, 5f, 2.4f, 1f);
+        }
+
+        /// <summary>Bão Tuyết (radius 4): snow whirling over the ground and the cold light of it, while it lasts.</summary>
+        static void Blizzard(GameObject r)
+        {
+            var ring = Spr(r, "Edge", "ring", Mat("ring", true, 1.2f), A(IceA, 0.55f), SortingLayerNames.Decal, 1);
+            ring.transform.localScale = new Vector3(8f, 4.4f, 1f);
+            var floor = Spr(r, "Floor", "glow", Mat("glow", true, 0.9f), A(IceA, 0.3f), SortingLayerNames.Decal, 0);
+            floor.transform.localScale = new Vector3(8f, 4.4f, 1f);
+            PS(r, "Snow", Mat("px_square", true, 2f), SortingLayerNames.Top, 0).Loop().Rate(90).Life(0.8f, 1.4f).Speed(0.2f, 0.8f).Size(0.06f, 0.14f)
+                .Col(Color.white, IceA).Circle(4f).Vel(-2.5f, -1.2f, -1.6f, -0.6f).Noise(1.2f, 0.8f).Fade(0.2f);
+            PS(r, "Swirl", Mat("smoke", true, 1f), SortingLayerNames.Top, -1).Loop().Rate(10).Life(1f, 1.6f).Size(1.4f, 2.4f)
+                .Col(A(Color.white, 0.25f), A(IceA, 0.35f)).Circle(3.2f).Orbit(1.6f).Rot().Spin(-60, 60).Fade(0.3f);
+            PS(r, "Shards", Mat("ice_shard", false, 1.3f)).Loop().Rate(8).Life(0.4f, 0.8f).Speed(0.5f, 1.5f).Size(0.15f, 0.3f)
+                .Col(IceB, IceA).Circle(3.5f).Grav(1f).Rot().Spin(-200, 200).Fade();
+            Light(r, IceA, 6f, 0.9f, pulse: false, flicker: 0.1f);
+        }
+
+        /// <summary>Kỷ Băng Hà (radius 8): a wave of ice runs out over the ground, shards leap up, the light turns to frost.</summary>
+        static void IceAge(GameObject r)
+        {
+            Ring(r, "Wave", A(IceA, 1f), 0.5f, 16f, 0.7f, "ring_thick", SortingLayerNames.Decal, 0.55f);
+            Ring(r, "Wave2", A(Color.white, 0.8f), 0.3f, 14f, 0.9f, "ring", SortingLayerNames.Decal, 0.55f);
+            var floor = Spr(r, "Ice", "glow", Mat("glow", true, 1.3f), A(IceA, 0.55f), SortingLayerNames.Decal, 0);
+            floor.transform.localScale = new Vector3(16f, 8.8f, 1f);
+            SFX(floor, 2.5f, C(0, 0.1f, 0.3f, 1f, 1, 1f), C(0, 1, 0.7f, 1, 1, 0));
+            PS(r, "Spikes", Mat("ice_shard", false, 1.5f)).Burst(60).Life(0.6f, 1.2f).Speed(4f, 12f).Size(0.3f, 0.6f)
+                .Col(IceB, Color.white).Circle(0.5f).Drag(2f).Grav(0.8f).Rot().Spin(-400, 400).Fade();
+            PS(r, "Frost", Mat("smoke", true, 1f), SortingLayerNames.VFX, -1).Burst(24).Life(1f, 1.8f).Speed(2f, 7f).Size(1.2f, 2.2f)
+                .Col(A(IceA, 0.45f), A(Color.white, 0.3f)).Circle(1f).Drag(2f).Rot().Fade(0.1f);
+            var flash = Spr(r, "Flash", "glow_hard", Mat("glow_hard", true, 3f), IceA, scale: 6f);
+            SFX(flash, 0.4f, C(0, 0.6f, 1, 1.2f), C(0, 1, 1, 0));
+            Light(r, IceA, 12f, 4f, 1.2f);
+        }
+
+        /// <summary>Giáp Sương on the hero: a shell of frost crystals glinting around them.</summary>
+        static void FrostAura(GameObject r)
+        {
+            var shell = Spr(r, "Shell", "bubble", Mat("bubble", true, 1.4f), A(IceA, 0.55f), SortingLayerNames.VFX, 1, 1.3f, 0, 0.7f);
+            var b = shell.gameObject.AddComponent<Bobber>();
+            b.amplitude = 0;
+            b.pulse = 0.05f;
+            b.speed = 3f;
+            PS(r, "Glints", Mat("spark4", true, 2f)).Loop().Rate(8).Life(0.4f, 0.8f).Size(0.12f, 0.22f).Col(Color.white, IceA)
+                .Circle(0.7f).Fade().At(0, 0.7f).Local();
+            PS(r, "Chill", Mat("smoke", true, 0.8f), SortingLayerNames.VFX, -1).Loop().Rate(4).Life(0.8f, 1.2f).Size(0.4f, 0.7f)
+                .Col(A(IceA, 0.3f)).Circle(0.5f).Vel(0, 0, -0.3f, 0.1f).Fade(0.2f).Local();
+            Light(r, IceA, 2.2f, 0.7f, pulse: false);
+        }
+
+        /// <summary>A leap of lightning between two points (<see cref="ChainEffect"/>, the orb's zaps): a flickering bolt and a spark where it lands.</summary>
+        static void ChainBolt(GameObject r)
+        {
+            var boltGo = EditorUtil.Child(r, "Bolt");
+            var bolt = boltGo.AddComponent<LightningBolt>();
+            LineRenderer Line(string name, float width, Color c, int order)
+            {
+                var go = EditorUtil.Child(boltGo, name);
+                var lr = go.AddComponent<LineRenderer>();
+                lr.useWorldSpace = true;
+                lr.widthMultiplier = width;
+                lr.widthCurve = C(0, 0.8f, 0.5f, 1f, 1, 0.8f);
+                lr.startColor = c;
+                lr.endColor = c;
+                lr.sharedMaterial = Mat("streak", true, 3f);
+                lr.textureMode = LineTextureMode.Stretch;
+                lr.numCapVertices = 2;
+                lr.sortingLayerName = SortingLayerNames.Top;
+                lr.sortingOrder = order;
+                return lr;
+            }
+            bolt.core = Line("Core", 0.18f, Color.white, 2);
+            bolt.glow = Line("Glow", 0.7f, Volt, 1);
+            bolt.segments = 8;
+            bolt.jitter = 0.28f;
+            bolt.lifetime = 0.3f;
+            PS(r, "Sparks", Mat("px_square", true, 3f)).Burst(8).Life(0.1f, 0.25f).Speed(3f, 7f).Size(0.05f, 0.1f)
+                .Col(Color.white, Volt).Circle(0.05f).Drag(4f).Stretch(1.6f, 0.03f).Fade();
+            Light(r, Volt, 2.5f, 1.4f, 0.25f);
+        }
+
+        /// <summary>Lôi Cầu in flight: a ball of plasma crackling with small arcs.</summary>
+        static void LightningOrb(GameObject r)
+        {
+            var core = Spr(r, "Core", "glow_hard", Mat("glow_hard", true, 3f), Color.white, scale: 0.7f, y: 0.2f);
+            var b = core.gameObject.AddComponent<Bobber>();
+            b.amplitude = 0.08f;
+            b.pulse = 0.12f;
+            b.speed = 9f;
+            Spr(r, "Glow", "glow", Mat("glow", true, 2f), A(Volt, 0.85f), scale: 1.9f, y: 0.2f);
+            var ring = Spr(r, "Ring", "magic_circle", Mat("magic_circle", true, 1.6f), A(Volt, 0.7f), SortingLayerNames.VFX, 1, 0.6f, 0, 0.2f);
+            ring.gameObject.AddComponent<Spinner>().degreesPerSecond = 240f;
+            PS(r, "Arcs", Mat("px_square", true, 3f)).Loop().Rate(40).Life(0.08f, 0.2f).Speed(3f, 7f).Size(0.04f, 0.09f)
+                .Col(Color.white, Volt).Circle(0.4f).Drag(3f).Stretch(2f, 0.04f).Fade().At(0, 0.2f).Local();
+            PS(r, "Trail", Mat("glow", true, 1.4f), SortingLayerNames.VFX, -1).Loop().Rate(24).Life(0.25f, 0.5f).Size(0.2f, 0.4f)
+                .Col(A(Volt, 0.6f)).Circle(0.2f).Fade().At(0, 0.2f);
+            Light(r, Volt, 3.5f, 1.8f, pulse: false, flicker: 0.35f);
+        }
+
+        /// <summary>Lôi Cầu bursting (radius 2.5 at scale 1).</summary>
+        static void LightningBurst(GameObject r)
+        {
+            var flash = Spr(r, "Flash", "glow_hard", Mat("glow_hard", true, 3f), Volt, scale: 3.8f);
+            SFX(flash, 0.3f, C(0, 0.5f, 1, 1.2f), C(0, 1, 1, 0));
+            var hit = Spr(r, "Impact", "bolt_hit_0", Mat("bolt_hit_0", true, 3f), Color.white, scale: 2f);
+            Flip(hit, "bolt_hit");
+            Ring(r, "Shock", A(Volt, 1f), 0.3f, 5f, 0.4f, "ring_thick", SortingLayerNames.VFX, 0.6f);
+            PS(r, "Sparks", Mat("px_square", true, 3f)).Burst(40).Life(0.2f, 0.6f).Speed(5f, 12f).Size(0.06f, 0.12f)
+                .Col(Color.white, Volt).Circle(0.3f).Drag(3f).Stretch(2f, 0.04f).Fade();
+            Light(r, Volt, 7f, 4f, 0.4f);
+        }
+
+        /// <summary>Thiểm Bộ: the hero bursts into lightning where they stood (a ball of it stays there to burst).</summary>
+        static void ThunderStep(GameObject r)
+        {
+            var flash = Spr(r, "Flash", "glow_hard", Mat("glow_hard", true, 3f), Volt, scale: 2.4f, y: 0.5f);
+            SFX(flash, 0.25f, C(0, 1f, 1, 0.6f), C(0, 1, 1, 0));
+            Ring(r, "Ring", A(Volt, 0.9f), 0.2f, 2f, 0.35f, "ring", SortingLayerNames.VFX, 0.55f);
+            PS(r, "Arcs", Mat("px_square", true, 3f)).Burst(24).Life(0.15f, 0.45f).Speed(3f, 9f).Size(0.05f, 0.1f)
+                .Col(Color.white, Volt).Circle(0.4f).Drag(3f).Stretch(2f, 0.04f).Fade().At(0, 0.5f);
+            var orb = Spr(r, "Orb", "glow_hard", Mat("glow_hard", true, 2.6f), A(Volt, 0.9f), scale: 0.8f, y: 0.5f);
+            SFX(orb, 0.85f, C(0, 0.6f, 0.8f, 1.1f, 1, 0.2f), C(0, 1, 0.8f, 1, 1, 0));
+            Light(r, Volt, 3.5f, 2f, 0.6f);
+        }
+
+        /// <summary>Điện Trường (radius 3): a ring of runes crackling on the ground, arcs jumping inside it.</summary>
+        static void StormField(GameObject r)
+        {
+            var circle = Spr(r, "Circle", "magic_circle", Mat("magic_circle", true, 1.8f), Volt, SortingLayerNames.Decal, 2);
+            circle.transform.localScale = new Vector3(2.5f, 1.4f, 1f);
+            circle.gameObject.AddComponent<Spinner>().degreesPerSecond = 30f;
+            var edge = Spr(r, "Edge", "ring", Mat("ring", true, 1.5f), A(Volt, 0.7f), SortingLayerNames.Decal, 1);
+            edge.transform.localScale = new Vector3(6f, 3.3f, 1f);
+            var glow = Spr(r, "Glow", "glow", Mat("glow", true, 1f), A(Volt, 0.35f), SortingLayerNames.Decal, 0);
+            glow.transform.localScale = new Vector3(6f, 3.3f, 1f);
+            PS(r, "Arcs", Mat("px_square", true, 3f)).Loop().Rate(60).Life(0.08f, 0.2f).Speed(4f, 9f).Size(0.04f, 0.09f)
+                .Col(Color.white, Volt).Circle(2.8f).Drag(3f).Stretch(2f, 0.04f).Fade();
+            PS(r, "Motes", Mat("spark4", true, 2f)).Loop().Rate(14).Life(0.5f, 1f).Size(0.1f, 0.2f).Col(Color.white, Volt)
+                .Circle(2.6f).Vel(0, 0, 0.5f, 1.5f).Fade(0.2f);
+            Light(r, Volt, 5f, 1f, pulse: false, flicker: 0.4f);
+        }
+
+        /// <summary>Lôi Ấn on the hero: arcs crawl over them and their weapon.</summary>
+        static void LightningImbue(GameObject r)
+        {
+            PS(r, "Arcs", Mat("px_square", true, 3f)).Loop().Rate(28).Life(0.06f, 0.16f).Speed(2f, 5f).Size(0.04f, 0.08f)
+                .Col(Color.white, Volt).Circle(0.45f).Drag(3f).Stretch(1.8f, 0.04f).Fade().At(0, 0.6f).Local();
+            PS(r, "Glow", Mat("glow", true, 1.4f), SortingLayerNames.VFX, -1).Loop().Rate(10).Life(0.2f, 0.4f).Size(0.3f, 0.5f)
+                .Col(A(Volt, 0.5f)).Circle(0.4f).Fade().At(0, 0.6f).Local();
+            Light(r, Volt, 2f, 0.8f, pulse: false, flicker: 0.5f);
+        }
+
+        /// <summary>Lời Nguyền (radius 3 at scale 1): a sigil burns into the ground, purple smoke rises from it.</summary>
+        static void CurseSigil(GameObject r)
+        {
+            var sigil = Spr(r, "Sigil", "magic_circle", Mat("magic_circle", true, 2f), DarkC, SortingLayerNames.Decal, 2);
+            sigil.transform.localScale = new Vector3(2.6f, 1.45f, 1f);
+            SFX(sigil, 1.5f, C(0, 0.3f, 0.2f, 1f, 1, 1f), C(0, 1, 0.6f, 1, 1, 0), 90f);
+            Ring(r, "Ring", A(DarkC, 0.9f), 0.3f, 6f, 0.5f, "ring_thick", SortingLayerNames.Decal, 0.55f);
+            PS(r, "Smoke", Mat("smoke", false, 1f)).Burst(14).Life(0.8f, 1.4f).Speed(0.2f, 0.8f).Size(0.7f, 1.3f)
+                .Col(new Color(0.25f, 0.08f, 0.35f, 0.6f)).Circle(2.4f).Vel(0, 0, 0.5f, 1.2f).Rot().Fade(0.2f);
+            PS(r, "Eyes", Mat("spark4", true, 2.2f)).Burst(10).Life(0.5f, 1f).Size(0.12f, 0.2f).Col(new Color(1f, 0.25f, 0.35f), DarkC)
+                .Circle(2.4f).Vel(0, 0, 0.3f, 0.8f).Fade();
+            Light(r, DarkC, 5f, 1.8f, 1f);
+        }
+
+        /// <summary>Nhật Thực on the hero: the light around them goes out under a black sun ringed with fire.</summary>
+        static void Eclipse(GameObject r)
+        {
+            // the shadow it throws on the ground, and the black sun high over the hero in a pale corona
+            for (int i = 0; i < 2; i++)
+            {
+                var dark = Spr(r, "Dark" + i, "glow", Mat("glow", false, 1f), new Color(0.02f, 0f, 0.05f, 0.8f), SortingLayerNames.Decal, i);
+                dark.transform.localScale = i == 0 ? new Vector3(14f, 8f, 1f) : new Vector3(7f, 4f, 1f);
+            }
+            var halo = Spr(r, "Halo", "glow", Mat("glow", true, 1.6f), new Color(0.75f, 0.35f, 1f, 0.6f), SortingLayerNames.VFX, 0, 4.2f, 0, 3.4f);
+            halo.gameObject.AddComponent<Spinner>().degreesPerSecond = -8f;
+            var corona = Spr(r, "Corona", "glow_hard", Mat("glow_hard", true, 2.6f), new Color(1f, 0.82f, 0.95f, 1f), SortingLayerNames.VFX, 1, 2.9f, 0, 3.4f);
+            corona.gameObject.AddComponent<Spinner>().degreesPerSecond = 20f;
+            Spr(r, "Sun", "glow_hard", Mat("glow_hard", false, 1f), new Color(0.02f, 0.01f, 0.04f, 1f), SortingLayerNames.VFX, 2, 2.3f, 0, 3.4f);
+            PS(r, "Shadow", Mat("smoke", false, 1f), SortingLayerNames.VFX, -1).Loop().Rate(12).Life(0.6f, 1f).Size(0.5f, 0.9f)
+                .Col(new Color(0.12f, 0.04f, 0.18f, 0.6f)).Circle(0.5f).Vel(0, 0, 0.6f, 1.2f).Rot().Fade(0.2f).Local();
+            PS(r, "Embers", Mat("px_square", true, 2.5f)).Loop().Rate(10).Life(0.5f, 0.9f).Size(0.05f, 0.1f)
+                .Col(new Color(1f, 0.7f, 0.95f), DarkC).Circle(1.2f).Vel(0, 0, 0.5f, 1.5f).Fade().At(0, 3.4f).Local();
         }
 
         /// <summary>A crescent of wind cut loose by Thủ Lĩnh Hắc Phong's blades (<see cref="EnemyShots.WindBlade"/>).</summary>

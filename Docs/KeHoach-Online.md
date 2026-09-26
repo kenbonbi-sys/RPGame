@@ -1,6 +1,6 @@
 # Kế hoạch online — Rừng Thì Thầm (hướng C: thế giới online nhiều người)
 
-> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Thế giới lớn dần thành một bản đồ liền mạch (mục 13): Đầm Lầy Sương Mù đã nối vào phía đông và Hang Pha Lê phía bắc đầm, một máy chủ mỗi kênh giữ cả bản đồ, không cần máy chủ riêng cho từng vùng; giao thức 10 (trang bị: `ActKind.Equip`, ăn uống từ túi: `ActKind.UseItem`, chế tạo ở Lò Rèn), rồi 11 (Thảo Nguyên Gió phía tây hang), rồi 12 (Hắc Phong). Còn lại: đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
+> Trạng thái (24/09/2026, trên `main`): **giai đoạn 0–3 xong; giai đoạn 4 và 5 xong phần chính**. Thế giới online chạy trên một máy chủ luôn bật (đã cài trên máy nhà, tự chạy khi đăng nhập Windows), người chơi bấm *Vào thế giới* là vào (không nhập IP), có tài khoản, nhân vật lưu trên máy chủ, quái và boss do máy chủ điều khiển, mỗi người rơi đồ riêng. Đã thêm (mục 12): bù trễ khi Lướt, máu boss theo số người, kênh (k1, k2…), tổ đội, bạn bè, chat tổ đội và nhắn riêng, kiểm tra di chuyển, tắt máy chủ đúng cách, giám sát, thử tải bằng bot. Thế giới lớn dần thành một bản đồ liền mạch (mục 13): Đầm Lầy Sương Mù đã nối vào phía đông và Hang Pha Lê phía bắc đầm, một máy chủ mỗi kênh giữ cả bản đồ, không cần máy chủ riêng cho từng vùng; giao thức 10 (trang bị: `ActKind.Equip`, ăn uống từ túi: `ActKind.UseItem`, chế tạo ở Lò Rèn), rồi 11 (Thảo Nguyên Gió phía tây hang), rồi 12 (Hắc Phong), rồi 13 (Sách Chiêu: `ActKind.SetSkill`). Còn lại: đưa lên VPS (cần thuê). Vận hành máy chủ: `Docs/MayChu.md`. Các con số thời gian là ước lượng thô cho 1 lập trình viên toàn thời gian; team 3 người (xem `KeHoach-RungThiTham.md`) thì chia bớt phần code, không chia được phần thử nghiệm.
 
 ## 1. Mục tiêu
 
@@ -289,6 +289,21 @@ Giao thức lên **12** (26/09): Hắc Phong (T62, `Docs/ThaoNguyen.md` mục H�
 - **Mất thăng bằng**: máy chủ nghe `Health.Evaded` của nhân vật trong nhát lướt thứ ba và thêm 0,45 giây sau nhát đó. Nhờ vậy một cú né bị `LagCompensation` giữ nửa ping vẫn được tính.
 
 Sửa kèm: chơi một mình thì intro, thanh máu, nhạc của boss và dòng "Kỹ năng: …" trên đầu quái không hiện (chúng tra số hiệu mạng, mà offline không có); nay máy có màn hình tự hiện, máy chủ vẫn gửi cho người chơi như cũ.
+
+Giao thức lên **13** (26/09): Sách Chiêu (T63, `Docs/NhanVat.md` mục Sách Chiêu). 18 chiêu hệ Băng, Lôi, Ám học từ Bí Kíp boss rơi.
+- **Chiêu đã học và thanh chiêu nằm trong `HeroLook`** (`spells`, `bar`), nên đi theo đường sẵn có: lưu trong phần `player`, `HeroInfoMsg` gửi tới mọi máy, bản sao của người khác gắn đúng chiêu ở từng ô (`ApplyKit`) để hiện đúng chiêu người đó tung. `CharacterChoice` giữ nguyên hai danh sách này của máy chủ khi người chơi đổi ngoại hình (`ChooseLook` không sửa được chúng).
+- **Học** là `ActKind.UseItem` với một Bí Kíp: máy chủ kiểm tra lớp và chiêu chưa học, rồi mới lấy sách. **Đặt chiêu** là `ActKind.SetSkill` mới (`value` = ô 1–6, `text` = id chiêu, rỗng để trả về chiêu của lớp): máy chủ kiểm tra đã học, lớp được dùng, Tuyệt kỹ chỉ ở ô D, và không đang giao chiến (4 giây không bị đánh, không quái nào đang đuổi). Bị từ chối thì người đó thấy lý do trên đầu nhân vật.
+- **Rương boss** chỉ gieo Bí Kíp cho người còn học được (đúng lớp, chưa học); mỗi người có công gieo riêng như mọi đồ rơi.
+- Hồi chiêu đi theo chiêu chứ không theo ô, trên máy chủ cũng như máy người chơi.
+- Chiêu mới không cần tin nhắn riêng: tia sét nhảy, tia hút hồn, quả cầu điện và phân thân được mỗi màn hình tự vẽ từ cùng một lần tung chiêu (`CastShown`), máy chủ tính sát thương.
+
+### Đã kiểm tra (26/09, giao thức 13)
+
+- 201 test EditMode (2 test phông chữ bỏ qua như trước). `SpellbookTests` mới có 7 bài: ba hệ đủ 6 chiêu, sách và boss giữ sách; lớp nào đọc được sách nào, rương chỉ gieo sách còn học được; đặt chiêu vào ô, Tuyệt kỹ chỉ ở D, không đổi khi đang giao chiến, hồi chiêu theo chiêu, lưu và sao chép; và từng chiêu mới làm đúng việc của nó trên bia đỡ.
+- `Tools/Server/netsmoke.ps1` 3 vòng, 0 lỗi. Thêm một bước: máy chủ đưa SmokeA (Du Hiệp) một Bí Kíp Băng Tiễn, A đọc sách và đặt Băng Tiễn lên W qua máy chủ, SmokeB thấy ô W của A đổi thành Băng Tiễn; vòng hai A vào lại vẫn còn chiêu ở W.
+- `Tools/Server/loadtest.ps1` (10 bot, 120 giây): 10/10 người, máy chủ thấp nhất 57.8 FPS, trung bình 58.3, CPU nhiều nhất 19% một nhân, 260 MB; 0 lỗi, không ai bị kéo về, tắt đúng cách.
+- Tour `-autoshotOnly spells` (22 ảnh): 0 lỗi.
+- SERVER_LINE
 
 ### Đã kiểm tra (26/09, giao thức 12)
 

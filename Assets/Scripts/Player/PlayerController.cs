@@ -119,7 +119,7 @@ namespace RPG
         void OnLookChanged()
         {
             if (stats == null) return;
-            if (stats.HasClass) skills.ApplyKit(stats.Class, stats.Weapon);
+            if (stats.HasClass) skills.ApplyKit(stats.Class, stats.Weapon, stats.look);
             HeroArt.ApplyTo(this);
             var lamp = GetComponentInChildren<NightLight>(true);
             if (lamp != null) lamp.rangeScale = stats.Darkvision ? 1.6f : 1f;
@@ -216,9 +216,17 @@ namespace RPG
         /// <summary>The source of the stat modifiers buffs give (Cuồng Nộ's damage, Bùng Nổ Hành Động's speed).</summary>
         readonly object buffMods = new object();
 
+        /// <summary>How much harder a charged weapon makes the basic attack (Lôi Ấn), 0: not charged.</summary>
+        public float ImbuePower { get; private set; }
+        /// <summary>Stacks of Tích Điện a charged basic attack adds.</summary>
+        public int ImbueCharge { get; private set; }
+        /// <summary>Stacks of Lạnh whoever strikes this hero from close by gets (Giáp Sương).</summary>
+        public int ChillAttackers { get; private set; }
+
         void ApplyBuffs()
         {
-            float taken = 1f, dealt = 1f, speed = 0f;
+            float taken = 1f, dealt = 1f, speed = 0f, imbue = 0f, crit = 0f;
+            int charge = 0, chill = 0;
             bool immune = false;
             foreach (var b in buffs)
             {
@@ -227,7 +235,14 @@ namespace RPG
                 dealt *= b.spec.damageDealtMultiplier > 0f ? b.spec.damageDealtMultiplier : 1f;
                 speed += b.spec.attackSpeedBonus;
                 immune |= b.spec.stunImmune;
+                imbue += b.spec.imbuePower;
+                charge += b.spec.imbueCharge;
+                crit += b.spec.critBonus;
+                chill += b.spec.chillAttackers;
             }
+            ImbuePower = imbue;
+            ImbueCharge = charge;
+            ChillAttackers = chill;
             health.damageTakenMultiplier = taken;
             if (status != null) status.stunImmune = immune;
             if (stats != null)
@@ -235,6 +250,7 @@ namespace RPG
                 stats.Stats.RemoveFrom(buffMods);
                 if (!Mathf.Approximately(dealt, 1f)) stats.Stats.Add(new StatModifier(StatId.DamageDealt, ModKind.PercentMult, dealt - 1f, buffMods));
                 if (speed != 0f) stats.Stats.Add(new StatModifier(StatId.AttackSpeed, ModKind.Flat, speed, buffMods));
+                if (crit != 0f) stats.Stats.Add(new StatModifier(StatId.CritChance, ModKind.Flat, crit, buffMods));
             }
         }
 
@@ -416,6 +432,7 @@ namespace RPG
         /// </summary>
         public bool UseItem(ItemDef item)
         {
+            if (item != null && item.kind == ItemKind.Tome) return ReadTome(item);
             if (item == null || item.kind != ItemKind.Consumable || IsDead || Time.time < potionReadyAt) return false;
             if (inventory == null || inventory.Count(item) <= 0) return false;
             potionReadyAt = Time.time + potionCooldown;
@@ -425,6 +442,28 @@ namespace RPG
                 return true;
             }
             Consume(item);
+            return true;
+        }
+
+        /// <summary>
+        /// Reads a Bí Kíp from the bag: its spell is learned for good (<see cref="Spellbook"/>) and the
+        /// book is gone. Online a player's machine asks the server.
+        /// </summary>
+        bool ReadTome(ItemDef item)
+        {
+            if (IsDead || inventory == null || inventory.Count(item) <= 0) return false;
+            if (!GameSession.IsAuthority)
+            {
+                OnlineSession.Ask(new ActRequest { kind = ActKind.UseItem, text = item.id });
+                return true;
+            }
+            string why = Spellbook.Learn(this, Spellbook.OfTome(item));
+            if (why != null)
+            {
+                Notify.WorldText(this, why, health.HeadPosition + Vector3.up * 0.4f, new Color(1f, 0.6f, 0.5f));
+                return false;
+            }
+            inventory.Remove(item, 1);
             return true;
         }
 
@@ -747,6 +786,18 @@ namespace RPG
             // the machine that moves the hero pushes it (a server's copy of someone else's hero does not)
             if (motor != null && motor.enabled && d.knockback > 0) motor.AddKnockback(d.direction * d.knockback);
             if (GameSession.IsAuthority) Rebuke(d);
+            if (GameSession.IsAuthority) Frostbite(d);
+        }
+
+        /// <summary>Giáp Sương: whoever strikes the hero from close by is chilled.</summary>
+        void Frostbite(DamageInfo d)
+        {
+            if (ChillAttackers <= 0 || d.dot || d.source == null) return;
+            if (Vector2.Distance(d.source.transform.position, transform.position) > 3f) return;
+            var st = d.source.GetComponentInParent<StatusEffects>();
+            if (st == null) return;
+            st.Chill(ChillAttackers);
+            NetCues.Vfx("hit_ice", d.source.transform.position + Vector3.up * 0.4f, 0f, 0.7f);
         }
 
         /// <summary>Quỷ Duệ: Trả Đòn Địa Ngục — now and then an attacker is set alight.</summary>

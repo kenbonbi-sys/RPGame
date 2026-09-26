@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b4a40aabc157564683b0b9dc615f86e, type: 3}
+  m_Name: tome_shadowclone
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.ItemDef
+  id: tome_shadowclone
+  displayName: "B\xED K\xEDp: Ph\xE2n Th\xE2n"
+  description: "S\xE1ch c\u1ED5 h\u1EC7 \xC1m ch\xE9p chi\xEAu Ph\xE2n Th\xE2n, r\u01A1i t\u1EEB Th\u1EE7 L\u0129nh H\u1EAFc Phong. \u0110\u1ECDc xong, s\xE1ch tan th\xE0nh b\u1EE5i s\xE1ng."
+  icon: {fileID: 71431841, guid: 1063657dcf9a2a443b8a4786504171f2, type: 3}
+  kind: 5
+  rarity: 2
+  maxStack: 5
+  value: 250
+  healAmount: 0
+  energyAmount: 0
+  cleanse: 0
+  slot: -1
+  bonuses: []
+  craftGold: 0
+  craftItems: []

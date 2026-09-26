@@ -676,7 +676,7 @@ namespace RPG
             switch (filter)
             {
                 case 1: return it.IsGear || it.kind == ItemKind.Equipment;
-                case 2: return it.kind == ItemKind.Consumable;
+                case 2: return it.kind == ItemKind.Consumable || it.kind == ItemKind.Tome;
                 case 3: return it.kind == ItemKind.Material || it.kind == ItemKind.Quest;
                 default: return true;
             }
@@ -805,7 +805,7 @@ namespace RPG
                 me.inventory.AskEquip(it);
                 return;
             }
-            if (it.kind == ItemKind.Consumable && b == PointerEventData.InputButton.Right) me.UseItem(it);
+            if ((it.kind == ItemKind.Consumable || it.kind == ItemKind.Tome) && b == PointerEventData.InputButton.Right) me.UseItem(it);
         }
     }
 }

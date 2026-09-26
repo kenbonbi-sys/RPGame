@@ -46,7 +46,7 @@ namespace RPG
         /// <summary>The drawn animation set of a look (cached).</summary>
         public static SpriteAnimSet SetFor(HeroLook look)
         {
-            string key = look.ToJson();
+            string key = look.ArtKey();
             if (Cache.TryGetValue(key, out var set) && set != null) return set;
             set = Build(look, Template);
             Cache[key] = set;

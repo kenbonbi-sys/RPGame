@@ -16,6 +16,8 @@ namespace RPG
     /// invites SmokeB into a party, they talk on the party channel and whisper, SmokeA adds SmokeB
     /// as a friend and sees them playing), then steps next to a Slime Rêu of its own (the two split
     /// them) and hits it until the server says it fell, and checks the server gave it the XP.
+    /// SmokeA, a ranger, is given a Bí Kíp by the server, reads it and puts Băng Tiễn on W (the server
+    /// checks both); SmokeB must see A's W become Băng Tiễn, and coming back A still has it there.
     /// On the first run SmokeA also flies over Khe Vực on a Cột Gió while SmokeB watches from the
     /// far rim: B must see A rise above the ravine and come down on its side.
     /// With -netsmokeAgain (a second run) SmokeA checks its friend is still listed, and with
@@ -119,6 +121,7 @@ namespace RPG
             {
                 int now = ServerPlayers.I != null ? ServerPlayers.I.Count : 0;
                 most = Mathf.Max(most, now);
+                GiveBooks();
                 if (most >= players && now == 0)
                 {
                     done++;
@@ -136,6 +139,19 @@ namespace RPG
             }
             yield return Wait(1f);
             Finish(true, $"{rounds} rounds of players came and left");
+        }
+
+        readonly HashSet<PlayerController> booked = new HashSet<PlayerController>();
+
+        /// <summary>A ranger that does not know Băng Tiễn gets its Bí Kíp, once (Sách Chiêu over the network).</summary>
+        void GiveBooks()
+        {
+            var tome = GameManager.I != null ? GameManager.I.db.Item("tome_frostarrows") : null;
+            if (tome == null) return;
+            foreach (var p in Players.All)
+                if (p != null && p.stats != null && p.inventory != null && p.stats.look.cls == "ranger" &&
+                    !Spellbook.Knows(p.stats.look, "frostarrows") && p.inventory.Count(tome) == 0 && booked.Add(p))
+                    p.inventory.Add(tome, 1, false);
         }
 
         // ================================================================== player
@@ -229,6 +245,32 @@ namespace RPG
                 Debug.Log($"[NetSmoke] {role}: off hand {(me.inventory.Worn(EquipSlot.Offhand) != null ? me.inventory.Worn(EquipSlot.Offhand).id : "-")} → {(gearOk ? "ok" : "NOT")}");
             }
 
+            // ---------------------------------------------------------------- Sách Chiêu, through the server
+            // SmokeA reads the Bí Kíp the server gave it and puts Băng Tiễn on W (the server checks
+            // both, saves them and shows them to everyone); SmokeB must see A's W change
+            bool spellOk = true;
+            if (LoginInfo.Name != null && LoginInfo.Name.EndsWith("A"))
+            {
+                if (!Spellbook.Knows(me.stats.look, "frostarrows"))
+                {
+                    var tome = GameManager.I.db.Item("tome_frostarrows");
+                    yield return Until(() => me.inventory.Count(tome) > 0, 10f);
+                    me.UseItem(tome);
+                    yield return Until(() => Spellbook.Knows(me.stats.look, "frostarrows"), 8f);
+                }
+                if (Spellbook.OnBar(me.stats.look, 1) != "frostarrows") Spellbook.Ask(1, "frostarrows");
+                yield return Until(() => me.skills.slots[1] != null && me.skills.slots[1].id == "frostarrows", 8f);
+                spellOk = Spellbook.Knows(me.stats.look, "frostarrows") && me.skills.slots[1] != null && me.skills.slots[1].id == "frostarrows" &&
+                          me.inventory.Count(GameManager.I.db.Item("tome_frostarrows")) == 0;
+                Debug.Log($"[NetSmoke] {role}: W {(me.skills.slots[1] != null ? me.skills.slots[1].id : "-")}, knows {string.Join(",", me.stats.look.spells ?? new string[0])} → {(spellOk ? "ok" : "NOT")}");
+            }
+            else
+            {
+                yield return Until(() => other != null && other.skills.slots[1] != null && other.skills.slots[1].id == "frostarrows", 25f);
+                spellOk = other != null && other.skills.slots[1] != null && other.skills.slots[1].id == "frostarrows";
+                Debug.Log($"[NetSmoke] {role}: sees the other's W as {(other != null && other.skills.slots[1] != null ? other.skills.slots[1].id : "-")} → {(spellOk ? "ok" : "NOT")}");
+            }
+
             // ---------------------------------------------------------------- playing together
             bool together = false;
             bool again = expect != null || Array.IndexOf(Environment.GetCommandLineArgs(), "-netsmokeAgain") >= 0;
@@ -287,8 +329,8 @@ namespace RPG
             yield return Shot(again ? "_again" : "");
             // the other player keeps fighting a little longer: stay so they still see this hero
             yield return Wait(GameSession.HasScreen ? 3f : 1f);
-            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk && gearOk && flightOk,
-                   $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}, gear {gearOk}, flight {flightOk}");
+            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk && gearOk && spellOk && flightOk,
+                   $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}, gear {gearOk}, spell {spellOk}, flight {flightOk}");
         }
 
         /// <summary>

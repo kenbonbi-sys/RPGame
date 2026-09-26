@@ -29,11 +29,28 @@ namespace RPG
                 if (worn != null && worn != item)
                     sb.Append($"\n<color={Muted}><size=85%>Đang mặc: {worn.displayName} ({worn.BonusText(", ")})</size></color>");
             }
+            var spell = Spellbook.OfTome(item);
+            if (spell != null) sb.Append('\n').Append(TomeText(spell, hero));
             string uses = Uses(item);
             if (uses != null) sb.Append($"\n\n<color={Muted}><size=85%>Lò Rèn cần: {uses}</size></color>");
             if (count > 1) sb.Append($"\n<color={Muted}><size=85%>Đang có: {count}</size></color>");
             if (!string.IsNullOrEmpty(hint)) sb.Append($"\n\n<color=#9ad06a>{hint}</color>");
             return (item.displayName, sb.ToString(), item.RarityColor);
+        }
+
+        /// <summary>A Bí Kíp's spell: what it does, its school, who may learn it and whether this hero may.</summary>
+        static string TomeText(Spellbook.Entry e, PlayerController hero)
+        {
+            var db = GameManager.I != null ? GameManager.I.db : null;
+            var a = db != null ? db.Ability(e.id) : null;
+            var sb = new StringBuilder();
+            string color = "#" + ColorUtility.ToHtmlStringRGB(Spellbook.SchoolColor(e.school));
+            sb.Append($"\n<color={color}><b>{(a != null ? a.displayName : e.id)}</b> · hệ {Spellbook.SchoolName(e.school)}</color>");
+            if (a != null) sb.Append('\n').Append(a.Tooltip());
+            sb.Append($"\n<color={Muted}><size=85%>Lớp học được: {Spellbook.ClassNames(e)}</size></color>");
+            string why = Spellbook.WhyNotLearn(hero, e);
+            sb.Append(why == null ? $"\n<color={Good}>Chuột phải để học.</color>" : $"\n<color={Bad}>{why}</color>");
+            return sb.ToString();
         }
 
         /// <summary>"Nâng +8 (6), Mũ Pha Lê (8)": where the forge asks for <paramref name="item"/> (null: nowhere).</summary>

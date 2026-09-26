@@ -11,7 +11,9 @@ namespace RPG
         Consumable,
         Material,
         Equipment,
-        Quest
+        Quest,
+        /// <summary>A Bí Kíp: reading it teaches a spell of the Sách Chiêu (<see cref="Spellbook"/>).</summary>
+        Tome
     }
 
     public enum ItemRarity
@@ -121,6 +123,7 @@ namespace RPG
                     case ItemKind.Material: return "Nguyên liệu";
                     case ItemKind.Quest: return "Vật phẩm nhiệm vụ";
                     case ItemKind.Currency: return "Tiền";
+                    case ItemKind.Tome: return "Bí Kíp";
                     default: return "Trang bị";
                 }
             }

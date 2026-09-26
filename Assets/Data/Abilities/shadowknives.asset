@@ -1,0 +1,142 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: shadowknives
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: shadowknives
+  displayName: "\xC1m Ti\u1EC5n"
+  description: "Phi ba dao b\xF3ng t\u1ED1i h\xECnh qu\u1EA1t v\u1EC1 ph\xEDa chu\u1ED9t, d\u1EC5 ch\xED m\u1EA1ng."
+  icon: {fileID: 1181917250, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 2080
+  cooldown: 3
+  energyCost: 8
+  targeting: 0
+  maxRange: 10
+  lockTime: 0.25
+  commitTime: 0.15
+  animBase: attack
+  moveWhileCasting: 0.25
+  castSfx: sfx_swing
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 8556425367783735327
+  - rid: 8556425367783735328
+  - rid: 8556425367783735329
+  references:
+    version: 2
+    RefIds:
+    - rid: 8556425367783735327
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 7520830618491659538, guid: d5be9cf7fc9fb9742982f05552037fda, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 16
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 0.75
+          type: 6
+          critChance: 0.25
+          knockback: 2
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        hitVfx: dark_hit
+        hitSfx: sfx_hit
+        hitShake: 0.08
+        angle: -12
+    - rid: 8556425367783735328
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 7520830618491659538, guid: d5be9cf7fc9fb9742982f05552037fda, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 16
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 0.75
+          type: 6
+          critChance: 0.25
+          knockback: 2
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        hitVfx: dark_hit
+        hitSfx: sfx_hit
+        hitShake: 0.08
+        angle: 0
+    - rid: 8556425367783735329
+      type: {class: ProjectileEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        prefab: {fileID: 7520830618491659538, guid: d5be9cf7fc9fb9742982f05552037fda, type: 3}
+        spawn:
+          from: 0
+          up: 0.55
+          forward: 0.5
+        speed: 16
+        lifetime: 0
+        explodeRadius: 0
+        pierce: 0
+        hit:
+          power: 0.75
+          type: 6
+          critChance: 0.25
+          knockback: 2
+          poise: 3
+          hitStop: 0
+          status:
+            burn: 0
+            chill: 0
+            charge: 0
+            poison: 0
+            stun: 0
+            root: 0
+            slow: 0
+            slowDuration: 0
+            curse: 0
+            judgment: 0
+        hitVfx: dark_hit
+        hitSfx: sfx_hit
+        hitShake: 0.08
+        angle: 12

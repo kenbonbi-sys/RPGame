@@ -52,6 +52,7 @@ namespace RPG
             Button(menus, "Journal", "<Keyboard>/j");
             Button(menus, "QuestCycle", "<Keyboard>/tab");
             Button(menus, "Map", "<Keyboard>/m");
+            Button(menus, "Spellbook", "<Keyboard>/k");
             Button(menus, "Advance", "<Keyboard>/f", "<Keyboard>/space", "<Keyboard>/enter", "<Mouse>/leftButton");
             for (int i = 0; i < ChoiceActions.Length; i++) Button(menus, ChoiceActions[i], $"<Keyboard>/{i + 1}");
 

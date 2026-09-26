@@ -19,12 +19,16 @@ Mỗi chiêu là một asset `AbilityDef` gồm chi phí, hồi chiêu, nhãn v�
 | **Projectile** | Đạn, cầu phép | Prefab có component `Projectile`, tốc độ, bán kính nổ, xuyên, `hit`, VFX/SFX khi trúng |
 | **Dash** | Lướt, lao tới | Quãng đường, thời gian, thời gian bất tử, bóng mờ |
 | **Heal** | Hồi máu | Hồi ngay (số hoặc % máu tối đa), hồi theo giây trong một khoảng thời gian, VFX quanh người |
-| **Buff** | Khiên, tăng tốc | Thời gian, hệ số tốc chạy, hệ số sát thương nhận vào, miễn choáng, VFX bám theo và VFX khi hết |
+| **Buff** | Khiên, tăng tốc | Thời gian, hệ số tốc chạy, hệ số sát thương nhận vào, miễn choáng, VFX bám theo và VFX khi hết; `imbuePower` / `imbueCharge` làm đòn Q mạnh hơn và thêm Tích Điện (Lôi Ấn), `critBonus` cộng chí mạng (Nhật Thực), `chillAttackers` làm Lạnh kẻ đánh gần (Giáp Sương) |
 | **Cue** | Chỉ để trình bày | VFX, âm thanh, rung màn hình, nháy màn hình, xung Impact |
 | **Line** | Hàng gai băng | Chạy các khối con tại từng điểm dọc hướng chiêu: số điểm, khoảng cách, nhịp, dừng khi gặp tường, to dần |
 | **Burst** | Bão sét | Chạy các khối con nhiều lần trong một vùng, ưu tiên điểm có kẻ địch, có thời gian tụ lực |
 | **Pulse** | Chiêu kênh (Bão Kiếm) | Chạy các khối con mỗi nhịp trong một khoảng thời gian quanh người dùng |
 | **Combo** | Chuỗi đòn (Chém Gió) | Mỗi lần dùng lại trong `window` giây chuyển sang đoạn tiếp theo; các đoạn lặp lại |
+| **Chain** | Xích Lôi | Đánh kẻ gần điểm nhắm nhất rồi nhảy sang kẻ gần nhất chưa bị đánh: `jumps`, `jumpRange`, `falloff` (yếu đi mỗi lần nhảy), tia sét giữa hai kẻ |
+| **Beam** | Hút Hồn | Tia kênh vào một kẻ trong `duration` giây, mỗi `interval` đánh một lần, `lifesteal` hồi máu theo sát thương |
+| **Orb** | Lôi Cầu | Quả cầu bay chậm theo hướng chiêu, giật mọi kẻ trong `radius` mỗi nhịp, nổ ở cuối đường bay hoặc khi chạm đá |
+| **Clone** | Phân Thân | Bóng của người dùng đứng cạnh `duration` giây, chém kẻ gần nó mỗi `interval`, hết giờ nổ (`burst`) |
 
 ## Con số
 
@@ -33,7 +37,8 @@ Mỗi chiêu là một asset `AbilityDef` gồm chi phí, hồi chiêu, nhãn v�
 - **Kháng hệ** của mục tiêu nằm ở `Health.resistances`, mỗi hệ một số: `-0.5` là điểm yếu (nhận thêm 50%), tối đa `0.75`. Nấm Độc yếu Lửa (`-0.3`).
 - Anh hùng cấp 1 có Công 24.5, nên `power 1` ≈ 24 sát thương. 8 chiêu cũ được chuyển sang với lực chiêu cho đúng số sát thương của bản prototype (Chém Gió 90%, Cầu Lửa 188%, Mũi Băng 122%, Lôi Phạt 212%, Bão Kiếm 45% mỗi nhịp).
 - **Cấp chiêu 1–5:** mỗi cấp +`powerPerLevel` lực (mặc định 12%) và −`cooldownPerLevel` hồi chiêu (4%). Cấp của từng ô nằm ở `PlayerSkills.levels`.
-- **Vị trí (`Anchor`)**: tính từ người dùng (Caster), điểm hiện tại (Point: nơi viên đạn nổ, gai băng mọc…) hoặc điểm nhắm (Aim), cộng thêm `up` (lên trên) và `forward` (theo hướng chiêu).
+- **Vị trí (`Anchor`)**: tính từ người dùng (Caster), điểm hiện tại (Point: nơi viên đạn nổ, gai băng mọc…), điểm nhắm (Aim) hoặc chỗ người dùng đứng lúc ra chiêu (Origin: chỗ cũ sau khi Thiểm Bộ dịch chuyển đi), cộng thêm `up` (lên trên) và `forward` (theo hướng chiêu).
+- **Chiêu học từ Bí Kíp** (Sách Chiêu, `Docs/NhanVat.md`): thêm một dòng vào `Spellbook.All` (id, hệ, các lớp học được, boss giữ sách); `AssetFactory` tự tạo Bí Kíp `tome_<id>` và boss tự thêm sách vào đồ rơi.
 
 ## Khi nào cần code
 
