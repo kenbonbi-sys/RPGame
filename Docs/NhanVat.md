@@ -11,7 +11,9 @@ Nhân vật mới (và nhân vật cũ chưa có lớp) mở **màn Tạo Nhân 
 3. **Ngoại hình**: màu da (Long Duệ: màu vảy, chọn luôn tổ tiên rồng), kiểu tóc (7), màu tóc (12), râu, màu mắt, màu trang phục (12 hoặc màu của lớp), mũ/mũ trùm, vũ khí, kim loại vũ khí. Có nút *Ngẫu nhiên*.
 4. **Hoàn tất**: chỉ số, kỹ năng, đặc tính.
 
-Bên phải là nhân vật xem trước: đi, đứng, đánh, niệm phép, xoay 4 hướng. **Lớp và chủng tộc chọn một lần**; ngoại hình và vũ khí đổi lại được ở bảng Nhân Vật (B hoặc C → *Ngoại hình*). Nhân vật cũ được trả lại toàn bộ điểm đã cộng khi chọn lớp. Online máy chủ kiểm tra lựa chọn (`CharacterChoice`), lưu nó cùng nhân vật và gửi cho mọi người chơi khác để vẽ đúng.
+Bên phải là nhân vật xem trước đứng trên bệ đá (bước Lớp: trong hầm có đuốc và cờ): đi, đứng, đánh, niệm phép, xoay 4 hướng, kèm sáu chỉ số, máu, năng lượng, xúc xắc máu và vũ khí.
+
+Giao diện theo bản thiết kế 26/09 (nền xanh đen, khung vàng): trên cùng là bốn bước *1 Lớp · 2 Chủng tộc · 3 Ngoại hình · 4 Hoàn tất* (bước đã qua có dấu ✓, bấm để quay lại); thẻ lớp có huy hiệu, hình nhân vật, hai chữ về lối đánh (`ClassDef.tagline`, ví dụ *Cận chiến · Bền bỉ*) và nhãn độ khó Dễ / Vừa / Khó; **bấm lần nữa vào lớp đang chọn** mở *Chi tiết lớp* (xúc xắc máu, giáp, chỉ số chính, phép dùng, kháng, vũ khí và 7 kỹ năng với mô tả, số liệu tô vàng). Ngoại hình chia ba nhóm *Diện mạo*, *Tóc & trang phục*, *Vũ khí*; màu da chọn bằng ô màu. Đổi ngoại hình từ bảng Nhân Vật thì nút trái là *Hủy*. Hình nhỏ của các màn này (khung vàng, bệ đá, hầm, icon) được vẽ ngay trong game (`UI/MenuArt.cs`, `UI/MenuArtDraw.cs`), widget chung ở `UI/MenuKit.cs`; màn hình chính dùng cùng bộ đó. **Lớp và chủng tộc chọn một lần**; ngoại hình và vũ khí đổi lại được ở bảng Nhân Vật (B hoặc C → *Ngoại hình*). Nhân vật cũ được trả lại toàn bộ điểm đã cộng khi chọn lớp. Online máy chủ kiểm tra lựa chọn (`CharacterChoice`), lưu nó cùng nhân vật và gửi cho mọi người chơi khác để vẽ đúng.
 
 ## Sáu chỉ số
 
@@ -171,4 +173,4 @@ Không có ảnh vẽ sẵn cho từng tổ hợp: `HeroArt` là bản C# của 
   - lông thú (Cuồng Chiến Binh), đai (Võ Tăng), vòng lá (Tế Sư).
 - Mười lăm loại vũ khí trong tay, theo kim loại và cấp rèn.
 
-Mỗi màn hình tự vẽ các nhân vật nó thấy, nên qua mạng mỗi ngoại hình chỉ tốn vài byte. Xem thử mọi lớp: menu `Tools/RPG/Hero Art Preview` hoặc `-executeMethod RPG.EditorTools.HeroArtPreview.Batch -previewOut <file.png>`; chụp màn tạo nhân vật: `RungThiTham.exe -creatorshot <thư mục>`; tour kỹ năng các lớp: `-autoshot -autoshotOnly classes`.
+Mỗi màn hình tự vẽ các nhân vật nó thấy, nên qua mạng mỗi ngoại hình chỉ tốn vài byte. Xem thử mọi lớp: menu `Tools/RPG/Hero Art Preview` hoặc `-executeMethod RPG.EditorTools.HeroArtPreview.Batch -previewOut <file.png>`; chụp màn tạo nhân vật (bốn bước và cửa sổ chi tiết lớp): `RungThiTham.exe -creatorshot <thư mục>`, màn hình chính: `-titleshot <file.png>` (thêm `-titleshotLogin 1` để chụp cửa sổ đăng nhập); tour kỹ năng các lớp: `-autoshot -autoshotOnly classes`.

@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "Thi S\u0129"
   englishName: Bard
   role: "NGH\u1EC6 S\u0128 C\u1ED4 V\u0168"
+  tagline: "H\u1ED7 tr\u1EE3 \xB7 Linh ho\u1EA1t"
   description: "D\xF9ng l\u1EDDi ca v\xE0 ti\u1EBFng \u0111\xE0n \u0111\u1EC3 c\u1ED5 v\u0169 \u0111\u1ED3ng \u0111\u1ED9i, ch\u1EEFa l\xE0nh, ch\u1EBF nh\u1EA1o v\xE0 m\xEA ho\u1EB7c k\u1EBB th\xF9."
   complexity: 2
   hitDie: 8

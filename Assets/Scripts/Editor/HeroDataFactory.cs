@@ -216,6 +216,7 @@ namespace RPG.EditorTools
                     c.displayName = "Cuồng Chiến Binh";
                     c.englishName = "Barbarian";
                     c.role = "CHIẾN BINH CUỒNG NỘ";
+                    c.tagline = "Cận chiến · Bền bỉ";
                     c.description = "Chiến binh hoang dã sống bằng cơn thịnh nộ nguyên thủy: càng đau càng đánh mạnh.";
                     c.complexity = Complexity.Low;
                     c.hitDie = 12;
@@ -234,6 +235,7 @@ namespace RPG.EditorTools
                     c.displayName = "Thi Sĩ";
                     c.englishName = "Bard";
                     c.role = "NGHỆ SĨ CỔ VŨ";
+                    c.tagline = "Hỗ trợ · Linh hoạt";
                     c.description = "Dùng lời ca và tiếng đàn để cổ vũ đồng đội, chữa lành, chế nhạo và mê hoặc kẻ thù.";
                     c.complexity = Complexity.High;
                     c.hitDie = 8;
@@ -252,6 +254,7 @@ namespace RPG.EditorTools
                     c.displayName = "Tu Sĩ";
                     c.englishName = "Cleric";
                     c.role = "TU SĨ THẦN THÁNH";
+                    c.tagline = "Hồi phục · Thần thuật";
                     c.description = "Mượn sức mạnh của thần linh: chữa lành đồng đội, che chở họ và giáng ánh sáng lên kẻ ác.";
                     c.complexity = Complexity.Average;
                     c.hitDie = 8;
@@ -270,6 +273,7 @@ namespace RPG.EditorTools
                     c.displayName = "Tế Sư Rừng Xanh";
                     c.englishName = "Druid";
                     c.role = "TƯ TẾ THIÊN NHIÊN";
+                    c.tagline = "Thiên nhiên · Khống chế";
                     c.description = "Người giữ rừng: gọi rễ cây trói địch, gọi sấm sét, gai nhọn và chữa lành bằng sức sống muôn loài.";
                     c.complexity = Complexity.High;
                     c.hitDie = 8;
@@ -288,6 +292,7 @@ namespace RPG.EditorTools
                     c.displayName = "Chiến Binh";
                     c.englishName = "Fighter";
                     c.role = "BẬC THẦY VŨ KHÍ";
+                    c.tagline = "Vũ khí · Đa dụng";
                     c.description = "Thạo mọi loại vũ khí và giáp trụ. Xông pha, trụ vững, và không bao giờ bỏ cuộc.";
                     c.complexity = Complexity.Low;
                     c.hitDie = 10;
@@ -306,6 +311,7 @@ namespace RPG.EditorTools
                     c.displayName = "Võ Tăng";
                     c.englishName = "Monk";
                     c.role = "VÕ SƯ";
+                    c.tagline = "Võ thuật · Cơ động";
                     c.description = "Rèn thân và tâm tới mức nắm đấm nhanh như gió, cú đá làm choáng, bước chân nhẹ như mây.";
                     c.complexity = Complexity.High;
                     c.hitDie = 8;
@@ -324,6 +330,7 @@ namespace RPG.EditorTools
                     c.displayName = "Hiệp Sĩ Thánh";
                     c.englishName = "Paladin";
                     c.role = "CHIẾN BINH MỘ ĐẠO";
+                    c.tagline = "Hộ vệ · Thánh quang";
                     c.description = "Chiến binh đã thề nguyện: giáp nặng, đòn trừng phạt thần thánh, bàn tay chữa lành.";
                     c.complexity = Complexity.Average;
                     c.hitDie = 10;
@@ -342,6 +349,7 @@ namespace RPG.EditorTools
                     c.displayName = "Du Hiệp";
                     c.englishName = "Ranger";
                     c.role = "CHIẾN BINH HOANG DÃ";
+                    c.tagline = "Săn đuổi · Tầm xa";
                     c.description = "Thợ săn nơi hoang dã: tên bay như mưa, bẫy gai, dấu săn, và luôn giữ khoảng cách.";
                     c.complexity = Complexity.Average;
                     c.hitDie = 10;
@@ -360,6 +368,7 @@ namespace RPG.EditorTools
                     c.displayName = "Đạo Tặc";
                     c.englishName = "Rogue";
                     c.role = "CAO THỦ KHÉO LÉO";
+                    c.tagline = "Ẩn nấp · Chí mạng";
                     c.description = "Nhanh tay, lẹ mắt, đánh vào chỗ yếu: dao ném, nhát chí mạng, bom khói và bóng tối.";
                     c.complexity = Complexity.Low;
                     c.hitDie = 8;
@@ -378,6 +387,7 @@ namespace RPG.EditorTools
                     c.displayName = "Thuật Sĩ";
                     c.englishName = "Sorcerer";
                     c.role = "PHÉP THUẬT BẨM SINH";
+                    c.tagline = "Phép bẩm sinh · Bùng nổ";
                     c.description = "Sinh ra đã mang ma lực trong máu: lửa, băng, sấm và hỗn loạn tuôn ra theo cảm xúc.";
                     c.complexity = Complexity.High;
                     c.hitDie = 6;
@@ -396,6 +406,7 @@ namespace RPG.EditorTools
                     c.displayName = "Khế Ước Sư";
                     c.englishName = "Warlock";
                     c.role = "PHÙ THỦY DỊ GIỚI";
+                    c.tagline = "Khế ước · Ma thuật";
                     c.description = "Đổi lấy sức mạnh bằng khế ước với thực thể bên kia bức màn: tia hắc ám, lời nguyền, xúc tu bóng tối.";
                     c.complexity = Complexity.High;
                     c.hitDie = 8;
@@ -414,6 +425,7 @@ namespace RPG.EditorTools
                     c.displayName = "Pháp Sư";
                     c.englishName = "Wizard";
                     c.role = "HỌC GIẢ PHÉP THUẬT";
+                    c.tagline = "Học thuật · Đa phép";
                     c.description = "Học phép từ sách vở suốt đời: cầu lửa, mũi băng, sấm sét, lá chắn và cả hố đen.";
                     c.complexity = Complexity.Average;
                     c.hitDie = 6;

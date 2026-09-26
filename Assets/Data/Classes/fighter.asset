@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "Chi\u1EBFn Binh"
   englishName: Fighter
   role: "B\u1EACC TH\u1EA6Y V\u0168 KH\xCD"
+  tagline: "V\u0169 kh\xED \xB7 \u0110a d\u1EE5ng"
   description: "Th\u1EA1o m\u1ECDi lo\u1EA1i v\u0169 kh\xED v\xE0 gi\xE1p tr\u1EE5. X\xF4ng pha, tr\u1EE5 v\u1EEFng, v\xE0 kh\xF4ng bao gi\u1EDD b\u1ECF cu\u1ED9c."
   complexity: 0
   hitDie: 10

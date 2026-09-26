@@ -36,7 +36,7 @@ Chạy script từ một ứng dụng dạng gói MSIX (ví dụ Claude desktop)
 | Qua Internet không VPN | Cần máy chủ có địa chỉ công khai: mở cổng UDP 7770–7771 trên router hoặc thuê VPS (mục 5), rồi ghi địa chỉ đó vào `servers.txt`. |
 
 - **`servers.txt`**: danh sách địa chỉ game thử (mỗi dòng một địa chỉ, có thể kèm `:cổng`). Nằm trong `Assets/StreamingAssets` và được đóng gói vào `RungThiTham_Data/StreamingAssets/servers.txt` cạnh game: sửa file này là đổi máy chủ cho mọi người, không cần build lại.
-- Trên màn hình chính còn ô **Máy chủ khác** để một người tự gõ địa chỉ (game nhớ lại).
+- Trên màn hình chính còn mục **Máy chủ khác** (bấm để mở) để một người tự gõ địa chỉ rồi bấm *Tìm lại* (game nhớ lại, lần sau mục này tự mở).
 - Lần đầu vào: nhập **tên nhân vật** và **mật khẩu** (tên mới thì bấm *Tạo nhân vật mới*). Game nhớ đăng nhập trên máy đó; đổi máy thì nhập lại tên và mật khẩu là có nhân vật cũ. Mật khẩu không bao giờ gửi qua mạng: máy người chơi chỉ gửi bằng chứng đã ký (xem `Net/LoginCrypto.cs`).
 - Mất kết nối: game về màn hình chính, báo lý do và **tự vào lại sau 5 giây** (nếu máy chủ chưa chạy lại thì tìm tiếp tới khi thấy).
 - Nhiều kênh: màn hình chính hiện các kênh và tự vào kênh còn chỗ có số nhỏ nhất. Trong game gõ `/kenh` để xem, `/kenh 2` để sang kênh 2.

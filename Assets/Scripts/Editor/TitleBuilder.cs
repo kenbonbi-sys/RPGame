@@ -8,9 +8,9 @@ namespace RPG.EditorTools
 {
     /// <summary>
     /// The title screen scene (Assets/Scenes/Title.unity, the build's first scene): a camera, an
-    /// event system and a <see cref="TitleScreen"/> given the game's font, frames and, when
+    /// event system and a <see cref="TitleScreen"/> given the game's font and, when
     /// Assets/Art/UI/title_backdrop.png exists, a picture behind the menu. The widgets themselves
-    /// are made by TitleScreen when it starts.
+    /// (and their small pictures, <see cref="MenuArt"/>) are made by TitleScreen when it starts.
     /// </summary>
     public static class TitleBuilder
     {
@@ -46,10 +46,6 @@ namespace RPG.EditorTools
             var title = go.AddComponent<TitleScreen>();
             title.font = AssetFactory.Font;
             title.fontOutline = AssetFactory.FontOutline;
-            title.windowSprite = ArtImporter.S("frame_wood");
-            title.buttonSprite = ArtImporter.S("frame_panel");
-            title.dividerSprite = ArtImporter.S("divider");
-            title.whiteSprite = ArtImporter.S("white");
             title.backdrop = Backdrop();
 
             EditorSceneManager.MarkSceneDirty(scene);

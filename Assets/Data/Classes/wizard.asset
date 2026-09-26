@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "Ph\xE1p S\u01B0"
   englishName: Wizard
   role: "H\u1ECCC GI\u1EA2 PH\xC9P THU\u1EACT"
+  tagline: "H\u1ECDc thu\u1EADt \xB7 \u0110a ph\xE9p"
   description: "H\u1ECDc ph\xE9p t\u1EEB s\xE1ch v\u1EDF su\u1ED1t \u0111\u1EDDi: c\u1EA7u l\u1EEDa, m\u0169i b\u0103ng, s\u1EA5m s\xE9t, l\xE1 ch\u1EAFn v\xE0 c\u1EA3 h\u1ED1 \u0111en."
   complexity: 1
   hitDie: 6

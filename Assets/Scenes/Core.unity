@@ -11321,11 +11321,6 @@ MonoBehaviour:
   blocksGameplay: 1
   font: {fileID: 11400000, guid: 00a76ab58de0d9247b0d2250ed45b9ed, type: 2}
   fontOutline: {fileID: 2100000, guid: 5380a3aef41f8934eb5d1b06f6e97bfe, type: 2}
-  windowSprite: {fileID: -1885218777, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
-  buttonSprite: {fileID: -731373025, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
-  dividerSprite: {fileID: 1653727300, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
-  whiteSprite: {fileID: -8108132, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
-  slotSprite: {fileID: -1431523833, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
 --- !u!224 &589239262
 RectTransform:
   m_ObjectHideFlags: 0

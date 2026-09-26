@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "V\xF5 T\u0103ng"
   englishName: Monk
   role: "V\xD5 S\u01AF"
+  tagline: "V\xF5 thu\u1EADt \xB7 C\u01A1 \u0111\u1ED9ng"
   description: "R\xE8n th\xE2n v\xE0 t\xE2m t\u1EDBi m\u1EE9c n\u1EAFm \u0111\u1EA5m nhanh nh\u01B0 gi\xF3, c\xFA \u0111\xE1 l\xE0m cho\xE1ng, b\u01B0\u1EDBc ch\xE2n nh\u1EB9 nh\u01B0 m\xE2y."
   complexity: 2
   hitDie: 8

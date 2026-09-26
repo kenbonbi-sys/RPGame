@@ -37,6 +37,8 @@ namespace RPG
         public string englishName;
         [Tooltip("The card's first tag, in capitals (CHIẾN BINH CUỒNG NỘ).")]
         public string role;
+        [Tooltip("Two words under its name on the creator's card: how it fights (Cận chiến · Bền bỉ).")]
+        public string tagline;
         [TextArea(2, 4)] public string description;
         public Complexity complexity = Complexity.Average;
 

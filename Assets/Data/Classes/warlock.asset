@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "Kh\u1EBF \u01AF\u1EDBc S\u01B0"
   englishName: Warlock
   role: "PH\xD9 TH\u1EE6Y D\u1ECA GI\u1EDAI"
+  tagline: "Kh\u1EBF \u01B0\u1EDBc \xB7 Ma thu\u1EADt"
   description: "\u0110\u1ED5i l\u1EA5y s\u1EE9c m\u1EA1nh b\u1EB1ng kh\u1EBF \u01B0\u1EDBc v\u1EDBi th\u1EF1c th\u1EC3 b\xEAn kia b\u1EE9c m\xE0n: tia h\u1EAFc \xE1m, l\u1EDDi nguy\u1EC1n, x\xFAc tu b\xF3ng t\u1ED1i."
   complexity: 2
   hitDie: 8

@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "Hi\u1EC7p S\u0129 Th\xE1nh"
   englishName: Paladin
   role: "CHI\u1EBEN BINH M\u1ED8 \u0110\u1EA0O"
+  tagline: "H\u1ED9 v\u1EC7 \xB7 Th\xE1nh quang"
   description: "Chi\u1EBFn binh \u0111\xE3 th\u1EC1 nguy\u1EC7n: gi\xE1p n\u1EB7ng, \u0111\xF2n tr\u1EEBng ph\u1EA1t th\u1EA7n th\xE1nh, b\xE0n tay ch\u1EEFa l\xE0nh."
   complexity: 1
   hitDie: 10

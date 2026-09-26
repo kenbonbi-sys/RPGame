@@ -654,7 +654,7 @@ namespace RPG.EditorTools
             return ui;
         }
 
-        /// <summary>The character creator: a full-screen panel that builds its own widgets (<see cref="CharacterCreatorUI"/>).</summary>
+        /// <summary>The character creator: a full-screen panel that builds its own widgets and pictures (<see cref="CharacterCreatorUI"/>, <see cref="MenuArt"/>).</summary>
         static CharacterCreatorUI BuildCreator(Transform root)
         {
             var rt = Stretch(root, "CharacterCreator");
@@ -664,11 +664,6 @@ namespace RPG.EditorTools
             ui.window = rt;
             ui.font = font;
             ui.fontOutline = outline;
-            ui.windowSprite = ArtImporter.S("frame_wood");
-            ui.buttonSprite = ArtImporter.S("frame_panel");
-            ui.dividerSprite = ArtImporter.S("divider");
-            ui.whiteSprite = ArtImporter.S("white");
-            ui.slotSprite = ArtImporter.S("slot");
             return ui;
         }
 

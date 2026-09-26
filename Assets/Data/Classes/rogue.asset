@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\u0110\u1EA1o T\u1EB7c"
   englishName: Rogue
   role: "CAO TH\u1EE6 KH\xC9O L\xC9O"
+  tagline: "\u1EA8n n\u1EA5p \xB7 Ch\xED m\u1EA1ng"
   description: "Nhanh tay, l\u1EB9 m\u1EAFt, \u0111\xE1nh v\xE0o ch\u1ED7 y\u1EBFu: dao n\xE9m, nh\xE1t ch\xED m\u1EA1ng, bom kh\xF3i v\xE0 b\xF3ng t\u1ED1i."
   complexity: 0
   hitDie: 8

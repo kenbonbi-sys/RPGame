@@ -34,6 +34,12 @@ namespace TMPro
     public class TMP_SpriteAsset : TMP_Asset { }
     public class TMP_StyleSheet : ScriptableObject { }
     public class TMP_ColorGradient : ScriptableObject { }
+    public struct VertexGradient
+    {
+        public Color topLeft, topRight, bottomLeft, bottomRight;
+        public VertexGradient(Color color) { topLeft = topRight = bottomLeft = bottomRight = color; }
+        public VertexGradient(Color color0, Color color1, Color color2, Color color3) { topLeft = color0; topRight = color1; bottomLeft = color2; bottomRight = color3; }
+    }
     public class TMP_Settings : ScriptableObject
     {
         public static TMP_Settings instance => null;
@@ -81,6 +87,7 @@ namespace TMPro
         public int maxVisibleLines { get; set; }
         public int firstVisibleCharacter { get; set; }
         public bool enableVertexGradient { get; set; }
+        public VertexGradient colorGradient { get; set; }
         public Color32 faceColor { get; set; }
         public Color32 outlineColor { get; set; }
         public float outlineWidth { get; set; }

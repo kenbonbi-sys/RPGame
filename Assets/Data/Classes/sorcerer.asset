@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "Thu\u1EADt S\u0129"
   englishName: Sorcerer
   role: "PH\xC9P THU\u1EACT B\u1EA8M SINH"
+  tagline: "Ph\xE9p b\u1EA9m sinh \xB7 B\xF9ng n\u1ED5"
   description: "Sinh ra \u0111\xE3 mang ma l\u1EF1c trong m\xE1u: l\u1EEDa, b\u0103ng, s\u1EA5m v\xE0 h\u1ED7n lo\u1EA1n tu\xF4n ra theo c\u1EA3m x\xFAc."
   complexity: 2
   hitDie: 6

@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "Du Hi\u1EC7p"
   englishName: Ranger
   role: "CHI\u1EBEN BINH HOANG D\xC3"
+  tagline: "S\u0103n \u0111u\u1ED5i \xB7 T\u1EA7m xa"
   description: "Th\u1EE3 s\u0103n n\u01A1i hoang d\xE3: t\xEAn bay nh\u01B0 m\u01B0a, b\u1EABy gai, d\u1EA5u s\u0103n, v\xE0 lu\xF4n gi\u1EEF kho\u1EA3ng c\xE1ch."
   complexity: 1
   hitDie: 10

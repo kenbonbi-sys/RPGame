@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "T\u1EBF S\u01B0 R\u1EEBng Xanh"
   englishName: Druid
   role: "T\u01AF T\u1EBE THI\xCAN NHI\xCAN"
+  tagline: "Thi\xEAn nhi\xEAn \xB7 Kh\u1ED1ng ch\u1EBF"
   description: "Ng\u01B0\u1EDDi gi\u1EEF r\u1EEBng: g\u1ECDi r\u1EC5 c\xE2y tr\xF3i \u0111\u1ECBch, g\u1ECDi s\u1EA5m s\xE9t, gai nh\u1ECDn v\xE0 ch\u1EEFa l\xE0nh b\u1EB1ng s\u1EE9c s\u1ED1ng mu\xF4n lo\xE0i."
   complexity: 2
   hitDie: 8

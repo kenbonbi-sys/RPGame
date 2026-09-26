@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "Cu\u1ED3ng Chi\u1EBFn Binh"
   englishName: Barbarian
   role: "CHI\u1EBEN BINH CU\u1ED2NG N\u1ED8"
+  tagline: "C\u1EADn chi\u1EBFn \xB7 B\u1EC1n b\u1EC9"
   description: "Chi\u1EBFn binh hoang d\xE3 s\u1ED1ng b\u1EB1ng c\u01A1n th\u1ECBnh n\u1ED9 nguy\xEAn th\u1EE7y: c\xE0ng \u0111au c\xE0ng \u0111\xE1nh m\u1EA1nh."
   complexity: 0
   hitDie: 12

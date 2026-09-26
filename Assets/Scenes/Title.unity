@@ -1015,10 +1015,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RPG.TitleScreen
   font: {fileID: 11400000, guid: 00a76ab58de0d9247b0d2250ed45b9ed, type: 2}
   fontOutline: {fileID: 2100000, guid: 5380a3aef41f8934eb5d1b06f6e97bfe, type: 2}
-  windowSprite: {fileID: -1885218777, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
-  buttonSprite: {fileID: -731373025, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
-  dividerSprite: {fileID: 1653727300, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
-  whiteSprite: {fileID: -8108132, guid: bc72a5b556103fc45a091bde2524e4f0, type: 3}
   backdrop: {fileID: 21300000, guid: 5ab59c03a08d871489ff481a2f67cb70, type: 3}
 --- !u!4 &2069043773
 Transform:
