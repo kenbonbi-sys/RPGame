@@ -290,12 +290,21 @@ Giao thức lên **12** (26/09): Hắc Phong (T62, `Docs/ThaoNguyen.md` mục H�
 
 Sửa kèm: chơi một mình thì intro, thanh máu, nhạc của boss và dòng "Kỹ năng: …" trên đầu quái không hiện (chúng tra số hiệu mạng, mà offline không có); nay máy có màn hình tự hiện, máy chủ vẫn gửi cho người chơi như cũ.
 
+### Đã kiểm tra (26/09, giao thức 12)
+
+- 194 test EditMode (2 test phông chữ bỏ qua như trước). `HacPhongTests` mới có 10 bài: bù nhìn đứng im rồi tỉnh, nhảy và xoay; tên đón gió vẫn trúng qua gió ngang; đao thủ hở sườn; Bò Rừng Sắt bung giáp; gió riêng của đồi và bão cát; né nhát thứ ba; cung thủ bị gọi rồi rút lui; lốc xoáy.
+- `Tools/Server/netsmoke.ps1` 3 vòng, 0 lỗi. SmokeB đứng bờ tây Khe Vực và thấy cung thủ Hắc Phong do máy chủ gửi được vẽ đúng diện mạo trên màn hình của mình.
+- `Tools/Server/loadtest.ps1` (10 bot, 120 giây): 10/10 người, máy chủ thấp nhất 53 FPS, trung bình 56, CPU nhiều nhất 22% một nhân, 258 MB; 0 lỗi, không ai bị kéo về, tắt đúng cách.
+- Tour `-autoshotOnly steppe` (18 ảnh) và `-autoshotOnly hacphong` (33 ảnh): 0 lỗi.
+- Máy chủ thật trên máy nhà đã lên giao thức 12 (26/09 lúc 03:51, không ai đang chơi, 5 tài khoản giữ nguyên). `RungThiTham.zip` trên Desktop đã đóng gói lại cùng bản build; game giao thức 11 sẽ được báo tải bản mới.
+
 ### Đã kiểm tra (26/09, giao thức 11)
 
 - 184 test EditMode (2 test phông chữ bỏ qua như trước), trong đó `SteppeTests` có thêm bài: nhân vật người khác (bản sao kinematic do mạng dời) lướt qua Khe Vực thì màn hình này tự vẽ nó bay lên rồi đáp xuống; đứng yên trong vòng đá thì không bay.
 - `Tools/Server/netsmoke.ps1` 3 vòng, 0 lỗi: SmokeA bay qua Khe Vực, SmokeB ở bờ bên kia thấy A cao 1,8 ô trên bóng rồi đáp xuống.
 - `Tools/Server/loadtest.ps1` (10 bot, 120 giây): 10/10 người, máy chủ thấp nhất 36 FPS, trung bình 47, CPU nhiều nhất 22% một nhân, 258 MB; 0 lỗi, không ai bị kéo về, tắt đúng cách.
 - `RungThiTham.exe -autoshot -autoshotOnly steppe`: 18 ảnh (cửa hầm, trại, gió, Cột Gió trước/trong/sau, ba loài quái, ban đêm, bản đồ); 0 lỗi.
+- Máy chủ thật trên máy nhà đã lên giao thức 11 (26/09 lúc 02:28, 5 tài khoản giữ nguyên); `RungThiTham.zip` đóng gói lại cùng bản build.
 
 ### Đã kiểm tra (25/09, giao thức 6)
 
