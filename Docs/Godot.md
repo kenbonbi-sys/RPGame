@@ -14,7 +14,7 @@ Project nằm trong `Godot/`. Code viết bằng **GDScript** (máy chưa có .N
 |---|---|
 | **WASD** · chuột | Chạy theo hướng camera · xoay camera |
 | **Space** | Nhảy; khi đang bám thì bật nhảy khỏi bề mặt |
-| **Shift** | Nhấp: Lướt (lộn né, bất tử 0,28 s, hồi 2,2 s) · giữ: chạy nhanh |
+| **Shift** | Bấm là Lướt ngay, cả khi đang trên không (lộn né, bất tử 0,28 s, hồi 2,2 s; lướt trên không gần như không rơi) · giữ quá 0,22 s: chạy nhanh |
 | **Chuột trái** | Đòn thường của vũ khí (kiếm: combo Chém Gió 3 đòn). Khi đang bám hoặc đứng trên lưng colossus: giữ để vung kiếm, thả để đâm (giữ càng lâu càng đau) |
 | **1 2 3 4 5** · **R** | 5 chiêu của lớp nhân vật · Tuyệt kỹ (bản Unity: W E R A S · D) |
 | **Z X C** | Bình Máu · Bình Năng Lượng · Thuốc Thảo Mộc (bản Unity: 1 2 3) |
@@ -63,7 +63,21 @@ Số liệu nằm trong các ScriptableObject của bản Unity (`Assets/Data`).
 - Đất là một hàm độ cao (`WorldMap.height`, `WorldMap.splat`) được **bake** thành `world/terrain_data.res`. Đổi bố cục xong thì chạy lại:
   `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot -s tools/bake_world.gd` (khoảng 4 giây, vẽ luôn `map_preview.png`). Test `baked land matches WorldMap` báo khi quên bake.
 - `Terrain` dựng lưới 64 m mỗi mảnh và một va chạm heightmap 1 m. `Foliage` rải cây, đá, bụi, nấm và hoa theo hạt giống cố định. Cây và đá lớn có va chạm.
-- Model Kenney được đổi màu sang bảng màu trầm trong `palette.gd`, và lá cây lay theo gió.
+- **Nhìn như Dauntless:** ánh sáng kiểu vẽ tay dùng chung (`shaders/stylized_light.gdshaderinc`): ranh sáng–tối mềm, bóng ngả xanh lam chứ không xám, viền sáng ở mép. Tán cây dùng pháp tuyến "khối cầu" nên đổ bóng tròn như một khối lá, mặt dưới tối và có ánh xuyên lá (`leaves.gdshader`). Đá ấm, có rêu trên mặt hướng lên (`rock.gdshader`). Đất xanh tươi, đường đất ấm (`terrain.gdshader`). Trời xanh đậm, sương nhẹ theo khoảng cách, bloom và SSAO (`world/environment.tres`).
+- **Cỏ** (`grass.gd`, `grass.gdshader`): lưới ô 16 m quanh camera (7×7 ô, mỗi ô tới 520 bụi, mỗi bụi 7 lá), chỉ mọc trên đất cỏ phẳng, không mọc trên đường, đá, bùn, nước. Cỏ lay theo gió, rẽ ra quanh hero, nhỏ dần rồi biến mất ở 34–46 m.
+- Model Kenney được đổi màu sang bảng màu tươi trong `palette.gd`.
+
+## Giao diện kiểu Dauntless (`hud.gd`)
+
+Font **Barlow Condensed** (SemiBold, Bold, ExtraBold), khung xiên như Dauntless.
+
+- **Góc trái trên:** chân dung hero quay trực tiếp (một camera nhỏ chỉ thấy lớp 11), vòng quanh chân dung là máu; huy hiệu cấp; tên và lớp; thanh máu xanh ngọc (phần xanh lam là lượng sát thương đang được buff đỡ, phần trắng là máu vừa mất đang rút dần); thanh vàng là sức bám; năng lượng chia ô 10 điểm; vạch kinh nghiệm; ô buff với số giây còn lại.
+- **Giữa trên:** la bàn B, ĐB, Đ, ĐN, N, TN, T, TB theo hướng camera; chấm xanh là làng, hình thoi đỏ là colossus. Khi colossus đang săn hero thì tên và thanh máu của nó hiện ngay dưới la bàn, còn lại là tên vùng.
+- **Phải trên:** biểu tượng tam giác ngược với phần trăm máu còn lại của colossus.
+- **Giữa dưới:** 8 ô chiêu có biểu tượng theo hệ (kiếm, lửa, băng, sét, độc, thánh, bóng tối, hỗ trợ, di chuyển), phím, năng lượng tốn, hồi chiêu dạng màn che có số giây, tên chiêu.
+- **Phải dưới:** 3 bình thuốc Z X C và số lượng.
+- **Trái dưới:** nhật ký sự kiện (nhặt đồ, hạ quái, kinh nghiệm, lên cấp, boss phát hiện) qua `Game.log(text, color)` / tín hiệu `Game.message`, mờ đi sau 8 s; dòng "[Enter] Để trò chuyện" dành cho bản online.
+- **Bảng tên quái** (`nameplate.gd`): cả bảng xoay theo camera nên nền và thanh máu luôn khớp nhau; phần vàng là máu vừa mất rút dần. Số sát thương dùng Barlow ExtraBold.
 
 ## Camera kiểu SotC (`sotc_camera.gd`)
 
@@ -71,9 +85,11 @@ Camera nằm trên `SpringArm3D` (không xuyên tường), đi theo hero hơi tr
 
 ## Hero (`hero.gd`)
 
-Trạng thái: đất, không trung, Lướt, chém, bám, đâm, ngã, chết. Model là KayKit Knight (cao khoảng 1,85 m).
+Trạng thái: đất, không trung, Lướt, chém, bám, đâm, ngã, chết.
 
-- **Sức bám** (vòng vàng góc phải dưới, 100 điểm): bám đứng yên tốn 5/s, leo tốn 10/s, colossus lắc mình tốn thêm tới 34/s, gồng đâm tốn thêm 6/s. Hồi 38/s trên đất, 14/s khi đứng trên lưng colossus. Hết sức bám thì rơi.
+**Model** (`hero_model.gd`): bộ đồ **Ranger** của Quaternius (Modular Character Outfits – Fantasy), đầu, mắt, tóc lấy từ Universal Base Characters (phần đầu và cổ được cắt khỏi thân theo trọng số xương), khăn quàng đỏ và thanh kiếm bản to gắn vào xương tay phải. Hoạt ảnh lấy từ Universal Animation Library 1 và 2 (cùng bộ xương kiểu Unreal: `pelvis`, `spine_01`, `upperarm_l`...): chỉ chép xoay của từng xương và vị trí hông (đã đổi tỉ lệ), bỏ xương gốc và scale. `ALIASES` ánh xạ tên hoạt ảnh cũ (KayKit) sang tên trong UAL, nên `hero.gd` không phải đổi. Lưới của hero nằm ở lớp hiển thị 2 (không dính decal) và lớp 11 (chỉ hero, cho camera chân dung trên HUD).
+
+- **Sức bám** (thanh vàng dưới thanh máu, 100 điểm): bám đứng yên tốn 5/s, leo tốn 10/s, colossus lắc mình tốn thêm tới 34/s, gồng đâm tốn thêm 6/s. Hồi 38/s trên đất, 14/s khi đứng trên lưng colossus. Hết sức bám thì rơi.
 - **Leo:** bề mặt bám được là va chạm có `meta climbable = true` (lông). Giáp vỏ cây, mặt nạ xương và móng thì không bám được. Điểm bám được lưu theo toạ độ riêng của bộ phận đang bám, nên hero đi theo con quái khi nó bước, quay hay lắc. Leo tới mép thì tự trèo lên mặt trên.
 - **Đứng trên lưng:** hero được mang theo bộ phận dưới chân. Khi colossus lắc mình mà không giữ chuột phải thì bị hất văng.
 - **Rơi:** rơi quá 7,5 m mất 7 máu mỗi mét.
@@ -129,6 +145,7 @@ Cao khoảng 18 m, dài khoảng 30 m, sống trong Hang Gấu Ma (sàn phẳng 
 |---|---|---|
 | 1 · Nền móng | Project, phím, camera SotC, hero (chạy/nhảy/Lướt/combo/bám/leo/đâm/rơi), thế giới 800×512 m theo bố cục Unity, làng, Hang Gấu Ma, **Gấu Ma thành colossus**, HUD, test, AutoShot | **Xong** (14/10/2026) |
 | 2 · Chiến đấu & tiến trình | Công thức sát thương, kháng hệ, trạng thái, Trấn Áp, hit-stop 3 mức, Lướt Hoàn Hảo, cả 92 chiêu chạy từ dữ liệu, cấp/XP, 6 chỉ số D&D; số liệu chuyển từ `Assets/Data` bằng script; Slime Rêu và Nấm Độc; túi đồ, rơi đồ, bình thuốc | **Phần lớn xong** (15/10/2026). Còn: cửa sổ cộng điểm chỉ số, Sách Chiêu (K), cấp chiêu |
+| 2b · Art kiểu Dauntless | Hero Quaternius (bộ đồ, đầu, tóc, hoạt ảnh UAL), ánh sáng kiểu vẽ tay, tán cây tròn, cỏ dày, đá rêu, trời và sương; HUD như Dauntless; bảng tên quái sửa lệch thanh máu; Lướt cả trên không | **Phần lớn xong** (15/10/2026). Còn: nhà làng, dáng cây tròn hơn, quái và NPC theo cùng phong cách |
 | 3 · Đồ, nhiệm vụ, hội thoại | Túi đồ, trang bị, chế tạo, rơi đồ, nhiệm vụ (`QuestDef`), hội thoại Yarn (đọc lại các file `.yarn`), NPC làng, Bách Khoa Trùm, lưu game, các cửa sổ B/I/C, J, K | Chưa |
 | 4 · Các vùng | Đầm Lầy (Cóc Tía, Xà Mẫu thành colossus dưới nước), Hang Pha Lê (hang trong lòng núi, Golem Pha Lê Cổ, Nhện Chúa), Thảo Nguyên Gió (gió, Khe Vực, Cột Gió, Bò Rừng Sắt, Thủ Lĩnh Hắc Phong) | Chưa |
 | 5 · Nhân vật | Lớp D&D và chủng tộc (KayKit có Knight, Barbarian, Mage, Rogue), tạo nhân vật, màn hình chính xanh lá–vàng | Chưa |
@@ -144,4 +161,6 @@ Tất cả đều **CC0** (dùng tự do, kể cả thương mại, không bắt
 
 - **KayKit Adventurers 1.0** và **KayKit Skeletons 1.0** của Kay Lousberg ([kaylousberg.com](https://www.kaylousberg.com)), lấy từ github.com/KayKit-Game-Assets (chỉ thư mục glTF): nhân vật có 76–95 hoạt ảnh, vũ khí.
 - **Nature Kit** của Kenney ([kenney.nl](https://kenney.nl)): 329 model cây, đá, cây bụi, đồ vật (chỉ bản GLB).
+- **Universal Base Characters**, **Universal Animation Library** 1 và 2, **Modular Character Outfits – Fantasy** của Quaternius ([quaternius.com](https://quaternius.com)): thân, đầu, tóc, bộ đồ Ranger/Peasant, khoảng 120 hoạt ảnh. Ảnh lớn hơn 2048 px được thu nhỏ còn 2048.
 - Font **Inter** (SIL OFL 1.1), chép từ `Assets/Fonts`.
+- Font **Barlow Condensed** của Jeremy Tribby (SIL OFL 1.1, `assets/fonts/BarlowCondensed-OFL.txt`), từ Google Fonts.

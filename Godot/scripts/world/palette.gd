@@ -1,32 +1,40 @@
 class_name Palette
 extends RefCounted
-## Re-colours the Kenney Nature Kit (bright pastel) into the game's muted forest palette, by the
-## kit's material names. Leaves get a gentle sway in the wind.
+## Re-colours the Kenney Nature Kit (bright pastel, faceted) into the game's Dauntless-like palette
+## by the kit's material names: canopies become soft painted blobs that sway (leaves.gdshader),
+## stone gets moss on its tops (rock.gdshader), wood and flowers turn warm and saturated.
 
 const COLORS := {
-	"leafsGreen": Color(0.31, 0.43, 0.22),
-	"leafsDark": Color(0.20, 0.30, 0.17),
-	"leafsFall": Color(0.60, 0.44, 0.22),
-	"grass": Color(0.34, 0.46, 0.23),
-	"wood": Color(0.42, 0.32, 0.23),
-	"woodBark": Color(0.33, 0.26, 0.19),
-	"woodBarkDark": Color(0.26, 0.21, 0.16),
-	"woodDark": Color(0.28, 0.21, 0.15),
-	"woodBirch": Color(0.76, 0.73, 0.66),
-	"woodInner": Color(0.62, 0.52, 0.38),
-	"stone": Color(0.56, 0.56, 0.53),
-	"stoneDark": Color(0.42, 0.42, 0.40),
-	"dirt": Color(0.44, 0.37, 0.29),
-	"dirtDark": Color(0.34, 0.28, 0.22),
-	"colorRed": Color(0.72, 0.30, 0.28),
-	"colorRedDark": Color(0.52, 0.22, 0.20),
-	"colorPurple": Color(0.55, 0.47, 0.72),
-	"colorYellow": Color(0.86, 0.72, 0.38),
-	"colorTan": Color(0.78, 0.66, 0.50),
-	"corn": Color(0.80, 0.68, 0.40),
+	"leafsGreen": Color(0.30, 0.50, 0.20),
+	"leafsDark": Color(0.20, 0.40, 0.20),
+	"leafsFall": Color(0.80, 0.48, 0.18),
+	"grass": Color(0.38, 0.56, 0.22),
+	"wood": Color(0.52, 0.36, 0.22),
+	"woodBark": Color(0.40, 0.28, 0.19),
+	"woodBarkDark": Color(0.30, 0.22, 0.16),
+	"woodDark": Color(0.34, 0.24, 0.16),
+	"woodBirch": Color(0.84, 0.80, 0.70),
+	"woodInner": Color(0.76, 0.60, 0.40),
+	"stone": Color(0.60, 0.56, 0.50),
+	"stoneDark": Color(0.46, 0.45, 0.44),
+	"dirt": Color(0.56, 0.41, 0.27),
+	"dirtDark": Color(0.42, 0.31, 0.22),
+	"colorRed": Color(0.85, 0.25, 0.22),
+	"colorRedDark": Color(0.60, 0.18, 0.16),
+	"colorPurple": Color(0.62, 0.42, 0.85),
+	"colorYellow": Color(0.98, 0.78, 0.30),
+	"colorTan": Color(0.86, 0.70, 0.50),
+	"corn": Color(0.90, 0.74, 0.36),
 }
-const LEAVES := ["leafsGreen", "leafsDark", "leafsFall"]
+## leaves: [top colour, underside colour]
+const LEAF_TONES := {
+	"leafsGreen": [Color(0.66, 0.80, 0.30), Color(0.08, 0.27, 0.23)],
+	"leafsDark": [Color(0.46, 0.62, 0.26), Color(0.05, 0.20, 0.18)],
+	"leafsFall": [Color(0.98, 0.72, 0.30), Color(0.45, 0.18, 0.12)],
+}
+const STONES := ["stone", "stoneDark"]
 const SWAY := preload("res://shaders/leaves.gdshader")
+const ROCK := preload("res://shaders/rock.gdshader")
 
 static var _mats := {}
 static var _meshes := {}
@@ -41,15 +49,24 @@ static func material_for(source: Material) -> Material:
 	if _mats.has(key):
 		return _mats[key]
 	var m: Material
-	if key in LEAVES:
+	if LEAF_TONES.has(key):
 		var sm := ShaderMaterial.new()
 		sm.shader = SWAY
 		sm.set_shader_parameter("albedo", COLORS[key])
+		sm.set_shader_parameter("top_color", LEAF_TONES[key][0])
+		sm.set_shader_parameter("under_color", LEAF_TONES[key][1])
 		m = sm
+	elif key in STONES:
+		var rm := ShaderMaterial.new()
+		rm.shader = ROCK
+		rm.set_shader_parameter("albedo", COLORS[key])
+		m = rm
 	else:
 		var st := StandardMaterial3D.new()
 		st.albedo_color = COLORS[key]
-		st.roughness = 0.92
+		st.roughness = 0.9
+		st.rim_enabled = true
+		st.rim = 0.2
 		m = st
 	_mats[key] = m
 	return m

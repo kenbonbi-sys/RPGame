@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="Environment" path="res://world/environment.tres" id="2"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/camera/sotc_camera.gd" id="9"]
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="10"]
 [ext_resource type="Script" path="res://scripts/world/forest_camps.gd" id="11"]
+[ext_resource type="Script" path="res://scripts/world/grass.gd" id="12"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1")
@@ -20,8 +21,8 @@ environment = ExtResource("2")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation = Vector3(-0.698, -0.698, 0)
-light_color = Color(1, 0.94, 0.84, 1)
-light_energy = 1.35
+light_color = Color(1, 0.89, 0.72, 1)
+light_energy = 1.85
 shadow_enabled = true
 shadow_blur = 1.5
 directional_shadow_max_distance = 260.0
@@ -29,6 +30,9 @@ light_volumetric_fog_energy = 1.6
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("3")
+
+[node name="Grass" type="Node3D" parent="."]
+script = ExtResource("12")
 
 [node name="Foliage" type="Node3D" parent="."]
 script = ExtResource("4")

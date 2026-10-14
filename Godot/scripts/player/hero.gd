@@ -38,7 +38,7 @@ const CHEST := 1.15
 @export var gravity := 21.0
 @export var jump_speed := 7.4
 @export var climb_speed := 1.8
-@export var model_scale := 0.75
+@export var model_scale := 1.0
 ## Falls shorter than this do not hurt.
 @export var safe_fall := 7.5
 
@@ -70,6 +70,7 @@ var _counter_until := 0.0
 var _roll_speed_now := 10.0
 var _roll_time_now := 0.48
 var _roll_style := "roll"
+var _air_dash := false
 var hp: float:
 	get:
 		return health.hp if health else 0.0
@@ -109,7 +110,6 @@ var grip_hint := false
 
 var _state_time := 0.0
 var _dodge_down_at := -1.0
-var _dodge_held := false
 var _sprinting := false
 var _peak_y := 0.0
 var _ground_time := 0.0
@@ -131,6 +131,8 @@ var model: Node3D
 var anim: AnimationPlayer
 var _anim_name := ""
 var _anim_len := {}
+## Model-specific clip names (HeroModel maps the KayKit names this script uses).
+var _resolve: Callable
 
 const SWINGS := ["1H_Melee_Attack_Slice_Diagonal", "1H_Melee_Attack_Slice_Horizontal", "1H_Melee_Attack_Chop"]
 const LOOPING := ["Idle", "Walking_A", "Running_A", "Running_B", "Jump_Idle", "Spellcasting", "Blocking", "Lie_Idle", "Sit_Floor_Idle"]
@@ -158,8 +160,10 @@ func _ready() -> void:
 	if model:
 		model.scale = Vector3.ONE * model_scale
 		anim = model.find_children("*", "AnimationPlayer", true, false).front() as AnimationPlayer
+		if model.has_method("resolve"):
+			_resolve = model.resolve
 		for n in model.find_children("*", "MeshInstance3D", true, false):
-			(n as MeshInstance3D).layers = 2
+			(n as MeshInstance3D).layers = 2 | HeroModel.PORTRAIT_LAYER
 			if n.name in HIDDEN_GEAR:
 				n.visible = false
 	if anim:
@@ -225,30 +229,36 @@ func attached_colossus() -> Node:
 
 
 # ================================================================== animation
+func _clip(anim_name: String) -> String:
+	return _resolve.call(anim_name) if _resolve.is_valid() else anim_name
+
+
 func play(anim_name: String, blend := 0.15, speed := 1.0) -> void:
-	if not anim or not anim.has_animation(anim_name):
+	var clip := _clip(anim_name)
+	if not anim or not anim.has_animation(clip):
 		return
 	if _anim_name == anim_name:
 		anim.speed_scale = speed
 		return
 	_anim_name = anim_name
 	anim.speed_scale = speed
-	anim.play(anim_name, blend)
+	anim.play(clip, blend)
 
 
 ## Hold one moment of an animation (used for the climbing and stab poses).
 func hold(anim_name: String, t: float, blend := 0.12) -> void:
-	if not anim or not anim.has_animation(anim_name):
+	var clip := _clip(anim_name)
+	if not anim or not anim.has_animation(clip):
 		return
 	if _anim_name != anim_name:
 		_anim_name = anim_name
-		anim.play(anim_name, blend)
+		anim.play(clip, blend)
 	anim.speed_scale = 0.0
-	anim.seek(clampf(t, 0.0, _anim_len.get(anim_name, 1.0)), true)
+	anim.seek(clampf(t, 0.0, _anim_len.get(clip, 1.0)), true)
 
 
 func anim_length(anim_name: String) -> float:
-	return _anim_len.get(anim_name, 1.0)
+	return _anim_len.get(_clip(anim_name), 1.0)
 
 
 # ================================================================== state
@@ -309,17 +319,13 @@ func _locomotion(delta: float) -> void:
 	if not stunned:
 		_potions()
 
-	# Shift: a tap is Lướt, holding it sprints
-	if Input.is_action_just_pressed("dodge"):
+	# Shift: Lướt the moment it is pressed (on the ground or in the air); keep holding it to sprint
+	if Input.is_action_just_pressed("dodge") and not stunned and not rooted:
 		_dodge_down_at = Game.now()
-		_dodge_held = true
-	if _dodge_held and Input.is_action_just_released("dodge"):
-		_dodge_held = false
-		if Game.now() - _dodge_down_at < Controls.DODGE_TAP_TIME and on_floor and not stunned and not rooted:
-			skills.request(PlayerSkills.DASH_SLOT)
-			if state == State.ROLL:
-				return
-	_sprinting = _dodge_held and Game.now() - _dodge_down_at >= Controls.DODGE_TAP_TIME and amount > 0.3
+		skills.request(PlayerSkills.DASH_SLOT)
+		if state == State.ROLL:
+			return
+	_sprinting = Input.is_action_pressed("dodge") and Game.now() - _dodge_down_at >= Controls.DODGE_TAP_TIME and amount > 0.3
 
 	if not stunned and Input.is_action_pressed("grip") and _try_grip():
 		return
@@ -477,6 +483,9 @@ func dash(dir: Vector3, distance: float, time: float, invuln: float, perfect: bo
 		_perfect_until = Game.now() + DB.c("perfectWindow", 0.15)
 		_perfect_used = false
 	_knock = Vector3.ZERO
+	_air_dash = not is_on_floor()
+	if _air_dash:
+		velocity.y = maxf(velocity.y, 0.5)
 	set_state(State.ROLL)
 	match style:
 		"roll":
@@ -493,7 +502,8 @@ func _roll(delta: float) -> void:
 	var spd := _roll_speed_now * ((1.0 - t * t * 0.6) if _roll_style == "roll" else 1.0)
 	velocity.x = _roll_dir.x * spd
 	velocity.z = _roll_dir.z * spd
-	velocity.y -= gravity * delta
+	# an air dash glides: gravity barely pulls until it ends
+	velocity.y -= gravity * delta * (0.2 if _air_dash else 1.0)
 	if not status.is_stunned():
 		_skill_keys()
 	move_and_slide()
@@ -777,8 +787,8 @@ func _climb(delta: float) -> void:
 	if top:
 		hold("PickUp", anim_length("PickUp") * 0.42)
 	else:
-		var a := "Spellcast_Raise"
-		hold(a, anim_length(a) * (0.55 + 0.18 * absf(sin(_climb_cycle * PI))))
+		var a := "Climb"
+		hold(a, anim_length(a) * (0.12 + 0.1 * absf(sin(_climb_cycle * PI))))
 
 
 ## Moves the grip point to a new spot on the surface; false when nothing there can be held.

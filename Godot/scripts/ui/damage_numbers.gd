@@ -3,6 +3,7 @@ extends RefCounted
 ## Floating numbers over whoever got hit (Label3D, always facing the camera): white for normal
 ## hits, gold and bigger for crits, green for healing, status colours for damage over time.
 
+const FONT := preload("res://assets/fonts/BarlowCondensed-ExtraBold.ttf")
 const COLORS := {
 	"normal": Color(1.0, 0.97, 0.9),
 	"crit": Color(1.0, 0.78, 0.25),
@@ -25,7 +26,8 @@ static func show(pos: Vector3, text: String, kind := "normal", big := false) -> 
 	l.no_depth_test = true
 	l.fixed_size = true
 	l.pixel_size = 0.0011 if big else 0.0008
-	l.font_size = 48
+	l.font = FONT
+	l.font_size = 52
 	l.outline_size = 14
 	l.modulate = COLORS.get(kind, COLORS.normal)
 	l.outline_modulate = Color(0, 0, 0, 0.75)

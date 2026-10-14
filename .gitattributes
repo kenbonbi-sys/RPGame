@@ -35,3 +35,4 @@
 *.glb       filter=lfs diff=lfs merge=lfs -text
 Godot/**/*.bin filter=lfs diff=lfs merge=lfs -text
 *.res       filter=lfs diff=lfs merge=lfs -text
+*.fbx       filter=lfs diff=lfs merge=lfs -text

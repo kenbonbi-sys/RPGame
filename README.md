@@ -109,5 +109,5 @@ Tools/
 - Font **Inter** (SIL Open Font License 1.1), lấy từ bộ cài Unity.
 - **FishNet** (thư viện mạng, FirstGearGames): giấy phép riêng của FishNet, miễn phí khi dùng trong game; cài qua Package Manager, không chép mã nguồn vào repo.
 - Font pixel **Galmuri7**, **Galmuri11** của Lee Minseo (SIL Open Font License 1.1), bản rút gọn Latin + tiếng Việt do `Tools/FontGen/make_pixel_fonts.py` tạo; giấy phép ở `Assets/Fonts/Galmuri-LICENSE.txt`.
-- Bản 3D (`Godot/`): model **KayKit Adventurers / Skeletons** (Kay Lousberg) và **Kenney Nature Kit**, đều CC0; giấy phép đi kèm trong `Godot/assets/third_party`.
+- Bản 3D (`Godot/`): model **Quaternius** (Universal Base Characters, Universal Animation Library 1–2, Modular Character Outfits – Fantasy), **KayKit Adventurers / Skeletons** (Kay Lousberg) và **Kenney Nature Kit**, đều CC0; giấy phép đi kèm trong `Godot/assets/third_party`. Font **Barlow Condensed** (SIL OFL 1.1).
 - Toàn bộ art/âm thanh còn lại do script trong `Tools/` sinh ra. Bộ icon Franuka chỉ dùng làm tham khảo phong cách, không có trong project.

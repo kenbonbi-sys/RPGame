@@ -5,6 +5,8 @@ extends Node
 signal boss_engaged(boss: Node3D)
 signal boss_defeated(boss: Node3D)
 signal hero_died
+## A line for the event log (loot, kills, level-ups).
+signal message(text: String, color: Color)
 ## A flash of colour over the whole screen (skills, being hurt).
 signal screen_flash(color: Color, strength: float, seconds: float)
 ## A monster fell; `credited` are the heroes who share its XP and loot (quests, bestiary).
@@ -25,8 +27,18 @@ var _slow_scale := 1.0
 var _slow_ease := 0.4
 
 
-func _ready() -> void:
+## Counts errors from the very start when a test tour runs (AutoShot reads it).
+var error_counter: Logger
+
+
+func _enter_tree() -> void:
 	args = OS.get_cmdline_user_args()
+	if args.has("--autoshot"):
+		error_counter = AutoShot.ErrorCounter.new()
+		OS.add_logger(error_counter)
+
+
+func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
@@ -74,6 +86,10 @@ func slow_motion(scale: float, seconds: float, ease := 0.4) -> void:
 	_slow_scale = maxf(0.01, scale)
 	_slow_until = now() + seconds
 	_slow_ease = maxf(0.0, ease)
+
+
+func log(text: String, color := Color(0.92, 0.9, 0.84)) -> void:
+	message.emit(text, color)
 
 
 func flash_screen(color: Color, strength: float, seconds: float) -> void:

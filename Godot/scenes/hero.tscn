@@ -1,9 +1,10 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/hero.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/third_party/kaykit_adventurers/characters/Knight.glb" id="2"]
+[ext_resource type="Script" path="res://scripts/player/hero_model.gd" id="2"]
 
 [node name="Hero" type="CharacterBody3D"]
 script = ExtResource("1")
 
-[node name="Model" parent="." instance=ExtResource("2")]
+[node name="Model" type="Node3D" parent="."]
+script = ExtResource("2")

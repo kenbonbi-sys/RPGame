@@ -17,18 +17,23 @@ class ErrorCounter:
 			_editor_notify: bool, error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
 		if error_type == ERROR_TYPE_WARNING:
 			return
+		# Godot's own leak report at exit is not ours
+		if rationale.begins_with("BUG: Unreferenced") or code.contains("leaked"):
+			return
 		errors += 1
 		if first.size() < 12:
 			first.append("%s:%d %s %s %s" % [file, line, function, code, rationale])
 
 	func _log_message(message: String, error: bool) -> void:
+		if error and message.contains("SHADER ERROR"):
+			errors += 1
 		if error and first.size() < 12:
 			first.append(message.strip_edges())
 
 
 var dir := ""
 var only := ""
-var counter := ErrorCounter.new()
+var counter: ErrorCounter
 var main: Node
 var hero: Hero
 var cam: SotcCamera
@@ -38,7 +43,9 @@ var _taken := 0
 
 
 func _ready() -> void:
-	OS.add_logger(counter)
+	counter = Game.error_counter if Game.error_counter else ErrorCounter.new()
+	if Game.error_counter == null:
+		OS.add_logger(counter)
 	dir = Game.arg_value("--shots-dir", OS.get_user_data_dir().path_join("autoshot"))
 	only = Game.arg_value("--autoshot-only", "")
 	DirAccess.make_dir_recursive_absolute(dir)
