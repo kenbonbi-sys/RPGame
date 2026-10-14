@@ -48,10 +48,10 @@ func _land(ground: float) -> void:
 	flying = false
 	global_position.y = ground + radius * 0.45
 	if thrower and thrower.has_method("hit_area"):
-		thrower.hit_area(global_position, 5.5, 34.0, 9.0, 5.0)
+		thrower.hit_area(global_position, 5.5, 24.0, 9.0, 5.0, "Ném Đá Lớn")
 	Fx.dust(global_position, 5.0, 60)
 	Fx.burst(global_position + Vector3.UP, Vector3.UP, Color(0.45, 0.42, 0.38, 0.9), 20, 9.0, 0.5, 1.2, 50.0, -14.0)
-	var h: Node3D = Game.hero
+	var h: Node3D = Game.hero if is_instance_valid(Game.hero) else null
 	if h:
 		Game.shake(0.6 * clampf(1.0 - h.global_position.distance_to(global_position) / 50.0, 0.1, 1.0))
 	var body := StaticBody3D.new()

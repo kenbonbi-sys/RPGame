@@ -14,6 +14,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 [autoload]
 
 Controls="*res://scripts/core/controls.gd"
+DB="*res://scripts/core/db.gd"
 Game="*res://scripts/core/game.gd"
 
 [display]

@@ -59,6 +59,8 @@ func _run() -> void:
 	await _wait(2.0)
 	if only == "" or only == "world":
 		await _world()
+	if only == "" or only == "forest":
+		await _forest()
 	if only == "" or only == "climb":
 		await _climb()
 	if only == "" or only == "skills":
@@ -88,6 +90,65 @@ func _world() -> void:
 	_put(ridge, WorldMap.arena_center())
 	await _wait(1.0)
 	await _shot("05_tren_vach_da")
+
+
+## Monsters of the forest and the hero's skills.
+func _forest() -> void:
+	var camp := WorldMap.tile(Vector2(47, 27.5))
+	_put(camp + Vector2(-14, -6), camp)
+	await _wait(1.5)
+	await _shot("20_bai_slime")
+	_put(camp + Vector2(-7, -3), camp)
+	await _wait(2.5)
+	await _shot("21_slime_lao_toi")
+	for i in 3:
+		_aim_at_nearest()
+		_press("attack")
+		await _wait(0.12)
+		_release("attack")
+		await _wait(0.3)
+	await _shot("22_chem_gio")
+	for i in 6:
+		_aim_at_nearest()
+		hero.skills.request(0)
+		await _wait(0.45)
+	await _wait(1.0)
+	await _shot("23_roi_do")
+	hero.skills.request(2)
+	await _wait(0.5)
+	await _shot("24_chem_xoay")
+	var shrooms := WorldMap.tile(Vector2(62, 29.5))
+	_put(shrooms + Vector2(-13, -4), shrooms)
+	await _wait(3.0)
+	await _shot("25_nam_doc_ban")
+	_aim_at_nearest()
+	AbilityRunner.cast(hero, Ability.get_by_id("fireball"), _nearest_enemy_pos(), 1, 1)
+	await _wait(0.45)
+	await _shot("26_cau_lua")
+	AbilityRunner.cast(hero, Ability.get_by_id("lightning"), _nearest_enemy_pos(), 1, 3)
+	await _wait(0.9)
+	await _shot("27_loi_phat")
+	print("AUTOSHOT: hero level %d xp %d gold %d bag %s" % [hero.level, hero.stats.xp, hero.inventory.gold,
+		str(hero.inventory.stacks.map(func(s): return "%s×%d" % [s.id, s.count]))])
+
+
+func _nearest_enemy_pos() -> Vector3:
+	var best := hero.global_position + hero.facing * 6.0
+	var bd := INF
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e.state == Enemy.State.DEAD or not e.visible:
+			continue
+		var d: float = e.global_position.distance_to(hero.global_position)
+		if d < bd:
+			bd = d
+			best = e.global_position
+	return best
+
+
+func _aim_at_nearest() -> void:
+	var p := _nearest_enemy_pos()
+	var to := p - hero.global_position
+	cam.yaw = atan2(-to.x, -to.z)
 
 
 func _climb() -> void:

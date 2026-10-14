@@ -7,12 +7,22 @@ extends CanvasLayer
 const GOLD := Color(0.86, 0.73, 0.40)
 const GREEN_DARK := Color(0.06, 0.11, 0.08, 0.78)
 const LIFE := Color(0.80, 0.22, 0.20)
+const ENERGY := Color(0.30, 0.55, 0.95)
+const XP := Color(0.86, 0.73, 0.40)
 const BOSS := Color(0.55, 0.85, 0.75)
+const SLOT_KEYS := ["Chuột T", "1", "2", "3", "4", "5", "R", "Shift"]
 
 var hero: Node3D
 var boss: Node3D
 
 var _hp_bar: ProgressBar
+var _energy_bar: ProgressBar
+var _xp_bar: ProgressBar
+var _hp_text: Label
+var _buff_label: Label
+var _slots: Array[SkillSlot] = []
+var _potion_labels: Array[Label] = []
+var _flash: ColorRect
 var _name_label: Label
 var _grip: GripRing
 var _boss_box: Control
@@ -48,6 +58,45 @@ func _ready() -> void:
 	vb.add_child(_name_label)
 	_hp_bar = _bar(LIFE, Vector2(300, 14))
 	vb.add_child(_hp_bar)
+	_hp_text = _label("", 12, Color(1, 1, 1, 0.85))
+	_hp_text.position = Vector2(8, -1)
+	_hp_bar.add_child(_hp_text)
+	_energy_bar = _bar(ENERGY, Vector2(300, 8))
+	vb.add_child(_energy_bar)
+	_xp_bar = _bar(XP, Vector2(300, 4))
+	vb.add_child(_xp_bar)
+	_buff_label = _label("", 13, Color(1.0, 0.9, 0.6))
+	vb.add_child(_buff_label)
+
+	# skill bar (bottom left)
+	var bar := HBoxContainer.new()
+	bar.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	bar.position = Vector2(24, -96)
+	bar.add_theme_constant_override("separation", 6)
+	root.add_child(bar)
+	for i in 8:
+		var s := SkillSlot.new()
+		s.key = SLOT_KEYS[i]
+		s.custom_minimum_size = Vector2(70, 70)
+		bar.add_child(s)
+		_slots.append(s)
+	var pots := HBoxContainer.new()
+	pots.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	pots.position = Vector2(24, -128)
+	pots.add_theme_constant_override("separation", 14)
+	root.add_child(pots)
+	for i in 3:
+		var l := _label("", 14, [Color(1.0, 0.55, 0.5), Color(0.55, 0.7, 1.0), Color(0.6, 1.0, 0.55)][i])
+		l.add_theme_constant_override("outline_size", 5)
+		l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+		pots.add_child(l)
+		_potion_labels.append(l)
+
+	_flash = ColorRect.new()
+	_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_flash.color = Color(1, 0, 0, 0)
+	root.add_child(_flash)
 
 	# grip ring (bottom right)
 	_grip = GripRing.new()
@@ -106,7 +155,8 @@ func _ready() -> void:
 
 	# keys (top right, fades after a while; F1 shows it again)
 	_help = _label("WASD: chạy · Chuột: xoay camera · Space: nhảy · Shift: Lướt (giữ: chạy nhanh)\n" +
-		"Chuột trái: chém · Giữ chuột phải: bám và leo · Khi đang bám, giữ rồi thả chuột trái: đâm\n" +
+		"Chuột trái: đòn thường · 1–5: chiêu · R: Tuyệt kỹ · Z X C: bình thuốc\n" +
+		"Giữ chuột phải: bám và leo · Khi đang bám, giữ rồi thả chuột trái: đâm\n" +
 		"Q hoặc chuột giữa: nhìn về phía boss · Esc: nhả chuột · F1: bảng phím", 15, Color(0.92, 0.9, 0.84))
 	_help.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_help.position = Vector2(-760, 22)
@@ -122,6 +172,7 @@ func _ready() -> void:
 	_debug.visible = false
 	root.add_child(_debug)
 
+	Game.screen_flash.connect(_screen_flash)
 	Game.boss_engaged.connect(_on_boss_engaged)
 	Game.boss_defeated.connect(_on_boss_defeated)
 	Game.hero_died.connect(func() -> void: show_center("Bạn đã gục ngã...", 3.0))
@@ -132,7 +183,34 @@ func bind_hero(h: Node3D) -> void:
 	h.hp_changed.connect(func(v: float, m: float) -> void: _hp_bar.max_value = m; _hp_bar.value = v)
 	_hp_bar.max_value = h.max_hp
 	_hp_bar.value = h.hp
-	_name_label.text = "%s · Cấp %d" % [h.hero_name, h.level]
+	h.energy_changed.connect(func(v: float, m: float) -> void: _energy_bar.max_value = m; _energy_bar.value = v)
+	h.hurt.connect(func(amount: float) -> void:
+		_screen_flash(Color(0.9, 0.1, 0.1), clampf(amount / 80.0, 0.12, 0.35), 0.3))
+	h.stats.changed.connect(_refresh_hero)
+	h.inventory.changed.connect(_refresh_hero)
+	for i in _slots.size():
+		_slots[i].skills = h.skills
+		_slots[i].index = i
+	_refresh_hero()
+
+
+func _refresh_hero() -> void:
+	var h := hero
+	if h == null:
+		return
+	_name_label.text = "%s · %s · Cấp %d" % [h.hero_name, DB.classes.get(h.stats.class_id, {}).get("displayName", ""), h.level]
+	var need := PlayerStats.xp_to_next(h.level)
+	_xp_bar.max_value = maxf(1.0, need)
+	_xp_bar.value = h.stats.xp if need > 0 else need
+	for i in 3:
+		var id: String = Hero.POTIONS[i]
+		_potion_labels[i].text = "%s %s ×%d" % [["Z", "X", "C"][i], DB.item(id).get("displayName", id), h.inventory.count(id)]
+
+
+func _screen_flash(color: Color, strength: float, seconds: float) -> void:
+	_flash.color = Color(color, strength)
+	var tw := create_tween()
+	tw.tween_property(_flash, "color:a", 0.0, seconds)
 
 
 func _on_boss_engaged(b: Node3D) -> void:
@@ -189,6 +267,13 @@ func _process(_delta: float) -> void:
 		_boss_box.visible = (boss.engaged or boss.dead) and is_instance_valid(boss) and not (boss.dead and t > _center_until)
 	if not hero:
 		return
+	_hp_bar.max_value = hero.max_hp
+	_hp_bar.value = hero.hp
+	_hp_text.text = "%d / %d" % [roundi(hero.hp), roundi(hero.max_hp)]
+	var names := PackedStringArray()
+	for id in hero.buffs:
+		names.append(String(hero.buffs[id].spec.get("displayName", id)))
+	_buff_label.text = " · ".join(names)
 	_grip.value = hero.grip / hero.max_grip
 	_grip.active = hero.is_climbing or hero.grip < hero.max_grip - 0.5
 	_hint.text = _hint_text()
@@ -259,6 +344,48 @@ static func _bar(color: Color, min_size: Vector2) -> ProgressBar:
 	b.add_theme_stylebox_override("fill", fg)
 	b.value = 100
 	return b
+
+
+class SkillSlot:
+	extends Control
+	## One skill on the bar: its key, a short name, the cooldown as a darkening sweep, red when
+	## there is not enough energy.
+	var skills: PlayerSkills
+	var index := 0
+	var key := ""
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _process(_delta: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		var r := Rect2(Vector2.ZERO, size)
+		draw_rect(r, Color(0.06, 0.11, 0.08, 0.82))
+		var a: Ability = skills.slots[index] if skills and index < skills.slots.size() else null
+		var font := get_theme_default_font()
+		if a:
+			var col := Hud.GOLD if not a.has_tag(Ability.TAG_ULTIMATE) else Color(1.0, 0.55, 0.35)
+			var left := skills.cooldown_left(index)
+			var cooling := left > 0.05
+			var words := a.display_name().split(" ")
+			var y := 26.0
+			for w in words.slice(0, 3):
+				draw_string(font, Vector2(4, y), w, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8, 12,
+					Color(0.95, 0.92, 0.85, 0.35 if cooling else 1.0))
+				y += 13.0
+			if cooling:
+				var frac := skills.cooldown_fraction(index)
+				draw_rect(Rect2(0, size.y * (1.0 - frac), size.x, size.y * frac), Color(0, 0, 0, 0.55))
+				draw_string(font, Vector2(0, size.y * 0.5 + 7), ("%.1f" % left) if left < 10.0 else str(int(left)),
+					HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color.WHITE)
+			if skills.hero and skills.hero.energy < a.energy_cost():
+				draw_rect(r, Color(0.6, 0.1, 0.1, 0.35))
+			if a.energy_cost() > 0.0:
+				draw_string(font, Vector2(0, size.y - 4), str(roundi(a.energy_cost())), HORIZONTAL_ALIGNMENT_RIGHT, size.x - 4, 11, Hud.ENERGY.lightened(0.3))
+			draw_rect(r, col, false, 1.5)
+		draw_string(font, Vector2(4, 12), key, HORIZONTAL_ALIGNMENT_LEFT, size.x, 11, Color(1, 1, 1, 0.7))
 
 
 class GripRing:

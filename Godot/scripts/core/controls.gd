@@ -15,7 +15,25 @@ const KEYS := {
 	"pause": [KEY_ESCAPE],
 	"debug_overlay": [KEY_F3],
 	"screenshot": [KEY_F12],
+	# the Unity game's W E R A S skill slots and D (ultimate); Q (the basic attack) is the left mouse button
+	"skill_1": [KEY_1],
+	"skill_2": [KEY_2],
+	"skill_3": [KEY_3],
+	"skill_4": [KEY_4],
+	"skill_5": [KEY_5],
+	"skill_ult": [KEY_R],
+	# the Unity game's potions on 1 2 3
+	"potion_1": [KEY_Z],
+	"potion_2": [KEY_X],
+	"potion_3": [KEY_C],
+	"window_character": [KEY_B, KEY_I],
+	"window_bestiary": [KEY_J],
+	"window_spellbook": [KEY_K],
+	"track_quest": [KEY_TAB],
 }
+
+## Skill slots in the order of the Unity game's PlayerSkills.slots (0 = the basic attack).
+const SKILL_ACTIONS := ["attack", "skill_1", "skill_2", "skill_3", "skill_4", "skill_5", "skill_ult"]
 
 const MOUSE := {
 	"attack": [MOUSE_BUTTON_LEFT],

@@ -14,6 +14,13 @@ const FUR_SHADER := preload("res://shaders/fur.gdshader")
 @export var display_name := "Colossus"
 @export var aggro_range := 95.0
 @export var respawn_seconds := 180.0
+## For XP and the armour maths on heroes (the Unity boss's level).
+@export var level := 6
+## {"item": id, "chance": 0..1, "min": n, "max": n}; boss coins included as "coin" rows.
+@export var loot: Array[Dictionary] = []
+
+## Heroes who stabbed it this fight: they share the XP and roll the loot.
+var attackers: Array[Node] = []
 
 var weak_points: Array[WeakPoint] = []
 ## 0..1: how hard the body is shaking right now (heroes holding on lose grip faster).
@@ -223,17 +230,30 @@ func heroes_on_me() -> Array[Node3D]:
 
 
 ## Hurts heroes on the ground within a radius (those clinging to the colossus are spared).
-func hit_area(center: Vector3, radius: float, amount: float, knock := 8.0, lift := 5.0) -> int:
+func hit_area(center: Vector3, radius: float, amount: float, knock := 8.0, lift := 5.0, skill := "") -> int:
 	var n := 0
 	for h in heroes():
 		if is_on_me(h) or h.get("is_climbing"):
 			continue
 		var d := Vector2(h.global_position.x - center.x, h.global_position.z - center.z).length()
 		if d <= radius and absf(h.global_position.y - center.y) < 6.0:
-			h.take_hit({"amount": amount * (1.0 - 0.4 * d / radius), "from": center, "knockdown": true,
-				"knock": knock, "lift": lift, "source": self})
+			hurt_hero(h, amount * (1.0 - 0.4 * d / radius), center, knock, lift, skill)
 			n += 1
 	return n
+
+
+## A blow that throws a hero to the ground (armour still counts against the colossus's level).
+func hurt_hero(h: Node3D, amount: float, from: Vector3, knock := 8.0, lift := 5.0, skill := "") -> float:
+	var hh: Health = h.get("health")
+	if hh == null:
+		return 0.0
+	var d := DamageInfo.make(amount, Combat.Team.ENEMY, self, h.global_position + Vector3.UP, h.global_position - from,
+		Combat.Element.PHYSICAL, knock)
+	d.knockdown = true
+	d.lift = lift
+	d.source_level = level
+	d.skill_name = skill
+	return hh.take_damage(d)
 
 
 # ================================================================== damage
@@ -254,8 +274,7 @@ func max_vital_hp() -> float:
 
 
 ## A sword on the hide does nothing but spark (only the weak points matter).
-func take_hit(info: Dictionary) -> void:
-	var p: Vector3 = info.get("point", global_position)
+func hide_hit(p: Vector3) -> void:
 	Fx.burst(p, Vector3.UP, Color(1.0, 0.85, 0.6, 0.9), 8, 4.0, 0.15, 0.4, 70.0, -9.0, true)
 
 
@@ -263,7 +282,9 @@ func prodded(_hero: Node3D) -> void:
 	shake_amount = maxf(shake_amount, 0.12)
 
 
-func on_weak_point_stabbed(_wp: WeakPoint, _amount: float, _hero: Node3D) -> void:
+func on_weak_point_stabbed(_wp: WeakPoint, _amount: float, hero: Node3D) -> void:
+	if hero and not hero in attackers:
+		attackers.append(hero)
 	health_changed.emit(vital_hp(), max_vital_hp())
 
 
@@ -277,10 +298,20 @@ func die() -> void:
 	engaged = false
 	defeated.emit()
 	Game.boss_defeated.emit(self)
+	if Game.is_authority():
+		var credited: Array = attackers.filter(func(h) -> bool: return is_instance_valid(h))
+		if credited.is_empty():
+			credited = heroes()
+		for h in credited:
+			if h.get("stats"):
+				h.stats.on_kill(level, Enemy.Rank.BOSS, look_point())
+		Loot.drop(get_parent(), look_point().lerp(global_position, 0.6), loot, credited)
+		Game.enemy_killed.emit(self, credited)
 	get_tree().create_timer(respawn_seconds, false).timeout.connect(respawn)
 
 
 func respawn() -> void:
+	attackers.clear()
 	for wp in weak_points:
 		wp.restore()
 	global_transform = home

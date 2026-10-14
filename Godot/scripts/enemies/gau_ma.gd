@@ -97,6 +97,17 @@ var _rock_scenes: Array[PackedScene] = []
 
 func _ready() -> void:
 	display_name = "Gấu Ma Rừng Già"
+	level = 6
+	# BossBear's chest, one per hero who fought it
+	loot = [
+		{"item": "claw", "chance": 1.0, "min": 1, "max": 1},
+		{"item": "pelt", "chance": 1.0, "min": 1, "max": 1},
+		{"item": "gem_red", "chance": 0.7, "min": 1, "max": 1},
+		{"item": "gem_blue", "chance": 0.7, "min": 1, "max": 1},
+		{"item": "potion_red", "chance": 1.0, "min": 2, "max": 2},
+		{"item": "meat", "chance": 1.0, "min": 1, "max": 2},
+		{"item": "coin", "chance": 1.0, "min": 12, "max": 12},
+	]
 	_init_materials(Color(0.17, 0.16, 0.13), Color(0.38, 0.37, 0.29), Color(0.66, 0.62, 0.53))
 	process_physics_priority = -10
 	home = global_transform
@@ -443,7 +454,7 @@ func _swipe(delta: float) -> void:
 				continue
 			if h.global_position.distance_to(leg.foot) < 3.4 * S:
 				_hit_this_swing[h] = true
-				h.take_hit({"amount": 28.0, "from": leg.foot, "knockdown": true, "knock": 12.0, "lift": 6.0, "source": self})
+				hurt_hero(h, 22.0, leg.foot, 12.0, 6.0, "Vồ")
 		if _once("whoosh"):
 			Game.shake(0.15)
 	elif t < 2.0:
@@ -481,7 +492,7 @@ func _stomp(delta: float) -> void:
 			leg.override_rate = 22.0
 	elif t < 2.7:
 		if _once("impact"):
-			hit_area(_stomp_point, 11.0 * S, 32.0, 10.0, 6.0)
+			hit_area(_stomp_point, 11.0 * S, 28.0, 10.0, 6.0, "Dậm Đất")
 			Fx.dust(_stomp_point, 7.0 * S, 80)
 			Fx.dust(_stomp_point, 3.0 * S, 30)
 			_shake_near(_stomp_point, 0.85)
@@ -589,7 +600,7 @@ func _pounce(delta: float) -> void:
 			_plant_feet()
 			var front := global_transform * (Vector3(0, 0, -10.0) * S)
 			front.y = Terrain.height_at_world(front)
-			hit_area(front, 8.5 * S, 40.0, 12.0, 6.0)
+			hit_area(front, 8.5 * S, 32.0, 12.0, 6.0, "Chụp Quăng")
 			Fx.dust(front, 7.0 * S, 80)
 			Fx.dust(global_position, 6.0 * S, 50)
 			_shake_near(front, 1.0)
@@ -687,7 +698,7 @@ func _dying(_delta: float) -> void:
 
 
 func _shake_near(p: Vector3, amount: float) -> void:
-	var h: Node3D = Game.hero
+	var h: Node3D = Game.hero if is_instance_valid(Game.hero) else null
 	if h:
 		var d := h.global_position.distance_to(p)
 		Game.shake(amount * clampf(1.0 - d / 70.0, 0.15, 1.0))
@@ -812,7 +823,7 @@ func _footfall(leg: Leg) -> void:
 			continue
 		if Vector2(h.global_position.x - leg.foot.x, h.global_position.z - leg.foot.z).length() < 2.3 * S \
 				and absf(h.global_position.y - leg.foot.y) < 2.5 * S:
-			h.take_hit({"amount": 22.0, "from": leg.foot, "knockdown": true, "knock": 8.0, "lift": 3.0, "source": self})
+			hurt_hero(h, 18.0, leg.foot, 8.0, 3.0, "Giẫm")
 
 
 func _update_body(_delta: float) -> void:

@@ -19,6 +19,7 @@ func _ready() -> void:
 	await _run("fall damage", _test_fall_damage)
 	await _run("climbing a hind leg", _test_climb_leg)
 	await _run("thrown rocks are capped", _test_boulder_cap)
+	await preload("res://tests/combat_tests.gd").new(self).run_all()
 	print("\n%d checks, %d failed" % [checks, failures.size()])
 	for f in failures:
 		print("  FAIL ", f)
@@ -137,12 +138,12 @@ func _test_colossus_damage() -> void:
 func _test_fall_damage() -> void:
 	var hero: Hero = HERO.instantiate()
 	add_child(hero)
-	hero.global_position = Vector3(0, 0, 0)
+	hero.global_position = Vector3(300, 50, 300)
 	await _frames(1)
-	hero._peak_y = 20.0
+	hero._peak_y = hero.global_position.y + 20.0
 	hero.state = Hero.State.AIR
 	hero._land()
-	var want := hero.max_hp - (20.0 - hero.global_position.y - hero.safe_fall) * 7.0
+	var want := hero.max_hp - Combat.round_half_even((20.0 - hero.safe_fall) * 7.0)
 	check(absf(hero.hp - want) < 0.5, "a 20 m fall hurts by the rule (%.1f, want %.1f)" % [hero.hp, want])
 	var hp := hero.hp
 	hero._peak_y = hero.global_position.y + 5.0

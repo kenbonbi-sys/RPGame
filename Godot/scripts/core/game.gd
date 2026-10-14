@@ -5,6 +5,10 @@ extends Node
 signal boss_engaged(boss: Node3D)
 signal boss_defeated(boss: Node3D)
 signal hero_died
+## A flash of colour over the whole screen (skills, being hurt).
+signal screen_flash(color: Color, strength: float, seconds: float)
+## A monster fell; `credited` are the heroes who share its XP and loot (quests, bestiary).
+signal enemy_killed(enemy: Node3D, credited: Array)
 
 ## The hero on this screen (Players.Local in the Unity game). Game rules must not depend on it.
 var hero: Node3D
@@ -18,11 +22,32 @@ var args := PackedStringArray()
 var _hitstop_until := 0.0
 var _slow_until := 0.0
 var _slow_scale := 1.0
+var _slow_ease := 0.4
 
 
 func _ready() -> void:
 	args = OS.get_cmdline_user_args()
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+## True where the game rules run (offline: always; online later: the server). Presentation
+## goes through has_screen(). Same split as the Unity game's GameSession.IsAuthority / HasScreen.
+func is_authority() -> bool:
+	return true
+
+
+## Online play comes in stage 7; until then every game is offline.
+func is_online() -> bool:
+	return false
+
+
+func has_screen() -> bool:
+	return DisplayServer.get_name() != "headless" or Engine.is_editor_hint() or OS.has_feature("test_screen")
+
+
+## The camera, or null if it is gone.
+func cam() -> SotcCamera:
+	return camera as SotcCamera if is_instance_valid(camera) else null
 
 
 func has_arg(name: String) -> bool:
@@ -43,14 +68,20 @@ func hitstop(seconds: float) -> void:
 	_hitstop_until = maxf(_hitstop_until, now() + seconds)
 
 
-## Slow motion for a while (Lướt Hoàn Hảo: 35% for 0.3 s).
-func slow_motion(scale: float, seconds: float) -> void:
-	_slow_scale = scale
+## Slow motion for `seconds` of real time, easing back to normal over the last `ease` seconds
+## (Lướt Hoàn Hảo: 35% for 0.3 s, ease 0.1; a hero's fall: 30% for 1.2 s).
+func slow_motion(scale: float, seconds: float, ease := 0.4) -> void:
+	_slow_scale = maxf(0.01, scale)
 	_slow_until = now() + seconds
+	_slow_ease = maxf(0.0, ease)
+
+
+func flash_screen(color: Color, strength: float, seconds: float) -> void:
+	screen_flash.emit(color, strength, seconds)
 
 
 func shake(amount: float) -> void:
-	if camera and camera.has_method("add_trauma"):
+	if is_instance_valid(camera) and camera.has_method("add_trauma"):
 		camera.add_trauma(amount)
 
 
@@ -72,6 +103,7 @@ func _process(_delta: float) -> void:
 	if t < _hitstop_until:
 		Engine.time_scale = 0.03
 	elif t < _slow_until:
-		Engine.time_scale = _slow_scale
+		var remain := _slow_until - t
+		Engine.time_scale = lerpf(1.0, _slow_scale, remain / _slow_ease) if remain < _slow_ease else _slow_scale
 	else:
 		Engine.time_scale = 1.0

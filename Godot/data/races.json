@@ -1,0 +1,746 @@
+{
+ "dragonborn": {
+  "_name": "dragonborn",
+  "id": "dragonborn",
+  "displayName": "Long Duệ",
+  "englishName": "Dragonborn",
+  "description": "Hậu duệ của rồng: vảy cứng, dáng cao, máu rồng chảy trong người.",
+  "bonus": [
+   2,
+   0,
+   0,
+   0,
+   0,
+   1
+  ],
+  "traits": "Huyết Thống Rồng: màu vảy là tổ tiên rồng, kháng 50% hệ của nó (Đỏ, Vàng Kim: Lửa; Lam, Đồng Thiếc: Lôi; Trắng, Bạc: Băng; Lục, Đen: Độc).",
+  "speedMultiplier": 1,
+  "darkvision": 0,
+  "resist": {
+   "physical": 0,
+   "fire": 0,
+   "ice": 0,
+   "lightning": 0,
+   "poison": 0,
+   "holy": 0,
+   "dark": 0
+  },
+  "poisonShorter": 0,
+  "controlShorter": 0,
+  "luckyDodge": 0,
+  "relentlessCooldown": 0,
+  "savageCrit": 0,
+  "rebukeChance": 0,
+  "xpBonus": 0,
+  "hpPerLevel": 0,
+  "draconic": 1,
+  "build": 0,
+  "skins": [
+   {
+    "r": 0.72156864,
+    "g": 0.19607843,
+    "b": 0.17254902,
+    "a": 1
+   },
+   {
+    "r": 0.84705883,
+    "g": 0.65882355,
+    "b": 0.1882353,
+    "a": 1
+   },
+   {
+    "r": 0.22745098,
+    "g": 0.42352942,
+    "b": 0.78431374,
+    "a": 1
+   },
+   {
+    "r": 0.627451,
+    "g": 0.47843137,
+    "b": 0.2509804,
+    "a": 1
+   },
+   {
+    "r": 0.8784314,
+    "g": 0.89411765,
+    "b": 0.9254902,
+    "a": 1
+   },
+   {
+    "r": 0.65882355,
+    "g": 0.6901961,
+    "b": 0.7529412,
+    "a": 1
+   },
+   {
+    "r": 0.22745098,
+    "g": 0.5411765,
+    "b": 0.2901961,
+    "a": 1
+   },
+   {
+    "r": 0.22745098,
+    "g": 0.20392157,
+    "b": 0.28235295,
+    "a": 1
+   }
+  ],
+  "pointedEars": 0,
+  "horns": 0,
+  "tail": 1,
+  "tusks": 0,
+  "dragonHead": 1,
+  "hairStyles": null,
+  "beards": 0
+ },
+ "dwarf": {
+  "_name": "dwarf",
+  "id": "dwarf",
+  "displayName": "Người Lùn",
+  "englishName": "Hill Dwarf",
+  "description": "Thấp, chắc như đá núi, bền bỉ và cứng đầu. Uống rượu mạnh như uống nước.",
+  "bonus": [
+   0,
+   0,
+   0,
+   2,
+   1,
+   0
+  ],
+  "traits": "Nhìn Trong Tối.\nKiên Cường: kháng Độc 30%, Độc ngắn hơn một nửa.\nDẻo Dai: thêm máu mỗi cấp.\nChân ngắn: đi chậm hơn một chút.",
+  "speedMultiplier": 0.93,
+  "darkvision": 1,
+  "resist": {
+   "physical": 0,
+   "fire": 0,
+   "ice": 0,
+   "lightning": 0,
+   "poison": 0.3,
+   "holy": 0,
+   "dark": 0
+  },
+  "poisonShorter": 0.5,
+  "controlShorter": 0,
+  "luckyDodge": 0,
+  "relentlessCooldown": 0,
+  "savageCrit": 0,
+  "rebukeChance": 0,
+  "xpBonus": 0,
+  "hpPerLevel": 1.8,
+  "draconic": 0,
+  "build": 1,
+  "skins": [
+   {
+    "r": 0.9647059,
+    "g": 0.7921569,
+    "b": 0.65882355,
+    "a": 1
+   },
+   {
+    "r": 0.8862745,
+    "g": 0.6666667,
+    "b": 0.53333336,
+    "a": 1
+   },
+   {
+    "r": 0.7921569,
+    "g": 0.5411765,
+    "b": 0.40784314,
+    "a": 1
+   },
+   {
+    "r": 0.63529414,
+    "g": 0.41568628,
+    "b": 0.2901961,
+    "a": 1
+   },
+   {
+    "r": 0.4862745,
+    "g": 0.30588236,
+    "b": 0.21176471,
+    "a": 1
+   }
+  ],
+  "pointedEars": 0,
+  "horns": 0,
+  "tail": 0,
+  "tusks": 0,
+  "dragonHead": 0,
+  "hairStyles": null,
+  "beards": 1
+ },
+ "elf": {
+  "_name": "elf",
+  "id": "elf",
+  "displayName": "Tiên Tộc",
+  "englishName": "High Elf",
+  "description": "Dân rừng già sống hàng trăm năm, mắt tinh, tay khéo, thuộc phép từ bé.",
+  "bonus": [
+   0,
+   1,
+   2,
+   0,
+   0,
+   0
+  ],
+  "traits": "Nhìn Trong Tối: ánh sáng của mình rọi xa hơn trong hang.\nDòng Máu Tiên: Choáng, Trói và Nguyền ngắn hơn 30%.",
+  "speedMultiplier": 1,
+  "darkvision": 1,
+  "resist": {
+   "physical": 0,
+   "fire": 0,
+   "ice": 0,
+   "lightning": 0,
+   "poison": 0,
+   "holy": 0,
+   "dark": 0
+  },
+  "poisonShorter": 0,
+  "controlShorter": 0.3,
+  "luckyDodge": 0,
+  "relentlessCooldown": 0,
+  "savageCrit": 0,
+  "rebukeChance": 0,
+  "xpBonus": 0,
+  "hpPerLevel": 0,
+  "draconic": 0,
+  "build": 0,
+  "skins": [
+   {
+    "r": 1,
+    "g": 0.9490196,
+    "b": 0.8862745,
+    "a": 1
+   },
+   {
+    "r": 0.9647059,
+    "g": 0.8627451,
+    "b": 0.76862746,
+    "a": 1
+   },
+   {
+    "r": 0.9019608,
+    "g": 0.76862746,
+    "b": 0.63529414,
+    "a": 1
+   },
+   {
+    "r": 0.78431374,
+    "g": 0.627451,
+    "b": 0.5019608,
+    "a": 1
+   },
+   {
+    "r": 0.6117647,
+    "g": 0.47843137,
+    "b": 0.39215687,
+    "a": 1
+   },
+   {
+    "r": 0.8627451,
+    "g": 0.8627451,
+    "b": 0.9411765,
+    "a": 1
+   }
+  ],
+  "pointedEars": 1,
+  "horns": 0,
+  "tail": 0,
+  "tusks": 0,
+  "dragonHead": 0,
+  "hairStyles": null,
+  "beards": 0
+ },
+ "gnome": {
+  "_name": "gnome",
+  "id": "gnome",
+  "displayName": "Thần Lùn",
+  "englishName": "Rock Gnome",
+  "description": "Nhỏ con, tò mò vô tận, đầu óc đầy máy móc và phép thuật.",
+  "bonus": [
+   0,
+   2,
+   0,
+   1,
+   0,
+   0
+  ],
+  "traits": "Nhìn Trong Tối.\nMưu Trí: kháng 10% mọi hệ phép.",
+  "speedMultiplier": 1,
+  "darkvision": 1,
+  "resist": {
+   "physical": 0,
+   "fire": 0.1,
+   "ice": 0.1,
+   "lightning": 0.1,
+   "poison": 0.1,
+   "holy": 0.1,
+   "dark": 0.1
+  },
+  "poisonShorter": 0,
+  "controlShorter": 0,
+  "luckyDodge": 0,
+  "relentlessCooldown": 0,
+  "savageCrit": 0,
+  "rebukeChance": 0,
+  "xpBonus": 0,
+  "hpPerLevel": 0,
+  "draconic": 0,
+  "build": 2,
+  "skins": [
+   {
+    "r": 1,
+    "g": 0.8862745,
+    "b": 0.7764706,
+    "a": 1
+   },
+   {
+    "r": 0.9490196,
+    "g": 0.76862746,
+    "b": 0.6117647,
+    "a": 1
+   },
+   {
+    "r": 0.87058824,
+    "g": 0.6509804,
+    "b": 0.4627451,
+    "a": 1
+   },
+   {
+    "r": 0.7607843,
+    "g": 0.5137255,
+    "b": 0.3372549,
+    "a": 1
+   },
+   {
+    "r": 0.59607846,
+    "g": 0.3764706,
+    "b": 0.24313726,
+    "a": 1
+   },
+   {
+    "r": 0.41568628,
+    "g": 0.2627451,
+    "b": 0.18039216,
+    "a": 1
+   }
+  ],
+  "pointedEars": 1,
+  "horns": 0,
+  "tail": 0,
+  "tusks": 0,
+  "dragonHead": 0,
+  "hairStyles": null,
+  "beards": 0
+ },
+ "halfelf": {
+  "_name": "halfelf",
+  "id": "halfelf",
+  "displayName": "Bán Tiên",
+  "englishName": "Half-Elf",
+  "description": "Nửa người nửa tiên, ở đâu cũng được đón mà chẳng thuộc hẳn về đâu. Miệng lưỡi khéo.",
+  "bonus": [
+   0,
+   0,
+   1,
+   1,
+   0,
+   2
+  ],
+  "traits": "Nhìn Trong Tối.\nDòng Máu Tiên: Choáng, Trói và Nguyền ngắn hơn 30%.",
+  "speedMultiplier": 1,
+  "darkvision": 1,
+  "resist": {
+   "physical": 0,
+   "fire": 0,
+   "ice": 0,
+   "lightning": 0,
+   "poison": 0,
+   "holy": 0,
+   "dark": 0
+  },
+  "poisonShorter": 0,
+  "controlShorter": 0.3,
+  "luckyDodge": 0,
+  "relentlessCooldown": 0,
+  "savageCrit": 0,
+  "rebukeChance": 0,
+  "xpBonus": 0,
+  "hpPerLevel": 0,
+  "draconic": 0,
+  "build": 0,
+  "skins": [
+   {
+    "r": 1,
+    "g": 0.8862745,
+    "b": 0.7764706,
+    "a": 1
+   },
+   {
+    "r": 0.9490196,
+    "g": 0.76862746,
+    "b": 0.6117647,
+    "a": 1
+   },
+   {
+    "r": 0.87058824,
+    "g": 0.6509804,
+    "b": 0.4627451,
+    "a": 1
+   },
+   {
+    "r": 0.7607843,
+    "g": 0.5137255,
+    "b": 0.3372549,
+    "a": 1
+   },
+   {
+    "r": 0.59607846,
+    "g": 0.3764706,
+    "b": 0.24313726,
+    "a": 1
+   },
+   {
+    "r": 0.41568628,
+    "g": 0.2627451,
+    "b": 0.18039216,
+    "a": 1
+   }
+  ],
+  "pointedEars": 1,
+  "horns": 0,
+  "tail": 0,
+  "tusks": 0,
+  "dragonHead": 0,
+  "hairStyles": null,
+  "beards": 0
+ },
+ "halfling": {
+  "_name": "halfling",
+  "id": "halfling",
+  "displayName": "Người Tí Hon",
+  "englishName": "Lightfoot Halfling",
+  "description": "Nhỏ bé, vui vẻ và may mắn đến khó tin. Lẻn qua đâu cũng không ai để ý.",
+  "bonus": [
+   0,
+   0,
+   2,
+   0,
+   0,
+   1
+  ],
+  "traits": "May Mắn: 10% đòn đánh trúng mình bị hụt.\nGan Dạ: Choáng, Trói và Nguyền ngắn hơn 30%.\nChân ngắn: đi chậm hơn một chút.",
+  "speedMultiplier": 0.93,
+  "darkvision": 0,
+  "resist": {
+   "physical": 0,
+   "fire": 0,
+   "ice": 0,
+   "lightning": 0,
+   "poison": 0,
+   "holy": 0,
+   "dark": 0
+  },
+  "poisonShorter": 0,
+  "controlShorter": 0.3,
+  "luckyDodge": 0.1,
+  "relentlessCooldown": 0,
+  "savageCrit": 0,
+  "rebukeChance": 0,
+  "xpBonus": 0,
+  "hpPerLevel": 0,
+  "draconic": 0,
+  "build": 2,
+  "skins": [
+   {
+    "r": 1,
+    "g": 0.8862745,
+    "b": 0.7764706,
+    "a": 1
+   },
+   {
+    "r": 0.9490196,
+    "g": 0.76862746,
+    "b": 0.6117647,
+    "a": 1
+   },
+   {
+    "r": 0.87058824,
+    "g": 0.6509804,
+    "b": 0.4627451,
+    "a": 1
+   },
+   {
+    "r": 0.7607843,
+    "g": 0.5137255,
+    "b": 0.3372549,
+    "a": 1
+   },
+   {
+    "r": 0.59607846,
+    "g": 0.3764706,
+    "b": 0.24313726,
+    "a": 1
+   },
+   {
+    "r": 0.41568628,
+    "g": 0.2627451,
+    "b": 0.18039216,
+    "a": 1
+   }
+  ],
+  "pointedEars": 0,
+  "horns": 0,
+  "tail": 0,
+  "tusks": 0,
+  "dragonHead": 0,
+  "hairStyles": null,
+  "beards": 0
+ },
+ "halforc": {
+  "_name": "halforc",
+  "id": "halforc",
+  "displayName": "Bán Orc",
+  "englishName": "Half-Orc",
+  "description": "Mang sức vóc của tộc orc: to khỏe, dữ dằn, gục rồi vẫn đứng dậy.",
+  "bonus": [
+   2,
+   0,
+   0,
+   1,
+   0,
+   0
+  ],
+  "traits": "Nhìn Trong Tối.\nKiên Trì Bất Khuất: đòn chí tử chỉ để lại 1 máu, mỗi 90 giây một lần.\nĐòn Tàn Bạo: chí mạng mạnh hơn.",
+  "speedMultiplier": 1,
+  "darkvision": 1,
+  "resist": {
+   "physical": 0,
+   "fire": 0,
+   "ice": 0,
+   "lightning": 0,
+   "poison": 0,
+   "holy": 0,
+   "dark": 0
+  },
+  "poisonShorter": 0,
+  "controlShorter": 0,
+  "luckyDodge": 0,
+  "relentlessCooldown": 90,
+  "savageCrit": 0.3,
+  "rebukeChance": 0,
+  "xpBonus": 0,
+  "hpPerLevel": 0,
+  "draconic": 0,
+  "build": 0,
+  "skins": [
+   {
+    "r": 0.63529414,
+    "g": 0.7058824,
+    "b": 0.50980395,
+    "a": 1
+   },
+   {
+    "r": 0.5411765,
+    "g": 0.627451,
+    "b": 0.4392157,
+    "a": 1
+   },
+   {
+    "r": 0.47058824,
+    "g": 0.5568628,
+    "b": 0.38431373,
+    "a": 1
+   },
+   {
+    "r": 0.5568628,
+    "g": 0.59607846,
+    "b": 0.53333336,
+    "a": 1
+   },
+   {
+    "r": 0.6901961,
+    "g": 0.65882355,
+    "b": 0.5019608,
+    "a": 1
+   },
+   {
+    "r": 0.41568628,
+    "g": 0.47843137,
+    "b": 0.34509805,
+    "a": 1
+   }
+  ],
+  "pointedEars": 0,
+  "horns": 0,
+  "tail": 0,
+  "tusks": 1,
+  "dragonHead": 0,
+  "hairStyles": null,
+  "beards": 0
+ },
+ "human": {
+  "_name": "human",
+  "id": "human",
+  "displayName": "Con Người",
+  "englishName": "Human",
+  "description": "Tuổi đời ngắn nên sống vội và học nhanh. Đi đâu cũng thấy họ, làm gì cũng được.",
+  "bonus": [
+   1,
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "traits": "Đa Tài: nhận thêm 10% kinh nghiệm.",
+  "speedMultiplier": 1,
+  "darkvision": 0,
+  "resist": {
+   "physical": 0,
+   "fire": 0,
+   "ice": 0,
+   "lightning": 0,
+   "poison": 0,
+   "holy": 0,
+   "dark": 0
+  },
+  "poisonShorter": 0,
+  "controlShorter": 0,
+  "luckyDodge": 0,
+  "relentlessCooldown": 0,
+  "savageCrit": 0,
+  "rebukeChance": 0,
+  "xpBonus": 0.1,
+  "hpPerLevel": 0,
+  "draconic": 0,
+  "build": 0,
+  "skins": [
+   {
+    "r": 1,
+    "g": 0.8862745,
+    "b": 0.7764706,
+    "a": 1
+   },
+   {
+    "r": 0.9490196,
+    "g": 0.76862746,
+    "b": 0.6117647,
+    "a": 1
+   },
+   {
+    "r": 0.87058824,
+    "g": 0.6509804,
+    "b": 0.4627451,
+    "a": 1
+   },
+   {
+    "r": 0.7607843,
+    "g": 0.5137255,
+    "b": 0.3372549,
+    "a": 1
+   },
+   {
+    "r": 0.59607846,
+    "g": 0.3764706,
+    "b": 0.24313726,
+    "a": 1
+   },
+   {
+    "r": 0.41568628,
+    "g": 0.2627451,
+    "b": 0.18039216,
+    "a": 1
+   }
+  ],
+  "pointedEars": 0,
+  "horns": 0,
+  "tail": 0,
+  "tusks": 0,
+  "dragonHead": 0,
+  "hairStyles": null,
+  "beards": 0
+ },
+ "tiefling": {
+  "_name": "tiefling",
+  "id": "tiefling",
+  "displayName": "Quỷ Duệ",
+  "englishName": "Tiefling",
+  "description": "Mang dòng máu quỷ từ xa xưa: sừng, đuôi, mắt rực, và ngọn lửa địa ngục trong tay.",
+  "bonus": [
+   0,
+   1,
+   0,
+   0,
+   0,
+   2
+  ],
+  "traits": "Nhìn Trong Tối.\nKháng Lửa Địa Ngục: kháng Lửa 50%.\nTrả Đòn Địa Ngục: 20% làm kẻ đánh mình bốc cháy.",
+  "speedMultiplier": 1,
+  "darkvision": 1,
+  "resist": {
+   "physical": 0,
+   "fire": 0.5,
+   "ice": 0,
+   "lightning": 0,
+   "poison": 0,
+   "holy": 0,
+   "dark": 0
+  },
+  "poisonShorter": 0,
+  "controlShorter": 0,
+  "luckyDodge": 0,
+  "relentlessCooldown": 0,
+  "savageCrit": 0,
+  "rebukeChance": 0.2,
+  "xpBonus": 0,
+  "hpPerLevel": 0,
+  "draconic": 0,
+  "build": 0,
+  "skins": [
+   {
+    "r": 0.78431374,
+    "g": 0.3137255,
+    "b": 0.3529412,
+    "a": 1
+   },
+   {
+    "r": 0.65882355,
+    "g": 0.24313726,
+    "b": 0.36078432,
+    "a": 1
+   },
+   {
+    "r": 0.5411765,
+    "g": 0.2901961,
+    "b": 0.6039216,
+    "a": 1
+   },
+   {
+    "r": 0.41568628,
+    "g": 0.4392157,
+    "b": 0.72156864,
+    "a": 1
+   },
+   {
+    "r": 0.84705883,
+    "g": 0.65882355,
+    "b": 0.5647059,
+    "a": 1
+   },
+   {
+    "r": 0.6039216,
+    "g": 0.3529412,
+    "b": 0.3529412,
+    "a": 1
+   }
+  ],
+  "pointedEars": 0,
+  "horns": 1,
+  "tail": 1,
+  "tusks": 0,
+  "dragonHead": 0,
+  "hairStyles": null,
+  "beards": 0
+ }
+}

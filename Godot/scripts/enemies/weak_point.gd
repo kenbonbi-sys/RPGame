@@ -58,6 +58,8 @@ func stab(amount: float, hero: Node3D) -> void:
 		return
 	hp = maxf(0.0, hp - amount)
 	_flare = 1.0
+	if Game.has_screen():
+		DamageNumbers.show(global_position + outward() * 0.6, str(roundi(amount)) + ("!" if amount >= 40.0 else ""), "crit", true)
 	var out := outward()
 	Fx.burst(global_position + out * 0.2, out + Vector3.UP * 0.6, Color(0.04, 0.05, 0.06, 0.95), 40 + int(amount), 9.0, 0.55, 1.6, 22.0, -9.0)
 	Fx.burst(global_position + out * 0.2, out, Color(0.55, 1.0, 0.85, 0.9), 16, 5.0, 0.25, 0.7, 60.0, -2.0, true)

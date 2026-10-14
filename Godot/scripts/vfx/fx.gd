@@ -35,7 +35,9 @@ static func ring_texture() -> ImageTexture:
 				var d := Vector2(x + 0.5 - n * 0.5, y + 0.5 - n * 0.5).length() / (n * 0.5)
 				var edge := clampf(1.0 - absf(d - 0.94) / 0.05, 0.0, 1.0)
 				var fill := 0.18 if d < 0.94 else 0.0
-				img.set_pixel(x, y, Color(1, 1, 1, maxf(edge, fill)))
+				# colour premultiplied by alpha: decal emission reads only RGB
+				var a := maxf(edge, fill)
+				img.set_pixel(x, y, Color(a, a, a, a))
 		_ring = ImageTexture.create_from_image(img)
 	return _ring
 
@@ -47,7 +49,8 @@ static func disc_texture() -> ImageTexture:
 		for y in n:
 			for x in n:
 				var d := Vector2(x + 0.5 - n * 0.5, y + 0.5 - n * 0.5).length() / (n * 0.5)
-				img.set_pixel(x, y, Color(1, 1, 1, 0.35 if d < 0.97 else 0.0))
+				var a := 0.35 if d < 0.97 else 0.0
+				img.set_pixel(x, y, Color(a, a, a, a))
 		_disc = ImageTexture.create_from_image(img)
 	return _disc
 

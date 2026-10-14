@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="Environment" path="res://world/environment.tres" id="2"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/enemies/gau_ma.gd" id="8"]
 [ext_resource type="Script" path="res://scripts/camera/sotc_camera.gd" id="9"]
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="10"]
+[ext_resource type="Script" path="res://scripts/world/forest_camps.gd" id="11"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1")
@@ -37,6 +38,9 @@ script = ExtResource("5")
 
 [node name="Arena" type="Node3D" parent="."]
 script = ExtResource("6")
+
+[node name="Monsters" type="Node3D" parent="."]
+script = ExtResource("11")
 
 [node name="GauMa" type="Node3D" parent="."]
 script = ExtResource("8")

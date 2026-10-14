@@ -1,0 +1,2127 @@
+{
+ "ancient_core": {
+  "_name": "ancient_core",
+  "id": "ancient_core",
+  "displayName": "Lõi Pha Lê Cổ",
+  "description": "Trái tim hổ phách của Golem Pha Lê Cổ, vẫn còn ấm và phát sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 180,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "apple": {
+  "_name": "apple",
+  "id": "apple",
+  "displayName": "Táo Đỏ",
+  "description": "Giòn ngọt. Hồi 10 Máu.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 1,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 2,
+  "healAmount": 10,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "armor_bear": {
+  "_name": "armor_bear",
+  "id": "armor_bear",
+  "displayName": "Áo Da Gấu",
+  "description": "Áo may từ da Gấu Ma, cổ viền lông đen. Ấm, và dai như thép.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 1,
+  "maxStack": 1,
+  "value": 180,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 1,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 4,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 30,
+    "tag": null
+   }
+  ],
+  "craftGold": 150,
+  "craftItems": [
+   {
+    "id": "pelt",
+    "count": 1
+   },
+   {
+    "id": "claw",
+    "count": 1
+   }
+  ]
+ },
+ "armor_bison": {
+  "_name": "armor_bison",
+  "id": "armor_bison",
+  "displayName": "Áo Da Bò Rừng",
+  "description": "Áo da bò rừng dày, vai đính sừng. Gió thảo nguyên và nanh vuốt đều trượt đi.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 3,
+  "maxStack": 1,
+  "value": 980,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 1,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 13,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 90,
+    "tag": null
+   },
+   {
+    "stat": 13,
+    "kind": 0,
+    "value": 0.08,
+    "tag": null
+   }
+  ],
+  "craftGold": 950,
+  "craftItems": [
+   {
+    "id": "bison_hide",
+    "count": 5
+   },
+   {
+    "id": "bison_horn",
+    "count": 2
+   },
+   {
+    "id": "hyena_fang",
+    "count": 4
+   }
+  ]
+ },
+ "armor_scale": {
+  "_name": "armor_scale",
+  "id": "armor_scale",
+  "displayName": "Giáp Vảy Xà",
+  "description": "Giáp lưới đan từ vảy Xà Mẫu và da Rắn Nước, cứng hơn thép mà nhẹ như vải.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 2,
+  "maxStack": 1,
+  "value": 420,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 1,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 8,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 40,
+    "tag": null
+   },
+   {
+    "stat": 13,
+    "kind": 0,
+    "value": 0.05,
+    "tag": null
+   }
+  ],
+  "craftGold": 380,
+  "craftItems": [
+   {
+    "id": "snake_scale",
+    "count": 2
+   },
+   {
+    "id": "wsnake_skin",
+    "count": 4
+   },
+   {
+    "id": "mud_core",
+    "count": 2
+   }
+  ]
+ },
+ "armor_silk": {
+  "_name": "armor_silk",
+  "id": "armor_silk",
+  "displayName": "Áo Tơ Pha Lê",
+  "description": "Áo dệt từ tơ của Nhện Chúa: không lưỡi dao nào cắt đứt, phép thuật trượt đi trên nó.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 3,
+  "maxStack": 1,
+  "value": 900,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 1,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 11,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 60,
+    "tag": null
+   },
+   {
+    "stat": 13,
+    "kind": 0,
+    "value": 0.1,
+    "tag": null
+   }
+  ],
+  "craftGold": 800,
+  "craftItems": [
+   {
+    "id": "crystal_silk",
+    "count": 2
+   },
+   {
+    "id": "spider_silk",
+    "count": 5
+   },
+   {
+    "id": "ancient_core",
+    "count": 1
+   }
+  ]
+ },
+ "bat_wing": {
+  "_name": "bat_wing",
+  "id": "bat_wing",
+  "displayName": "Cánh Dơi Pha Lê",
+  "description": "Cánh dơi mỏng, mép cánh lấm tấm những hạt pha lê.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 7,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "beetle_shell": {
+  "_name": "beetle_shell",
+  "id": "beetle_shell",
+  "displayName": "Vỏ Bọ Giáp",
+  "description": "Mảnh mai đá của Bọ Giáp Đá, cứng như khiên, lấm tấm pha lê.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 16,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "bison_hide": {
+  "_name": "bison_hide",
+  "id": "bison_hide",
+  "displayName": "Da Bò Rừng",
+  "description": "Tấm da dày lông xù của Bò Rừng, gió thảo nguyên không lọt qua.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 18,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "bison_horn": {
+  "_name": "bison_horn",
+  "id": "bison_horn",
+  "displayName": "Sừng Bò Rừng",
+  "description": "Chiếc sừng cong, gốc to bằng cổ tay, còn vết húc vào đá.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 30,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "blackwind_blade": {
+  "_name": "blackwind_blade",
+  "id": "blackwind_blade",
+  "displayName": "Mảnh Song Đao",
+  "description": "Nửa lưỡi đao cong của Thủ Lĩnh Hắc Phong, chuôi còn quấn dây đỏ.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 3,
+  "maxStack": 99,
+  "value": 380,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "bone": {
+  "_name": "bone",
+  "id": "bone",
+  "displayName": "Xương",
+  "description": "Một khúc xương cũ.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 1,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "boots_howl": {
+  "_name": "boots_howl",
+  "id": "boots_howl",
+  "displayName": "Ủng Gió Hú",
+  "description": "Ủng da đen viền lông của Thủ Lĩnh Hắc Phong. Gió hú theo từng bước lướt.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 3,
+  "maxStack": 1,
+  "value": 1400,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 2,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 5,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 50,
+    "tag": null
+   },
+   {
+    "stat": 12,
+    "kind": 0,
+    "value": 0.2,
+    "tag": null
+   },
+   {
+    "stat": 2,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   }
+  ],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "boots_leather": {
+  "_name": "boots_leather",
+  "id": "boots_leather",
+  "displayName": "Giày Da",
+  "description": "Đôi giày da mềm, đế mỏng: bước nhẹ, lướt nhanh.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 0,
+  "maxStack": 1,
+  "value": 40,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 2,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   },
+   {
+    "stat": 12,
+    "kind": 0,
+    "value": 0.06,
+    "tag": null
+   }
+  ],
+  "craftGold": 60,
+  "craftItems": [
+   {
+    "id": "gel",
+    "count": 4
+   },
+   {
+    "id": "herb",
+    "count": 3
+   }
+  ]
+ },
+ "boots_toad": {
+  "_name": "boots_toad",
+  "id": "boots_toad",
+  "displayName": "Giày Da Cóc",
+  "description": "Giày da cóc sần sùi, không thấm nước: lướt trên bùn như trên đất khô.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 1,
+  "maxStack": 1,
+  "value": 160,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 2,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 2,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 20,
+    "tag": null
+   },
+   {
+    "stat": 12,
+    "kind": 0,
+    "value": 0.1,
+    "tag": null
+   }
+  ],
+  "craftGold": 180,
+  "craftItems": [
+   {
+    "id": "toad_skin",
+    "count": 5
+   },
+   {
+    "id": "leech_tooth",
+    "count": 3
+   }
+  ]
+ },
+ "boots_wind": {
+  "_name": "boots_wind",
+  "id": "boots_wind",
+  "displayName": "Giày Gió",
+  "description": "Giày khâu bằng lông ưng: bước đi như có gió đẩy sau lưng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 3,
+  "maxStack": 1,
+  "value": 760,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 2,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 3,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 30,
+    "tag": null
+   },
+   {
+    "stat": 12,
+    "kind": 0,
+    "value": 0.15,
+    "tag": null
+   }
+  ],
+  "craftGold": 720,
+  "craftItems": [
+   {
+    "id": "eagle_feather",
+    "count": 4
+   },
+   {
+    "id": "bison_hide",
+    "count": 2
+   }
+  ]
+ },
+ "bread": {
+  "_name": "bread",
+  "id": "bread",
+  "displayName": "Bánh Mì",
+  "description": "Bánh mì nóng giòn. Hồi 15 Máu.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 1,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 3,
+  "healAmount": 15,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "claw": {
+  "_name": "claw",
+  "id": "claw",
+  "displayName": "Vuốt Gấu Ma",
+  "description": "Móng vuốt của Gấu Ma Rừng Già, vẫn còn tỏa khí lạnh.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 80,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "coin": {
+  "_name": "coin",
+  "id": "coin",
+  "displayName": "Đồng Vàng",
+  "description": "Tiền tệ của Làng Lá Xanh.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 0,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 1,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "crown_toad": {
+  "_name": "crown_toad",
+  "id": "crown_toad",
+  "displayName": "Vương Miện Cóc",
+  "description": "Vương miện của Cóc Tía, Thợ Rèn nắn lại cho vừa đầu người. Vàng tự tìm tới người đội nó.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 2,
+  "maxStack": 1,
+  "value": 380,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 0,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 3,
+    "tag": null
+   },
+   {
+    "stat": 17,
+    "kind": 0,
+    "value": 2,
+    "tag": null
+   },
+   {
+    "stat": 20,
+    "kind": 0,
+    "value": 0.12,
+    "tag": null
+   }
+  ],
+  "craftGold": 300,
+  "craftItems": [
+   {
+    "id": "toad_crown",
+    "count": 1
+   },
+   {
+    "id": "dragonfly_wing",
+    "count": 3
+   },
+   {
+    "id": "poison_gland",
+    "count": 2
+   }
+  ]
+ },
+ "crystal_jelly": {
+  "_name": "crystal_jelly",
+  "id": "crystal_jelly",
+  "displayName": "Nhân Slime Pha Lê",
+  "description": "Giọt nhớt xanh trong, giữa lòng có một hạt pha lê nhỏ.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 9,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "crystal_shard": {
+  "_name": "crystal_shard",
+  "id": "crystal_shard",
+  "displayName": "Mảnh Pha Lê",
+  "description": "Mảnh pha lê trong vắt, tự phát ra ánh sáng xanh nhạt.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 6,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "crystal_silk": {
+  "_name": "crystal_silk",
+  "id": "crystal_silk",
+  "displayName": "Tơ Pha Lê",
+  "description": "Tơ của Nhện Chúa, óng ánh bụi pha lê, không lưỡi dao nào cắt đứt.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 120,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "dragonfly_wing": {
+  "_name": "dragonfly_wing",
+  "id": "dragonfly_wing",
+  "displayName": "Cánh Chuồn Chuồn",
+  "description": "Cánh mỏng như sương, gân xanh chằng chịt. Chạm nhẹ là rung.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 5,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "eagle_feather": {
+  "_name": "eagle_feather",
+  "id": "eagle_feather",
+  "displayName": "Lông Ưng Đá",
+  "description": "Chiếc lông xám như đá của Chim Ưng Đá. Thả ra là nó cưỡi gió bay đi.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 22,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "eye_lens": {
+  "_name": "eye_lens",
+  "id": "eye_lens",
+  "displayName": "Thủy Tinh Thể Mắt Hang",
+  "description": "Thấu kính trong vắt của Mắt Hang. Nhìn qua nó, bóng tối như sáng lên.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 22,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "gel": {
+  "_name": "gel",
+  "id": "gel",
+  "displayName": "Gel Slime",
+  "description": "Chất nhầy xanh lấp lánh. Thợ rèn rất thích thứ này.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 2,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "gem_blue": {
+  "_name": "gem_blue",
+  "id": "gem_blue",
+  "displayName": "Lam Ngọc",
+  "description": "Viên đá xanh thẳm, mát lạnh khi cầm.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 150,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "gem_red": {
+  "_name": "gem_red",
+  "id": "gem_red",
+  "displayName": "Hồng Ngọc",
+  "description": "Viên đá đỏ rực, ẩn chứa sức mạnh lửa.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 150,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "gold": {
+  "_name": "gold",
+  "id": "gold",
+  "displayName": "Túi Vàng",
+  "description": "Một túi vàng nặng trĩu.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 0,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 50,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "golem_core": {
+  "_name": "golem_core",
+  "id": "golem_core",
+  "displayName": "Lõi Golem",
+  "description": "Trái tim đá của Golem, một con mắt xanh vẫn lập lòe.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 24,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "helm_crystal": {
+  "_name": "helm_crystal",
+  "id": "helm_crystal",
+  "displayName": "Mũ Pha Lê",
+  "description": "Mũ thép gắn mào pha lê, sáng mờ trong bóng tối. Đầu óc tỉnh táo lạ thường.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 2,
+  "maxStack": 1,
+  "value": 460,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 0,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 5,
+    "tag": null
+   },
+   {
+    "stat": 5,
+    "kind": 0,
+    "value": 15,
+    "tag": null
+   },
+   {
+    "stat": 18,
+    "kind": 0,
+    "value": 0.06,
+    "tag": null
+   }
+  ],
+  "craftGold": 450,
+  "craftItems": [
+   {
+    "id": "crystal_shard",
+    "count": 10
+   },
+   {
+    "id": "bat_wing",
+    "count": 3
+   },
+   {
+    "id": "golem_core",
+    "count": 1
+   }
+  ]
+ },
+ "helm_eagle": {
+  "_name": "helm_eagle",
+  "id": "helm_eagle",
+  "displayName": "Mũ Lông Ưng",
+  "description": "Mũ thép cài hai chiếc lông Ưng Đá. Người đội nó nhìn thấy chỗ hở trước khi đối thủ kịp che.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 2,
+  "maxStack": 1,
+  "value": 560,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 0,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 6,
+    "tag": null
+   },
+   {
+    "stat": 9,
+    "kind": 0,
+    "value": 0.05,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 40,
+    "tag": null
+   }
+  ],
+  "craftGold": 600,
+  "craftItems": [
+   {
+    "id": "eagle_feather",
+    "count": 6
+   },
+   {
+    "id": "hyena_fang",
+    "count": 3
+   }
+  ]
+ },
+ "helm_leather": {
+  "_name": "helm_leather",
+  "id": "helm_leather",
+  "displayName": "Mũ Da",
+  "description": "Mũ da thuộc khâu tay, hai vạt che tai. Thợ Rèn phết gel slime cho da không nứt.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 0,
+  "maxStack": 1,
+  "value": 40,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 0,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 2,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 15,
+    "tag": null
+   }
+  ],
+  "craftGold": 60,
+  "craftItems": [
+   {
+    "id": "gel",
+    "count": 6
+   },
+   {
+    "id": "shroom_cap",
+    "count": 2
+   }
+  ]
+ },
+ "herb": {
+  "_name": "herb",
+  "id": "herb",
+  "displayName": "Cỏ Thuốc",
+  "description": "Loại cỏ dùng để chế thuốc.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 2,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "hp_badge": {
+  "_name": "hp_badge",
+  "id": "hp_badge",
+  "displayName": "Huy Hiệu Hắc Phong",
+  "description": "Đĩa sắt đen khắc cơn lốc trắng, bọn cướp Hắc Phong đeo trước ngực.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 26,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "hyena_fang": {
+  "_name": "hyena_fang",
+  "id": "hyena_fang",
+  "displayName": "Nanh Linh Cẩu",
+  "description": "Chiếc nanh vàng ố của Linh Cẩu Gió, mòn vì gặm xương.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 14,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "iron_horn": {
+  "_name": "iron_horn",
+  "id": "iron_horn",
+  "displayName": "Sừng Sắt",
+  "description": "Sừng của Bò Rừng Sắt, bọc sắt tán đinh. Nó đã húc đổ bao nhiêu tảng đá?",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 150,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "iron_plate": {
+  "_name": "iron_plate",
+  "id": "iron_plate",
+  "displayName": "Giáp Sắt Vụn",
+  "description": "Mảnh giáp tán đinh bung ra khỏi lưng Bò Rừng Sắt, rỉ sét ở mép.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 40,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "key": {
+  "_name": "key",
+  "id": "key",
+  "displayName": "Chìa Khóa Cổ",
+  "description": "Chìa khóa bằng đồng, khắc hoa văn lạ.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 4,
+  "rarity": 1,
+  "maxStack": 1,
+  "value": 0,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "leech_tooth": {
+  "_name": "leech_tooth",
+  "id": "leech_tooth",
+  "displayName": "Răng Đỉa",
+  "description": "Chiếc răng cưa li ti, sắc như dao cạo.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 5,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "lotus": {
+  "_name": "lotus",
+  "id": "lotus",
+  "displayName": "Sen Đầm",
+  "description": "Hoa sen trắng mọc giữa đầm lầy. Hồi 40 Máu và 20 Năng lượng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 1,
+  "rarity": 1,
+  "maxStack": 20,
+  "value": 8,
+  "healAmount": 40,
+  "energyAmount": 20,
+  "cleanse": 0
+ },
+ "meat": {
+  "_name": "meat",
+  "id": "meat",
+  "displayName": "Thịt Nướng",
+  "description": "Thơm lừng. Hồi 20 Máu.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 1,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 4,
+  "healAmount": 20,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "mimic_tooth": {
+  "_name": "mimic_tooth",
+  "id": "mimic_tooth",
+  "displayName": "Răng Mimic",
+  "description": "Chiếc răng cong của Mimic Tham Lam, một đồng vàng vẫn còn dính trên đó.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 3,
+  "maxStack": 99,
+  "value": 300,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "mud_core": {
+  "_name": "mud_core",
+  "id": "mud_core",
+  "displayName": "Lõi Bùn",
+  "description": "Hòn bùn cứng như đá, vẫn còn ấm. Người Bùn sống nhờ nó.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 12,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "pelt": {
+  "_name": "pelt",
+  "id": "pelt",
+  "displayName": "Da Gấu Ma",
+  "description": "Tấm da đen tuyền, ấm và dai như thép.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 120,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "poison_gland": {
+  "_name": "poison_gland",
+  "id": "poison_gland",
+  "displayName": "Tuyến Độc",
+  "description": "Túi độc nhỏ của Cóc Độc. Bà lang nào cũng muốn có.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 10,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "potion_blue": {
+  "_name": "potion_blue",
+  "id": "potion_blue",
+  "displayName": "Bình Năng Lượng",
+  "description": "Hồi phục 40 Năng lượng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 1,
+  "rarity": 0,
+  "maxStack": 20,
+  "value": 10,
+  "healAmount": 0,
+  "energyAmount": 40,
+  "cleanse": 0
+ },
+ "potion_green": {
+  "_name": "potion_green",
+  "id": "potion_green",
+  "displayName": "Thuốc Thảo Mộc",
+  "description": "Hồi 30 Máu, 25 Năng lượng và giải mọi hiệu ứng xấu.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 1,
+  "rarity": 1,
+  "maxStack": 20,
+  "value": 25,
+  "healAmount": 30,
+  "energyAmount": 25,
+  "cleanse": 1
+ },
+ "potion_red": {
+  "_name": "potion_red",
+  "id": "potion_red",
+  "displayName": "Bình Máu",
+  "description": "Hồi phục 60 Máu.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 1,
+  "rarity": 0,
+  "maxStack": 20,
+  "value": 10,
+  "healAmount": 60,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "queen_eye": {
+  "_name": "queen_eye",
+  "id": "queen_eye",
+  "displayName": "Mắt Nhện Chúa",
+  "description": "Con mắt đỏ rực của Nhện Chúa Pha Lê, nằm giữa một vòng pha lê.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 3,
+  "maxStack": 99,
+  "value": 360,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "ring": {
+  "_name": "ring",
+  "id": "ring",
+  "displayName": "Nhẫn Trưởng Làng",
+  "description": "Chiếc nhẫn gia truyền, dành cho người hùng của làng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 3,
+  "maxStack": 1,
+  "value": 500,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 4,
+  "bonuses": [
+   {
+    "stat": 0,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   },
+   {
+    "stat": 2,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   },
+   {
+    "stat": 3,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   },
+   {
+    "stat": 1,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   },
+   {
+    "stat": 16,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   },
+   {
+    "stat": 17,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   },
+   {
+    "stat": 20,
+    "kind": 0,
+    "value": 0.05,
+    "tag": null
+   }
+  ],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "ring_eye": {
+  "_name": "ring_eye",
+  "id": "ring_eye",
+  "displayName": "Nhẫn Mắt Hang",
+  "description": "Nhẫn bạc gắn thủy tinh thể của Mắt Hang. Nhìn qua nó, thấy ngay chỗ yếu.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 2,
+  "maxStack": 1,
+  "value": 400,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 4,
+  "bonuses": [
+   {
+    "stat": 9,
+    "kind": 0,
+    "value": 0.05,
+    "tag": null
+   },
+   {
+    "stat": 10,
+    "kind": 0,
+    "value": 0.15,
+    "tag": null
+   }
+  ],
+  "craftGold": 400,
+  "craftItems": [
+   {
+    "id": "eye_lens",
+    "count": 3
+   },
+   {
+    "id": "gem_blue",
+    "count": 1
+   }
+  ]
+ },
+ "ring_mimic": {
+  "_name": "ring_mimic",
+  "id": "ring_mimic",
+  "displayName": "Nhẫn Răng Mimic",
+  "description": "Răng của Mimic Tham Lam trên một vòng vàng. Vàng cứ thế rơi vào túi.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 3,
+  "maxStack": 1,
+  "value": 600,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 4,
+  "bonuses": [
+   {
+    "stat": 17,
+    "kind": 0,
+    "value": 1,
+    "tag": null
+   },
+   {
+    "stat": 20,
+    "kind": 0,
+    "value": 0.25,
+    "tag": null
+   }
+  ],
+  "craftGold": 350,
+  "craftItems": [
+   {
+    "id": "mimic_tooth",
+    "count": 1
+   },
+   {
+    "id": "gem_red",
+    "count": 1
+   }
+  ]
+ },
+ "scarecrow_straw": {
+  "_name": "scarecrow_straw",
+  "id": "scarecrow_straw",
+  "displayName": "Rơm Bù Nhìn",
+  "description": "Nắm rơm lấy từ bụng một Bù Nhìn Sống. Còn ấm, như có gì vừa rời đi.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 16,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "scarf_blackwind": {
+  "_name": "scarf_blackwind",
+  "id": "scarf_blackwind",
+  "displayName": "Khăn Hắc Phong",
+  "description": "Mũ trùm đen và khăn đỏ của Thủ Lĩnh Hắc Phong. Kẻ đội nó ra đòn trước khi bị thấy.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 3,
+  "maxStack": 1,
+  "value": 1400,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 0,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 7,
+    "tag": null
+   },
+   {
+    "stat": 9,
+    "kind": 0,
+    "value": 0.07,
+    "tag": null
+   },
+   {
+    "stat": 10,
+    "kind": 0,
+    "value": 0.2,
+    "tag": null
+   }
+  ],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "scroll": {
+  "_name": "scroll",
+  "id": "scroll",
+  "displayName": "Cuộn Giấy Cổ",
+  "description": "Ghi chép về Rừng Già Cổ Thụ.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 4,
+  "rarity": 1,
+  "maxStack": 1,
+  "value": 0,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "shield": {
+  "_name": "shield",
+  "id": "shield",
+  "displayName": "Khiên Gỗ",
+  "description": "Chiếc khiên gỗ bọc sắt.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 0,
+  "maxStack": 1,
+  "value": 25,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 3,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 3,
+    "tag": null
+   }
+  ],
+  "craftGold": 50,
+  "craftItems": [
+   {
+    "id": "gel",
+    "count": 3
+   },
+   {
+    "id": "herb",
+    "count": 2
+   }
+  ]
+ },
+ "shield_beetle": {
+  "_name": "shield_beetle",
+  "id": "shield_beetle",
+  "displayName": "Khiên Vỏ Bọ",
+  "description": "Khiên làm từ mai Bọ Giáp Đá, lấm tấm pha lê.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 2,
+  "maxStack": 1,
+  "value": 480,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 3,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 7,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 40,
+    "tag": null
+   }
+  ],
+  "craftGold": 480,
+  "craftItems": [
+   {
+    "id": "beetle_shell",
+    "count": 4
+   },
+   {
+    "id": "crystal_jelly",
+    "count": 3
+   }
+  ]
+ },
+ "shield_iron": {
+  "_name": "shield_iron",
+  "id": "shield_iron",
+  "displayName": "Khiên Sừng Sắt",
+  "description": "Khiên sắt tròn gắn sừng của Bò Rừng Sắt. Đỡ được cả một cú húc.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 3,
+  "maxStack": 1,
+  "value": 900,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 3,
+  "bonuses": [
+   {
+    "stat": 6,
+    "kind": 0,
+    "value": 12,
+    "tag": null
+   },
+   {
+    "stat": 4,
+    "kind": 0,
+    "value": 70,
+    "tag": null
+   },
+   {
+    "stat": 13,
+    "kind": 0,
+    "value": 0.05,
+    "tag": null
+   }
+  ],
+  "craftGold": 1100,
+  "craftItems": [
+   {
+    "id": "iron_horn",
+    "count": 1
+   },
+   {
+    "id": "iron_plate",
+    "count": 3
+   },
+   {
+    "id": "hp_badge",
+    "count": 4
+   }
+  ]
+ },
+ "shroom_cap": {
+  "_name": "shroom_cap",
+  "id": "shroom_cap",
+  "displayName": "Mũ Nấm Đỏ",
+  "description": "Mũ nấm đỏ chót của Nấm Độc. Bé Mai đang cần.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 3,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "snake_fang": {
+  "_name": "snake_fang",
+  "id": "snake_fang",
+  "displayName": "Nanh Xà Mẫu",
+  "description": "Chiếc nanh dài của Xà Mẫu Đầm Lầy, nọc vẫn còn nhỏ giọt.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 3,
+  "maxStack": 99,
+  "value": 320,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "snake_scale": {
+  "_name": "snake_scale",
+  "id": "snake_scale",
+  "displayName": "Vảy Xà Mẫu",
+  "description": "Vảy lục thẫm cứng hơn thép, phản chiếu ánh sương.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 160,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "spider_silk": {
+  "_name": "spider_silk",
+  "id": "spider_silk",
+  "displayName": "Tơ Nhện Hang",
+  "description": "Cuộn tơ dai như dây thừng, dính tay khó gỡ.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 12,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "sword": {
+  "_name": "sword",
+  "id": "sword",
+  "displayName": "Kiếm Sắt",
+  "description": "Thanh kiếm sắt đáng tin cậy.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 3,
+  "rarity": 0,
+  "maxStack": 1,
+  "value": 30,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": 3,
+  "bonuses": [
+   {
+    "stat": 7,
+    "kind": 0,
+    "value": 2,
+    "tag": null
+   },
+   {
+    "stat": 11,
+    "kind": 0,
+    "value": 0.04,
+    "tag": null
+   }
+  ],
+  "craftGold": 80,
+  "craftItems": [
+   {
+    "id": "gel",
+    "count": 5
+   }
+  ]
+ },
+ "toad_crown": {
+  "_name": "toad_crown",
+  "id": "toad_crown",
+  "displayName": "Vương Miện Cóc Tía",
+  "description": "Chiếc vương miện vàng méo mó của Cóc Tía, dính đầy nhựa độc.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 2,
+  "maxStack": 99,
+  "value": 150,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "toad_skin": {
+  "_name": "toad_skin",
+  "id": "toad_skin",
+  "displayName": "Da Cóc",
+  "description": "Da cóc sần sùi, vẫn còn rịn nhựa độc.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 4,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "tome_balllightning": {
+  "_name": "tome_balllightning",
+  "id": "tome_balllightning",
+  "displayName": "Bí Kíp: Lôi Cầu",
+  "description": "Sách cổ hệ Lôi chép chiêu Lôi Cầu, rơi từ Nhện Chúa Pha Lê. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_blizzard": {
+  "_name": "tome_blizzard",
+  "id": "tome_blizzard",
+  "displayName": "Bí Kíp: Bão Tuyết",
+  "description": "Sách cổ hệ Băng chép chiêu Bão Tuyết, rơi từ Xà Mẫu. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_chainlightning": {
+  "_name": "tome_chainlightning",
+  "id": "tome_chainlightning",
+  "displayName": "Bí Kíp: Xích Lôi",
+  "description": "Sách cổ hệ Lôi chép chiêu Xích Lôi, rơi từ Golem Pha Lê Cổ. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_curse": {
+  "_name": "tome_curse",
+  "id": "tome_curse",
+  "displayName": "Bí Kíp: Lời Nguyền",
+  "description": "Sách cổ hệ Ám chép chiêu Lời Nguyền, rơi từ Bò Rừng Sắt. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_eclipse": {
+  "_name": "tome_eclipse",
+  "id": "tome_eclipse",
+  "displayName": "Bí Kíp: Nhật Thực",
+  "description": "Sách cổ hệ Ám chép chiêu Tuyệt kỹ Nhật Thực, rơi từ Thủ Lĩnh Hắc Phong. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 3,
+  "maxStack": 5,
+  "value": 600,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_frostarmor": {
+  "_name": "tome_frostarmor",
+  "id": "tome_frostarmor",
+  "displayName": "Bí Kíp: Giáp Sương",
+  "description": "Sách cổ hệ Băng chép chiêu Giáp Sương, rơi từ Cóc Tía. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_frostarrows": {
+  "_name": "tome_frostarrows",
+  "id": "tome_frostarrows",
+  "displayName": "Bí Kíp: Băng Tiễn",
+  "description": "Sách cổ hệ Băng chép chiêu Băng Tiễn, rơi từ Cóc Tía. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_ice": {
+  "_name": "tome_ice",
+  "id": "tome_ice",
+  "displayName": "Bí Kíp: Mũi Băng",
+  "description": "Sách cổ hệ Băng chép chiêu Mũi Băng, rơi từ Cóc Tía. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_iceage": {
+  "_name": "tome_iceage",
+  "id": "tome_iceage",
+  "displayName": "Bí Kíp: Kỷ Băng Hà",
+  "description": "Sách cổ hệ Băng chép chiêu Tuyệt kỹ Kỷ Băng Hà, rơi từ Xà Mẫu. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 3,
+  "maxStack": 5,
+  "value": 600,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_iceprison": {
+  "_name": "tome_iceprison",
+  "id": "tome_iceprison",
+  "displayName": "Bí Kíp: Ngục Băng",
+  "description": "Sách cổ hệ Băng chép chiêu Ngục Băng, rơi từ Xà Mẫu. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_lightningbrand": {
+  "_name": "tome_lightningbrand",
+  "id": "tome_lightningbrand",
+  "displayName": "Bí Kíp: Lôi Ấn",
+  "description": "Sách cổ hệ Lôi chép chiêu Lôi Ấn, rơi từ Golem Pha Lê Cổ. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_shadowclone": {
+  "_name": "tome_shadowclone",
+  "id": "tome_shadowclone",
+  "displayName": "Bí Kíp: Phân Thân",
+  "description": "Sách cổ hệ Ám chép chiêu Phân Thân, rơi từ Thủ Lĩnh Hắc Phong. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_shadowknives": {
+  "_name": "tome_shadowknives",
+  "id": "tome_shadowknives",
+  "displayName": "Bí Kíp: Ám Tiễn",
+  "description": "Sách cổ hệ Ám chép chiêu Ám Tiễn, rơi từ Bò Rừng Sắt. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_shadowstep": {
+  "_name": "tome_shadowstep",
+  "id": "tome_shadowstep",
+  "displayName": "Bí Kíp: Bước Bóng",
+  "description": "Sách cổ hệ Ám chép chiêu Bước Bóng, rơi từ Bò Rừng Sắt. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_soulsiphon": {
+  "_name": "tome_soulsiphon",
+  "id": "tome_soulsiphon",
+  "displayName": "Bí Kíp: Hút Hồn",
+  "description": "Sách cổ hệ Ám chép chiêu Hút Hồn, rơi từ Thủ Lĩnh Hắc Phong. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_stormfield": {
+  "_name": "tome_stormfield",
+  "id": "tome_stormfield",
+  "displayName": "Bí Kíp: Điện Trường",
+  "description": "Sách cổ hệ Lôi chép chiêu Điện Trường, rơi từ Nhện Chúa Pha Lê. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_thunderstep": {
+  "_name": "tome_thunderstep",
+  "id": "tome_thunderstep",
+  "displayName": "Bí Kíp: Thiểm Bộ",
+  "description": "Sách cổ hệ Lôi chép chiêu Thiểm Bộ, rơi từ Golem Pha Lê Cổ. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 2,
+  "maxStack": 5,
+  "value": 250,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "tome_thunderstorm": {
+  "_name": "tome_thunderstorm",
+  "id": "tome_thunderstorm",
+  "displayName": "Bí Kíp: Cửu Thiên Lôi",
+  "description": "Sách cổ hệ Lôi chép chiêu Tuyệt kỹ Cửu Thiên Lôi, rơi từ Nhện Chúa Pha Lê. Đọc xong, sách tan thành bụi sáng.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 5,
+  "rarity": 3,
+  "maxStack": 5,
+  "value": 600,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0,
+  "slot": -1,
+  "bonuses": [],
+  "craftGold": 0,
+  "craftItems": []
+ },
+ "venom_sac": {
+  "_name": "venom_sac",
+  "id": "venom_sac",
+  "displayName": "Túi Nọc",
+  "description": "Túi nọc đặc quánh, lấp lánh ánh tím.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 20,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "wisp_essence": {
+  "_name": "wisp_essence",
+  "id": "wisp_essence",
+  "displayName": "Tinh Chất Ma Trơi",
+  "description": "Một đốm lửa lạnh nhốt trong bình, không bao giờ tắt.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 1,
+  "maxStack": 99,
+  "value": 18,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ },
+ "wsnake_skin": {
+  "_name": "wsnake_skin",
+  "id": "wsnake_skin",
+  "displayName": "Da Rắn Nước",
+  "description": "Lớp da lột xanh ô liu, còn nguyên những khoanh vằn sẫm.",
+  "icon": {
+   "$asset": "Art/Icons/items.png"
+  },
+  "kind": 2,
+  "rarity": 0,
+  "maxStack": 99,
+  "value": 6,
+  "healAmount": 0,
+  "energyAmount": 0,
+  "cleanse": 0
+ }
+}
