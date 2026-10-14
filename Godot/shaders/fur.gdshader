@@ -43,7 +43,7 @@ void fragment() {
 	float h = locks * 0.5 + fine * 0.15 + clumps * 0.35;
 	// soft painted streaks, lit from above: pale on the back, deep underneath
 	vec3 c = mix(base, tip, smoothstep(0.32, 0.78, h));
-	c *= mix(0.72, 1.18, smoothstep(-0.7, 0.8, world_nrm.y));
+	c *= mix(0.86, 1.16, smoothstep(-0.7, 0.8, world_nrm.y));
 	float mossy = smoothstep(0.55, 0.85, world_nrm.y + (clumps - 0.5) * 0.5) * moss_amount;
 	c = mix(c, moss * (0.8 + 0.4 * fine), mossy);
 	ALBEDO = c;

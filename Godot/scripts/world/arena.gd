@@ -15,8 +15,8 @@ func _ready() -> void:
 	for a in BOULDER_ANGLES:
 		var r := 30.0 + rng.randf_range(-3.0, 3.0)
 		var m := c + Vector2(cos(deg_to_rad(a)), sin(deg_to_rad(a))) * r
-		Props.place(self, ["rock_tallA", "rock_tallB", "rock_tallC", "rock_tallE"][rng.randi() % 4], m,
-			rng.randf() * TAU, 7.0, true, 0.6, "boulders")
+		Props.place(self, ["gen:rock_tall_3", "gen:rock_tall_4", "gen:rock_boulder_4", "gen:rock_tall_5"][rng.randi() % 4], m,
+			rng.randf() * TAU, 3.6, true, 0.8, "boulders")
 	for a in RUIN_ANGLES:
 		var m := c + Vector2(cos(deg_to_rad(a)), sin(deg_to_rad(a))) * rng.randf_range(50.0, 56.0)
 		var model: String = ["statue_column", "statue_columnDamaged", "statue_columnDamaged", "statue_block"][rng.randi() % 4]

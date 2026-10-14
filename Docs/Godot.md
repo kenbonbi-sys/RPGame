@@ -43,7 +43,7 @@ Godot/
     player/            hero.gd · player_skills.gd
     enemies/           colossus.gd (nền chung) · gau_ma.gd · weak_point.gd · boulder.gd · enemy.gd (quái thường) · slime.gd · shroom.gd · enemy_spawner.gd · creature_art.gd
     world/             world_map.gd (bố cục) · terrain*.gd · foliage.gd · village.gd · arena.gd · props.gd · palette.gd · grass.gd
-                       mesh_kit.gd (dựng hình bằng code) · tree_art.gd (cây, bụi) · house_art.gd (nhà, sạp, thùng, cờ, rào)
+                       mesh_kit.gd (dựng hình bằng code) · tree_art.gd (cây, bụi) · rock_art.gd (đá, khối vách) · house_art.gd (nhà, sạp, thùng, cờ, rào)
     ui/hud.gd · vfx/fx.gd · debug/autoshot.gd
   shaders/             đất, nước, lông colossus, ấn ký điểm yếu, tán cây (canopy), bề mặt vẽ tay (painted), đá, cỏ, ánh sáng chung (stylized_light)
   world/               terrain_data.res (đất đã bake) · map_preview.png · environment.tres (trời, sương, màu)
@@ -68,7 +68,9 @@ Số liệu nằm trong các ScriptableObject của bản Unity (`Assets/Data`).
 - **Cỏ** (`grass.gd`, `grass.gdshader`): lưới ô 16 m quanh camera (7×7 ô, mỗi ô tới 520 bụi, mỗi bụi 7 lá), chỉ mọc trên đất cỏ phẳng, không mọc trên đường, đá, bùn, nước. Cỏ lay theo gió, rẽ ra quanh hero, nhỏ dần rồi biến mất ở 34–46 m.
 - **Cây và bụi** (`tree_art.gd`, `canopy.gdshader`): dựng bằng code chứ không dùng model Kenney. Thân to thuôn dần, rễ xoè, vài cành vươn vào tán; tán là 6–10 cục phồng (icosphere đẩy bằng nhiễu) có pháp tuyến ngả ra từ tâm cả tán, nên cả tán đổ bóng như một khối vẽ tay. Màu đỉnh–giữa–dưới, độ sâu trong tán và sắc từng cục nằm trong màu đỉnh của lưới. Các loại: sồi, sồi sẫm, cây tròn, cây cao, cây hoa hồng (4% trong rừng), thông tầng, cây đầm lầy cong có rêu rủ, keo thảo nguyên tán bằng, bụi. Mỗi loại 2–4 biến thể, mỗi biến thể có bản gần và bản xa (ít đa giác) đổi nhau ở 150 m (bụi 70 m).
 - `mesh_kit.gd` là bộ dựng hình dùng chung: khối hộp bo cạnh, cục phồng, ống thuôn có uốn, lăng trụ tam giác; tự sửa chiều mặt tam giác.
-- Đá, khúc gỗ, nấm, hoa vẫn là Kenney, đổi màu trong `palette.gd`.
+- **Đá** (`rock_art.gd`): một quả cầu bị 13–15 mặt phẳng ngẫu nhiên cắt, nên có những mặt phẳng lớn, cạnh bo mềm, đỉnh phẳng cho rêu mọc và đáy phẳng cắm xuống đất. Mỗi mặt một sắc ấm hoặc lạnh, khối vách có thêm vân tầng. Các loại: tảng tròn, phiến, cột, khối vách. Va chạm là khối lồi tính đúng từ các mặt cắt (`RockArt.hull`), vì Jolt không dựng được khối lồi từ quá nhiều điểm gần đồng phẳng. Dùng cho đá rải khắp nơi, 4 Tảng Đá Lớn trong hang và đá Gấu Ma ném.
+- **Vách núi:** mọi sườn dốc (pháp tuyến y < 0,8, trừ đường đi) được cắm các khối đá vách lớn 6–20 m, nghiêng theo sườn và lún sâu (`Foliage._scatter_cliffs`), nên sườn núi thành vách đá xếp chồng chứ không phải mặt đất bị kéo dài. Shader đất vẽ đá thành từng tầng: mỗi tầng một sắc, nếp tối bên dưới, gờ sáng bên trên, vài vết nứt dọc.
+- Khúc gỗ, nấm, hoa vẫn là Kenney, đổi màu trong `palette.gd`.
 
 ### Làng Lá Xanh (`village.gd`, `house_art.gd`)
 
@@ -126,13 +128,14 @@ Vùng phát hiện, bán kính dây xích, lang thang và ngủ được nhân `
 
 ## Colossus
 
-`Colossus` là lớp nền chung. Thân con quái là các `AnimatableBody3D` trên lớp vật lý `colossus` (layer 4), được đặt lại vị trí mỗi khung hình. Lông vẽ tay (`fur.gdshader`): vệt lông mềm, lưng sáng bụng sẫm, rêu mọc trên lưng; các lọn lông cong dày phủ quanh thân (`Colossus.lock_mesh`). Giáp là tấm bo cạnh màu vỏ cây có rêu, mặt nạ xương và móng cũng dùng `painted.gdshader`. **Điểm yếu** (`WeakPoint`) là ấn ký phát sáng: điểm *vital* giữ máu boss, điểm thường gây hiệu ứng khi bị phá. Chém kiếm vào da không có tác dụng (chỉ toé lửa). Mọi colossus hồi sinh sau 3 phút như mọi boss trong game.
+`Colossus` là lớp nền chung. Thân con quái là các `AnimatableBody3D` trên lớp vật lý `colossus` (layer 4), được đặt lại vị trí mỗi khung hình. Lông vẽ tay (`fur.gdshader`): vệt lông mềm, lưng sáng bụng sẫm, rêu mọc trên lưng; các lọn lông cong dày phủ quanh thân (`Colossus.lock_mesh`). Phần lông được vẽ bằng lưới sần (`Colossus.fur_mesh`): mặt da lồi lõm thành từng mảng dài theo thân, phần lớn lõm vào trong khối va chạm, lồi ra tối đa khoảng 0,25 m, nên tay chân hero vẫn bám đúng chỗ nhìn thấy; ấn ký điểm yếu đặt cách da 0,3 m cho khỏi bị lông che. Giáp vẽ thành nhiều tấm vỏ cây chồng lên nhau như vảy (va chạm vẫn là một khối). **Điểm yếu** (`WeakPoint`) là ấn ký phát sáng: điểm *vital* giữ máu boss, điểm thường gây hiệu ứng khi bị phá. Chém kiếm vào da không có tác dụng (chỉ toé lửa). Mọi colossus hồi sinh sau 3 phút như mọi boss trong game.
 
 ### Gấu Ma Rừng Già (`gau_ma.gd`)
 
 Cao khoảng 18 m, dài khoảng 30 m, sống trong Hang Gấu Ma (sàn phẳng bán kính 50 m, có 4 Tảng Đá Lớn và tàn tích cột đá). Bốn chân bước theo kiểu IK thủ tục (chân chéo nhau thay phiên), mỗi bước làm rung đất, giẫm trúng thì bị ngã.
 
 - **Đường leo:** lông sau bắp chân sau → mông → lưng → cổ → đỉnh đầu. Hai bên sườn có giáp vỏ cây, ngực có tấm giáp, mặt là mặt nạ xương.
+- **Hình dáng:** đôi gạc như cành cây cổ thụ có rêu ở gốc, mày xương nặng, hàng răng và hai nanh cong ở hàm dưới, bàn chân có ngón và bốn vuốt cong (gốc sẫm, đầu ngà), cụm nấm phát sáng xanh ngọc trên hai bên sườn và vai (tránh đường leo và điểm yếu). Gạc, răng, nấm chỉ là hình, không có va chạm.
 - **Điểm yếu:** bắp chân sau trái (45 máu, phá được thì gấu **Quỵ Gối** khoảng 10 s, lưng hạ xuống thành dốc) · u lưng (120) · đỉnh đầu (120). Đâm hết 2 điểm vital thì gấu ngã xuống.
 - **Chiêu** (lấy từ boss 2D, mỗi chiêu có vòng cảnh báo đỏ trên đất và chữ "Kỹ năng: …"):
   - *Vồ*: quét chân trước.
@@ -154,7 +157,7 @@ Cao khoảng 18 m, dài khoảng 30 m, sống trong Hang Gấu Ma (sàn phẳng 
 |---|---|---|
 | 1 · Nền móng | Project, phím, camera SotC, hero (chạy/nhảy/Lướt/combo/bám/leo/đâm/rơi), thế giới 800×512 m theo bố cục Unity, làng, Hang Gấu Ma, **Gấu Ma thành colossus**, HUD, test, AutoShot | **Xong** (14/10/2026) |
 | 2 · Chiến đấu & tiến trình | Công thức sát thương, kháng hệ, trạng thái, Trấn Áp, hit-stop 3 mức, Lướt Hoàn Hảo, cả 92 chiêu chạy từ dữ liệu, cấp/XP, 6 chỉ số D&D; số liệu chuyển từ `Assets/Data` bằng script; Slime Rêu và Nấm Độc; túi đồ, rơi đồ, bình thuốc | **Phần lớn xong** (15/10/2026). Còn: cửa sổ cộng điểm chỉ số, Sách Chiêu (K), cấp chiêu |
-| 2b · Art kiểu Dauntless | Hero Quaternius (bộ đồ, đầu, tóc, hoạt ảnh UAL), ánh sáng kiểu vẽ tay, tán cây tròn, cỏ dày, đá rêu, trời và sương; HUD như Dauntless; bảng tên quái sửa lệch thanh máu; Lướt cả trên không | **Phần lớn xong** (15/10/2026): thêm nhà làng, cây và bụi dựng bằng code, slime/nấm/Gấu Ma vẽ tay. Còn: vách núi và đá còn góc cạnh, thân Gấu Ma vẫn ghép từ khối đơn giản, NPC trong làng |
+| 2b · Art kiểu Dauntless | Hero Quaternius (bộ đồ, đầu, tóc, hoạt ảnh UAL), ánh sáng kiểu vẽ tay, tán cây tròn, cỏ dày, đá rêu, trời và sương; HUD như Dauntless; bảng tên quái sửa lệch thanh máu; Lướt cả trên không | **Phần lớn xong** (15/10/2026): thêm nhà làng, cây và bụi dựng bằng code, slime/nấm/Gấu Ma vẽ tay; đá và vách núi dựng bằng code, Gấu Ma có lông sần, gạc, nanh, vuốt, nấm phát sáng. Còn: NPC trong làng, mặt đất trên đỉnh vách còn phẳng, thanh kiếm |
 | 3 · Đồ, nhiệm vụ, hội thoại | Túi đồ, trang bị, chế tạo, rơi đồ, nhiệm vụ (`QuestDef`), hội thoại Yarn (đọc lại các file `.yarn`), NPC làng, Bách Khoa Trùm, lưu game, các cửa sổ B/I/C, J, K | Chưa |
 | 4 · Các vùng | Đầm Lầy (Cóc Tía, Xà Mẫu thành colossus dưới nước), Hang Pha Lê (hang trong lòng núi, Golem Pha Lê Cổ, Nhện Chúa), Thảo Nguyên Gió (gió, Khe Vực, Cột Gió, Bò Rừng Sắt, Thủ Lĩnh Hắc Phong) | Chưa |
 | 5 · Nhân vật | Lớp D&D và chủng tộc (KayKit có Knight, Barbarian, Mage, Rogue), tạo nhân vật, màn hình chính xanh lá–vàng | Chưa |

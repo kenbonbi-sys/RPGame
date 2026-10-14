@@ -89,12 +89,7 @@ func add_capsule(body: Node3D, radius: float, height: float, xf: Transform3D, cl
 	var s := CapsuleShape3D.new()
 	s.radius = radius
 	s.height = height
-	var m := CapsuleMesh.new()
-	m.radius = radius
-	m.height = height
-	m.radial_segments = 24
-	m.rings = 10
-	var cs := _add_shape(body, s, m, xf, climbable, fur_material if climbable else armor_material)
+	var cs := _add_shape(body, s, fur_mesh(radius, height), xf, climbable, fur_material if climbable else armor_material)
 	if tufts > 0:
 		_add_tufts(body, xf, radius, height, tufts)
 	return cs
@@ -103,12 +98,7 @@ func add_capsule(body: Node3D, radius: float, height: float, xf: Transform3D, cl
 func add_sphere(body: Node3D, radius: float, xf: Transform3D, climbable := true, tufts := 0) -> CollisionShape3D:
 	var s := SphereShape3D.new()
 	s.radius = radius
-	var m := SphereMesh.new()
-	m.radius = radius
-	m.height = radius * 2.0
-	m.radial_segments = 24
-	m.rings = 12
-	var cs := _add_shape(body, s, m, xf, climbable, fur_material if climbable else armor_material)
+	var cs := _add_shape(body, s, fur_mesh(radius, radius * 2.0), xf, climbable, fur_material if climbable else armor_material)
 	if tufts > 0:
 		_add_tufts(body, xf, radius, radius * 2.0, tufts)
 	return cs
@@ -141,6 +131,59 @@ static func plate_mesh(size: Vector3) -> ArrayMesh:
 
 
 static var _lock_mesh: ArrayMesh
+static var _fur_meshes := {}
+
+
+## A capsule (or ball, when height = 2 × radius) along +Y whose surface is pushed in and out in
+## long clumps, so the fur has a lumpy silhouette. It stays within about a hand of the collider
+## (mostly just under it), so heroes still hold on to what they see.
+static func fur_mesh(radius: float, height: float) -> ArrayMesh:
+	var key := "%.2f|%.2f" % [radius, height]
+	if _fur_meshes.has(key):
+		return _fur_meshes[key]
+	var half := maxf(0.0, height * 0.5 - radius)
+	var segs := clampi(int(TAU * radius / 0.7), 20, 56)
+	var cap_rows := clampi(int(PI * 0.5 * radius / 0.7), 5, 14)
+	var body_rows := maxi(1, int(half * 2.0 / 0.8))
+	var amp := minf(0.32, radius * 0.07)
+	# rows from the bottom pole to the top: [centre y, angle above the equator]
+	var rows := []
+	for i in cap_rows:
+		rows.append([-half, -PI * 0.5 + PI * 0.5 * i / cap_rows])
+	for i in body_rows + 1:
+		rows.append([-half + half * 2.0 * i / body_rows, 0.0])
+	for i in range(1, cap_rows + 1):
+		rows.append([half, PI * 0.5 * i / cap_rows])
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for r in rows:
+		var cy: float = r[0]
+		var th: float = r[1]
+		for sgi in segs:
+			var a := TAU * sgi / segs
+			var d := Vector3(cos(a) * cos(th), sin(th), sin(a) * cos(th))
+			var p := Vector3(0, cy, 0) + d * radius
+			var n1 := MeshKit._noise3(Vector3(p.x / 1.3, p.y / 3.0, p.z / 1.3))
+			var n2 := MeshKit._noise3(p / 0.6 + Vector3(7, 7, 7))
+			var disp := amp * ((n1 - 0.5) * 2.2 + (n2 - 0.5) * 0.7 - 0.25)
+			st.add_vertex(p + d * disp)
+	var cols := segs
+	for r in rows.size() - 1:
+		for sgi in segs:
+			var a := r * cols + sgi
+			var b := r * cols + (sgi + 1) % segs
+			var c := b + cols
+			var d := a + cols
+			st.add_index(c)
+			st.add_index(d)
+			st.add_index(a)
+			st.add_index(c)
+			st.add_index(a)
+			st.add_index(b)
+	st.generate_normals()
+	var m := st.commit()
+	_fur_meshes[key] = m
+	return m
 
 
 ## One chunky, curled lock of fur (1 m long, along +Y), shared by every colossus.

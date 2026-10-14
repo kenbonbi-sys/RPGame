@@ -9,8 +9,8 @@ uniform vec3 grass_sun : source_color = vec3(0.47, 0.62, 0.22);
 uniform vec3 grass_steppe : source_color = vec3(0.80, 0.68, 0.34);
 uniform vec3 earth : source_color = vec3(0.56, 0.40, 0.25);
 uniform vec3 earth_light : source_color = vec3(0.72, 0.56, 0.36);
-uniform vec3 rock_warm : source_color = vec3(0.58, 0.52, 0.46);
-uniform vec3 rock_cool : source_color = vec3(0.36, 0.38, 0.42);
+uniform vec3 rock_warm : source_color = vec3(0.66, 0.58, 0.47);
+uniform vec3 rock_cool : source_color = vec3(0.44, 0.46, 0.52);
 uniform vec3 moss : source_color = vec3(0.32, 0.46, 0.18);
 uniform vec3 mud : source_color = vec3(0.27, 0.24, 0.16);
 uniform float low_v = 256.0;
@@ -62,8 +62,16 @@ void fragment() {
 
 	vec3 dirt = mix(earth, earth_light, smoothstep(0.35, 0.75, mid)) * (0.92 + 0.12 * fine);
 
-	float strata = vnoise(vec2(world_pos.y * 0.35, (p.x + p.y) * 0.015));
-	vec3 rock = mix(rock_cool, rock_warm, smoothstep(0.2, 0.8, strata * 0.6 + big * 0.6));
+	// rock as painted strata: layers of their own tone, a dark crease under each, a pale ledge on
+	// top, a few vertical cracks
+	float layer = world_pos.y * 0.3 + fbm(p * 0.03) * 3.0;
+	float band = fract(layer);
+	float tone = hash(vec2(floor(layer), 3.7));
+	vec3 rock = mix(rock_cool, rock_warm, smoothstep(0.15, 0.85, tone * 0.7 + big * 0.5));
+	rock *= mix(0.74, 1.0, smoothstep(0.0, 0.16, band));
+	rock *= 1.0 + 0.14 * smoothstep(0.8, 0.95, band);
+	float crack = smoothstep(0.04, 0.0, abs(vnoise(vec2((p.x - p.y) * 0.22, world_pos.y * 0.05)) - 0.5));
+	rock *= (1.0 - 0.28 * crack) * (0.93 + 0.12 * fine);
 	// moss on the parts of rock that face the sky
 	float mossy = smoothstep(0.55, 0.85, world_nrm.y + (mid - 0.5) * 0.4);
 	rock = mix(rock, moss * (0.85 + 0.3 * mid), mossy * 0.75);

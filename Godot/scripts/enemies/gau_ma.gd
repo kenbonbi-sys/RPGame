@@ -22,11 +22,7 @@ const LIFT := 1.5 * S
 const NECK_BASE := Vector3(0, 1.4, -8.6) * S
 const HEAD_OFFSET := Vector3(0, 1.4, -4.6) * S
 const DEN_RADIUS := 38.0
-const ROCK_SCENES := [
-	"res://assets/third_party/kenney_nature/rock_largeA.glb",
-	"res://assets/third_party/kenney_nature/rock_largeC.glb",
-	"res://assets/third_party/kenney_nature/rock_largeE.glb",
-]
+const ROCKS := ["rock_boulder_5", "rock_boulder_6", "rock_boulder_7"]
 
 
 class Leg:
@@ -72,6 +68,7 @@ var head: AnimatableBody3D
 var legs: Array[Leg] = []
 var eye_mat: StandardMaterial3D
 var leg_point: WeakPoint
+var _bone_mat: Material
 
 var _cooldowns := {"swipe": 2.0, "stomp": 4.0, "throw": 3.0, "pounce": 8.0, "shake": 0.0}
 var _on_me_time := 0.0
@@ -92,7 +89,6 @@ var _jump_from := Vector3.ZERO
 var _jump_to := Vector3.ZERO
 var _held_rock: Node3D
 var _hit_this_swing := {}
-var _rock_scenes: Array[PackedScene] = []
 
 
 func _ready() -> void:
@@ -111,8 +107,6 @@ func _ready() -> void:
 	_init_materials(Color(0.27, 0.19, 0.13), Color(0.56, 0.42, 0.29), Color(0.42, 0.32, 0.23))
 	process_physics_priority = -10
 	home = global_transform
-	for p in ROCK_SCENES:
-		_rock_scenes.append(load(p))
 	_build()
 	_snap_to_ground()
 	_plant_feet()
@@ -128,12 +122,29 @@ func _build() -> void:
 	var dark := StandardMaterial3D.new()
 	dark.albedo_color = Color(0.05, 0.05, 0.05)
 	dark.roughness = 0.4
+	_bone_mat = bone
 
 	torso = make_part("Torso")
 	add_capsule(torso, 3.7 * S, 16.0 * S, Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(0, 0.5, -2.0) * S), true, 620)
 	for side in [-1.0, 1.0]:
-		add_box(torso, Vector3(0.8, 3.6, 9.5) * S, Transform3D(Basis(Vector3.FORWARD, side * 0.2), Vector3(side * 3.45, -0.3, -3.2) * S))
-	add_box(torso, Vector3(5.8, 4.4, 1.0) * S, Transform3D(Basis(Vector3.RIGHT, 0.28), Vector3(0, -0.6, -9.7) * S))
+		var flank := Transform3D(Basis(Vector3.FORWARD, side * 0.2), Vector3(side * 3.45, -0.3, -3.2) * S)
+		add_box(torso, Vector3(0.8, 3.6, 9.5) * S, flank, null, false)
+		# drawn as three bark plates overlapping like scales
+		var plates := MeshKit.new()
+		for k in 3:
+			var off := Vector3(side * 0.12 * k, 0.12 * (k - 1), (k - 1) * 3.0) * S
+			plates.rounded_box(Vector3(0.7, 3.5 - absf(k - 1) * 0.35, 3.8) * S, 0.28 * S,
+				flank * Transform3D(Basis(Vector3.UP, side * 0.07 * (k - 1)), off), Color.WHITE)
+		CreatureArt.built(torso, plates, armor_material)
+	_dress_back()
+	var chest := Transform3D(Basis(Vector3.RIGHT, 0.28), Vector3(0, -0.6, -9.7) * S)
+	add_box(torso, Vector3(5.8, 4.4, 1.0) * S, chest, null, false)
+	# drawn as three bark plates, the upper ones over the lower
+	var breast := MeshKit.new()
+	for k in 3:
+		breast.rounded_box(Vector3(5.6 - k * 0.5, 1.8, 0.9) * S, 0.3 * S,
+			chest * Transform3D(Basis(Vector3.RIGHT, -0.12), Vector3(0, (1.3 - k * 1.35), -0.1 * (2 - k)) * S), Color.WHITE)
+	CreatureArt.built(torso, breast, armor_material)
 	add_weak_point(torso, Vector3(0, 4.18, 1.6) * S, Vector3(0, 1, 0.2), 120.0, true, 2.4)
 
 	neck = make_part("Neck")
@@ -177,6 +188,7 @@ func _build() -> void:
 		ear.transform = Transform3D(Basis(Vector3.FORWARD, side * -0.5), Vector3(side * 1.8, 2.3, 0.3) * S)
 		ear.layers = 4
 		head.add_child(ear)
+	_dress_head(bone)
 	var glow := OmniLight3D.new()
 	glow.light_color = Color(0.6, 1.0, 0.8)
 	glow.light_energy = 2.0
@@ -238,15 +250,92 @@ func _add_leg(leg_name: String, hip: Vector3, l1: float, l2: float, r1: float, r
 	leg.paw = make_part(leg_name + "_Paw")
 	add_box(leg.paw, Vector3(2.5, 1.1, 3.1) * S, Transform3D(Basis.IDENTITY, Vector3(0, -0.1, -0.5) * S), null, false)
 	_ellipsoid(leg.paw, Vector3(1.35, 0.62, 1.7) * S, Vector3(0, 0.0, -0.45) * S, fur_material)
+	# four hooked claws, dark at the root and pale at the tip, and the toes over them
+	var claws := MeshKit.new()
+	var toes := MeshKit.new()
 	for i in 4:
-		var claw := MeshInstance3D.new()
-		var cm := PrismMesh.new()
-		cm.size = Vector3(0.35, 0.9, 0.5) * S
-		claw.mesh = cm
-		claw.material_override = claw_material
-		claw.transform = Transform3D(Basis(Vector3.RIGHT, -PI * 0.5), Vector3(-0.9 + i * 0.6, -0.3, -2.25) * S)
-		leg.paw.add_child(claw)
+		var x := (-0.9 + i * 0.6) * S
+		_tube_along(claws, Vector3(x, -0.2 * S, -1.85 * S), Vector3(0, -0.2, -1), 1.2 * S, 0.22 * S, 0.02 * S, 7,
+			Vector3(0, -0.5 * S, 0), Color(0.42, 0.36, 0.32), Color(1.0, 0.98, 0.94))
+		toes.lump(Vector3(0.36, 0.3, 0.42) * S, 1, Transform3D(Basis.IDENTITY, Vector3(x, 0.05 * S, -1.75 * S)), 0.1, i, _white())
+	CreatureArt.built(leg.paw, claws, _bone_mat)
+	CreatureArt.built(leg.paw, toes, fur_material)
 	legs.append(leg)
+
+
+static func _white() -> Callable:
+	return func(_p: Vector3, _c: Vector3) -> Color:
+		return Color.WHITE
+
+
+## A tapered tube from `from` along `dir`, bent by `bend` (body space) toward its tip.
+static func _tube_along(kit: MeshKit, from: Vector3, dir: Vector3, length: float, r0: float, r1: float, sides: int,
+		bend: Vector3, color: Color, tip := Color(-1, 0, 0)) -> void:
+	var xf := Transform3D(_axis_basis(dir), from)
+	kit.tube(r0, r1, length, sides, xf, color, xf.basis.inverse() * bend, 3, tip)
+
+
+## Where a bent tube's centre line is at `t` (0..1).
+static func _along(from: Vector3, dir: Vector3, length: float, bend: Vector3, t: float) -> Vector3:
+	return from + dir.normalized() * length * t + bend * t * t
+
+
+## The face and crown: a heavy bone brow, teeth and tusks, and a pair of mossy branch antlers
+## (the old forest grows on it).
+func _dress_head(bone: Material) -> void:
+	var kb := MeshKit.new()
+	for side in [-1.0, 1.0]:
+		kb.lump(Vector3(0.8, 0.3, 0.5) * S, 2, Transform3D(Basis(Vector3.FORWARD, side * 0.28), Vector3(side * 0.86, 0.97, -2.7) * S), 0.06, 3, _white())
+		for i in 4:
+			var z := lerpf(-4.35, -3.25, i / 3.0)
+			_tube_along(kb, Vector3(side * lerpf(0.5, 0.78, i / 3.0), -1.72, z) * S, Vector3(0, -1, -0.1), 0.45 * S, 0.11 * S, 0.01 * S, 6,
+				Vector3.ZERO, Color(0.9, 0.88, 0.84))
+		_tube_along(kb, Vector3(side * 0.62, -1.95, -3.55) * S, Vector3(side * 0.35, 1.0, -0.4), 1.35 * S, 0.19 * S, 0.02 * S, 8,
+			Vector3(side * 0.25, 0, 0.3) * S, Color(0.85, 0.82, 0.76), Color(1.0, 1.0, 0.98))
+	CreatureArt.built(head, kb, bone)
+	var wood := CreatureArt.painted(Color(0.46, 0.34, 0.24), 0.25, 0.75, 0.95)
+	var ka := MeshKit.new()
+	for side in [-1.0, 1.0]:
+		var from := Vector3(side * 1.05, 2.05, 0.95) * S
+		var dir := Vector3(side * 0.6, 0.85, 0.3)
+		var length := 4.8 * S
+		var bend := Vector3(side * 1.4, -0.4, 1.6) * S
+		_tube_along(ka, from, dir, length, 0.46 * S, 0.14 * S, 9, bend, Color(0.75, 0.72, 0.7), Color(1.0, 0.98, 0.95))
+		var tines := [[0.3, Vector3(side * 0.1, 1.0, -0.5), 2.3], [0.55, Vector3(side * 0.3, 1.0, -0.2), 2.0], [0.78, Vector3(side * 0.45, 1.0, 0.1), 1.6],
+			[0.97, Vector3(side * 0.7, 0.7, 0.4), 1.2]]
+		for tn in tines:
+			var at := _along(from, dir, length, bend, tn[0])
+			_tube_along(ka, at, tn[1], tn[2] * S, 0.24 * S, 0.04 * S, 7, Vector3(side * 0.2, 0, 0.35) * S, Color(0.85, 0.82, 0.8), Color(1.0, 0.98, 0.95))
+		# a cushion of moss where the antler meets the skull
+		ka.lump(Vector3(0.55, 0.3, 0.55) * S, 1, Transform3D(Basis.IDENTITY, from + Vector3(0, -0.05, 0) * S), 0.2, 9,
+			func(_p: Vector3, _c: Vector3) -> Color: return Color(0.62, 0.95, 0.42))
+	CreatureArt.built(head, ka, wood)
+
+
+## Glowing mushrooms in clumps on its flanks and shoulders, off the climbing line and the weak point.
+func _dress_back() -> void:
+	var stems := MeshKit.new()
+	var caps := MeshKit.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 908
+	for spot in [[-55.0, -6.6], [55.0, -6.0], [-60.0, -1.8], [58.0, 4.0], [-52.0, 4.6]]:
+		var phi := deg_to_rad(spot[0])
+		var n := Vector3(sin(phi), cos(phi), 0)
+		var base := Vector3(0, 0.5, spot[1]) * S + n * 3.6 * S
+		for i in rng.randi_range(3, 5):
+			var off := Vector3(rng.randf_range(-0.6, 0.6), 0, rng.randf_range(-0.8, 0.8)) * S
+			var dir := (n + Vector3(rng.randf_range(-0.3, 0.3), 0.35, rng.randf_range(-0.3, 0.3))).normalized()
+			var h := rng.randf_range(0.45, 0.95) * S
+			var p := base + off
+			_tube_along(stems, p, dir, h, 0.11 * S, 0.08 * S, 6, Vector3.ZERO, Color(0.92, 0.9, 0.84))
+			var r := rng.randf_range(0.3, 0.55) * S
+			caps.lump(Vector3(r, r * 0.45, r), 1, Transform3D(_axis_basis(dir), p + dir * h), 0.1, i, _white(), Vector3.INF, 0.0, 0.3)
+	var stem_mat := CreatureArt.painted(Color(0.9, 0.88, 0.82), 0.1)
+	var cap_mat := CreatureArt.painted(Color(0.36, 0.86, 0.8), 0.12)
+	cap_mat.set_shader_parameter("glow", Color(0.3, 1.0, 0.85))
+	cap_mat.set_shader_parameter("glow_energy", 1.4)
+	CreatureArt.built(torso, stems, stem_mat)
+	CreatureArt.built(torso, caps, cap_mat)
 
 
 static func _axis_basis(y: Vector3) -> Basis:
@@ -552,8 +641,9 @@ func _throw(delta: float) -> void:
 
 
 func _make_rock(radius: float) -> Node3D:
-	var rock: Node3D = _rock_scenes.pick_random().instantiate()
-	rock.scale = Vector3.ONE * radius * 2.2
+	var rock := MeshInstance3D.new()
+	rock.mesh = RockArt.mesh(ROCKS.pick_random())
+	rock.scale = Vector3.ONE * radius * 1.05
 	rock.rotation = Vector3(randf() * TAU, randf() * TAU, randf() * TAU)
 	get_parent().add_child(rock)
 	return rock

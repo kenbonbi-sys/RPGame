@@ -32,7 +32,7 @@ func _ready() -> void:
 	_quad.mesh = q
 	_quad.material_override = _mat
 	_quad.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_quad.position = Vector3(0, 0, 0.06)
+	_quad.position = Vector3(0, 0, 0.3)   # clear of the fur's clumps
 	add_child(_quad)
 	_light = OmniLight3D.new()
 	_light.light_color = Color(0.55, 0.95, 0.85)

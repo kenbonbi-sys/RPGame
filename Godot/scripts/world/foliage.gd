@@ -2,9 +2,9 @@ class_name Foliage
 extends Node3D
 ## Scatters the land (same seed, same world every time): old trees in the forest with a dense wall
 ## along the map's edge, pines toward the mountains, crooked trees in the swamp, flat-topped
-## acacias on the steppe, bushes (all built by TreeArt in the Dauntless style), and rocks, logs,
-## mushrooms and flowers from the Kenney Nature Kit. Drawn with MultiMeshes in 128 m cells, built
-## trees with a light far version; trees and big rocks are solid.
+## acacias on the steppe, bushes (TreeArt), boulders and the rock chunks that make the steep slopes
+## read as cliffs (RockArt), and logs, mushrooms and flowers from the Kenney Nature Kit. Drawn with
+## MultiMeshes in 128 m cells, built things with a light far version; trees and rocks are solid.
 
 const CELL := 128.0
 const KIT := "res://assets/third_party/kenney_nature/%s.glb"
@@ -17,16 +17,18 @@ const PINES := ["gen:pine_0", "gen:pine_1", "gen:pine_2", "gen:pine_3"]
 const SWAMP_TREES := ["gen:swamp_0", "gen:swamp_1", "gen:swamp_2"]
 const STEPPE_TREES := ["gen:acacia_0", "gen:acacia_1", "gen:acacia_2"]
 const BUSHES := ["gen:bush_0", "gen:bush_1", "gen:bush_2", "gen:bush_3"]
-const ROCKS := ["rock_largeA", "rock_largeB", "rock_largeC", "rock_largeD", "rock_largeE", "rock_largeF"]
+const ROCKS := ["gen:rock_boulder_0", "gen:rock_boulder_1", "gen:rock_boulder_2", "gen:rock_boulder_3",
+	"gen:rock_slab_0", "gen:rock_slab_1", "gen:rock_tall_0", "gen:rock_tall_1"]
+const CLIFFS := ["gen:rock_cliff_0", "gen:rock_cliff_1", "gen:rock_cliff_2", "gen:rock_cliff_3", "gen:rock_tall_2"]
 ## (the grass itself is the Grass node's)
 const SMALL := ["mushroom_red", "mushroom_redGroup", "mushroom_tan", "mushroom_tanGroup", "flower_purpleA",
 	"flower_redA", "flower_yellowA", "flower_purpleA", "flower_redA", "flower_yellowA"]
 const LOGS := ["stump_old", "stump_oldTall", "log", "log_large", "stump_round"]
 
 ## draw distance per kind
-const RANGE := {"tree": 650.0, "rock": 520.0, "bush": 180.0, "small": 75.0, "log": 220.0}
-## built trees and bushes switch to their far version here
-const NEAR := {"tree": 150.0, "bush": 70.0}
+const RANGE := {"tree": 650.0, "rock": 520.0, "cliff": 900.0, "bush": 180.0, "small": 75.0, "log": 220.0}
+## built things switch to their far version here
+const NEAR := {"tree": 150.0, "bush": 70.0, "rock": 140.0, "cliff": 200.0}
 
 @export var data: TerrainData = preload("res://world/terrain_data.res")
 
@@ -49,6 +51,7 @@ func _ready() -> void:
 	add_child(_solid)
 	_scatter_trees()
 	_scatter_rocks()
+	_scatter_cliffs()
 	_scatter_bushes()
 	_scatter_logs()
 	_scatter_small()
@@ -61,7 +64,7 @@ func parts(model: String) -> Array:
 		return _parts_cache[model]
 	var out := []
 	if model.begins_with("gen:"):
-		out.append([TreeArt.mesh(model.substr(4)), Transform3D.IDENTITY])
+		out.append([built(model.substr(4)), Transform3D.IDENTITY])
 		_parts_cache[model] = out
 		return out
 	var scene: PackedScene = load(KIT % model)
@@ -77,6 +80,13 @@ func parts(model: String) -> Array:
 	root.free()
 	_parts_cache[model] = out
 	return out
+
+
+## A built model by name: "rock_*" from RockArt, the rest from TreeArt.
+static func built(model_name: String, far := false) -> ArrayMesh:
+	if model_name.begins_with("rock_"):
+		return RockArt.mesh(model_name.substr(5), far)
+	return TreeArt.mesh(model_name, far)
 
 
 func _blocked(u: float, v: float, margin := 0.0) -> bool:
@@ -176,12 +186,59 @@ func _rock_at(u: float, v: float) -> void:
 	if _rng.randf() > p:
 		return
 	var model: String = ROCKS[_rng.randi() % ROCKS.size()]
-	var scale := _rng.randf_range(3.5, 8.5) * (1.6 if s.b > 0.5 else 1.0)
-	var xf := _add("rock", model, u, v, scale, 0.25 * scale * 0.26, 0.25)
+	if data.normal_at(u, v).y < 0.85 and model.contains("slab"):
+		model = ROCKS[0]
+	var scale := _rng.randf_range(1.4, 3.6) * (1.5 if s.b > 0.5 else 1.0)
+	var xf := _add("rock", model, u, v, scale, 0.3 * scale, 0.2)
+	_solid_mesh(model, xf)
+
+
+## Big rock chunks sunk into every steep slope, so hillsides and the mountains read as stacked,
+## faceted cliffs instead of a smooth stretched surface. Kept off roads and paths.
+func _scatter_cliffs() -> void:
+	_jitter_grid(11.0, _cliff_at)
+
+
+func _cliff_at(u: float, v: float) -> void:
+	var h := data.height_at(u, v)
+	if h < 1.5 or _blocked(u, v, 2.0):
+		return
+	var n := data.normal_at(u, v)
+	if n.y > 0.8:
+		return
+	if data.splat_at(u, v).g > 0.1 or WorldMap.path_distance(u, v).x < 9.0:
+		return
+	var steep := smoothstep(0.8, 0.55, n.y)
+	if _rng.randf() > 0.25 + 0.5 * steep:
+		return
+	var model: String = CLIFFS[_rng.randi() % CLIFFS.size()]
+	var scale := _rng.randf_range(3.0, 6.0) * (1.0 + 0.6 * smoothstep(40.0, 90.0, h))
+	# lean the chunk with the slope a little, and sink it well in
+	var up := Vector3.UP.lerp(n, 0.35).normalized()
+	var b := Basis(Vector3.UP, _rng.randf() * TAU)
+	var axis := Vector3.UP.cross(up)
+	if axis.length() > 0.001:
+		b = Basis(axis.normalized(), Vector3.UP.angle_to(up)) * b
+	var xf := Transform3D(b.scaled(Vector3.ONE * scale), Vector3(u, h - 0.45 * scale, -v))
+	var key := "cliff|%s|%d|%d" % [model, int(u / CELL), int(v / CELL)]
+	if not _batches.has(key):
+		_batches[key] = []
+	_batches[key].append(xf)
+	placed += 1
 	_solid_mesh(model, xf)
 
 
 func _solid_mesh(model: String, xf: Transform3D) -> void:
+	if model.begins_with("gen:rock_"):
+		var shape := ConvexPolygonShape3D.new()
+		var pts := PackedVector3Array()
+		for q in RockArt.hull(model.substr(9)):
+			pts.append(xf * q)
+		shape.points = pts
+		var rcs := CollisionShape3D.new()
+		rcs.shape = shape
+		_solid.add_child(rcs)
+		return
 	for part in parts(model):
 		var mesh: Mesh = part[0]
 		var local: Transform3D = xf * part[1]
@@ -274,13 +331,13 @@ func _build_batches() -> void:
 			add_child(mmi)
 
 
-## A built tree or bush batch: the full version up close, the light one beyond NEAR[kind].
+## A built batch (trees, bushes, rocks): the full version up close, the light one beyond NEAR[kind].
 func _add_built(kind: String, tree_name: String, xfs: Array, key: String) -> void:
 	var split: float = NEAR.get(kind, 120.0)
 	for far in [false, true]:
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = TreeArt.mesh(tree_name, far)
+		mm.mesh = built(tree_name, far)
 		mm.instance_count = xfs.size()
 		for i in xfs.size():
 			mm.set_instance_transform(i, xfs[i])
