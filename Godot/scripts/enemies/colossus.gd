@@ -30,8 +30,9 @@ var engaged := false
 var home: Transform3D
 
 var fur_material: ShaderMaterial
-var armor_material: StandardMaterial3D
-var claw_material: StandardMaterial3D
+var armor_material: ShaderMaterial
+var claw_material: ShaderMaterial
+var lock_material: ShaderMaterial
 
 
 func _enter_tree() -> void:
@@ -48,36 +49,13 @@ func _init_materials(fur_base: Color, fur_tip: Color, armor: Color) -> void:
 	fur_material.shader = FUR_SHADER
 	fur_material.set_shader_parameter("base", fur_base)
 	fur_material.set_shader_parameter("tip", fur_tip)
-	armor_material = StandardMaterial3D.new()
-	armor_material.albedo_color = armor
-	armor_material.roughness = 0.95
-	var noise := FastNoiseLite.new()
-	noise.frequency = 0.04
-	noise.fractal_octaves = 4
-	var nt := NoiseTexture2D.new()
-	nt.noise = noise
-	nt.seamless = true
-	nt.as_normal_map = true
-	nt.bump_strength = 6.0
-	armor_material.normal_enabled = true
-	armor_material.normal_texture = nt
-	armor_material.normal_scale = 1.4
-	var ct := NoiseTexture2D.new()
-	var n2 := FastNoiseLite.new()
-	n2.frequency = 0.02
-	ct.noise = n2
-	ct.seamless = true
-	var ramp := Gradient.new()
-	ramp.set_color(0, armor.darkened(0.45))
-	ramp.set_color(1, armor.lightened(0.15))
-	ramp.add_point(0.55, Color(0.33, 0.38, 0.24))
-	ct.color_ramp = ramp
-	armor_material.albedo_texture = ct
-	armor_material.uv1_triplanar = true
-	armor_material.uv1_scale = Vector3.ONE * 0.12
-	claw_material = StandardMaterial3D.new()
-	claw_material.albedo_color = armor.darkened(0.55)
-	claw_material.roughness = 0.6
+	# bark-like armour plates, painted, with moss on whatever faces up
+	armor_material = CreatureArt.painted(armor, 0.32, 0.6, 0.95)
+	armor_material.set_shader_parameter("paint_scale", 0.9)
+	claw_material = CreatureArt.painted(armor.darkened(0.55), 0.12, 0.0, 0.6)
+	claw_material.set_shader_parameter("specular_amount", 0.25)
+	lock_material = CreatureArt.painted(fur_tip, 0.2, 0.45, 0.95)
+	lock_material.set_shader_parameter("paint_scale", 1.2)
 
 
 # ================================================================== building the body
@@ -140,28 +118,48 @@ func add_sphere(body: Node3D, radius: float, xf: Transform3D, climbable := true,
 func add_box(body: Node3D, size: Vector3, xf: Transform3D, mat: Material = null, show := true) -> CollisionShape3D:
 	var s := BoxShape3D.new()
 	s.size = size
-	var m: BoxMesh = null
+	var m: Mesh = null
 	if show:
-		m = BoxMesh.new()
-		m.size = size
+		m = plate_mesh(size)
 	return _add_shape(body, s, m, xf, false, mat if mat else armor_material)
 
 
-## Shaggy tufts over a capsule (or sphere) so the silhouette reads as fur.
+static var _plates := {}
+
+
+## A chunky bevelled plate for armour boxes.
+static func plate_mesh(size: Vector3) -> ArrayMesh:
+	var key := size.snapped(Vector3.ONE * 0.01)
+	if _plates.has(key):
+		return _plates[key]
+	var k := MeshKit.new()
+	k.rounded_box(size, minf(size.x, minf(size.y, size.z)) * 0.3, Transform3D.IDENTITY, Color.WHITE)
+	var m := ArrayMesh.new()
+	k.commit(m, null)
+	_plates[key] = m
+	return m
+
+
+static var _lock_mesh: ArrayMesh
+
+
+## One chunky, curled lock of fur (1 m long, along +Y), shared by every colossus.
+static func lock_mesh() -> ArrayMesh:
+	if _lock_mesh:
+		return _lock_mesh
+	var k := MeshKit.new()
+	k.tube(0.2, 0.03, 1.0, 6, Transform3D(Basis.IDENTITY.scaled(Vector3(1.8, 1.0, 0.6)), Vector3(0, -0.5, 0)),
+		Color(0.62, 0.6, 0.58), Vector3(0, 0, 0.3), 3, Color(1.08, 1.06, 1.02))
+	_lock_mesh = ArrayMesh.new()
+	k.commit(_lock_mesh, null)
+	return _lock_mesh
+
+
+## Shaggy locks over a capsule (or sphere) so the silhouette reads as fur.
 func _add_tufts(body: Node3D, xf: Transform3D, radius: float, height: float, count: int) -> void:
-	var cone := CylinderMesh.new()
-	cone.top_radius = 0.0
-	cone.bottom_radius = 0.13
-	cone.height = 1.0
-	cone.radial_segments = 4
-	cone.rings = 1
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = (fur_material.get_shader_parameter("tip") as Color).darkened(0.1)
-	mat.roughness = 0.95
-	cone.material = mat
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = cone
+	mm.mesh = lock_mesh()
 	mm.instance_count = count
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(body.name) ^ count
@@ -182,6 +180,7 @@ func _add_tufts(body: Node3D, xf: Transform3D, radius: float, height: float, cou
 		mm.set_instance_transform(i, xf * Transform3D(b, p + dir * len * 0.45))
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
+	mmi.material_override = lock_material
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	body.add_child(mmi)
 

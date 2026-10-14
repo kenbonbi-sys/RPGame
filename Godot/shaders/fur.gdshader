@@ -1,13 +1,18 @@
 shader_type spatial;
-// Shaggy colossus fur: strands running along the part's length (object-space Y), clumped
-// shading and a soft sheen at the rim. 3D noise, so spheres have no pinched poles.
+// Colossus fur, painted: chunky locks running along the part's length (object-space Y), darker
+// roots and sunlit tips, moss settling on whatever faces the sky, the stylised light.
 // Climbable surfaces wear this; armour does not.
 
 uniform vec3 base : source_color = vec3(0.23, 0.20, 0.17);
 uniform vec3 tip : source_color = vec3(0.42, 0.37, 0.30);
-uniform float strand_density = 5.0;
+uniform vec3 moss : source_color = vec3(0.34, 0.48, 0.2);
+uniform float moss_amount = 0.65;
+uniform float strand_density = 3.0;
+
+#include "res://shaders/stylized_light.gdshaderinc"
 
 varying vec3 obj_pos;
+varying vec3 world_nrm;
 
 float hash3(vec3 p) {
 	p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
@@ -27,19 +32,27 @@ float vnoise3(vec3 x) {
 
 void vertex() {
 	obj_pos = VERTEX;
+	world_nrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
 void fragment() {
 	vec3 p = obj_pos;
-	float strands = vnoise3(p * vec3(strand_density, 0.35, strand_density));
-	float fine = vnoise3(p * vec3(strand_density * 3.1, 0.9, strand_density * 3.1));
-	float clumps = vnoise3(p * vec3(0.7, 0.25, 0.7) + vec3(3.0));
-	float h = strands * 0.5 + fine * 0.25 + clumps * 0.35;
-	ALBEDO = mix(base * 0.7, tip, smoothstep(0.3, 0.95, h));
+	float locks = vnoise3(p * vec3(strand_density, 0.25, strand_density));
+	float fine = vnoise3(p * vec3(strand_density * 2.6, 0.6, strand_density * 2.6));
+	float clumps = vnoise3(p * vec3(0.5, 0.2, 0.5) + vec3(3.0));
+	float h = locks * 0.5 + fine * 0.15 + clumps * 0.35;
+	// soft painted streaks, lit from above: pale on the back, deep underneath
+	vec3 c = mix(base, tip, smoothstep(0.32, 0.78, h));
+	c *= mix(0.72, 1.18, smoothstep(-0.7, 0.8, world_nrm.y));
+	float mossy = smoothstep(0.55, 0.85, world_nrm.y + (clumps - 0.5) * 0.5) * moss_amount;
+	c = mix(c, moss * (0.8 + 0.4 * fine), mossy);
+	ALBEDO = c;
 	ROUGHNESS = 0.92;
-	SPECULAR = 0.3;
-	RIM = 0.55;
-	RIM_TINT = 0.5;
-	AO = mix(0.55, 1.0, h);
-	AO_LIGHT_AFFECT = 0.6;
+	SPECULAR = 0.25;
+	AO = mix(0.6, 1.0, h);
+	AO_LIGHT_AFFECT = 0.4;
+}
+
+void light() {
+	stylized_light(NORMAL, VIEW, LIGHT, LIGHT_COLOR, ATTENUATION, ALBEDO, DIFFUSE_LIGHT, SPECULAR_LIGHT);
 }

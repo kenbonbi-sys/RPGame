@@ -118,4 +118,4 @@ func _physics_process(delta: float) -> void:
 	var puff := 1.0
 	if state == State.ATTACK and state_time < 0.4:
 		puff = 1.0 + sin(clampf(state_time / 0.32, 0.0, 1.0) * PI) * 0.25
-	_cap.scale = _cap.scale.lerp(Vector3(puff, 0.55 * (2.0 - puff), puff), 0.3)
+	_cap.scale = _cap.scale.lerp(Vector3(puff, 2.0 - puff, puff), 0.3)

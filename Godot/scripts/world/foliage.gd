@@ -1,27 +1,32 @@
 class_name Foliage
 extends Node3D
-## Scatters the Kenney Nature Kit over the land (same seed, same world every time): tall old
-## trees in the forest with a dense wall along the map's edge, pines toward the mountains, thin
-## dark trees in the swamp, flat-topped acacias on the steppe, bushes, rocks, logs, mushrooms and
-## flowers. Drawn with MultiMeshes in 128 m cells; trees and big rocks are solid.
+## Scatters the land (same seed, same world every time): old trees in the forest with a dense wall
+## along the map's edge, pines toward the mountains, crooked trees in the swamp, flat-topped
+## acacias on the steppe, bushes (all built by TreeArt in the Dauntless style), and rocks, logs,
+## mushrooms and flowers from the Kenney Nature Kit. Drawn with MultiMeshes in 128 m cells, built
+## trees with a light far version; trees and big rocks are solid.
 
 const CELL := 128.0
 const KIT := "res://assets/third_party/kenney_nature/%s.glb"
 
-const FOREST_TREES := ["tree_oak", "tree_default", "tree_detailed", "tree_fat", "tree_oak_dark",
-	"tree_default_dark", "tree_detailed_dark", "tree_tall", "tree_tall_dark"]
-const PINES := ["tree_pineTallA_detailed", "tree_pineTallB_detailed", "tree_pineTallC_detailed",
-	"tree_pineTallD_detailed", "tree_pineRoundA", "tree_pineRoundC"]
-const SWAMP_TREES := ["tree_thin_dark", "tree_simple_dark", "tree_plateau_dark", "tree_tall_dark"]
-const STEPPE_TREES := ["tree_plateau", "tree_plateau_fall"]
-const BUSHES := ["plant_bush", "plant_bushDetailed", "plant_bushLarge", "plant_bushLargeTriangle"]
+## "gen:" models are built by TreeArt (metres); the rest are Kenney models.
+const FOREST_TREES := ["gen:oak_0", "gen:oak_1", "gen:oak_2", "gen:round_0", "gen:round_1", "gen:tall_0", "gen:tall_1",
+	"gen:oakdark_0", "gen:oakdark_1", "gen:oakdark_2"]
+const BLOSSOMS := ["gen:blossom_0", "gen:blossom_1"]
+const PINES := ["gen:pine_0", "gen:pine_1", "gen:pine_2", "gen:pine_3"]
+const SWAMP_TREES := ["gen:swamp_0", "gen:swamp_1", "gen:swamp_2"]
+const STEPPE_TREES := ["gen:acacia_0", "gen:acacia_1", "gen:acacia_2"]
+const BUSHES := ["gen:bush_0", "gen:bush_1", "gen:bush_2", "gen:bush_3"]
 const ROCKS := ["rock_largeA", "rock_largeB", "rock_largeC", "rock_largeD", "rock_largeE", "rock_largeF"]
+## (the grass itself is the Grass node's)
 const SMALL := ["mushroom_red", "mushroom_redGroup", "mushroom_tan", "mushroom_tanGroup", "flower_purpleA",
-	"flower_redA", "flower_yellowA", "plant_flatTall", "grass_large", "grass_leafsLarge", "grass_large", "grass_leafsLarge"]
+	"flower_redA", "flower_yellowA", "flower_purpleA", "flower_redA", "flower_yellowA"]
 const LOGS := ["stump_old", "stump_oldTall", "log", "log_large", "stump_round"]
 
 ## draw distance per kind
 const RANGE := {"tree": 650.0, "rock": 520.0, "bush": 180.0, "small": 75.0, "log": 220.0}
+## built trees and bushes switch to their far version here
+const NEAR := {"tree": 150.0, "bush": 70.0}
 
 @export var data: TerrainData = preload("res://world/terrain_data.res")
 
@@ -55,6 +60,10 @@ func parts(model: String) -> Array:
 	if _parts_cache.has(model):
 		return _parts_cache[model]
 	var out := []
+	if model.begins_with("gen:"):
+		out.append([TreeArt.mesh(model.substr(4)), Transform3D.IDENTITY])
+		_parts_cache[model] = out
+		return out
 	var scene: PackedScene = load(KIT % model)
 	var root := scene.instantiate() as Node3D
 	for n in root.find_children("*", "MeshInstance3D", true, false):
@@ -121,20 +130,20 @@ func _tree_at(u: float, v: float) -> void:
 	var swamp := WorldMap.swamp_weight(u, v)
 	var north := WorldMap.north_weight(u, v)
 	var mountain := WorldMap.mountain_weight(u, v)
-	var list: Array = FOREST_TREES
+	var list: Array = FOREST_TREES if _rng.randf() > 0.04 else BLOSSOMS
 	var p := 0.3 + 0.45 * smoothstep(-0.2, 0.45, n) + border * 0.6
-	var scale := _rng.randf_range(8.0, 13.0)
+	var scale := _rng.randf_range(0.85, 1.3)
 	if mountain > 0.5:
 		list = PINES
 		p = 0.18 + border * 0.3
 	elif north > 0.5:
 		list = STEPPE_TREES
 		p = 0.035
-		scale = _rng.randf_range(7.0, 10.0)
+		scale = _rng.randf_range(0.85, 1.15)
 	elif swamp > 0.5:
 		list = SWAMP_TREES
 		p = 0.2 + 0.25 * smoothstep(0.0, 0.5, n)
-		scale = _rng.randf_range(7.0, 11.0)
+		scale = _rng.randf_range(0.85, 1.2)
 	elif v > WorldMap.LOW_V - 50.0 or border > 0.3:
 		list = PINES if _rng.randf() < 0.55 else FOREST_TREES
 	if WorldMap.path_distance(u, v).x < 8.0:
@@ -142,10 +151,10 @@ func _tree_at(u: float, v: float) -> void:
 	if _rng.randf() > p:
 		return
 	var model: String = list[_rng.randi() % list.size()]
-	_add("tree", model, u, v, scale, 0.3, 0.06)
+	_add("tree", model, u, v, scale, 0.15, 0.04)
 	var cs := CollisionShape3D.new()
 	var cyl := CylinderShape3D.new()
-	cyl.radius = 0.05 * scale
+	cyl.radius = TreeArt.trunk_radius(model.substr(4)) * scale
 	cyl.height = 8.0
 	cs.shape = cyl
 	cs.position = Vector3(u, data.height_at(u, v) + 3.5, -v)
@@ -203,7 +212,7 @@ func _bush_at(u: float, v: float) -> void:
 	var p := 0.12 + (0.25 if road < 7.0 else 0.0)
 	if _rng.randf() > p:
 		return
-	_add("bush", BUSHES[_rng.randi() % BUSHES.size()], u, v, _rng.randf_range(2.6, 4.6), 0.1, 0.1)
+	_add("bush", BUSHES[_rng.randi() % BUSHES.size()], u, v, _rng.randf_range(0.75, 1.5), 0.1, 0.1)
 
 
 func _scatter_logs() -> void:
@@ -244,6 +253,9 @@ func _build_batches() -> void:
 		var kind := bits[0]
 		var model := bits[1]
 		var xfs: Array = _batches[key]
+		if model.begins_with("gen:"):
+			_add_built(kind, model.substr(4), xfs, key)
+			continue
 		for part in parts(model):
 			var mm := MultiMesh.new()
 			mm.transform_format = MultiMesh.TRANSFORM_3D
@@ -260,3 +272,30 @@ func _build_batches() -> void:
 			if kind == "small":
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(mmi)
+
+
+## A built tree or bush batch: the full version up close, the light one beyond NEAR[kind].
+func _add_built(kind: String, tree_name: String, xfs: Array, key: String) -> void:
+	var split: float = NEAR.get(kind, 120.0)
+	for far in [false, true]:
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = TreeArt.mesh(tree_name, far)
+		mm.instance_count = xfs.size()
+		for i in xfs.size():
+			mm.set_instance_transform(i, xfs[i])
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = key.replace("|", "_").replace(":", "_") + ("_far" if far else "")
+		mmi.multimesh = mm
+		if far:
+			mmi.visibility_range_begin = split
+			mmi.visibility_range_begin_margin = 12.0
+			mmi.visibility_range_end = RANGE[kind]
+			mmi.visibility_range_end_margin = 20.0
+		else:
+			mmi.visibility_range_end = split
+			mmi.visibility_range_end_margin = 12.0
+		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		if kind == "bush" and far:
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mmi)

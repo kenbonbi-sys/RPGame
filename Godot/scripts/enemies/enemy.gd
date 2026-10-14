@@ -448,7 +448,8 @@ func revive(at: Vector3) -> void:
 func _update_look() -> void:
 	if not model:
 		return
-	var want := atan2(_facing.x, _facing.z)
+	# models look along -Z
+	var want := atan2(-_facing.x, -_facing.z)
 	model.rotation.y = lerp_angle(model.rotation.y, want, 0.25)
 	var tint := status.tint() if status else Color(0, 0, 0, 0)
 	for n in model.find_children("*", "MeshInstance3D", true, false):

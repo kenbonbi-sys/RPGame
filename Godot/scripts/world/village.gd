@@ -1,28 +1,17 @@
 class_name Village
 extends Node3D
-## Làng Lá Xanh: a ring of timber houses with thatched roofs around a campfire green, the
-## village's Đá Truyền Tống, a wheat field and fences. Built from code until real models come.
+## Làng Lá Xanh in the Dauntless style: a ring of timber-framed houses (HouseArt) with tiled roofs
+## around a campfire green, the great oak, a market stall, barrels and crates, banners, the
+## village's Đá Truyền Tống, a wheat field behind a fence.
 
 const HOUSE_ANGLES := [40.0, 140.0, 175.0, 212.0, 250.0, 292.0, 328.0]
+const BANNER := Color(0.20, 0.46, 0.36)
+const BANNER_TRIM := Color(0.95, 0.76, 0.34)
 
-var _plaster := StandardMaterial3D.new()
-var _timber := StandardMaterial3D.new()
-var _thatch := StandardMaterial3D.new()
-var _window := StandardMaterial3D.new()
 var _fire_light: OmniLight3D
 
 
 func _ready() -> void:
-	_plaster.albedo_color = Color(0.80, 0.76, 0.66)
-	_plaster.roughness = 0.95
-	_timber.albedo_color = Color(0.30, 0.22, 0.15)
-	_timber.roughness = 0.9
-	_thatch.albedo_color = Color(0.50, 0.40, 0.25)
-	_thatch.roughness = 1.0
-	_window.albedo_color = Color(1.0, 0.75, 0.4)
-	_window.emission_enabled = true
-	_window.emission = Color(1.0, 0.65, 0.3)
-	_window.emission_energy_multiplier = 1.5
 	var c := WorldMap.village_center()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 18
@@ -33,59 +22,111 @@ func _ready() -> void:
 		# face the green: the door looks back toward the centre
 		var to_center := c - m
 		var yaw := atan2(to_center.x, -to_center.y)
-		_house(m, yaw, rng.randf_range(6.5, 8.5), rng.randf_range(5.5, 7.0), rng.randf_range(3.6, 4.4))
+		_house(rng, m, yaw, rng.randf_range(6.5, 8.5), rng.randf_range(5.5, 6.8), 2 if i % 3 != 1 else 1)
 	_campfire(c)
 	_waystone(c + Vector2(9, -7))
-	_field(c + Vector2(-34, -30))
-	Props.place(self, "tree_oak", c + Vector2(-8, 10), 0.4, 16.0, false)
-	Props.place(self, "tent_detailedOpen", c + Vector2(14, 16), 2.2, 4.0)
+	_field(rng, c + Vector2(-34, -30))
+	_great_oak(c + Vector2(-8, 10))
+	_stall(rng, c + Vector2(14, 16), Color(0.85, 0.28, 0.24), Color(0.98, 0.92, 0.8))
+	_stall(rng, c + Vector2(-15, -12), Color(0.24, 0.5, 0.62), Color(0.98, 0.92, 0.8))
+	for i in 4:
+		var a := TAU * (i + 0.5) / 4.0
+		_mesh(HouseArt.banner_mesh(BANNER, BANNER_TRIM), c + Vector2(cos(a), sin(a)) * 13.0, a, true, 0.12)
+	_clutter(rng, c)
 	Props.place(self, "log_stack", c + Vector2(-12, -6), 1.0, 3.0)
-	Props.place(self, "log_stackLarge", c + Vector2(18, -14), 0.3, 3.0)
 	Props.place(self, "sign", c + Vector2(40, -2), -PI * 0.5, 3.0)
 
 
-func _house(m: Vector2, yaw: float, w: float, d: float, h: float) -> void:
-	var root := Node3D.new()
-	root.name = "House"
-	root.position = Props.ground(m) + Vector3.DOWN * 0.3
+func _house(rng: RandomNumberGenerator, m: Vector2, yaw: float, w: float, d: float, storeys: int) -> void:
+	var built := HouseArt.house(rng, w, d, storeys)
+	var root: Node3D = built.node
+	root.position = Props.ground(m) + Vector3.DOWN * 0.15
 	root.rotation.y = yaw
 	add_child(root)
-	_box(root, Vector3(w, h, d), Vector3(0, h * 0.5, 0), _plaster)
-	for sx in [-1.0, 1.0]:
-		for sz in [-1.0, 1.0]:
-			_box(root, Vector3(0.35, h + 0.1, 0.35), Vector3(sx * w * 0.5, h * 0.5, sz * d * 0.5), _timber)
-	_box(root, Vector3(w + 0.1, 0.3, d + 0.1), Vector3(0, h, 0), _timber)
-	var roof := MeshInstance3D.new()
-	var pm := PrismMesh.new()
-	pm.size = Vector3(w + 1.4, 2.8, d + 1.2)
-	roof.mesh = pm
-	roof.material_override = _thatch
-	roof.position = Vector3(0, h + 1.4, 0)
-	roof.rotation.y = PI * 0.5
-	root.add_child(roof)
-	_box(root, Vector3(1.3, 2.3, 0.15), Vector3(0, 1.15, d * 0.5 + 0.05), _timber)
-	for sx in [-1.0, 1.0]:
-		_box(root, Vector3(0.9, 0.8, 0.12), Vector3(sx * w * 0.28, h * 0.6, d * 0.5 + 0.05), _window)
+	var size: Vector3 = built.size
 	var body := StaticBody3D.new()
 	body.collision_layer = 1
+	body.collision_mask = 0
 	var cs := CollisionShape3D.new()
 	var bs := BoxShape3D.new()
-	bs.size = Vector3(w + 0.3, h + 2.5, d + 0.3)
+	bs.size = size
 	cs.shape = bs
-	cs.position = Vector3(0, (h + 2.5) * 0.5, 0)
+	cs.position = Vector3(0, size.y * 0.5, 0)
 	body.add_child(cs)
 	root.add_child(body)
 
 
-func _box(parent: Node3D, size: Vector3, pos: Vector3, mat: Material) -> MeshInstance3D:
+## Places a built mesh on the ground; `solid` gives it a small box (or cylinder) collider.
+func _mesh(mesh: Mesh, m: Vector2, yaw := 0.0, solid := false, radius := 0.5) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = size
-	mi.mesh = bm
-	mi.material_override = mat
-	mi.position = pos
-	parent.add_child(mi)
+	mi.mesh = mesh
+	mi.position = Props.ground(m)
+	mi.rotation.y = yaw
+	add_child(mi)
+	if solid:
+		var body := StaticBody3D.new()
+		body.collision_layer = 1
+		body.collision_mask = 0
+		var cs := CollisionShape3D.new()
+		var cyl := CylinderShape3D.new()
+		cyl.radius = radius
+		cyl.height = 2.0
+		cs.shape = cyl
+		cs.position = Vector3(0, 1.0, 0)
+		body.add_child(cs)
+		mi.add_child(body)
 	return mi
+
+
+func _great_oak(m: Vector2) -> void:
+	var tree := TreeArt.instance("village_0")
+	tree.position = Props.ground(m) + Vector3.DOWN * 0.2
+	tree.rotation.y = 0.4
+	add_child(tree)
+	var body := StaticBody3D.new()
+	var cs := CollisionShape3D.new()
+	var cyl := CylinderShape3D.new()
+	cyl.radius = TreeArt.trunk_radius("village_0")
+	cyl.height = 8.0
+	cs.shape = cyl
+	cs.position = Vector3(0, 4.0, 0)
+	body.add_child(cs)
+	tree.add_child(body)
+
+
+func _stall(rng: RandomNumberGenerator, m: Vector2, a: Color, b: Color) -> void:
+	var stall := HouseArt.stall(rng, a, b)
+	var to_center := WorldMap.village_center() - m
+	stall.position = Props.ground(m)
+	stall.rotation.y = atan2(to_center.x, -to_center.y)
+	add_child(stall)
+	var body := StaticBody3D.new()
+	var cs := CollisionShape3D.new()
+	var bs := BoxShape3D.new()
+	bs.size = Vector3(3.6, 1.0, 1.0)
+	cs.shape = bs
+	cs.position = Vector3(0, 0.5, 0.8)
+	body.add_child(cs)
+	stall.add_child(body)
+
+
+## Barrels and crates by the houses and stalls.
+func _clutter(rng: RandomNumberGenerator, c: Vector2) -> void:
+	var barrel := HouseArt.barrel_mesh(rng)
+	var crate := HouseArt.crate_mesh(rng)
+	var spots := [Vector2(16.5, 13.5), Vector2(17.3, 14.6), Vector2(11.5, 18.5), Vector2(-17.5, -10.0),
+		Vector2(-12.6, -14.2), Vector2(-13.4, -15.1), Vector2(6, 20), Vector2(-20, 6)]
+	for i in spots.size():
+		var s: Vector2 = spots[i]
+		var yaw := rng.randf() * TAU
+		if i % 3 == 2:
+			_mesh(crate, c + s, yaw, true, 0.55)
+			if rng.randf() < 0.5:
+				var top := _mesh(crate, c + s, yaw + 0.4)
+				top.position.y += 0.9
+				top.scale = Vector3.ONE * 0.8
+		else:
+			_mesh(barrel, c + s, yaw, true, 0.5)
 
 
 func _campfire(m: Vector2) -> void:
@@ -134,12 +175,20 @@ func _waystone(m: Vector2) -> void:
 	add_child(l)
 
 
-func _field(m: Vector2) -> void:
+func _field(rng: RandomNumberGenerator, m: Vector2) -> void:
 	for i in 6:
 		for j in 8:
 			Props.place(self, "crops_wheatStageB", m + Vector2(i * 2.6, j * 2.6), 0.0, 2.6, false, 0.1)
-	for i in 9:
-		Props.place(self, "fence_simple", m + Vector2(-2.0 + i * 2.2, -2.5), 0.0, 2.2, true)
+	var fence := HouseArt.fence_mesh(rng, 19.8)
+	_mesh(fence, m + Vector2(6.8, -2.5), 0.0)
+	var body := StaticBody3D.new()
+	var cs := CollisionShape3D.new()
+	var bs := BoxShape3D.new()
+	bs.size = Vector3(20.0, 1.2, 0.3)
+	cs.shape = bs
+	cs.position = Props.ground(m + Vector2(6.8, -2.5)) + Vector3.UP * 0.6
+	body.add_child(cs)
+	add_child(body)
 
 
 func _process(_delta: float) -> void:

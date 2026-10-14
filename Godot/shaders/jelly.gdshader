@@ -11,6 +11,8 @@ uniform float hurt = 0.0;
 // status colour (frozen, burning, poisoned...) with its strength in alpha
 uniform vec4 tint = vec4(0.0);
 
+#include "res://shaders/stylized_light.gdshaderinc"
+
 varying vec3 obj_pos;
 varying vec3 obj_nrm;
 
@@ -45,4 +47,11 @@ void fragment() {
 	ROUGHNESS = mix(0.12, 0.9, mossy);
 	SPECULAR = 0.7;
 	EMISSION = jelly * fres * 0.35 + vec3(hurt) * 0.6;
+}
+
+void light() {
+	stylized_light(NORMAL, VIEW, LIGHT, LIGHT_COLOR, ATTENUATION, ALBEDO, DIFFUSE_LIGHT, SPECULAR_LIGHT);
+	// a wet highlight
+	vec3 h = normalize(LIGHT + VIEW);
+	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * smoothstep(0.95, 0.985, dot(NORMAL, h)) * 0.45;
 }

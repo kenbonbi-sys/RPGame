@@ -108,7 +108,7 @@ func _ready() -> void:
 		{"item": "meat", "chance": 1.0, "min": 1, "max": 2},
 		{"item": "coin", "chance": 1.0, "min": 12, "max": 12},
 	]
-	_init_materials(Color(0.17, 0.16, 0.13), Color(0.38, 0.37, 0.29), Color(0.66, 0.62, 0.53))
+	_init_materials(Color(0.27, 0.19, 0.13), Color(0.56, 0.42, 0.29), Color(0.42, 0.32, 0.23))
 	process_physics_priority = -10
 	home = global_transform
 	for p in ROCK_SCENES:
@@ -123,9 +123,8 @@ func _ready() -> void:
 
 # ================================================================== the body
 func _build() -> void:
-	var bone := StandardMaterial3D.new()
-	bone.albedo_color = Color(0.80, 0.77, 0.68)
-	bone.roughness = 0.75
+	var bone := CreatureArt.painted(Color(0.92, 0.88, 0.78), 0.14, 0.15, 0.7)
+	bone.set_shader_parameter("paint_scale", 0.6)
 	var dark := StandardMaterial3D.new()
 	dark.albedo_color = Color(0.05, 0.05, 0.05)
 	dark.roughness = 0.4

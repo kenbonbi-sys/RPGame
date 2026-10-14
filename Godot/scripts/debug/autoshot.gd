@@ -83,6 +83,12 @@ func _run() -> void:
 # ------------------------------------------------------------------ tours
 func _world() -> void:
 	await _shot("01_lang_la_xanh")
+	var v := WorldMap.village_center()
+	for k in [[175.0, "01b_nha_lang"], [292.0, "01c_quang_truong"]]:
+		var dir := Vector2.from_angle(deg_to_rad(k[0]))
+		_put(v + dir * 12.0, v + dir * 30.0)
+		await _wait(1.0)
+		await _shot(k[1])
 	_put(WorldMap.tile(Vector2(47, 27)), WorldMap.arena_center())
 	await _wait(1.2)
 	await _shot("02_duong_rung")
