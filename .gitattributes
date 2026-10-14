@@ -29,3 +29,9 @@
 *.prefab    merge=unityyamlmerge
 *.asset     merge=unityyamlmerge
 *.mat       merge=unityyamlmerge
+
+# ---------------------------------------------------------------- Godot (3D version in Godot/)
+# 3D models, their glTF buffers and baked Godot resources are binary art too.
+*.glb       filter=lfs diff=lfs merge=lfs -text
+Godot/**/*.bin filter=lfs diff=lfs merge=lfs -text
+*.res       filter=lfs diff=lfs merge=lfs -text

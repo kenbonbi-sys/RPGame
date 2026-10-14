@@ -2,6 +2,10 @@
 
 Prototype top-down action RPG: khám phá rừng, nhặt đồ, làm nhiệm vụ và đánh boss **Gấu Ma Rừng Già** với nhiều pattern tấn công. Toàn bộ art (tile, nhân vật, boss, icon, UI, VFX) và âm thanh đều được **sinh bằng script** (không dùng asset bên thứ ba), nên bạn có thể thay bằng art thật bất cứ lúc nào.
 
+## Bản 3D (Godot) đang làm
+
+Game đang được chuyển sang **Godot 4.7 3D** với góc nhìn như *Shadow of the Colossus*: camera sau lưng nhân vật, boss là colossus khổng lồ phải leo lên và đâm vào điểm yếu. Bản Unity bên dưới vẫn là bản chơi online cho tới khi bản 3D bắt kịp. Project ở `Godot/`, chạy bằng `Godot/choi.cmd`. Phím, cấu trúc, kiểm tra và lộ trình: `Docs/Godot.md`.
+
 ## Mở và chạy
 
 - **Chơi ngay:** `Builds/Windows/RungThiTham.exe` (màn hình chính: *Vào thế giới* online hoặc *Chơi một mình*)
@@ -105,4 +109,5 @@ Tools/
 - Font **Inter** (SIL Open Font License 1.1), lấy từ bộ cài Unity.
 - **FishNet** (thư viện mạng, FirstGearGames): giấy phép riêng của FishNet, miễn phí khi dùng trong game; cài qua Package Manager, không chép mã nguồn vào repo.
 - Font pixel **Galmuri7**, **Galmuri11** của Lee Minseo (SIL Open Font License 1.1), bản rút gọn Latin + tiếng Việt do `Tools/FontGen/make_pixel_fonts.py` tạo; giấy phép ở `Assets/Fonts/Galmuri-LICENSE.txt`.
+- Bản 3D (`Godot/`): model **KayKit Adventurers / Skeletons** (Kay Lousberg) và **Kenney Nature Kit**, đều CC0; giấy phép đi kèm trong `Godot/assets/third_party`.
 - Toàn bộ art/âm thanh còn lại do script trong `Tools/` sinh ra. Bộ icon Franuka chỉ dùng làm tham khảo phong cách, không có trong project.

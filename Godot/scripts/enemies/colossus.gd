@@ -1,0 +1,293 @@
+class_name Colossus
+extends Node3D
+## What every colossus shares: a body made of moving parts (AnimatableBody3D on the "colossus"
+## layer) that heroes climb where there is fur, weak points that carry its life, shaking heroes off,
+## falling, and coming back (every boss in this game returns, 3 minutes after it falls).
+
+signal health_changed(hp: float, max_hp: float)
+signal defeated
+signal skill_used(skill_name: String)
+
+const LAYER_COLOSSUS := 8
+const FUR_SHADER := preload("res://shaders/fur.gdshader")
+
+@export var display_name := "Colossus"
+@export var aggro_range := 95.0
+@export var respawn_seconds := 180.0
+
+var weak_points: Array[WeakPoint] = []
+## 0..1: how hard the body is shaking right now (heroes holding on lose grip faster).
+var shake_amount := 0.0
+var dead := false
+var engaged := false
+var home: Transform3D
+
+var fur_material: ShaderMaterial
+var armor_material: StandardMaterial3D
+var claw_material: StandardMaterial3D
+
+
+func _enter_tree() -> void:
+	if not Game.colossi.has(self):
+		Game.colossi.append(self)
+
+
+func _exit_tree() -> void:
+	Game.colossi.erase(self)
+
+
+func _init_materials(fur_base: Color, fur_tip: Color, armor: Color) -> void:
+	fur_material = ShaderMaterial.new()
+	fur_material.shader = FUR_SHADER
+	fur_material.set_shader_parameter("base", fur_base)
+	fur_material.set_shader_parameter("tip", fur_tip)
+	armor_material = StandardMaterial3D.new()
+	armor_material.albedo_color = armor
+	armor_material.roughness = 0.95
+	var noise := FastNoiseLite.new()
+	noise.frequency = 0.04
+	noise.fractal_octaves = 4
+	var nt := NoiseTexture2D.new()
+	nt.noise = noise
+	nt.seamless = true
+	nt.as_normal_map = true
+	nt.bump_strength = 6.0
+	armor_material.normal_enabled = true
+	armor_material.normal_texture = nt
+	armor_material.normal_scale = 1.4
+	var ct := NoiseTexture2D.new()
+	var n2 := FastNoiseLite.new()
+	n2.frequency = 0.02
+	ct.noise = n2
+	ct.seamless = true
+	var ramp := Gradient.new()
+	ramp.set_color(0, armor.darkened(0.45))
+	ramp.set_color(1, armor.lightened(0.15))
+	ramp.add_point(0.55, Color(0.33, 0.38, 0.24))
+	ct.color_ramp = ramp
+	armor_material.albedo_texture = ct
+	armor_material.uv1_triplanar = true
+	armor_material.uv1_scale = Vector3.ONE * 0.12
+	claw_material = StandardMaterial3D.new()
+	claw_material.albedo_color = armor.darkened(0.55)
+	claw_material.roughness = 0.6
+
+
+# ================================================================== building the body
+func make_part(part_name: String) -> AnimatableBody3D:
+	var b := AnimatableBody3D.new()
+	b.name = part_name
+	b.collision_layer = LAYER_COLOSSUS
+	b.collision_mask = 0
+	b.set_meta("colossus", self)
+	add_child(b)
+	return b
+
+
+func _add_shape(body: Node3D, shape: Shape3D, mesh: Mesh, xf: Transform3D, climbable: bool, mat: Material) -> CollisionShape3D:
+	var cs := CollisionShape3D.new()
+	cs.shape = shape
+	cs.transform = xf
+	cs.set_meta("climbable", climbable)
+	body.add_child(cs)
+	if mesh == null:
+		return cs
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.transform = xf
+	mi.material_override = mat
+	body.add_child(mi)
+	return cs
+
+
+func add_capsule(body: Node3D, radius: float, height: float, xf: Transform3D, climbable := true, tufts := 0) -> CollisionShape3D:
+	var s := CapsuleShape3D.new()
+	s.radius = radius
+	s.height = height
+	var m := CapsuleMesh.new()
+	m.radius = radius
+	m.height = height
+	m.radial_segments = 24
+	m.rings = 10
+	var cs := _add_shape(body, s, m, xf, climbable, fur_material if climbable else armor_material)
+	if tufts > 0:
+		_add_tufts(body, xf, radius, height, tufts)
+	return cs
+
+
+func add_sphere(body: Node3D, radius: float, xf: Transform3D, climbable := true, tufts := 0) -> CollisionShape3D:
+	var s := SphereShape3D.new()
+	s.radius = radius
+	var m := SphereMesh.new()
+	m.radius = radius
+	m.height = radius * 2.0
+	m.radial_segments = 24
+	m.rings = 12
+	var cs := _add_shape(body, s, m, xf, climbable, fur_material if climbable else armor_material)
+	if tufts > 0:
+		_add_tufts(body, xf, radius, radius * 2.0, tufts)
+	return cs
+
+
+## A solid box nobody can hold on to; `show` false keeps only the collider.
+func add_box(body: Node3D, size: Vector3, xf: Transform3D, mat: Material = null, show := true) -> CollisionShape3D:
+	var s := BoxShape3D.new()
+	s.size = size
+	var m: BoxMesh = null
+	if show:
+		m = BoxMesh.new()
+		m.size = size
+	return _add_shape(body, s, m, xf, false, mat if mat else armor_material)
+
+
+## Shaggy tufts over a capsule (or sphere) so the silhouette reads as fur.
+func _add_tufts(body: Node3D, xf: Transform3D, radius: float, height: float, count: int) -> void:
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = 0.13
+	cone.height = 1.0
+	cone.radial_segments = 4
+	cone.rings = 1
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = (fur_material.get_shader_parameter("tip") as Color).darkened(0.1)
+	mat.roughness = 0.95
+	cone.material = mat
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = cone
+	mm.instance_count = count
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(body.name) ^ count
+	var half := maxf(0.0, height * 0.5 - radius)
+	for i in count:
+		var y := rng.randf_range(-half - radius * 0.6, half + radius * 0.6)
+		var ang := rng.randf() * TAU
+		var axis_y := clampf(y, -half, half)
+		var n := Vector3(cos(ang), 0, sin(ang))
+		if absf(y) > half:
+			var cap := (absf(y) - half) / radius
+			n = (n * sqrt(maxf(0.0, 1.0 - cap * cap)) + Vector3(0, signf(y) * cap, 0)).normalized()
+		var p := Vector3(0, axis_y, 0) + n * radius * 0.96
+		var dir := (n + Vector3(0, -0.8, 0) + Vector3(rng.randf_range(-0.3, 0.3), 0, rng.randf_range(-0.3, 0.3))).normalized()
+		var len := rng.randf_range(0.55, 1.1)
+		var side := dir.cross(Vector3.RIGHT if absf(dir.x) < 0.9 else Vector3.FORWARD).normalized()
+		var b := Basis(side, dir * len, side.cross(dir).normalized())
+		mm.set_instance_transform(i, xf * Transform3D(b, p + dir * len * 0.45))
+	var mmi := MultiMeshInstance3D.new()
+	mmi.multimesh = mm
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	body.add_child(mmi)
+
+
+func add_weak_point(body: Node3D, at: Vector3, outward: Vector3, hp: float, vital: bool, size := 1.8) -> WeakPoint:
+	var wp := WeakPoint.new()
+	wp.max_hp = hp
+	wp.vital = vital
+	wp.size = size
+	wp.colossus = self
+	var z := outward.normalized()
+	var x := (Vector3.UP if absf(z.y) < 0.9 else Vector3.RIGHT).cross(z).normalized()
+	wp.transform = Transform3D(Basis(x, z.cross(x), z), at)
+	body.add_child(wp)
+	wp.destroyed.connect(on_weak_point_destroyed)
+	weak_points.append(wp)
+	return wp
+
+
+# ================================================================== heroes
+func heroes() -> Array[Node3D]:
+	var out: Array[Node3D] = []
+	for h in get_tree().get_nodes_in_group("heroes"):
+		if is_instance_valid(h) and not h.is_dead():
+			out.append(h)
+	return out
+
+
+func nearest_hero(max_distance := INF) -> Node3D:
+	var best: Node3D = null
+	var best_d := max_distance
+	for h in heroes():
+		var d := h.global_position.distance_to(global_position)
+		if d < best_d:
+			best_d = d
+			best = h
+	return best
+
+
+func is_on_me(h: Node3D) -> bool:
+	return h.has_method("attached_colossus") and h.attached_colossus() == self
+
+
+func heroes_on_me() -> Array[Node3D]:
+	return heroes().filter(func(h): return is_on_me(h))
+
+
+## Hurts heroes on the ground within a radius (those clinging to the colossus are spared).
+func hit_area(center: Vector3, radius: float, amount: float, knock := 8.0, lift := 5.0) -> int:
+	var n := 0
+	for h in heroes():
+		if is_on_me(h) or h.get("is_climbing"):
+			continue
+		var d := Vector2(h.global_position.x - center.x, h.global_position.z - center.z).length()
+		if d <= radius and absf(h.global_position.y - center.y) < 6.0:
+			h.take_hit({"amount": amount * (1.0 - 0.4 * d / radius), "from": center, "knockdown": true,
+				"knock": knock, "lift": lift, "source": self})
+			n += 1
+	return n
+
+
+# ================================================================== damage
+func vital_hp() -> float:
+	var s := 0.0
+	for wp in weak_points:
+		if wp.vital:
+			s += wp.hp
+	return s
+
+
+func max_vital_hp() -> float:
+	var s := 0.0
+	for wp in weak_points:
+		if wp.vital:
+			s += wp.max_hp
+	return s
+
+
+## A sword on the hide does nothing but spark (only the weak points matter).
+func take_hit(info: Dictionary) -> void:
+	var p: Vector3 = info.get("point", global_position)
+	Fx.burst(p, Vector3.UP, Color(1.0, 0.85, 0.6, 0.9), 8, 4.0, 0.15, 0.4, 70.0, -9.0, true)
+
+
+func prodded(_hero: Node3D) -> void:
+	shake_amount = maxf(shake_amount, 0.12)
+
+
+func on_weak_point_stabbed(_wp: WeakPoint, _amount: float, _hero: Node3D) -> void:
+	health_changed.emit(vital_hp(), max_vital_hp())
+
+
+func on_weak_point_destroyed(wp: WeakPoint) -> void:
+	if wp.vital and vital_hp() <= 0.0 and not dead:
+		die()
+
+
+func die() -> void:
+	dead = true
+	engaged = false
+	defeated.emit()
+	Game.boss_defeated.emit(self)
+	get_tree().create_timer(respawn_seconds, false).timeout.connect(respawn)
+
+
+func respawn() -> void:
+	for wp in weak_points:
+		wp.restore()
+	global_transform = home
+	dead = false
+	shake_amount = 0.0
+	health_changed.emit(vital_hp(), max_vital_hp())
+
+
+func look_point() -> Vector3:
+	return global_position + Vector3.UP * 8.0
