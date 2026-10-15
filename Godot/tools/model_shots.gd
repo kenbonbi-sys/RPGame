@@ -1,7 +1,8 @@
 extends Node3D
 ## Photographs one model from a few angles under the game's sky and sun, for working on art:
 ##   Godot_console.exe --path . res://tools/model_shots.tscn -- --model slime --shots-dir D:/shots
-## Models: slime, shroom, bear, hero, sword.
+## Models: slime, shroom, bear, hero, sword, juice, rack, weapons, armour (every set the hero carries,
+## front and back; --close frames the chest).
 
 var dir := ""
 var model := ""
@@ -43,7 +44,7 @@ func _ready() -> void:
 	cam.fov = 50.0
 	add_child(cam)
 	var views := _build()
-	for i in (90 if model in ["hero", "sword", "weapons"] else 2):
+	for i in (90 if model in ["hero", "sword", "weapons", "armour"] else 2):
 		await get_tree().physics_frame
 	for v in views:
 		cam.global_position = v[1]
@@ -53,6 +54,10 @@ func _ready() -> void:
 		if model == "juice":
 			await _juice_burst(v[0])
 			continue
+		if model == "armour":
+			_weapon_hero.wear_set(String(v[0]).get_slice("_", 0), false)
+			for i in 6:
+				await get_tree().process_frame
 		if model == "weapons":
 			_weapon_hero.equip_weapon(v[0], false)
 			for i in 20:
@@ -129,6 +134,16 @@ func _build() -> Array:
 			var out := []
 			for id in Weapons.START:
 				out.append([id, Vector3(-1.0, 1.35, -2.2), Vector3(0.05, 0.95, 0)])
+			return out
+		"armour":
+			_weapon_hero = preload("res://scenes/hero.tscn").instantiate()
+			root.add_child(_weapon_hero)
+			var out := []
+			var near := 0.55 if close else 1.0
+			for id in Armour.WARDROBE + ["recruit", "torgadoro", "thrax"]:
+				var aim := Vector3(0.0, 1.25 if close else 0.95, 0)
+				out.append([id + "_front", aim + Vector3(0.7, 0.35, -2.3) * near, aim])
+				out.append([id + "_back", aim + Vector3(-0.9, 0.45, 2.2) * near, aim])
 			return out
 		"hero", "sword":
 			var hero: Node3D = preload("res://scenes/hero.tscn").instantiate()

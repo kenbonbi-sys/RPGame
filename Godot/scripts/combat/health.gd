@@ -7,6 +7,8 @@ extends Node3D
 ## dodge hook, attacker-side scaling (curse on the attacker), damage-taken multipliers, a guard
 ## multiplier by direction, armour against the attacker's level, resistance, a ±5% spread, rounding
 ## half to even with a minimum of 1, the survive-at-1 hook, then statuses (never on the killing blow).
+## On top of the Unity order sit the Dauntless rules: the element matchup on monsters (Elements)
+## and the armour a hero wears (Armour), both just before the rounding.
 
 signal damaged(d: DamageInfo, amount: float)
 signal died(d: DamageInfo)
@@ -29,6 +31,9 @@ signal evaded(d: DamageInfo)
 ## Dauntless element of the creature ("" = none): weapons of the opposing element hit it +50%,
 ## of its own −20%, and its own element never procs on it (Elements).
 @export var element := ""
+## Dauntless armour worn (heroes): net resistance points per element (Armour.points). A hit of
+## an element it resists is smaller, of the opposing element larger (Armour.multiplier).
+var armour_points := {}
 
 var hp := 100.0
 var damage_taken_multiplier := 1.0
@@ -158,6 +163,8 @@ func take_damage(d: DamageInfo) -> float:
 			raw *= maxf(0.0, guard.call(d))
 		raw = raw * (1.0 - armor_reduction(armor, _attacker_level(d))) * (1.0 - resistance(d.type)) * spread()
 		raw *= Elements.matchup(d.type, element)
+		if not armour_points.is_empty():
+			raw *= Armour.multiplier(armour_points, Armour.hit_element(d))
 		amount = maxf(1.0, Combat.round_half_even(raw))
 	if amount >= hp and hp > 1.0 and endure.is_valid() and endure.call():
 		amount = hp - 1.0

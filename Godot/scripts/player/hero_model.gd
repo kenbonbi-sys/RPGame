@@ -76,6 +76,11 @@ var body_root: Node3D
 var weapon_id := "w_kiem_hong_anh"
 var idle_clip := "Sword_Idle"
 var _weapon_nodes: Array[Node] = []
+## The armour worn (Armour, slot -> set id) and the plates drawn for it (ArmourArt), per slot.
+var armour := {}
+var _armour_nodes := {}
+var _hair_nodes: Array[Node] = []
+var _head_mesh: MeshInstance3D
 ## Bone -> its height above the soles in the rest pose, for sole_height().
 var _sole_bones := {}
 var _to_model := Transform3D.IDENTITY
@@ -97,6 +102,11 @@ func _ready() -> void:
 	anim.add_animation_library("", _library_for(skeleton, body_root.get_path_to(skeleton)))
 	_scarf()
 	set_weapon(weapon_id)
+	ArmourArt.warm(_armour_sources())
+	if not armour.is_empty():
+		var worn := armour
+		armour = {}
+		set_armour(worn)
 	for n in find_children("*", "MeshInstance3D", true, false):
 		(n as MeshInstance3D).layers = 2 | PORTRAIT_LAYER
 	var n: Node = skeleton
@@ -194,6 +204,7 @@ func _add_head() -> void:
 		copy.skin = mi.skin
 		if mi.name.begins_with("SuperHero"):
 			copy.mesh = _head_only(mi.mesh, mi.skin)
+			_head_mesh = copy
 			var m := mi.mesh.surface_get_material(0)
 			if m is BaseMaterial3D:
 				var sm := (m as BaseMaterial3D).duplicate() as BaseMaterial3D
@@ -266,6 +277,7 @@ func _add_hair() -> void:
 				copy.set_surface_override_material(s, hm)
 		skeleton.add_child(copy)
 		copy.skeleton = copy.get_path_to(skeleton)
+		_hair_nodes.append(copy)
 	h.free()
 
 
@@ -347,3 +359,53 @@ func set_weapon(id: String) -> void:
 			mi.material_override = part[1]
 			mi.layers = 2 | PORTRAIT_LAYER
 			root.add_child(mi)
+
+
+## The armour worn (Armour): each slot whose piece changed is drawn again (ArmourArt); a helmet
+## hides the hair under it.
+func set_armour(worn: Dictionary) -> void:
+	if skeleton == null:
+		armour = worn.duplicate()
+		return
+	for slot in Armour.SLOTS:
+		var want := String(worn.get(slot, ""))
+		if String(armour.get(slot, "")) == want:
+			continue
+		for n in _armour_nodes.get(slot, []):
+			if is_instance_valid(n):
+				n.queue_free()
+		_armour_nodes.erase(slot)
+		var nodes := ArmourArt.dress(skeleton, _armour_sources(), slot, want)
+		for mi in nodes:
+			mi.layers = 2 | PORTRAIT_LAYER
+		if not nodes.is_empty():
+			_armour_nodes[slot] = nodes
+	armour = worn.duplicate()
+	for h in _hair_nodes:
+		h.visible = not _armour_nodes.has("head")
+
+
+## The meshes armour plates are shaped from: the outfit's, by the part of their name after
+## "<Body>_<Outfit>_" ("Body", "Arms", "Legs"...), and the head as "Head".
+func _armour_sources() -> Dictionary:
+	var out := {}
+	var prefix := "%s_%s_" % [body, outfit]
+	for n in body_root.find_children("*", "MeshInstance3D", true, false):
+		if String(n.name).begins_with(prefix):
+			out[String(n.name).trim_prefix(prefix)] = n
+	if _head_mesh:
+		out["Head"] = _head_mesh
+	return out
+
+
+## Whether a helm (or hood) is drawn, which hides the hair.
+func wears_helmet() -> bool:
+	return _armour_nodes.has("head")
+
+
+## How many armour plates are drawn (tests).
+func armour_plates() -> int:
+	var n := 0
+	for slot in _armour_nodes:
+		n += (_armour_nodes[slot] as Array).size()
+	return n

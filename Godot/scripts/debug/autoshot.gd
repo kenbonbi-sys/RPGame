@@ -5,7 +5,7 @@ extends Node
 ## Exit code 0 = clean, 1 = errors in the log, 2 = ran out of time.
 ## Tours: "world" (village, forest, arena), "climb" (legs, kneel, back, stabs), "skills" (the bear's attacks),
 ## "hunt" (parts, Trảm, breaking the head, Húc and the interrupt, staggered damage), "arsenal" (every
-## weapon's combo and heavy move, an element proc on the bear), "brawl".
+## weapon's combo and heavy move, three armour sets, an element proc on the bear), "brawl".
 
 const TIMEOUT := 300.0
 
@@ -418,6 +418,13 @@ func _arsenal() -> void:
 		await _shot("40_%s" % id.trim_prefix("w_"))
 		await _wait(0.6)
 	hero.equip_weapon(Weapons.START[0], false)
+	# the wardrobe: a few sets on the hero, seen as in play, with the HUD's armour tag
+	for id in ["charrogg", "gnasher", "valomyr"]:
+		_put(camp + Vector2(-9, -3), camp)
+		hero.wear_set(id)
+		await _wait(0.6)
+		await _shot("42_giap_%s" % id)
+	hero.wear_set(Armour.START, false)
 	# the matchup on Gấu Ma (Terra): Shock blades proc Tê Liệt
 	bear.set_mode(GauMa.Mode.IDLE)
 	bear.respawn()

@@ -33,6 +33,10 @@ const CHEST := 1.15
 @export var weapon_item := "w_kiem_hong_anh"
 ## Every weapon the hero carries (V cycles them).
 var weapons: Array[String] = []
+## The armour worn (Armour.SETS), slot -> set id; pieces of different sets may mix.
+var armour := {}
+## Every armour set the hero carries (G cycles them).
+var wardrobe: Array[String] = []
 @export var max_grip := 100.0
 @export var walk_speed := 2.2
 @export var run_speed := 5.4
@@ -187,6 +191,8 @@ func _ready() -> void:
 	_build_components()
 	weapons.assign(Weapons.START)
 	equip_weapon(weapon_item, false)
+	wardrobe.assign(Armour.WARDROBE)
+	wear_set(Armour.START, false)
 	grip = max_grip
 	add_to_group("heroes")
 	if not is_instance_valid(Game.hero):
@@ -365,6 +371,8 @@ func _locomotion(delta: float) -> void:
 		return
 	if Input.is_action_just_pressed("switch_weapon") and action_remaining() <= 0.05 and weapons.size() > 1:
 		cycle_weapon()
+	if Input.is_action_just_pressed("switch_armour") and action_remaining() <= 0.05 and wardrobe.size() > 1:
+		cycle_armour()
 	if not stunned:
 		_skill_keys()
 
@@ -972,6 +980,41 @@ func equip_weapon(id: String, announce := true) -> void:
 func cycle_weapon() -> void:
 	var i := weapons.find(weapon_item)
 	equip_weapon(weapons[(i + 1) % weapons.size()])
+
+
+# ================================================================== armour
+## Puts on every piece of a set; a slot the set makes nothing for is left bare (Recruit's head).
+func wear_set(id: String, announce := true) -> void:
+	armour = Armour.full_set(id if Armour.SETS.has(id) else Armour.START)
+	_armour_changed(announce)
+
+
+## Puts on one piece and keeps the rest (Dauntless lets pieces of different sets mix).
+func wear_piece(slot: String, set_id: String, announce := true) -> void:
+	if not Armour.has_piece(set_id, slot):
+		return
+	armour[slot] = set_id
+	_armour_changed(announce)
+
+
+## The next set in the wardrobe (after mixed pieces, the first one).
+func cycle_armour() -> void:
+	var i := wardrobe.find(Armour.whole_set(armour))
+	wear_set(wardrobe[(i + 1) % wardrobe.size()])
+
+
+## The worn pieces' resistances go to Health, the model dresses, and the HUD says so.
+func _armour_changed(announce: bool) -> void:
+	if health:
+		health.armour_points = Armour.points(armour)
+	if model and model.has_method("set_armour"):
+		model.set_armour(armour)
+	if announce and Game.has_screen():
+		var whole := Armour.whole_set(armour)
+		var e := Armour.main_element(armour)
+		var title := "Mặc bộ %s" % Armour.set_of(whole).name if whole != "" else "Mặc giáp phối"
+		Game.log("%s · %s" % [title, Armour.summary(armour)], Elements.color(e), "a:" + (whole if whole != "" else Armour.START))
+		Fx.burst(global_position + Vector3.UP * 1.0, Vector3.UP, Elements.color(e), 24, 2.6, 0.25, 0.55, 120.0, 0.0, true)
 
 
 # ================================================================== Trảm, the heavy hit

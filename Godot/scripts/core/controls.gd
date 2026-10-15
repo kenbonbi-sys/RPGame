@@ -32,6 +32,8 @@ const KEYS := {
 	"window_bestiary": [KEY_J],
 	"window_spellbook": [KEY_K],
 	"switch_weapon": [KEY_V],
+	# G for giáp: the next armour set
+	"switch_armour": [KEY_G],
 	"track_quest": [KEY_TAB],
 }
 
@@ -50,6 +52,7 @@ const PAD := {
 	"attack": [JOY_BUTTON_X],
 	"interact": [JOY_BUTTON_Y],
 	"switch_weapon": [JOY_BUTTON_DPAD_RIGHT],
+	"switch_armour": [JOY_BUTTON_DPAD_LEFT],
 	"grip": [JOY_BUTTON_RIGHT_SHOULDER],
 	"look_boss": [JOY_BUTTON_LEFT_SHOULDER],
 	"pause": [JOY_BUTTON_START],

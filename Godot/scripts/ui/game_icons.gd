@@ -292,10 +292,27 @@ static func element(e: String, px := 48) -> Texture2D:
 	return icon("element:" + e, [[Elements.ALL.get(e, Elements.ALL.neutral).icon, "main", 50, 50, 0.9, 0]], ELEMENT_KINDS.get(e, "blade"), px)
 
 
-## Loot and log icons: "coin", "xp", "kill", "level", "w:<weapon>", or an item id.
+## An armour set's icon: a breastplate in its element's colour, the element's sign behind it.
+static func armour(set_id: String, px := 64) -> Texture2D:
+	var e := String(Armour.set_of(set_id).element)
+	var recipe := [["armor", "main", 50, 52, 0.9, 0]]
+	if e != "neutral":
+		recipe = [[String(Elements.ALL[e].icon), "back", 74, 26, 0.44, 0], ["armor", "main", 46, 54, 0.84, 0]]
+	return icon("armour:" + set_id, recipe, ELEMENT_KINDS.get(e, "blade"), px)
+
+
+## One armour piece (helm, breastplate, gauntlet, boot) in its element's colour.
+static func armour_piece(slot: String, element: String, px := 48) -> Texture2D:
+	return icon("piece:%s:%s" % [slot, element], [[String(Armour.SLOT_ICONS.get(slot, "armor")), "main", 50, 50, 0.9, 0]],
+		ELEMENT_KINDS.get(element, "blade"), px)
+
+
+## Loot and log icons: "coin", "xp", "kill", "level", "w:<weapon>", "a:<armour set>", or an item id.
 static func item(id: String, px := 64) -> Texture2D:
 	if id.begins_with("w:"):
 		return weapon(id.substr(2), px)
+	if id.begins_with("a:"):
+		return armour(id.substr(2), px)
 	var r := _item_recipe(id)
 	return icon("item:" + id, r[0], r[1], px)
 

@@ -32,6 +32,7 @@ var _skills: Array[SkillSlot] = []
 var _potions: Array[PotionSlot] = []
 var _heavy: HeavyMeter
 var _weapon_tag: WeaponTag
+var _armour_tag: ArmourTag
 var _log: LogBox
 var _hint: Label
 var _area: Label
@@ -80,7 +81,9 @@ func _ready() -> void:
 		_skills.append(s)
 
 	_weapon_tag = WeaponTag.new()
-	_place(root, _weapon_tag, Control.PRESET_CENTER_BOTTOM, Vector2(-bar_w * 0.5, -150), Vector2(330, 44))
+	_place(root, _weapon_tag, Control.PRESET_CENTER_BOTTOM, Vector2(-bar_w * 0.5, -150), Vector2(318, 44))
+	_armour_tag = ArmourTag.new()
+	_place(root, _armour_tag, Control.PRESET_CENTER_BOTTOM, Vector2(bar_w * 0.5 - 290, -150), Vector2(290, 44))
 	_heavy = HeavyMeter.new()
 	_place(root, _heavy, Control.PRESET_CENTER_BOTTOM, Vector2(-110, -186), Vector2(220, 9))
 
@@ -108,7 +111,7 @@ func _ready() -> void:
 
 	_help = _label(root, 18, TEXT, FONT_SEMI)
 	_help.text = "WASD chạy · Chuột xoay camera · Space nhảy · Shift lướt (cả khi đang bay; giữ để chạy nhanh)\n" + \
-		"Chuột trái đòn thường · 1–5 chiêu · R tuyệt kỹ · Z X C bình thuốc\n" + \
+		"Chuột trái đòn thường · 1–5 chiêu · R tuyệt kỹ · Z X C bình thuốc · V đổi vũ khí · G đổi giáp\n" + \
 		"Chuột phải: Trảm (giữ để tụ lực) · giữ E để bám và leo · đang bám thì giữ rồi thả chuột trái để đâm\n" + \
 		"Q / chuột giữa nhìn về phía boss · Esc nhả chuột · F1 bảng phím · F3 gỡ lỗi"
 	_place(root, _help, Control.PRESET_TOP_RIGHT, Vector2(-780, 196), Vector2(760, 110))
@@ -161,6 +164,7 @@ func bind_hero(h: Node3D) -> void:
 	_compass.hero = h
 	_heavy.hero = h
 	_weapon_tag.hero = h
+	_armour_tag.hero = h
 	for i in _skills.size():
 		_skills[i].skills = h.skills
 		_skills[i].index = i
@@ -557,6 +561,43 @@ class WeaponTag:
 		draw_string(Hud.FONT_SEMI, Vector2(x, 38), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
 		if hero.weapons.size() > 1:
 			draw_string(Hud.FONT_BOLD, Vector2(size.x - 34, 22), "[V]", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.6))
+
+
+class ArmourTag:
+	extends Control
+	## The armour worn, right of the weapon tag: the set's icon and name (or "giáp phối" when the
+	## pieces are mixed), what it resists and what it is weak to, the four slots in their
+	## elements' colours, and [G] to change.
+	var hero: Node3D
+
+	func _process(_delta: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		if hero == null or not is_instance_valid(hero) or not ("armour" in hero):
+			return
+		var worn: Dictionary = hero.armour
+		var whole := Armour.whole_set(worn)
+		var e := Armour.main_element(worn)
+		Hud.slant(self, Rect2(Vector2(0, 4), Vector2(size.x, size.y - 8)), Color(0.03, 0.05, 0.07, 0.6), 10)
+		var icon := GameIcons.armour(whole if whole != "" else Armour.START, 64)
+		if icon:
+			draw_texture_rect(icon, Rect2(Vector2(6, 0), Vector2(size.y, size.y)), false)
+		var x := size.y + 10.0
+		var title := ("BỘ " + String(Armour.set_of(whole).name)).to_upper() if whole != "" else "GIÁP PHỐI"
+		draw_string_outline(Hud.FONT_XBOLD, Vector2(x, 22), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 4, Color(0, 0, 0, 0.6))
+		draw_string(Hud.FONT_XBOLD, Vector2(x, 22), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Hud.TEXT)
+		draw_string(Hud.FONT_SEMI, Vector2(x, 38), Armour.summary(worn), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Elements.color(e))
+		# the four slots: a piece in its element's colour, a bare slot dimmed
+		var px := size.x - 38.0 - 4.0 * 19.0
+		for slot in Armour.SLOTS:
+			var p := Armour.piece(String(worn.get(slot, "")), slot)
+			var tex := GameIcons.armour_piece(slot, String(p.element) if not p.is_empty() else "neutral", 48)
+			if tex:
+				draw_texture_rect(tex, Rect2(Vector2(px, 6), Vector2(19, 19)), false, Color(1, 1, 1, 1.0 if not p.is_empty() else 0.22))
+			px += 19.0
+		if hero.wardrobe.size() > 1:
+			draw_string(Hud.FONT_BOLD, Vector2(size.x - 34, 22), "[G]", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.6))
 
 
 class HeavyMeter:
