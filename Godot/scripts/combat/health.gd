@@ -70,6 +70,16 @@ func head_position() -> Vector3:
 	return global_position + Vector3.UP * head_height
 
 
+## Where a hit from `from` lands on it (big bodies override this with their closest spot).
+func hit_point(_from: Vector3) -> Vector3:
+	return head_position()
+
+
+## Where a skill aimed at it from `from` should go.
+func aim_at(_from: Vector3) -> Vector3:
+	return global_position
+
+
 func fraction() -> float:
 	return hp / max_hp if max_hp > 0.0 else 0.0
 

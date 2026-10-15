@@ -54,14 +54,15 @@ static func health_of(n: Object) -> Health:
 	return null
 
 
-## Every living Health within `radius` of `center` that `team` may hurt (heroes and enemies).
+## Every living Health within `radius` of `center` that `team` may hurt (heroes, enemies, and a
+## colossus when any of its parts is in reach).
 static func healths_in_sphere(world: World3D, center: Vector3, radius: float, team: int, exclude: Array = []) -> Array[Health]:
 	var q := PhysicsShapeQueryParameters3D.new()
 	var s := SphereShape3D.new()
 	s.radius = radius
 	q.shape = s
 	q.transform = Transform3D(Basis.IDENTITY, center)
-	q.collision_mask = LAYER_HERO | LAYER_ENEMY
+	q.collision_mask = LAYER_HERO | LAYER_ENEMY | LAYER_COLOSSUS
 	q.collide_with_areas = true
 	var out: Array[Health] = []
 	for r in world.direct_space_state.intersect_shape(q, 64):
@@ -78,8 +79,8 @@ static func damage_circle(world: World3D, center: Vector3, radius: float, templa
 	var hits := 0
 	for h in healths_in_sphere(world, center, radius, template.source_team):
 		var d := template.copy()
-		d.point = h.head_position()
-		var away := h.global_position - center
+		d.point = h.hit_point(center)
+		var away := (d.point if h is BossHealth else h.global_position) - center
 		away.y = 0.0
 		if away.length() > 0.03:
 			d.direction = away.normalized()
@@ -98,12 +99,13 @@ static func damage_cone(world: World3D, origin: Vector3, dir: Vector3, radius: f
 	var hits := 0
 	var flat_dir := Vector3(dir.x, 0, dir.z).normalized()
 	for h in healths_in_sphere(world, origin, radius, template.source_team):
-		var to := h.global_position - origin
+		var at := h.hit_point(origin)
+		var to := (at if h is BossHealth else h.global_position) - origin
 		to.y = 0.0
 		if to.length() > 0.6 and rad_to_deg(flat_dir.angle_to(to.normalized())) > angle_deg * 0.5:
 			continue
 		var d := template.copy()
-		d.point = h.head_position()
+		d.point = at
 		d.direction = to.normalized() if to.length() > 0.03 else flat_dir
 		d.roll_crit(crit_chance)
 		if h.take_damage(d) > 0.0:

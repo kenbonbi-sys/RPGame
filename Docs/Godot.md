@@ -18,11 +18,12 @@ Project nằm trong `Godot/`. Code viết bằng **GDScript** (máy chưa có .N
 | **Chuột trái** | Đòn thường của vũ khí (kiếm: combo Chém Gió 3 đòn). Khi đang bám hoặc đứng trên lưng colossus: giữ để vung kiếm, thả để đâm (giữ càng lâu càng đau) |
 | **1 2 3 4 5** · **R** | 5 chiêu của lớp nhân vật · Tuyệt kỹ (bản Unity: W E R A S · D) |
 | **Z X C** | Bình Máu · Bình Năng Lượng · Thuốc Thảo Mộc (bản Unity: 1 2 3) |
-| **Giữ chuột phải** | Bám: túm lông colossus hoặc đá có thể bám, leo bằng WASD |
+| **Chuột phải** | **Trảm**, đòn nặng của kiếm: giữ để tụ lực (đầy sau 0,9 s, thanh tụ lực hiện trên thanh chiêu), thả để chém bổ xuống. Lướt huỷ được lúc đang tụ |
+| **Giữ E** | Bám: túm lông colossus hoặc đá có thể bám, leo bằng WASD (trước đây là chuột phải) |
 | **Q** / chuột giữa | Quay camera nhìn về phía boss |
 | **F1** · **F3** · **Esc** | Bảng phím · thông số (FPS, trạng thái) · nhả chuột |
 
-Có hỗ trợ tay cầm: cần trái chạy, cần phải xoay camera, A nhảy, B Lướt, X chém, RB bám, LB nhìn boss.
+Có hỗ trợ tay cầm: cần trái chạy, cần phải xoay camera, A nhảy, B Lướt, X chém, RT Trảm, RB bám, LB nhìn boss.
 
 Chiêu hướng thẳng theo camera, tự bẻ về con quái gần tâm nhìn (khóa mềm 32°); chiêu nhắm điểm rơi vào chỗ tâm màn hình chạm đất, hoặc vào con quái đang được khóa.
 
@@ -141,7 +142,19 @@ Vùng phát hiện, bán kính dây xích, lang thang và ngủ được nhân `
 
 ## Colossus
 
-`Colossus` là lớp nền chung. Thân con quái là các `AnimatableBody3D` trên lớp vật lý `colossus` (layer 4), được đặt lại vị trí mỗi khung hình. Colossus có model nặn sẵn (như Gấu Ma) đặt `draw_shapes = false`: khối va chạm khi đó không vẽ gì. Cách vẽ cũ vẫn còn cho colossus khác: lông vẽ tay (`fur.gdshader`): vệt lông mềm, lưng sáng bụng sẫm, rêu mọc trên lưng; các lọn lông cong dày phủ quanh thân (`Colossus.lock_mesh`). Phần lông được vẽ bằng lưới sần (`Colossus.fur_mesh`): mặt da lồi lõm thành từng mảng dài theo thân, phần lớn lõm vào trong khối va chạm, lồi ra tối đa khoảng 0,25 m, nên tay chân hero vẫn bám đúng chỗ nhìn thấy; ấn ký điểm yếu đặt cách da 0,3 m cho khỏi bị lông che. Giáp vẽ thành nhiều tấm vỏ cây chồng lên nhau như vảy (va chạm vẫn là một khối). **Điểm yếu** (`WeakPoint`) là ấn ký phát sáng: điểm *vital* giữ máu boss, điểm thường gây hiệu ứng khi bị phá. Chém kiếm vào da không có tác dụng (chỉ toé lửa). Mọi colossus hồi sinh sau 3 phút như mọi boss trong game.
+`Colossus` là lớp nền chung. Thân con quái là các `AnimatableBody3D` trên lớp vật lý `colossus` (layer 4), được đặt lại vị trí mỗi khung hình. Colossus có model nặn sẵn (như Gấu Ma) đặt `draw_shapes = false`: khối va chạm khi đó không vẽ gì. Cách vẽ cũ vẫn còn cho colossus khác: lông vẽ tay (`fur.gdshader`): vệt lông mềm, lưng sáng bụng sẫm, rêu mọc trên lưng; các lọn lông cong dày phủ quanh thân (`Colossus.lock_mesh`). Phần lông được vẽ bằng lưới sần (`Colossus.fur_mesh`): mặt da lồi lõm thành từng mảng dài theo thân, phần lớn lõm vào trong khối va chạm, lồi ra tối đa khoảng 0,25 m, nên tay chân hero vẫn bám đúng chỗ nhìn thấy; ấn ký điểm yếu đặt cách da 0,3 m cho khỏi bị lông che. Giáp vẽ thành nhiều tấm vỏ cây chồng lên nhau như vảy (va chạm vẫn là một khối). Mọi colossus hồi sinh sau 3 phút như mọi boss trong game.
+
+### Đánh boss kiểu Dauntless
+
+Theo cách behemoth của Dauntless vận hành (máu chung, bộ phận phá được, thanh choáng ẩn, gián đoạn):
+
+- **Đánh vào đâu cũng mất máu.** Colossus có một bể máu chung (`BossHealth`, Gấu Ma 3200 như boss Unity) cho mọi bộ phận; chém, chiêu, đạn, nổ trúng bất kỳ khối va chạm nào đều trừ vào đó. Mỗi đòn biết nó trúng chỗ nào (điểm gần nhất trên khối va chạm), nên số sát thương hiện đúng chỗ trúng và đòn được tính cho bộ phận đó.
+- **Bộ phận phá được.** Gấu Ma: Đầu (640 điểm phá) và bốn chân (mỗi chân 400); thân và cổ không phá được. Đòn trúng bộ phận chưa vỡ hiện **số vàng** = sát thương bộ phận. Lưỡi kiếm (đòn vật lý cận chiến, Trảm) tính **+50% sát thương bộ phận**, như vũ khí chém của Dauntless; phép và đạn tính 100%. Máu boss vẫn trừ đúng sát thương gốc ở phía sau. Đủ ngưỡng thì **vỡ**: chữ "VỠ ĐẦU!", gạc gãy rơi xuống đất (vỡ chân thì tấm vỏ cây ốp ống chân rơi), boss khựng lại 1,8 s, rơi đồ (đầu: Xương, chân: Vuốt Gấu Ma), dòng nhật ký có biểu tượng.
+- **Sau khi vỡ** bộ phận đó hiện **số trắng xanh** = sát thương gốc vào máu. Số nhỏ hơn số vàng một phần ba vì không còn +50% của lưỡi kiếm, còn máu boss mất vẫn y như trước (Dauntless cũng thế: số vàng che số xám của sát thương gốc, vỡ rồi thì chỉ còn số xám).
+- **Thanh choáng** (`Poise`, 300 như boss Unity; mỏng màu lam ngay dưới thanh máu boss): mọi đòn có trấn áp đều nạp vào, đánh vào đầu ×2, cổ ×1,5, chân ×1,2. Chém Gió nạp 3 mỗi đòn, Trảm 30–80, mỗi nhát đâm điểm yếu nạp bằng sát thương nhát đâm. Gần đầy (70%) thì có sao vàng xoay trên đầu. Đầy thì boss **choáng** 6 s, đầu gục xuống đất; mỗi lần choáng thanh dài thêm 25%; 4 s không bị đánh thì thanh tụt 12 mỗi giây.
+- **Sát thương lúc choáng** (staggered damage): mọi đòn trong lúc boss choáng gây **+50%** và hiện **số cam**. HUD ghi "CHOÁNG x s · SÁT THƯƠNG +50%" và thanh choáng chuyển cam, rút dần.
+- **Gián đoạn** (interrupt): chiêu **Húc** của Gấu Ma có tia sáng vàng toả ra trên đầu suốt lúc cúi đầu lấy đà và lao tới (`can_interrupt`). Trảm (đòn nặng) trúng đầu hoặc cổ trong lúc đó thì nó bị **GIÁN ĐOẠN**: ngã, choáng 7 s và nhận sát thương lúc choáng. Đòn nhẹ hay Trảm trúng chân thì không ngăn được. Lúc lao, đầu nó hạ xuống dưới 2,2 m nên đứng trên đất là với tới.
+- **Điểm yếu** (`WeakPoint`, kiểu SotC, vẫn còn): mỗi nhát đâm làm boss mất gấp 3 lần sát thương nhát đâm (số vàng to). Phá một điểm *vital* (u lưng, đỉnh đầu, mỗi điểm 120) lấy thêm 8% máu boss và làm nó choáng ngay. Điểm ở bắp chân sau trái làm nó Quỵ Gối. Boss ngã khi hết máu (không còn luật "đâm hết 2 điểm vital").
 
 ### Gấu Ma Rừng Già (`gau_ma.gd`)
 
@@ -149,19 +162,20 @@ Cao khoảng 10 m tới đỉnh đầu, dài khoảng 17 m (`GauMa.S = 0,8` mét
 
 - **Đường leo:** lông sau bắp chân sau → mông → lưng (qua u vai, có thêm một khối cầu va chạm) → cổ → đỉnh đầu. Hai bên sườn có giáp vỏ cây, ngực có tấm giáp, mặt là mặt nạ xương.
 - **Hình dáng** (nặn bằng `Tools/Sculpt/bear.py`): một con gấu già bị rừng mọc lên người. Lông nâu sẫm thành từng lọn chải về sau và xuống, đầu lọn sáng, bụng tối, chân "đi tất" sẫm; thảm rêu xanh dày trên lưng và u vai; hai hàng vảy vỏ cây hình bầu dục ôm theo sườn, ba tấm ngang ngực, tấm ốp ống chân, đều có vết nứt vỏ cây, địa y và rêu trên mép; mặt nạ xương ngà phủ trán, quanh mắt và sống mũi, hốc mắt sâu có mắt phát sáng, vết nứt, vạch xanh ngọc; mõm rộng, mũi đen, hàng răng và hai nanh cong; tai lông; đôi gạc như cành cây có rêu ở gốc và lá ở đầu; bàn chân bốn ngón với vuốt cong (gốc sẫm, đầu ngà); cụm nấm phát sáng xanh ngọc hai bên sườn và vai (tránh đường leo và điểm yếu). Gạc, răng, nấm chỉ là hình, không có va chạm.
-- **Điểm yếu:** bắp chân sau trái (45 máu, phá được thì gấu **Quỵ Gối** khoảng 10 s, lưng hạ xuống thành dốc) · u lưng (120) · đỉnh đầu (120). Đâm hết 2 điểm vital thì gấu ngã xuống.
+- **Điểm yếu:** bắp chân sau trái (45 máu, phá được thì gấu **Quỵ Gối** khoảng 10 s, lưng hạ xuống thành dốc) · u lưng (120) · đỉnh đầu (120). Gấu ngã khi hết máu (3200).
 - **Chiêu** (lấy từ boss 2D, mỗi chiêu có vòng cảnh báo đỏ trên đất và chữ "Kỹ năng: …"):
   - *Vồ*: quét chân trước.
   - *Dậm Đất*: chồm lên, giáng xuống, sóng chấn bán kính 11 đơn vị gấu (8,8 m). Hero đứng trên bàn chân cũng trúng (trước đây được coi như "đang ở trên gấu" nên không bị đánh, rồi bị chân ấn lọt xuống dưới đất).
   - *Ném Đá Lớn*: ném đá, đá nằm lại thành *Tảng Đá Lớn*, tối đa 4 tảng.
   - *Chụp Quăng*: nhảy vồ. Đáp cạnh một Tảng Đá Lớn thì bị **Choáng** 7 s, đầu gục xuống đất, leo lên đầu được ngay.
   - *Lắc Mình*: khi có người trên lưng.
+  - *Húc*: cúi đầu lấy đà 1,1 s (tia sáng trên đầu, vòng cảnh báo dọc đường lao), rồi lao 1,9 s tới quá chỗ hero đứng 8 m; đầu và hai chân trước chạm ai thì người đó bị hất (34 sát thương). Có thể bị Gián Đoạn (xem trên). Dùng khi hero ở cách 8–26 m phía trước, hồi 11 s.
   - *Cuồng Nộ*: dưới 50% máu, mắt đỏ, nhanh hơn và lắc nhiều hơn.
 
 ## Kiểm tra
 
-- **Test** (khoảng 25 s, 123 kiểm tra): `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot res://tests/test_runner.tscn`. Mã thoát 0 là đạt. Gồm bố cục thế giới, đất đã bake, giải IK, phím, điểm yếu/quỵ gối/ngã/hồi sinh, sát thương rơi, **leo chân gấu có vật lý thật**, giới hạn số đá; công thức sát thương (đúng ví dụ trong test Unity: Cầu Lửa 56 vào điểm yếu Lửa ra 73, có giáp ra 64), bảng XP, chỉ số cấp 1 của 9 lớp, các trạng thái, Trấn Áp, khống chế lặp lại, hero chém chết slime, Cầu Lửa gây Bỏng, bào tử làm chậm, Lướt Hoàn Hảo, Dậm Đất không đẩy hero xuống dưới đất ở cả năm chỗ đứng quanh chân gấu.
-- **AutoShot** (khoảng 75 s, mở cửa sổ): `Godot_v4.7.2-stable_win64_console.exe --path Godot -- --autoshot --shots-dir D:/shots [--autoshot-only world|forest|climb|skills|brawl]`. Chụp 29 cảnh (làng, hai góc nhà trong làng, rừng, đấu trường; bãi slime, Chém Gió, đồ rơi, Chém Xoáy, Nấm Độc bắn, Cầu Lửa, Lôi Phạt; bám chân, đâm, quỵ gối, trên lưng, lắc mình, Dậm Đất, Ném Đá, Chụp Quăng và Choáng), rồi để gấu tự đánh 40 s. Mã 0 là sạch, 1 là có lỗi trong log, 2 là quá giờ.
+- **Test** (khoảng 30 s, 152 kiểm tra): `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot res://tests/test_runner.tscn`. Mã thoát 0 là đạt. Gồm bố cục thế giới, đất đã bake, giải IK, phím, điểm yếu/quỵ gối/ngã/hồi sinh, sát thương rơi, **leo chân gấu có vật lý thật**, giới hạn số đá; công thức sát thương (đúng ví dụ trong test Unity: Cầu Lửa 56 vào điểm yếu Lửa ra 73, có giáp ra 64), bảng XP, chỉ số cấp 1 của 9 lớp, các trạng thái, Trấn Áp, khống chế lặp lại, hero chém chết slime, Cầu Lửa gây Bỏng, bào tử làm chậm, Lướt Hoàn Hảo, Dậm Đất không đẩy hero xuống dưới đất ở cả năm chỗ đứng quanh chân gấu; máu chung, sát thương bộ phận +50% của lưỡi kiếm, chân vỡ ở đúng ngưỡng rồi chỉ còn sát thương gốc, điểm yếu ×3 và +8%, thanh choáng (đầu ×2), +50% lúc choáng, Húc chỉ bị Trảm trúng đầu gián đoạn, đầu khi lao hạ trong tầm với, Trảm đầy lực gây khoảng 3,2 lần Tấn công.
+- **AutoShot** (khoảng 110 s, mở cửa sổ): `Godot_v4.7.2-stable_win64_console.exe --path Godot -- --autoshot --shots-dir D:/shots [--autoshot-only world|forest|climb|skills|hunt|brawl]`. Tour `hunt`: số vàng trên chân, tụ lực Trảm, Trảm, vỡ đầu, Húc với tia sáng, gián đoạn bằng Trảm thật (giữ rồi thả chuột phải đúng lúc), số cam lúc choáng. Chụp 36 cảnh (làng, hai góc nhà trong làng, rừng, đấu trường; bãi slime, Chém Gió, đồ rơi, Chém Xoáy, Nấm Độc bắn, Cầu Lửa, Lôi Phạt; bám chân, đâm, quỵ gối, trên lưng, lắc mình, Dậm Đất, Ném Đá, Chụp Quăng và Choáng), rồi để gấu tự đánh 40 s. Mã 0 là sạch, 1 là có lỗi trong log, 2 là quá giờ.
 - Chạy nhanh không cần cửa sổ: `--headless --path Godot --quit-after 200`.
 
 ## Lộ trình chuyển cả game

@@ -33,6 +33,10 @@ var feedback := true
 ## 3D only: a big blow that throws a hero to the ground (colossus stomps, charges).
 var knockdown := false
 var lift := 0.0
+## A heavy hit (the sword's right-click swing): it can interrupt a colossus's charge.
+var heavy := false
+## A blade's cut: +50% part damage on a colossus's breakable parts (Dauntless slashing weapons).
+var cutting := false
 
 
 static func make(amount: float, team: int, source: Node, point: Vector3, direction: Vector3,
@@ -52,7 +56,8 @@ static func make(amount: float, team: int, source: Node, point: Vector3, directi
 func copy() -> DamageInfo:
 	var d := DamageInfo.new()
 	for p in ["amount", "type", "source_team", "source", "point", "direction", "knockback", "crit", "hit_stop",
-			"poise", "skill_name", "source_level", "attack_scaled", "pure", "contact", "dot", "feedback", "knockdown", "lift"]:
+			"poise", "skill_name", "source_level", "attack_scaled", "pure", "contact", "dot", "feedback", "knockdown", "lift",
+			"heavy", "cutting"]:
 		d.set(p, get(p))
 	d.status = status.duplicate()
 	return d

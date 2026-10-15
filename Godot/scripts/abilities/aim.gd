@@ -17,11 +17,11 @@ static func point_for(hero: Hero, a: Ability) -> Vector3:
 	var p: Vector3
 	if a.targeting() == Ability.Targeting.POINT:
 		if target:
-			p = target.global_position
+			p = target.aim_at(from)
 		else:
 			p = _screen_ground(hero, range_)
 	else:
-		p = target.global_position if target else from + fwd * minf(range_, 6.0)
+		p = target.aim_at(from) if target else from + fwd * minf(range_, 6.0)
 	var off := p - from
 	off.y = 0.0
 	if off.length() < 0.1:
@@ -37,7 +37,7 @@ static func soft_target(hero: Hero, fwd: Vector3, range_: float) -> Health:
 	var best: Health = null
 	var best_score := INF
 	for h in Combat.healths_in_sphere(hero.get_world_3d(), hero.global_position + Vector3.UP, range_, Combat.Team.PLAYER):
-		var to := h.global_position - hero.global_position
+		var to := h.aim_at(hero.global_position) - hero.global_position
 		to.y = 0.0
 		if to.length() < 0.1:
 			return h

@@ -28,6 +28,7 @@ var _compass: Compass
 var _emblem: Emblem
 var _skills: Array[SkillSlot] = []
 var _potions: Array[PotionSlot] = []
+var _heavy: HeavyMeter
 var _log: LogBox
 var _hint: Label
 var _area: Label
@@ -75,6 +76,9 @@ func _ready() -> void:
 		_place(root, s, Control.PRESET_CENTER_BOTTOM, Vector2(-bar_w * 0.5 + i * 78, -104), Vector2(70, 70))
 		_skills.append(s)
 
+	_heavy = HeavyMeter.new()
+	_place(root, _heavy, Control.PRESET_CENTER_BOTTOM, Vector2(-110, -186), Vector2(220, 9))
+
 	for i in 3:
 		var p := PotionSlot.new()
 		p.index = i
@@ -100,7 +104,7 @@ func _ready() -> void:
 	_help = _label(root, 18, TEXT, FONT_SEMI)
 	_help.text = "WASD chạy · Chuột xoay camera · Space nhảy · Shift lướt (cả khi đang bay; giữ để chạy nhanh)\n" + \
 		"Chuột trái đòn thường · 1–5 chiêu · R tuyệt kỹ · Z X C bình thuốc\n" + \
-		"Giữ chuột phải để bám và leo · đang bám thì giữ rồi thả chuột trái để đâm\n" + \
+		"Chuột phải: Trảm (giữ để tụ lực) · giữ E để bám và leo · đang bám thì giữ rồi thả chuột trái để đâm\n" + \
 		"Q / chuột giữa nhìn về phía boss · Esc nhả chuột · F1 bảng phím · F3 gỡ lỗi"
 	_place(root, _help, Control.PRESET_TOP_RIGHT, Vector2(-780, 196), Vector2(760, 110))
 	_help.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -150,6 +154,7 @@ func bind_hero(h: Node3D) -> void:
 	hero = h
 	_frame.hero = h
 	_compass.hero = h
+	_heavy.hero = h
 	for i in _skills.size():
 		_skills[i].skills = h.skills
 		_skills[i].index = i
@@ -272,11 +277,11 @@ func _hint_text() -> String:
 	if hero.weak_point_near and (hero.is_climbing or hero.on_colossus):
 		return "Giữ chuột trái rồi thả để đâm vào điểm yếu"
 	if hero.is_climbing:
-		return "WASD leo · Space bật nhảy · thả chuột phải để buông"
+		return "WASD leo · Space bật nhảy · thả E để buông"
 	if hero.grip_hint:
-		return "Giữ chuột phải để bám"
+		return "Giữ E để bám"
 	if hero.on_colossus:
-		return "Giữ chuột phải để bám chặt khi nó lắc mình"
+		return "Giữ E để bám chặt khi nó lắc mình"
 	return ""
 
 
@@ -289,7 +294,8 @@ func _fade(c: CanvasItem, to: float, seconds: float) -> void:
 static func slant(ci: CanvasItem, r: Rect2, col: Color, slope := 8.0) -> void:
 	if r.size.x <= 0.5 or r.size.y <= 0.5:
 		return
-	var s := minf(slope, r.size.x)
+	# never let the slope eat the whole width (a thin bar would be a line and fail to triangulate)
+	var s := minf(slope, r.size.x * 0.5)
 	ci.draw_colored_polygon(PackedVector2Array([r.position + Vector2(s, 0), r.position + Vector2(r.size.x, 0),
 		r.position + Vector2(r.size.x - s, r.size.y), r.position + Vector2(0, r.size.y)]), col)
 
@@ -444,8 +450,21 @@ class Compass:
 			draw_string(Hud.FONT_XBOLD, Vector2(0, 64), title, HORIZONTAL_ALIGNMENT_CENTER, w, 22, Color(1.0, 0.84, 0.66))
 			var br := Rect2(120, 72, w - 240, 8)
 			Hud.slant(self, br.grow(2), Color(0, 0, 0, 0.62), 6)
-			var f: float = boss.vital_hp() / maxf(1.0, boss.max_vital_hp())
+			var f: float = boss.life_fraction()
 			Hud.slant(self, Rect2(br.position, Vector2(br.size.x * f, br.size.y)), Color(0.92, 0.3, 0.24), 6)
+			# the stagger bar (Dauntless keeps it hidden; here a thin blue line), orange while staggered
+			var sr := Rect2(br.position + Vector2(0, 12), Vector2(br.size.x, 4))
+			Hud.slant(self, sr.grow(1), Color(0, 0, 0, 0.5), 3)
+			if boss.is_staggered():
+				var left: float = boss.poise.broken_remaining()
+				Hud.slant(self, Rect2(sr.position, Vector2(sr.size.x * clampf(left / boss.stagger_seconds, 0.0, 1.0), sr.size.y)),
+					Color(1.0, 0.55, 0.16), 3)
+				var txt := "CHOÁNG  %.1f s  ·  SÁT THƯƠNG +50%%" % left
+				draw_string_outline(Hud.FONT_XBOLD, Vector2(0, sr.end.y + 18), txt, HORIZONTAL_ALIGNMENT_CENTER, w, 16, 4, Color(0, 0, 0, 0.6))
+				draw_string(Hud.FONT_XBOLD, Vector2(0, sr.end.y + 18), txt, HORIZONTAL_ALIGNMENT_CENTER, w, 16, Color(1.0, 0.62, 0.25))
+			else:
+				var sf: float = boss.stagger_fraction()
+				Hud.slant(self, Rect2(sr.position, Vector2(sr.size.x * sf, sr.size.y)), Color(0.45, 0.72, 1.0) if sf < 0.7 else Color(0.7, 0.88, 1.0), 3)
 		elif area != "":
 			var a := area.to_upper()
 			draw_string_outline(Hud.FONT_BOLD, Vector2(0, 60), a, HORIZONTAL_ALIGNMENT_CENTER, w, 17, 4, Color(0, 0, 0, 0.55))
@@ -486,10 +505,33 @@ class Emblem:
 		var k := 0.8
 		var inner := PackedVector2Array([c + (tri[0] - c) * k, c + (tri[1] - c) * k, c + (tri[2] - c) * k, c + (tri[0] - c) * k])
 		draw_polyline(inner, Color(0.78, 0.78, 0.8, 0.35), 1.5, true)
-		var f: float = boss.vital_hp() / maxf(1.0, boss.max_vital_hp())
+		var f: float = boss.life_fraction()
 		var txt := "%d%%" % roundi(f * 100.0)
 		draw_string_outline(Hud.FONT_XBOLD, c + Vector2(-60, 0), txt, HORIZONTAL_ALIGNMENT_CENTER, 120, 34, 5, Color(0, 0, 0, 0.6))
 		draw_string(Hud.FONT_XBOLD, c + Vector2(-60, 0), txt, HORIZONTAL_ALIGNMENT_CENTER, 120, 34, Hud.TEXT)
+
+
+class HeavyMeter:
+	extends Control
+	## Trảm gathering power: a bar that fills while the right mouse button is held, gold when full.
+	var hero: Node3D
+
+	func _process(_delta: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		if hero == null or not is_instance_valid(hero) or not hero.has_method("heavy_charge"):
+			return
+		var c: float = hero.heavy_charge()
+		if c < 0.0:
+			return
+		var r := Rect2(Vector2.ZERO, size)
+		Hud.slant(self, r.grow(2), Color(0, 0, 0, 0.6), 8)
+		var col := Color(1.0, 0.82, 0.35) if c >= 1.0 else Color(0.95, 0.95, 0.9)
+		Hud.slant(self, Rect2(r.position, Vector2(r.size.x * c, r.size.y)), col, 8)
+		var label := "TRẢM · TỤ LỰC ĐẦY" if c >= 1.0 else "TRẢM"
+		draw_string_outline(Hud.FONT_XBOLD, Vector2(0, -6), label, HORIZONTAL_ALIGNMENT_CENTER, size.x, 16, 4, Color(0, 0, 0, 0.6))
+		draw_string(Hud.FONT_XBOLD, Vector2(0, -6), label, HORIZONTAL_ALIGNMENT_CENTER, size.x, 16, col)
 
 
 class SkillSlot:

@@ -1,12 +1,20 @@
 class_name Colossus
 extends Node3D
 ## What every colossus shares: a body made of moving parts (AnimatableBody3D on the "colossus"
-## layer) that heroes climb where there is fur, weak points that carry its life, shaking heroes off,
+## layer) that heroes climb where there is fur, glowing weak points to stab, shaking heroes off,
 ## falling, and coming back (every boss in this game returns, 3 minutes after it falls).
+##
+## Its life works like a Dauntless behemoth's: one pool (BossHealth) that every hit on any part
+## lowers. Breakable parts take part damage on top (a blade's cut counts +50%) and break at their
+## threshold: the part's armour falls off, it drops loot, the colossus flinches. A stagger bar fills
+## from every hit (more from the head and from heavy hits); full, the colossus is knocked down and
+## takes staggered damage (+50%). Numbers: yellow = part damage on a part not yet broken,
+## white-blue = core damage, orange = staggered damage.
 
 signal health_changed(hp: float, max_hp: float)
 signal defeated
 signal skill_used(skill_name: String)
+signal part_broken(part: Dictionary)
 
 const LAYER_COLOSSUS := 8
 const FUR_SHADER := preload("res://shaders/fur.gdshader")
@@ -18,6 +26,26 @@ const FUR_SHADER := preload("res://shaders/fur.gdshader")
 @export var level := 6
 ## {"item": id, "chance": 0..1, "min": n, "max": n}; boss coins included as "coin" rows.
 @export var loot: Array[Dictionary] = []
+## The Unity boss's numbers: life, and the stagger bar (Poise) with how long a stagger lasts.
+@export var max_hp := 3200.0
+@export var max_stagger := 300.0
+@export var stagger_seconds := 6.0
+## A stab into a weak point hurts its life this many times the stab.
+@export var stab_multiplier := 3.0
+## A vital weak point destroyed: this share of its life, and a stagger.
+@export var vital_burst := 0.08
+
+const PART_CUT := 1.5
+
+var health: BossHealth
+var poise: Poise
+var status: StatusEffects
+## Every part of the body: {id, name, bodies, max, hp, broken, breakable, stagger, interrupt, loot,
+## on_break}. Parts that are not breakable (the trunk) still say how much stagger a hit there gives.
+var parts: Array[Dictionary] = []
+var _part_of := {}
+## The hit being taken right now: {"part": the part, "stab": true for a weak point}.
+var _hit := {}
 
 ## Heroes who stabbed it this fight: they share the XP and roll the loot.
 var attackers: Array[Node] = []
@@ -58,6 +86,211 @@ func _init_materials(fur_base: Color, fur_tip: Color, armor: Color) -> void:
 	claw_material.set_shader_parameter("specular_amount", 0.25)
 	lock_material = CreatureArt.painted(fur_tip, 0.2, 0.45, 0.95)
 	lock_material.set_shader_parameter("paint_scale", 1.2)
+
+
+# ================================================================== life
+## The pool every hit lowers, the stagger bar and statuses (burns tick on it too).
+func make_life() -> void:
+	status = StatusEffects.new()
+	status.name = "Status"
+	add_child(status)
+	poise = Poise.new()
+	poise.name = "Poise"
+	poise.max_poise = max_stagger
+	poise.break_stun = stagger_seconds
+	poise.decay_delay = 4.0
+	poise.decay_per_second = 12.0
+	add_child(poise)
+	health = BossHealth.new()
+	health.name = "Health"
+	health.colossus = self
+	health.display_name = display_name
+	health.level = level
+	health.max_hp = max_hp
+	health.team = Combat.Team.ENEMY
+	add_child(health)
+	health.damaged.connect(func(_d: DamageInfo, _a: float) -> void: health_changed.emit(health.hp, health.max_hp))
+	health.died.connect(func(_d: DamageInfo) -> void:
+		if not dead:
+			die())
+	poise.broken.connect(on_staggered)
+
+
+func life_fraction() -> float:
+	return health.fraction() if health else 1.0
+
+
+## 0..1 toward the next stagger (1 while staggered).
+func stagger_fraction() -> float:
+	return poise.fraction() if poise else 0.0
+
+
+func is_staggered() -> bool:
+	return poise != null and poise.is_broken()
+
+
+## Names a group of bodies as one part. `breakable_hp` 0 = it only takes core damage.
+func add_body_part(id: String, part_name: String, bodies: Array, breakable_hp: float, loot_item := "", stagger := 1.0,
+		interrupt := false, on_break := Callable()) -> Dictionary:
+	var part := {"id": id, "name": part_name, "bodies": bodies, "max": breakable_hp, "hp": breakable_hp,
+		"broken": false, "breakable": breakable_hp > 0.0, "stagger": stagger, "interrupt": interrupt, "loot": loot_item,
+		"on_break": on_break}
+	parts.append(part)
+	for b in bodies:
+		_part_of[b] = part
+	return part
+
+
+func part_by_id(id: String) -> Dictionary:
+	for part in parts:
+		if part.id == id:
+			return part
+	return {}
+
+
+## The closest spot on any of its colliders to `p`, with the body it is on (a point inside a
+## collider belongs to that one).
+func closest_point(p: Vector3) -> Dictionary:
+	var best := {"point": look_point(), "body": null}
+	var best_d := INF
+	for c in get_children():
+		if not (c is AnimatableBody3D):
+			continue
+		for cs in c.get_children():
+			if not (cs is CollisionShape3D):
+				continue
+			var q := _closest_on_shape(cs, p)
+			var d := 0.0 if _inside(cs, p) else q.distance_squared_to(p)
+			if d < best_d:
+				best_d = d
+				best = {"point": q, "body": c}
+	return best
+
+
+static func _inside(cs: CollisionShape3D, p: Vector3) -> bool:
+	var local := cs.global_transform.affine_inverse() * p
+	var s := cs.shape
+	if s is SphereShape3D:
+		return local.length() < s.radius
+	if s is CapsuleShape3D:
+		var half := maxf(0.0, s.height * 0.5 - s.radius)
+		return (local - Vector3(0, clampf(local.y, -half, half), 0)).length() < s.radius
+	if s is BoxShape3D:
+		var h: Vector3 = s.size * 0.5
+		return absf(local.x) < h.x and absf(local.y) < h.y and absf(local.z) < h.z
+	return false
+
+
+static func _closest_on_shape(cs: CollisionShape3D, p: Vector3) -> Vector3:
+	var xf := cs.global_transform
+	var local := xf.affine_inverse() * p
+	var s := cs.shape
+	var q := Vector3.ZERO
+	if s is SphereShape3D:
+		q = local.normalized() * s.radius if local.length() > 0.0001 else Vector3(0, s.radius, 0)
+	elif s is CapsuleShape3D:
+		var half := maxf(0.0, s.height * 0.5 - s.radius)
+		var c := Vector3(0, clampf(local.y, -half, half), 0)
+		var dv := local - c
+		q = c + (dv.normalized() * s.radius if dv.length() > 0.0001 else Vector3(s.radius, 0, 0))
+	elif s is BoxShape3D:
+		var h: Vector3 = s.size * 0.5
+		q = local.clamp(-h, h)
+	return xf * q
+
+
+## The lowest point of a body's colliders (is a charging head in reach?).
+static func _lowest_of(body: Node) -> Vector3:
+	var best := Vector3(0, INF, 0)
+	for cs in body.get_children():
+		if cs is CollisionShape3D:
+			var q := _closest_on_shape(cs, (cs as Node3D).global_position - Vector3.UP * 50.0)
+			if q.y < best.y:
+				best = q
+	return best
+
+
+func part_at(p: Vector3) -> Dictionary:
+	var body = closest_point(p)["body"]
+	return _part_of.get(body, {})
+
+
+## Before a hit counts: which part it landed on, and the head's extra stagger.
+func prepare_hit(d: DamageInfo) -> void:
+	if _hit.get("stab", false):
+		return
+	var part := {} if d.dot else part_at(d.point)
+	_hit = {"part": part}
+	if not part.is_empty():
+		d.poise *= float(part.stagger)
+
+
+## After it landed: part damage, a break at the threshold, an interrupt.
+func after_hit(d: DamageInfo, amount: float) -> void:
+	var part: Dictionary = _hit.get("part", {})
+	var stab: bool = _hit.get("stab", false)
+	_hit = {}
+	if d.source and is_instance_valid(d.source) and d.source.is_in_group("heroes") and not d.source in attackers:
+		attackers.append(d.source)
+	if dead:
+		return
+	if not part.is_empty() and part.breakable and not part.broken and not d.dot:
+		part.hp = maxf(0.0, float(part.hp) - amount * part_multiplier(d))
+		if part.hp <= 0.0:
+			break_part(part, d.point)
+	if d.heavy and not stab and not part.is_empty() and part.interrupt and can_interrupt():
+		interrupt(d.source)
+
+
+## Part damage per point of core damage: a blade cuts +50% (Dauntless slashing weapons).
+static func part_multiplier(d: DamageInfo) -> float:
+	return PART_CUT if d.cutting else 1.0
+
+
+func break_part(part: Dictionary, at: Vector3) -> void:
+	part.broken = true
+	part.hp = 0.0
+	if Game.has_screen():
+		DamageNumbers.show(at + Vector3.UP * 0.6, "VỠ %s!" % String(part.name).to_upper(), "part", true)
+		Fx.burst(at, Vector3.UP, Color(0.95, 0.82, 0.45, 1.0), 60, 9.0, 0.5, 1.0, 80.0, -9.0, true)
+		Fx.dust(at, 3.0, 40)
+		Game.log("Phá vỡ %s · %s" % [part.name, display_name], Color(1.0, 0.84, 0.4), part.loot if part.loot != "" else "level")
+	Game.shake(0.5)
+	Game.hitstop(0.1)
+	if part.loot != "" and Game.is_authority():
+		var credited: Array = attackers.filter(func(h) -> bool: return is_instance_valid(h))
+		Loot.drop(get_parent(), at, [{"item": part.loot, "chance": 1.0, "min": 1, "max": 1}], credited)
+	var cb: Callable = part.on_break
+	if cb.is_valid():
+		cb.call()
+	part_broken.emit(part)
+
+
+## Colossi that can be interrupted say so (a charge in its window).
+func can_interrupt() -> bool:
+	return false
+
+
+func interrupt(_by: Node) -> void:
+	pass
+
+
+## The stagger bar filled.
+func on_staggered() -> void:
+	pass
+
+
+func show_hit_number(d: DamageInfo, amount: float) -> void:
+	var at := d.point + Vector3(randf_range(-0.3, 0.3), randf_range(0.0, 0.4), randf_range(-0.3, 0.3))
+	var part: Dictionary = _hit.get("part", {})
+	if _hit.get("stab", false):
+		DamageNumbers.show(at, "%d!" % roundi(amount), "staggered" if is_staggered() else "crit", true)
+	elif is_staggered():
+		DamageNumbers.show(at, str(roundi(amount)), "staggered", not d.dot)
+	elif not part.is_empty() and part.breakable and not part.broken and not d.dot:
+		DamageNumbers.show(at, str(roundi(amount * part_multiplier(d))), "part", d.crit or d.heavy)
+	else:
+		DamageNumbers.show(at, str(roundi(amount)), "core", d.crit or d.heavy)
 
 
 # ================================================================== building the body
@@ -302,40 +535,38 @@ func hurt_hero(h: Node3D, amount: float, from: Vector3, knock := 8.0, lift := 5.
 
 
 # ================================================================== damage
-func vital_hp() -> float:
-	var s := 0.0
-	for wp in weak_points:
-		if wp.vital:
-			s += wp.hp
-	return s
-
-
-func max_vital_hp() -> float:
-	var s := 0.0
-	for wp in weak_points:
-		if wp.vital:
-			s += wp.max_hp
-	return s
-
-
-## A sword on the hide does nothing but spark (only the weak points matter).
-func hide_hit(p: Vector3) -> void:
-	Fx.burst(p, Vector3.UP, Color(1.0, 0.85, 0.6, 0.9), 8, 4.0, 0.15, 0.4, 70.0, -9.0, true)
-
-
 func prodded(_hero: Node3D) -> void:
 	shake_amount = maxf(shake_amount, 0.12)
 
 
-func on_weak_point_stabbed(_wp: WeakPoint, _amount: float, hero: Node3D) -> void:
+## A stab into a weak point: the rune loses `amount`, the colossus's life `stab_multiplier` times it,
+## and the stab staggers as much as it hurt the rune.
+func on_weak_point_stabbed(wp: WeakPoint, amount: float, hero: Node3D) -> void:
 	if hero and not hero in attackers:
 		attackers.append(hero)
-	health_changed.emit(vital_hp(), max_vital_hp())
+	if health == null or dead:
+		return
+	var d := DamageInfo.make(amount * stab_multiplier, Combat.Team.PLAYER, hero, wp.global_position + wp.outward() * 0.6, -wp.outward())
+	d.attack_scaled = true
+	d.poise = amount
+	d.skill_name = "Đâm"
+	_hit = {"stab": true, "part": _part_of.get(wp.get_parent(), {})}
+	health.take_damage(d)
+	_hit = {}
 
 
+## A vital rune destroyed takes a chunk of life and staggers the colossus.
 func on_weak_point_destroyed(wp: WeakPoint) -> void:
-	if wp.vital and vital_hp() <= 0.0 and not dead:
-		die()
+	if not wp.vital or dead or health == null:
+		return
+	var d := DamageInfo.make(max_hp * vital_burst, Combat.Team.PLAYER, null, wp.global_position + wp.outward(), -wp.outward())
+	d.pure = true
+	_hit = {"stab": true}
+	health.take_damage(d)
+	_hit = {}
+	if not dead and poise:
+		poise.force_break(stagger_seconds)
+		on_staggered()
 
 
 func die() -> void:
@@ -359,10 +590,19 @@ func respawn() -> void:
 	attackers.clear()
 	for wp in weak_points:
 		wp.restore()
+	for part in parts:
+		part.hp = part.max
+		part.broken = false
+	if health:
+		health.reset_health(max_hp)
+	if poise:
+		poise.reset_poise()
+	if status:
+		status.cleanse()
 	global_transform = home
 	dead = false
 	shake_amount = 0.0
-	health_changed.emit(vital_hp(), max_vital_hp())
+	health_changed.emit(health.hp if health else 1.0, health.max_hp if health else 1.0)
 
 
 func look_point() -> Vector3:

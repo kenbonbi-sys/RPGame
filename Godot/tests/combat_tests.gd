@@ -23,6 +23,7 @@ func run_all() -> void:
 	await t._run("a hero kills a slime with Chém Gió", slime_fight)
 	await t._run("Cầu Lửa burns, Nấm Độc spores slow", fireball_and_spores)
 	await t._run("Lướt Hoàn Hảo", perfect_dodge)
+	await t._run("Trảm: the heavy hit on the right button", heavy_hit)
 
 
 func _flat_ground() -> StaticBody3D:
@@ -271,5 +272,31 @@ func perfect_dodge() -> void:
 	check(hero.take_perfect_bonus(Ability.get_by_id("fireball")) == 1.0, "only once")
 	Engine.time_scale = 1.0
 	for c in [hero, ground]:
+		c.queue_free()
+	await t._frames(2)
+
+
+func heavy_hit() -> void:
+	var ground := _flat_ground()
+	var hero := _hero_at(Vector3(-60, 0.1, -60))
+	var slime := Slime.new()
+	t.add_child(slime)
+	slime.revive(Vector3(-60, 0.1, -61.8))
+	slime.health.reset_health(500.0)
+	await t._frames(5)
+	var hp0 := slime.health.hp
+	Input.action_press("heavy")
+	await t._frames(3)
+	check(hero.state == Hero.State.HEAVY and hero.heavy_charge() >= 0.0, "holding the right button gathers power")
+	await t._frames(60)
+	check(hero.heavy_charge() >= 0.99, "full power after 0.9 s")
+	Input.action_release("heavy")
+	await t._frames(20)
+	var dealt := hp0 - slime.health.hp
+	var full := hero.stats.attack_for(Combat.Element.PHYSICAL) * 3.2
+	check(dealt > full * 0.85, "a full Trảm hits for about 3.2× Attack (%.0f of %.0f)" % [dealt, full])
+	await t._frames(30)
+	check(hero.state == Hero.State.GROUND, "then back on its feet")
+	for c in [hero, slime, ground]:
 		c.queue_free()
 	await t._frames(2)

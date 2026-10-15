@@ -3,7 +3,8 @@ extends Node
 ## Plays a tour by itself, saves screenshots and quits, like the Unity game's -autoshot:
 ##   Godot.exe --path Godot -- --autoshot [--shots-dir D:/shots] [--autoshot-only climb]
 ## Exit code 0 = clean, 1 = errors in the log, 2 = ran out of time.
-## Tours: "world" (village, forest, arena), "climb" (legs, kneel, back, stabs), "skills" (the bear's attacks).
+## Tours: "world" (village, forest, arena), "climb" (legs, kneel, back, stabs), "skills" (the bear's attacks),
+## "hunt" (parts, Trảm, breaking the head, Húc and the interrupt, staggered damage), "brawl".
 
 const TIMEOUT := 300.0
 
@@ -72,6 +73,8 @@ func _run() -> void:
 		await _climb()
 	if only == "" or only == "skills":
 		await _skills()
+	if only == "" or only == "hunt":
+		await _hunt()
 	if only == "" or only == "brawl":
 		await _brawl()
 	print("AUTOSHOT: %d shots in %s, %d errors, %.1f s" % [_taken, dir, counter.errors, Game.now() - _start])
@@ -261,6 +264,95 @@ func _skills() -> void:
 		await _look_boss(1.0)
 		await _shot("18_choang")
 	bear.set_mode(GauMa.Mode.IDLE)
+
+
+## Dauntless rules on Gấu Ma: part damage in yellow on a leg, a charged Trảm, the head breaking
+## (its antlers fall), Húc with the rays on its head, an interrupt, staggered damage in orange.
+func _hunt() -> void:
+	bear.set_mode(GauMa.Mode.IDLE)
+	bear.respawn()
+	await _wait(1.0)
+	var fl: GauMa.Leg = bear.legs[0]
+	var side := bear.global_basis.x.normalized()
+	var calf := fl.lower.global_position
+	_put(WorldMap.map_of(calf - side * 2.4 - bear.global_basis.z * 1.0), WorldMap.map_of(calf))
+	await _wait(0.4)
+	for i in 5:
+		_face_point(calf)
+		_press("attack")
+		await _wait(0.08)
+		_release("attack")
+		await _wait(0.3)
+	await _shot("28_so_vang_bo_phan")
+	_face_point(calf)
+	_press("heavy")
+	await _wait(0.8)
+	await _shot("29_tram_tu_luc")
+	await _wait(0.2)
+	_release("heavy")
+	await _wait(0.2)
+	await _shot("30_tram")
+	await _wait(1.0)
+	var head := bear.part_by_id("head")
+	while not head.broken:
+		var d := DamageInfo.make(120.0, Combat.Team.PLAYER, hero, Colossus._lowest_of(bear.head), Vector3.FORWARD)
+		d.cutting = true
+		bear.health.take_damage(d)
+	await _wait(0.35)
+	await _look_boss(0.3)
+	await _shot("31_vo_gac")
+	await _wait(2.5)
+	# Húc: stand in its path, gather Trảm, release as the lowered head comes in reach
+	bear.set_mode(GauMa.Mode.IDLE)
+	await _wait(0.5)
+	var fwd := -bear.global_basis.z.normalized()
+	_put(WorldMap.map_of(bear.global_position + fwd * 20.0), WorldMap.map_of(bear.global_position))
+	await _wait(0.3)
+	bear.target = hero
+	bear.set_mode(GauMa.Mode.CHARGE)
+	_press("look_boss")
+	await _wait(0.8)
+	await _shot("32_huc_tia_sang")
+	var pressed := false
+	var t0 := Game.now()
+	while bear.mode == GauMa.Mode.CHARGE and Game.now() - t0 < 4.0:
+		await get_tree().physics_frame
+		var reach := Colossus._lowest_of(bear.head).distance_to(hero.global_position + Vector3.UP)
+		if not pressed and bear.mode_time > GauMa.CHARGE_WIND and reach < 11.0:
+			_face_point(bear.head.global_position)
+			_press("heavy")
+			pressed = true
+		elif pressed and reach < 3.4:
+			_release("heavy")
+			break
+	_release("look_boss")
+	_release("heavy")
+	await _wait(0.35)
+	await _shot("33_gian_doan")
+	print("AUTOSHOT: interrupt ", "yes" if bear.mode == GauMa.Mode.STUNNED and bear.is_staggered() else "no", "  mode ", GauMa.Mode.keys()[bear.mode])
+	await _wait(0.8)
+	var head_low := Colossus._lowest_of(bear.head)
+	var to := head_low - bear.global_position
+	to.y = 0.0
+	_put(WorldMap.map_of(head_low + to.normalized() * 2.2 + side * 1.4), WorldMap.map_of(head_low))
+	await _wait(0.2)
+	for i in 4:
+		_face_point(head_low)
+		_press("attack")
+		await _wait(0.08)
+		_release("attack")
+		await _wait(0.3)
+	await _shot("34_sat_thuong_choang")
+	await _wait(6.0)
+	bear.set_mode(GauMa.Mode.IDLE)
+	bear.respawn()
+
+
+func _face_point(p: Vector3) -> void:
+	var to := p - hero.global_position
+	to.y = 0.0
+	if to.length() > 0.1:
+		hero.facing = to.normalized()
 
 
 ## The bear decides for itself for a while; every skill should come up and nothing may break.

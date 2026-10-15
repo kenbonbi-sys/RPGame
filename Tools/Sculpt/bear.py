@@ -287,12 +287,14 @@ def head():
     moss_root = Paint(Displace(Xf(Ellipsoid((0.72, 0.34, 0.72)), (1.0, 2.1, 0.7)), lambda p: -(fbm(p * 3, 2, 87) - 0.5) * 0.15, 0.2),
                       lambda p, c: ramp([(0, MOSS_DARK), (1, MOSS_LIGHT)], fbm(p * 2.5, 2, 89)))
 
-    body = Union(fur, inner_mouth, mask, nose, Union(*teeth), MirrorX(tusk), MirrorX(ear),
-                 MirrorX(Union(antler, foliage, moss_root)), k=0.0)
+    body = Union(fur, inner_mouth, mask, nose, Union(*teeth), MirrorX(tusk), MirrorX(ear), k=0.0)
+    # the antlers are their own mesh: they snap off when the head part breaks
+    antlers = MirrorX(Union(antler, foliage, moss_root))
     eyes = MirrorX(Xf(Ellipsoid((0.3, 0.24, 0.2), rgb("b8fff0")), EYE, euler(0, -0.3, 0.25)))
     return [
         build("Head", body, (-5.0, -3.4, -6.0), (5.0, 7.0, 3.8), 0.085, ao=0.45, ao_dist=0.5, cavity=0.4, cavity_r=0.14),
         build("HeadGlow", eyes, (-1.5, -0.2, -3.2), (1.5, 1.0, -1.8), 0.04, ao=0.0, cavity=0.0),
+        build("Antlers", antlers, (-5.0, 1.2, -1.0), (5.0, 7.2, 4.0), 0.07, ao=0.4, ao_dist=0.4, cavity=0.4, cavity_r=0.12),
     ]
 
 
@@ -312,9 +314,10 @@ def leg(name, l1, l2, r1, r2, front):
     upper = furry(upper_base, (0, -1.0, 0.2), 0.55, 0.28, 11 + front, flow2=(0, 0, 1.0), moss=0.4, moss_up=0.7)
     lower_base = Union(RoundCone((0, l2 * 0.33, 0), (0, -l2 * 0.4, -0.05), r2 * 0.97, r2 * 0.86),
                        Xf(Ellipsoid((r2 * 0.8, l2 * 0.3, r2 * 0.85)), (0, l2 * 0.12, r2 * 0.25)), k=0.5)
-    lower = Union(furry(lower_base, (0, -1.0, 0.1), 0.46, 0.24, 13 + front, flow2=(0, 0, 1.0),
-                        socks=lambda p: smoothstep(0.0, -l2 * 0.5, p[:, 1])),
-                  _greave(lower_base, r2, l2, 17 + front))
+    lower = furry(lower_base, (0, -1.0, 0.1), 0.46, 0.24, 13 + front, flow2=(0, 0, 1.0),
+                  socks=lambda p: smoothstep(0.0, -l2 * 0.5, p[:, 1]))
+    # the bark shin is its own mesh: it falls off when the leg part breaks
+    greave = _greave(lower_base, r2, l2, 17 + front)
     h1 = (l1 + r1) * 0.5 + 0.6
     h2 = (l2 + r2 * 0.6) * 0.5 + 0.6
     return [
@@ -322,6 +325,8 @@ def leg(name, l1, l2, r1, r2, front):
               cavity_r=0.16),
         build("Lower" + name, lower, (-r2 - 0.8, -h2, -r2 - 0.9), (r2 + 0.8, h2, r2 + 0.9), 0.09, ao=0.45, ao_dist=0.45, cavity=0.35,
               cavity_r=0.14),
+        build("Greave" + name, greave, (-r2 - 0.8, -h2, -r2 - 0.9), (r2 + 0.8, h2, 0.2), 0.07, ao=0.4, ao_dist=0.3, cavity=0.35,
+              cavity_r=0.12),
     ]
 
 

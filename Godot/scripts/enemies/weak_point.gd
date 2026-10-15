@@ -1,7 +1,8 @@
 class_name WeakPoint
 extends Node3D
-## A glowing rune on a colossus's hide. Stab it (charged thrust, see Hero) to hurt the colossus;
-## vital points carry its life, the others make it kneel or stagger. Place it on a part with its
+## A glowing rune on a colossus's hide. Stab it (charged thrust, see Hero): the colossus loses
+## several times the stab from its life (Colossus.stab_multiplier); a vital rune destroyed takes a
+## chunk more and staggers it, the others make it kneel. Place it on a part with its
 ## local +Z pointing out of the hide.
 
 signal destroyed(wp: WeakPoint)
@@ -58,8 +59,6 @@ func stab(amount: float, hero: Node3D) -> void:
 		return
 	hp = maxf(0.0, hp - amount)
 	_flare = 1.0
-	if Game.has_screen():
-		DamageNumbers.show(global_position + outward() * 0.6, str(roundi(amount)) + ("!" if amount >= 40.0 else ""), "crit", true)
 	var out := outward()
 	Fx.burst(global_position + out * 0.2, out + Vector3.UP * 0.6, Color(0.04, 0.05, 0.06, 0.95), 40 + int(amount), 9.0, 0.55, 1.6, 22.0, -9.0)
 	Fx.burst(global_position + out * 0.2, out, Color(0.55, 1.0, 0.85, 0.9), 16, 5.0, 0.25, 0.7, 60.0, -2.0, true)

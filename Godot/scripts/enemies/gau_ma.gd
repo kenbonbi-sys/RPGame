@@ -9,9 +9,11 @@ extends Colossus
 ## and the crown of its head (these two carry its life).
 ## Skills (from the 2D boss): Vồ, Dậm Đất, Ném Đá Lớn (the rock stays as a Tảng Đá Lớn), Chụp Quăng
 ## (landing next to a Tảng Đá Lớn stuns it: its head drops to the ground), Cuồng Nộ below half its
-## life, and Lắc Mình when heroes ride it.
+## life, and Lắc Mình when heroes ride it. Húc, a Dauntless charge: it lowers its head (rays glow
+## on it) and rams; a heavy hit on its head in that window interrupts it and knocks it down.
+## Breakable parts (Colossus): the head (its antlers snap off) and each leg (the bark shin falls).
 
-enum Mode { IDLE, WALK, SWIPE, STOMP, THROW, POUNCE, SHAKE, KNEEL, STUNNED, DYING, DEAD }
+enum Mode { IDLE, WALK, SWIPE, STOMP, THROW, POUNCE, CHARGE, SHAKE, KNEEL, STUNNED, DYING, DEAD }
 
 ## Every length below is in "bear units"; S turns them into metres (about 10 m to the crown).
 const S := 0.8
@@ -71,7 +73,7 @@ var legs: Array[Leg] = []
 var eye_mat: StandardMaterial3D
 var leg_point: WeakPoint
 
-var _cooldowns := {"swipe": 2.0, "stomp": 4.0, "throw": 3.0, "pounce": 8.0, "shake": 0.0}
+var _cooldowns := {"swipe": 2.0, "stomp": 4.0, "throw": 3.0, "pounce": 8.0, "charge": 6.0, "shake": 0.0}
 var _on_me_time := 0.0
 var _speed := 0.0
 var _phase := 0.0
@@ -90,6 +92,24 @@ var _jump_from := Vector3.ZERO
 var _jump_to := Vector3.ZERO
 var _held_rock: Node3D
 var _hit_this_swing := {}
+## Húc: where the run goes, who was rammed, and whether a heavy hit on the head would interrupt.
+var _charge_from := Vector3.ZERO
+var _charge_to := Vector3.ZERO
+var _charge_open := false
+var _rammed := {}
+var _step_scale := 1.0
+## Knocked down (STUNNED): for how long, and whether it is a stagger (head on the ground) or a flinch.
+var _stun_for := 7.0
+var _stun_down := true
+var _prompt: Sprite3D
+var _stars: Node3D
+var _antlers: MeshInstance3D
+var _greaves := {}
+
+const LEG_NAMES := {"FL": "Chân trước trái", "FR": "Chân trước phải", "HL": "Chân sau trái", "HR": "Chân sau phải"}
+const CHARGE_WIND := 1.1
+const CHARGE_RUN := 1.9
+const CHARGE_STOP := 0.9
 
 
 func _ready() -> void:
@@ -108,12 +128,14 @@ func _ready() -> void:
 	_init_materials(Color(0.27, 0.19, 0.13), Color(0.56, 0.42, 0.29), Color(0.42, 0.32, 0.23))
 	process_physics_priority = -10
 	home = global_transform
+	make_life()
 	_build()
+	part_broken.connect(_on_part_broken)
 	_snap_to_ground()
 	_plant_feet()
 	_update_body(0.0)
 	_place_legs()
-	health_changed.emit(vital_hp(), max_vital_hp())
+	health_changed.emit(health.hp, health.max_hp)
 
 
 # ================================================================== the body
@@ -124,7 +146,7 @@ const SCULPT := "res://assets/creatures/gau_ma.glb"
 ## bear units, so the fur heroes grab is where the mesh shows it).
 func _build() -> void:
 	draw_shapes = false
-	var parts := CreatureArt.sculpt(SCULPT)
+	var looks := CreatureArt.sculpt(SCULPT)
 	var skin := CreatureArt.painted(Color.WHITE, 0.1, 0.0, 0.85)
 	skin.set_shader_parameter("paint_scale", 1.4)
 	var glow_mat := CreatureArt.lamp(Color(0.45, 1.0, 0.85), 1.8)
@@ -136,14 +158,14 @@ func _build() -> void:
 		var flank := Transform3D(Basis(Vector3.FORWARD, side * 0.2), Vector3(side * 3.45, -0.3, -3.2) * S)
 		add_box(torso, Vector3(0.8, 3.6, 9.5) * S, flank, null, false)
 	add_box(torso, Vector3(5.8, 4.4, 1.0) * S, Transform3D(Basis(Vector3.RIGHT, 0.28), Vector3(0, -0.6, -9.7) * S), null, false)
-	_look(torso, parts["Torso"], skin)
-	_look(torso, parts["TorsoGlow"], glow_mat)
+	_look(torso, looks["Torso"], skin)
+	_look(torso, looks["TorsoGlow"], glow_mat)
 	add_weak_point(torso, Vector3(0, 4.18, 1.6) * S, Vector3(0, 1, 0.2), 120.0, true, 2.4 * S / 1.4)
 
 	neck = make_part("Neck")
 	var nd := Vector3(0, 1.0, -3.4) * S
 	add_capsule(neck, 2.4 * S, 5.6 * S, Transform3D(_axis_basis(nd.normalized()), nd * 0.5), true)
-	_look(neck, parts["Neck"], skin)
+	_look(neck, looks["Neck"], skin)
 
 	head = make_part("Head")
 	add_sphere(head, 2.7 * S, Transform3D.IDENTITY, true)
@@ -157,14 +179,16 @@ func _build() -> void:
 	scs.transform = Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(0, -1.1, -3.0) * S)
 	scs.set_meta("climbable", false)
 	head.add_child(scs)
-	_look(head, parts["Head"], skin)
+	_look(head, looks["Head"], skin)
+	if looks.has("Antlers"):
+		_antlers = _look(head, looks["Antlers"], skin)
 	eye_mat = StandardMaterial3D.new()
 	eye_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	eye_mat.albedo_color = Color(0.7, 1.0, 0.85)
 	eye_mat.emission_enabled = true
 	eye_mat.emission = Color(0.6, 1.0, 0.8)
 	eye_mat.emission_energy_multiplier = 4.0
-	_look(head, parts["HeadGlow"], eye_mat)
+	_look(head, looks["HeadGlow"], eye_mat)
 	add_weak_point(head, Vector3(0, 2.5, 0.45) * S, Vector3(0, 1, 0.15), 120.0, true, 2.2 * S / 1.4)
 	var glow := OmniLight3D.new()
 	glow.light_color = Color(0.6, 1.0, 0.8)
@@ -179,15 +203,91 @@ func _build() -> void:
 	_add_leg("HR", Vector3(2.8, -0.9, 3.6), 4.4, 4.0, 1.75, 1.25, -1.0, 0)
 	for leg in legs:
 		var kind := "Front" if leg.bend > 0.0 else "Hind"
-		_look(leg.upper, parts["Upper" + kind], skin)
-		_look(leg.lower, parts["Lower" + kind], skin)
-		_look(leg.paw, parts["Paw"], skin)
+		_look(leg.upper, looks["Upper" + kind], skin)
+		_look(leg.lower, looks["Lower" + kind], skin)
+		_look(leg.paw, looks["Paw"], skin)
+		if looks.has("Greave" + kind):
+			_greaves[leg] = _look(leg.lower, looks["Greave" + kind], skin)
 	# the left hind calf: stab it and the bear kneels
 	var hl := legs[2]
 	leg_point = add_weak_point(hl.lower, Vector3(0, 0.2 * S, hl.r2 * 0.98), Vector3(0, 0, 1), 45.0, false, 1.9 * S / 1.4)
+	# Dauntless parts: the head (antlers) and the four legs (bark shins) break; trunk and neck do not
+	add_body_part("head", "Đầu", [head], 640.0, "bone", 2.0, true, _break_antlers)
+	add_body_part("neck", "Cổ", [neck], 0.0, "", 1.5, true)
+	add_body_part("body", "Thân", [torso], 0.0, "", 1.0)
+	for leg in legs:
+		add_body_part(leg.name.to_lower(), LEG_NAMES[leg.name], [leg.upper, leg.lower, leg.paw], 400.0, "claw", 1.2, false,
+			_break_greave.bind(leg))
 	for n in find_children("*", "VisualInstance3D", true, false):
 		if not (n is Light3D):
 			(n as VisualInstance3D).layers = 4
+	_make_prompt()
+	_make_stars()
+
+
+## The interrupt cue, Dauntless's rays on the head: shown while a heavy hit there would stop Húc.
+func _make_prompt() -> void:
+	_prompt = Sprite3D.new()
+	_prompt.texture = GameIcons.icon("prompt:rays", [["rays", "main", 50, 50, 1.0, 0]], "holy", 128)
+	_prompt.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_prompt.no_depth_test = true
+	_prompt.shaded = false
+	_prompt.pixel_size = 0.055 * S
+	_prompt.render_priority = 5
+	_prompt.modulate = Color(1.0, 0.92, 0.6)
+	_prompt.position = Vector3(0, 1.8, -2.6) * S
+	_prompt.visible = false
+	head.add_child(_prompt)
+
+
+## Dizzy stars over the head when the stagger bar is nearly full, and while staggered.
+func _make_stars() -> void:
+	_stars = Node3D.new()
+	_stars.position = Vector3(0, 3.6, 0.4) * S
+	_stars.visible = false
+	head.add_child(_stars)
+	var tex := GameIcons.icon("prompt:star", [["star", "main", 50, 50, 0.9, 0]], "gold", 64)
+	for i in 5:
+		var st := Sprite3D.new()
+		st.texture = tex
+		st.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		st.shaded = false
+		st.pixel_size = 0.014 * S
+		var a := TAU * i / 5.0
+		st.position = Vector3(cos(a), 0.15 * sin(a * 2.0), sin(a)) * 1.7 * S
+		_stars.add_child(st)
+
+
+func _break_antlers() -> void:
+	_drop_piece(_antlers)
+
+
+func _break_greave(leg: Leg) -> void:
+	_drop_piece(_greaves.get(leg))
+
+
+## A broken piece of armour: a copy tumbles to the ground and sinks away; the original hides.
+func _drop_piece(mi: MeshInstance3D) -> void:
+	if mi == null or not mi.visible:
+		return
+	mi.visible = false
+	if not Game.has_screen():
+		return
+	var piece := MeshInstance3D.new()
+	piece.mesh = mi.mesh
+	piece.material_override = mi.material_override
+	get_parent().add_child(piece)
+	piece.global_transform = mi.global_transform
+	var ground := Terrain.height_at_world(piece.global_position)
+	var side := Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)).normalized() * 2.5
+	var tw := piece.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(piece, "global_position", Vector3(piece.global_position.x + side.x, ground + 0.3, piece.global_position.z + side.z), 0.8) \
+		.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	tw.tween_property(piece, "rotation", piece.rotation + Vector3(randf_range(-1.2, 1.2), randf_range(-1, 1), randf_range(-1.2, 1.2)), 0.8)
+	tw.chain().tween_property(piece, "global_position:y", ground - 3.0 * S, 5.0).set_delay(4.0)
+	tw.chain().tween_callback(piece.queue_free)
+	Fx.dust(Vector3(piece.global_position.x + side.x, ground, piece.global_position.z + side.z), 2.5, 30)
 
 
 ## A sculpted mesh on a part, in bear units.
@@ -239,7 +339,22 @@ func _physics_process(delta: float) -> void:
 	_update_feet(delta)
 	_update_body(delta)
 	_place_legs()
+	_update_cues(delta)
 	shake_amount = maxf(0.0, shake_amount - delta * (0.0 if mode == Mode.SHAKE else 1.5))
+
+
+func _update_cues(delta: float) -> void:
+	if _prompt:
+		_prompt.visible = _charge_open
+		if _charge_open:
+			var pulse := 1.0 + 0.18 * sin(Game.now() * 14.0)
+			_prompt.scale = Vector3.ONE * pulse
+			_prompt.modulate = Color(1.0, 0.92, 0.6, 0.75 + 0.25 * sin(Game.now() * 14.0))
+	if _stars:
+		var f := stagger_fraction()
+		_stars.visible = not dead and (is_staggered() or f >= 0.7)
+		if _stars.visible:
+			_stars.rotate_y(delta * (4.0 if is_staggered() else 2.0))
 
 
 func _snap_to_ground() -> void:
@@ -258,6 +373,8 @@ func _plant_feet() -> void:
 func set_mode(m: Mode) -> void:
 	mode = m
 	mode_time = 0.0
+	_charge_open = false
+	_step_scale = 1.0
 	_event_done.clear()
 	_hit_this_swing.clear()
 	for leg in legs:
@@ -290,7 +407,7 @@ func _think(delta: float) -> void:
 		Game.boss_engaged.emit(self)
 		skill_used.emit("Gầm")
 		Game.shake(0.3)
-	if not rage and vital_hp() < max_vital_hp() * 0.5:
+	if not rage and life_fraction() < 0.5:
 		rage = true
 		skill_used.emit("Cuồng Nộ")
 		eye_mat.albedo_color = Color(1.0, 0.35, 0.25)
@@ -328,6 +445,10 @@ func _think(delta: float) -> void:
 		set_mode(Mode.STOMP)
 		_cooldowns.stomp = 6.5 * cd
 		skill_used.emit("Dậm Đất")
+	elif d > 14.0 * REACH and d < 46.0 * REACH and _cooldowns.charge <= 0.0 and front > 0.75:
+		set_mode(Mode.CHARGE)
+		_cooldowns.charge = 11.0 * cd
+		skill_used.emit("Húc")
 	elif d > 17.0 * REACH and d < 42.0 * REACH and _cooldowns.pounce <= 0.0 and front > 0.6:
 		set_mode(Mode.POUNCE)
 		_cooldowns.pounce = 13.0 * cd
@@ -391,6 +512,7 @@ func _run_mode(delta: float) -> void:
 		Mode.STOMP: _stomp(delta)
 		Mode.THROW: _throw(delta)
 		Mode.POUNCE: _pounce(delta)
+		Mode.CHARGE: _charge(delta)
 		Mode.SHAKE: _shake(delta)
 		Mode.KNEEL: _kneel(delta)
 		Mode.STUNNED: _stunned(delta)
@@ -583,7 +705,7 @@ func _pounce(delta: float) -> void:
 					rock.shatter()
 				else:
 					Fx.dust(rock.global_position, 4.0, 40)
-				set_mode(Mode.STUNNED)
+				stun(7.0)
 				skill_used.emit("Choáng!")
 				return
 		_goal_height = STAND_HEIGHT
@@ -630,7 +752,15 @@ func _kneel(_delta: float) -> void:
 func _stunned(_delta: float) -> void:
 	var t := mode_time
 	pitch_pivot_z = 3.6 * S
-	if t < 7.0:
+	if not _stun_down:
+		# a flinch (a part broke): it rears and shakes its head
+		_goal_pitch = 0.16 * sin(clampf(t / _stun_for, 0.0, 1.0) * PI)
+		_goal_head = Vector2(sin(t * 9.0) * 0.35, 0.25)
+		_head_free = false
+		if t >= _stun_for:
+			set_mode(Mode.IDLE)
+		return
+	if t < _stun_for:
 		_goal_pitch = -0.3
 		_goal_height = STAND_HEIGHT - 1.4 * S
 		_goal_head = Vector2(0, -0.75)
@@ -643,7 +773,7 @@ func _stunned(_delta: float) -> void:
 				var p := global_transform * Vector3(leg.hip.x * 1.6, 0, leg.hip.z - 2.5 * S)
 				p.y = Terrain.height_at_world(p) + 0.6 * S
 				leg.override_pos = p
-	elif t < 8.5:
+	elif t < _stun_for + 1.5:
 		eye_mat.emission_energy_multiplier = 4.0
 		for leg in legs:
 			leg.override_on = false
@@ -652,6 +782,125 @@ func _stunned(_delta: float) -> void:
 		_head_free = true
 	else:
 		set_mode(Mode.IDLE)
+
+
+## Knocked down for `seconds` with its head on the ground; `staggered` opens the staggered-damage
+## window (+50%). A short flinch (`down` false) only rears.
+func stun(seconds: float, staggered := true, down := true) -> void:
+	if dead:
+		return
+	if staggered and poise:
+		poise.force_break(seconds)
+	_stun_for = seconds
+	_stun_down = down
+	set_mode(Mode.STUNNED)
+
+
+## The stagger bar filled (Poise already opened the staggered window).
+func on_staggered() -> void:
+	if dead or mode == Mode.KNEEL or mode == Mode.DYING or mode == Mode.DEAD:
+		return
+	stun(maxf(poise.broken_remaining(), 1.0), false)
+	skill_used.emit("Choáng!")
+
+
+func can_interrupt() -> bool:
+	return mode == Mode.CHARGE and _charge_open
+
+
+## A heavy hit on its head while it charged: it stumbles and goes down, open to staggered damage.
+func interrupt(_by: Node) -> void:
+	skill_used.emit("Gián Đoạn!")
+	if Game.has_screen():
+		DamageNumbers.show(head.global_position + Vector3.UP * 2.0 * S, "GIÁN ĐOẠN!", "staggered", true)
+		Fx.flash(head.global_position, Color(1.0, 0.85, 0.45), 8.0, 14.0)
+		Fx.burst(head.global_position, Vector3.UP, Color(1.0, 0.85, 0.45, 1.0), 50, 10.0, 0.4, 0.8, 90.0, -6.0, true)
+	Game.hitstop(0.16)
+	Game.shake(0.7)
+	stun(7.0)
+
+
+func _on_part_broken(part: Dictionary) -> void:
+	skill_used.emit("Vỡ " + String(part.name))
+	if mode in [Mode.IDLE, Mode.WALK, Mode.SWIPE, Mode.THROW, Mode.STOMP, Mode.CHARGE, Mode.SHAKE, Mode.POUNCE] and not dead:
+		if mode == Mode.POUNCE:
+			return
+		stun(1.8, false, false)
+
+
+# ================================================================== Húc
+## Dauntless's charge: head down, rays glowing on it (the window), then it runs at where the hero
+## stood. Whoever its head or front paws meet is thrown; a heavy hit on its head interrupts it.
+func _charge(delta: float) -> void:
+	var t := mode_time
+	if _once("start"):
+		var aim := target.global_position if target else global_position - global_basis.z * 20.0
+		var to := aim - global_position
+		to.y = 0.0
+		var dir := to.normalized() if to.length() > 0.5 else -global_basis.z
+		_charge_from = global_position
+		var end := global_position + dir * clampf(to.length() + 8.0, 12.0, 32.0)
+		var off := Vector2(end.x - home.origin.x, end.z - home.origin.z)
+		if off.length() > DEN_RADIUS:
+			off = off.normalized() * DEN_RADIUS
+			end = Vector3(home.origin.x + off.x, end.y, home.origin.z + off.y)
+		_charge_to = end
+		_rammed.clear()
+		_charge_open = true
+		for i in 4:
+			var p := _charge_from.lerp(_charge_to, (i + 1) / 4.0)
+			p.y = Terrain.height_at_world(p)
+			Fx.telegraph(p, 3.2 * S, CHARGE_WIND + CHARGE_RUN * (i + 1) / 4.0)
+	if t < CHARGE_WIND:
+		_face(_charge_to, 2.6, delta)
+		_goal_pitch = -0.3
+		_goal_height = STAND_HEIGHT - 1.0 * S
+		_goal_head = Vector2(0, -0.6)
+		_head_free = false
+		if Engine.get_physics_frames() % 10 == 0:
+			for leg in [legs[0], legs[1]]:
+				Fx.dust(leg.foot - Vector3.UP * 0.5 * S, 1.6 * S, 8)
+	elif t < CHARGE_WIND + CHARGE_RUN:
+		var k := (t - CHARGE_WIND) / CHARGE_RUN
+		var p := _charge_from.lerp(_charge_to, k)
+		p.y = Terrain.height_at_world(p)
+		_speed = p.distance_to(global_position) / maxf(delta, 0.001)
+		global_position = p
+		_step_scale = 0.38
+		_goal_pitch = -0.32
+		_goal_height = STAND_HEIGHT - 1.2 * S
+		_goal_head = Vector2(0, -0.7)
+		_head_free = false
+		_charge_open = k < 0.9
+		if Engine.get_physics_frames() % 5 == 0:
+			Fx.dust(global_position - global_basis.z * 4.0 * S, 3.0 * S, 14)
+		_ram()
+	elif t < CHARGE_WIND + CHARGE_RUN + CHARGE_STOP:
+		_charge_open = false
+		_step_scale = 1.0
+		_goal_pitch = 0.0
+		_goal_height = STAND_HEIGHT
+		_head_free = true
+	else:
+		set_mode(Mode.IDLE)
+
+
+## Heroes the charging head or front paws touch are thrown (once per charge).
+func _ram() -> void:
+	var front: Array = [head, legs[0].paw, legs[1].paw, legs[0].lower, legs[1].lower]
+	for h in heroes():
+		if _rammed.has(h) or is_on_me(h) or h.get("is_climbing"):
+			continue
+		var chest: Vector3 = h.global_position + Vector3.UP
+		for body in front:
+			for cs in body.get_children():
+				if cs is CollisionShape3D and _closest_on_shape(cs, chest).distance_to(chest) < 0.9:
+					_rammed[h] = true
+					hurt_hero(h, 34.0, global_position, 15.0, 7.0, "Húc")
+					_shake_near(chest, 0.6)
+					break
+			if _rammed.has(h):
+				break
 
 
 func _dying(_delta: float) -> void:
@@ -703,6 +952,10 @@ func die() -> void:
 
 func respawn() -> void:
 	super.respawn()
+	if _antlers:
+		_antlers.visible = true
+	for leg in _greaves:
+		_greaves[leg].visible = true
 	rage = false
 	eye_mat.albedo_color = Color(0.7, 1.0, 0.85)
 	eye_mat.emission = Color(0.6, 1.0, 0.8)
@@ -752,7 +1005,7 @@ func _ease_pose(delta: float) -> void:
 func _update_feet(delta: float) -> void:
 	var root := global_transform
 	var vel := -root.basis.z * _speed
-	var step_time := STEP_TIME * (0.72 if rage else 1.0)
+	var step_time := STEP_TIME * (0.72 if rage else 1.0) * _step_scale
 	for leg in legs:
 		if leg.override_on:
 			leg.stepping = false

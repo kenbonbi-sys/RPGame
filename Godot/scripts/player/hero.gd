@@ -17,7 +17,7 @@ signal hurt(amount: float)
 signal perfect_dodge
 signal died
 
-enum State { GROUND, AIR, ROLL, CLIMB, STAB, KNOCKED, DEAD }
+enum State { GROUND, AIR, ROLL, CLIMB, STAB, HEAVY, KNOCKED, DEAD }
 
 const LAYER_WORLD := 1
 const LAYER_ENEMY := 4
@@ -116,6 +116,14 @@ var _ground_time := 0.0
 var _stab_charge := 0.0
 var _stab_released := false
 var _stab_target: Node3D
+## Trảm, the sword's heavy hit (right mouse): held to gather power, released to strike.
+var _heavy_charge := 0.0
+var _heavy_released := false
+var _heavy_struck := false
+var _heavy_full := false
+
+const HEAVY_CHARGE_TIME := 0.9
+const HEAVY_REACH := 2.7
 var _roll_dir := Vector3.FORWARD
 var _knock_landed := -1.0
 
@@ -292,6 +300,8 @@ func _physics_process(delta: float) -> void:
 			_climb(delta)
 		State.STAB:
 			_stab(delta)
+		State.HEAVY:
+			_heavy(delta)
 		State.KNOCKED:
 			_knocked(delta)
 		State.DEAD:
@@ -344,6 +354,9 @@ func _locomotion(delta: float) -> void:
 		return
 	if not stunned and Input.is_action_just_pressed("attack") and weak_point_near and on_colossus:
 		_start_stab(weak_point_near)
+		return
+	if not stunned and Input.is_action_just_pressed("heavy") and on_floor and action_remaining() <= 0.05:
+		_start_heavy()
 		return
 	if not stunned:
 		_skill_keys()
@@ -904,6 +917,86 @@ func _stab(delta: float) -> void:
 		velocity.y -= gravity * delta
 		move_and_slide()
 		_after_move(delta)
+
+
+# ================================================================== Trảm, the heavy hit
+## 0..1 while gathering power for Trảm, -1 otherwise (the HUD draws it).
+func heavy_charge() -> float:
+	return _heavy_charge if state == State.HEAVY and not _heavy_released else -1.0
+
+
+func _start_heavy() -> void:
+	var cam := Game.cam()
+	var dir: Vector3 = cam.forward_flat() if cam else facing
+	var target := Aim.soft_target(self, dir, 7.0)
+	if target:
+		var to := target.aim_at(global_position) - global_position
+		to.y = 0.0
+		if to.length() > 0.2:
+			dir = to.normalized()
+	facing = dir
+	_heavy_charge = 0.0
+	_heavy_released = false
+	_heavy_struck = false
+	_heavy_full = false
+	set_state(State.HEAVY)
+
+
+## Held: the blade rises and gathers power (full in 0.9 s); released (or held 1.4 s): an overhead
+## cut that hits hard, staggers a lot and can interrupt a colossus's charge. Lướt cancels it.
+func _heavy(delta: float) -> void:
+	var a := "1H_Melee_Attack_Chop"
+	var wind := anim_length(a) * 0.3
+	if not _heavy_released:
+		if Input.is_action_just_pressed("dodge"):
+			set_state(State.GROUND)
+			skills.request(PlayerSkills.DASH_SLOT)
+			return
+		_heavy_charge = minf(1.0, _heavy_charge + delta / HEAVY_CHARGE_TIME)
+		hold(a, wind * (0.25 + 0.75 * _heavy_charge))
+		var cam := Game.cam()
+		if cam:
+			facing = facing.slerp(cam.forward_flat(), 1.0 - exp(-4.0 * delta)).normalized()
+		if _heavy_charge >= 1.0 and not _heavy_full:
+			_heavy_full = true
+			if Game.has_screen():
+				Fx.flash(global_position + Vector3.UP * 1.6, Color(1.0, 0.9, 0.6), 3.0, 4.0)
+				Fx.burst(global_position + Vector3.UP * 1.8, Vector3.UP, Color(1.0, 0.9, 0.6, 1.0), 14, 3.0, 0.2, 0.4, 90.0, 0.0, true)
+		if not Input.is_action_pressed("heavy") or _state_time > 1.4:
+			_heavy_released = true
+			_state_time = 0.0
+			anim.speed_scale = 1.5
+			anim.seek(wind, true)
+	else:
+		if not _heavy_struck and _state_time >= 0.13:
+			_heavy_struck = true
+			_heavy_strike(_heavy_charge)
+		if _state_time >= 0.55:
+			anim.speed_scale = 1.0
+			set_state(State.GROUND)
+			return
+	velocity.x = move_toward(velocity.x, 0.0, 30.0 * delta)
+	velocity.z = move_toward(velocity.z, 0.0, 30.0 * delta)
+	velocity.y -= gravity * delta
+	move_and_slide()
+	_after_move(delta)
+
+
+func _heavy_strike(c: float) -> void:
+	var origin := global_position + Vector3.UP * 1.0 + facing * 0.6
+	var amount := stats.attack_for(Combat.Element.PHYSICAL) * (1.4 + 1.8 * c) * damage_dealt_multiplier()
+	var d := DamageInfo.make(amount, Combat.Team.PLAYER, self, origin, facing, Combat.Element.PHYSICAL, 6.0 + 4.0 * c)
+	d.attack_scaled = true
+	d.source_level = level
+	d.skill_name = "Trảm"
+	d.poise = 30.0 + 50.0 * c
+	d.hit_stop = 0.08 + 0.07 * c
+	d.heavy = true
+	d.cutting = true
+	var hits := Combat.damage_cone(get_world_3d(), origin, facing, HEAVY_REACH, 130.0, d, 0.1)
+	SkillFx.play("slash", global_position + Vector3.UP * 1.1 + facing * 0.9, facing, 1.3 + 0.5 * c, true)
+	if hits > 0:
+		Game.shake(0.15 + 0.25 * c)
 
 
 # ================================================================== grip meter

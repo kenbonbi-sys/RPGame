@@ -108,7 +108,7 @@ func _physics_process(delta: float) -> void:
 
 func _apply(h: Health) -> void:
 	var d := hit.copy()
-	d.point = h.head_position()
+	d.point = h.hit_point(global_position)
 	d.direction = Vector3(_dir.x, 0, _dir.z).normalized()
 	d.roll_crit(crit_chance)
 	if h.take_damage(d) > 0.0:

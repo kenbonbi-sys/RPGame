@@ -12,6 +12,8 @@ const KEYS := {
 	"dodge": [KEY_SHIFT],
 	"look_boss": [KEY_Q],
 	"interact": [KEY_F],
+	# hold to cling to fur (right mouse is the sword's heavy hit)
+	"grip": [KEY_E],
 	"pause": [KEY_ESCAPE],
 	"debug_overlay": [KEY_F3],
 	"screenshot": [KEY_F12],
@@ -37,7 +39,7 @@ const SKILL_ACTIONS := ["attack", "skill_1", "skill_2", "skill_3", "skill_4", "s
 
 const MOUSE := {
 	"attack": [MOUSE_BUTTON_LEFT],
-	"grip": [MOUSE_BUTTON_RIGHT],
+	"heavy": [MOUSE_BUTTON_RIGHT],
 	"look_boss": [MOUSE_BUTTON_MIDDLE],
 }
 
@@ -61,6 +63,7 @@ const PAD_AXES := {
 	"cam_right": [JOY_AXIS_RIGHT_X, 1.0],
 	"cam_up": [JOY_AXIS_RIGHT_Y, -1.0],
 	"cam_down": [JOY_AXIS_RIGHT_Y, 1.0],
+	"heavy": [JOY_AXIS_TRIGGER_RIGHT, 1.0],
 }
 
 ## Seconds Shift must be held before a tap (Lướt) turns into sprinting.

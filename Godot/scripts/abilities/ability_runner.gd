@@ -80,32 +80,18 @@ static func damage(ctx: AbilityContext, b: Dictionary) -> void:
 	var hit: Dictionary = b.get("hit", {})
 	var d := ctx.make_damage(hit)
 	d.point = p
+	# a melee swing with a physical weapon cuts (part damage on a colossus)
+	d.cutting = d.type == Combat.Element.PHYSICAL
 	var crit := float(hit.get("critChance", 0.0))
 	var hits := 0
 	if int(b.get("shape", 0)) == 1:
 		hits = Combat.damage_cone(ctx.world(), p + Vector3.UP * 0.6, ctx.dir, r, float(b.get("angle", 120.0)), d, crit)
 	else:
 		hits = Combat.damage_circle(ctx.world(), p + Vector3.UP * 0.6, r, d, crit)
-	_spark_colossus(ctx, p, r)
 	if hits > 0:
 		ctx.copy_at(p).run(b.get("onAnyHit", []))
 		if ctx.slot == 0 and ctx.caster.imbue_power > 0.0:
 			SkillFx.play("hit_lightning", p, ctx.dir)
-
-
-## A blade on a colossus's hide only sparks (only stabbing its weak points hurts it).
-static func _spark_colossus(ctx: AbilityContext, p: Vector3, r: float) -> void:
-	var q := PhysicsShapeQueryParameters3D.new()
-	var s := SphereShape3D.new()
-	s.radius = r
-	q.shape = s
-	q.transform = Transform3D(Basis.IDENTITY, p + Vector3.UP)
-	q.collision_mask = Combat.LAYER_COLOSSUS
-	for h in ctx.world().direct_space_state.intersect_shape(q, 4):
-		var col = h.collider.get_meta("colossus") if h.collider.has_meta("colossus") else null
-		if col and col.has_method("hide_hit"):
-			col.hide_hit(p + Vector3.UP * 1.2)
-			return
 
 
 static func projectile(ctx: AbilityContext, b: Dictionary) -> void:
@@ -369,7 +355,8 @@ static func dash(ctx: AbilityContext, b: Dictionary) -> void:
 	var end_vfx = b.get("endVfx")
 	if end_vfx is String and end_vfx != "":
 		await ctx.wait(time)
-		SkillFx.play(end_vfx, ctx.caster.global_position, dir, float(b.get("endVfxScale", 1.0)))
+		if is_instance_valid(ctx.caster):
+			SkillFx.play(end_vfx, ctx.caster.global_position, dir, float(b.get("endVfxScale", 1.0)))
 
 
 static func _allies(ctx: AbilityContext, radius: float) -> Array:

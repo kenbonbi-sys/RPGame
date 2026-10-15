@@ -94,6 +94,18 @@ func _physics_process(delta: float) -> void:
 		current = maxf(0.0, current - decay_per_second * delta)
 
 
+## Knocked down from outside the bar (an interrupt, a stun): the same staggered window and
+## +50% damage taken, without filling or raising the bar.
+func force_break(seconds: float) -> void:
+	if not Game.is_authority() or (health and health.is_dead):
+		return
+	current = 0.0
+	_broken_until = maxf(_broken_until, now() + seconds)
+	if health and not _bonus_applied:
+		health.damage_taken_multiplier *= 1.0 + broken_damage_bonus
+		_bonus_applied = true
+
+
 func reset_poise() -> void:
 	if _bonus_applied and health:
 		health.damage_taken_multiplier /= 1.0 + broken_damage_bonus

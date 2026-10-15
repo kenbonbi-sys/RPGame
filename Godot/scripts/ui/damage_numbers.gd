@@ -1,7 +1,8 @@
 class_name DamageNumbers
 extends RefCounted
 ## Floating numbers over whoever got hit (Label3D, always facing the camera): white for normal
-## hits, gold and bigger for crits, green for healing, status colours for damage over time.
+## hits, gold and bigger for crits, green for healing, status colours for damage over time. On a
+## colossus (Dauntless): yellow part damage, white-blue core damage, orange staggered damage.
 
 const FONT := preload("res://assets/fonts/BarlowCondensed-ExtraBold.ttf")
 const COLORS := {
@@ -13,6 +14,9 @@ const COLORS := {
 	"poison": Color(0.6, 0.95, 0.3),
 	"shock": Color(0.6, 0.85, 1.0),
 	"text": Color(0.95, 0.92, 0.8),
+	"part": Color(1.0, 0.84, 0.18),
+	"core": Color(0.86, 0.94, 1.0),
+	"staggered": Color(1.0, 0.52, 0.16),
 }
 
 

@@ -15,7 +15,8 @@ func _ready() -> void:
 	await _run("baked land matches WorldMap", _test_bake_up_to_date)
 	await _run("knee solver", _test_knee)
 	await _run("controls", _test_controls)
-	await _run("weak points, kneel and fall", _test_colossus_damage)
+	await _run("life, parts, runes, kneel and fall", _test_colossus_damage)
+	await _run("stagger, staggered damage and the interrupt", _test_stagger_and_interrupt)
 	await _run("fall damage", _test_fall_damage)
 	await _run("climbing a hind leg", _test_climb_leg)
 	await _run("thrown rocks are capped", _test_boulder_cap)
@@ -102,7 +103,7 @@ func _test_knee() -> void:
 
 
 func _test_controls() -> void:
-	for a in ["move_forward", "jump", "dodge", "attack", "grip", "look_boss"]:
+	for a in ["move_forward", "jump", "dodge", "attack", "heavy", "grip", "look_boss"]:
 		check(InputMap.has_action(a), "action " + a)
 
 
@@ -118,21 +119,118 @@ func _new_bear() -> GauMa:
 func _test_colossus_damage() -> void:
 	var bear := _new_bear()
 	await _frames(2)
+	Health.spread_override = 1.0
 	check(bear.weak_points.size() == 3, "three weak points")
-	check(is_equal_approx(bear.vital_hp(), 240.0), "life is the two vital points")
+	check(is_equal_approx(bear.health.max_hp, 3200.0), "its life is the Unity bear's 3200")
+	# a blade on the left hind calf: core damage to its life, +50% of it toward breaking the leg
+	var hl: GauMa.Leg = bear.legs[2]
+	var leg: Dictionary = bear.part_by_id("hl")
+	var at := hl.lower.global_transform * Vector3(0, 0, hl.r2)
+	check(bear.part_at(at) == leg, "a point on the calf is the left hind leg")
+	check(bear.part_at(bear.torso.global_position + Vector3.UP * 3.0) == bear.part_by_id("body"), "the back is the trunk")
+	var hp0: float = bear.health.hp
+	var dealt: float = bear.health.take_damage(_cut(100.0, at))
+	check(is_equal_approx(hp0 - bear.health.hp, 100.0) and is_equal_approx(dealt, 100.0), "a cut on a leg takes 100 from its life")
+	check(is_equal_approx(leg.max - leg.hp, 150.0), "and 150 part damage from the leg (%.0f)" % (leg.max - leg.hp))
+	var trunk: Dictionary = bear.part_by_id("body")
+	check(not trunk.breakable, "the trunk cannot break")
+	var n := 0
+	while not leg.broken and n < 20:
+		bear.health.take_damage(_cut(100.0, at))
+		n += 1
+	check(leg.broken and n == 2, "400 part damage breaks the leg (%d more cuts)" % n)
+	check(not bear._greaves.has(hl) or not bear._greaves[hl].visible, "its bark shin falls off")
+	check(bear.mode == GauMa.Mode.STUNNED and not bear._stun_down, "it flinches")
+	var after: float = bear.health.hp
+	bear.health.take_damage(_cut(100.0, at))
+	check(is_equal_approx(leg.hp, 0.0) and is_equal_approx(after - bear.health.hp, 100.0), "a broken leg still takes core damage")
+	# runes: a stab hurts its life three times over; a vital rune destroyed takes 8% and staggers it
 	bear.leg_point.stab(45.0, null)
-	check(bear.mode == GauMa.Mode.KNEEL, "stabbing the calf makes it kneel")
-	check(not bear.dead, "the calf is not vital")
+	check(bear.mode == GauMa.Mode.KNEEL, "stabbing the calf rune makes it kneel")
 	var vitals := bear.weak_points.filter(func(w: WeakPoint) -> bool: return w.vital)
+	var before: float = bear.health.hp
+	vitals[0].stab(40.0, null)
+	check(is_equal_approx(before - bear.health.hp, 120.0), "a 40 stab takes 120 from its life (%.0f)" % (before - bear.health.hp))
+	before = bear.health.hp
 	vitals[0].stab(200.0, null)
-	check(not bear.dead and bear.vital_hp() > 0.0, "one vital point is not enough")
-	vitals[1].stab(200.0, null)
-	check(bear.dead, "both vital points down: it falls")
-	check(bear.mode == GauMa.Mode.DYING, "it collapses")
+	check(not vitals[0].active, "the rune is destroyed")
+	check(bear.is_staggered(), "a destroyed vital rune staggers it")
+	check(before - bear.health.hp > 600.0 + 256.0 - 1.0, "the killing stab (×1.5 staggered) and 8% of its life")
+	bear.health.kill()
+	check(bear.dead and bear.mode == GauMa.Mode.DYING, "out of life it collapses")
 	bear.respawn()
-	check(not bear.dead and is_equal_approx(bear.vital_hp(), 240.0), "it comes back whole")
-	check(bear.leg_point.active, "its calf heals")
+	check(not bear.dead and is_equal_approx(bear.health.hp, 3200.0), "it comes back whole")
+	check(not leg.broken and is_equal_approx(leg.hp, 400.0), "its leg too")
+	check(bear.leg_point.active and vitals[0].active, "and its runes")
+	check(not bear.is_staggered() and bear.poise.current == 0.0, "and its stagger bar")
 	bear.queue_free()
+	Health.spread_override = -1.0
+	await _frames(1)
+
+
+func _cut(amount: float, at: Vector3, heavy := false) -> DamageInfo:
+	var d := DamageInfo.make(amount, Combat.Team.PLAYER, null, at, Vector3.FORWARD)
+	d.cutting = true
+	d.heavy = heavy
+	return d
+
+
+func _test_stagger_and_interrupt() -> void:
+	var bear := _new_bear()
+	await _frames(2)
+	Health.spread_override = 1.0
+	var head_at: Vector3 = bear.closest_point(bear.head.global_position + Vector3.UP * 20.0)["point"]
+	check(bear.part_at(head_at) == bear.part_by_id("head"), "the crown is the head")
+	# the stagger bar: 300; the head counts double
+	var d := _cut(10.0, head_at)
+	d.poise = 100.0
+	bear.health.take_damage(d)
+	check(is_equal_approx(bear.poise.current, 200.0), "a head hit staggers twice as much (%.0f)" % bear.poise.current)
+	check(not bear.is_staggered(), "not yet staggered")
+	d = _cut(10.0, head_at)
+	d.poise = 60.0
+	bear.health.take_damage(d)
+	check(bear.is_staggered() and bear.mode == GauMa.Mode.STUNNED, "a full bar knocks it down")
+	var before: float = bear.health.hp
+	bear.health.take_damage(_cut(100.0, head_at))
+	check(is_equal_approx(before - bear.health.hp, 150.0), "staggered it takes +50%% (%.0f)" % (before - bear.health.hp))
+	bear.queue_free()
+	await _frames(1)
+
+	# Húc: rays on the head; a heavy hit there interrupts it
+	bear = _new_bear()
+	await _frames(2)
+	bear.set_mode(GauMa.Mode.CHARGE)
+	await _frames(20)
+	check(bear.can_interrupt() and bear._prompt.visible, "charging, it can be interrupted and shows the rays")
+	head_at = Colossus._lowest_of(bear.head) + Vector3.UP * 0.05
+	check(bear.part_at(head_at) == bear.part_by_id("head"), "under the lowered head is the head")
+	bear.health.take_damage(_cut(50.0, head_at))
+	check(bear.mode == GauMa.Mode.CHARGE, "a light hit does not stop it")
+	var leg_at: Vector3 = bear.legs[0].lower.global_position
+	bear.health.take_damage(_cut(50.0, leg_at, true))
+	check(bear.mode == GauMa.Mode.CHARGE, "a heavy hit on a leg does not stop it")
+	bear.health.take_damage(_cut(50.0, head_at, true))
+	check(bear.mode == GauMa.Mode.STUNNED and bear.is_staggered(), "a heavy hit on the head interrupts it: down and staggered")
+	check(absf(bear._stun_for - 7.0) < 0.01, "for 7 s")
+	bear.queue_free()
+	await _frames(1)
+
+	# while it runs its head comes down within a standing hero's reach
+	bear = _new_bear()
+	await _frames(2)
+	bear.set_mode(GauMa.Mode.CHARGE)
+	var low := INF
+	for i in 150:
+		await _frames(1)
+		if bear.mode != GauMa.Mode.CHARGE:
+			break
+		if bear.mode_time > GauMa.CHARGE_WIND:
+			var q: Vector3 = Colossus._lowest_of(bear.head)
+			low = minf(low, q.y - bear.global_position.y)
+	check(low < 2.2, "the charging head dips to %.1f m, in reach of Trảm" % low)
+	bear.queue_free()
+	Health.spread_override = -1.0
 	await _frames(1)
 
 
