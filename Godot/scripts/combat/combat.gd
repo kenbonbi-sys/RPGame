@@ -4,12 +4,13 @@ extends RefCounted
 ## and hit-stop. Numbers come from DB.combat / DB.progression.
 
 enum Team { PLAYER, ENEMY, NEUTRAL }
-## Same order as the Unity DamageType enum (the JSON stores these numbers).
-enum Element { PHYSICAL, FIRE, ICE, LIGHTNING, POISON, HOLY, DARK }
+## Same order as the Unity DamageType enum (the JSON stores these numbers); TERRA is the 3D
+## version's own (Dauntless's Terra), after the Unity ones.
+enum Element { PHYSICAL, FIRE, ICE, LIGHTNING, POISON, HOLY, DARK, TERRA }
 
-const ELEMENT_NAMES := ["Vật lý", "Lửa", "Băng", "Lôi", "Độc", "Thánh Mộc", "Ám"]
+const ELEMENT_NAMES := ["Vật lý", "Lửa", "Băng", "Lôi", "Độc", "Thánh Mộc", "Ám", "Thổ"]
 const ELEMENT_COLORS := [Color(1, 1, 1), Color(1.0, 0.52, 0.2), Color(0.55, 0.85, 1.0), Color(0.72, 0.78, 1.0),
-	Color(0.6, 0.95, 0.3), Color(1.0, 0.92, 0.55), Color(0.72, 0.45, 0.95)]
+	Color(0.6, 0.95, 0.3), Color(1.0, 0.92, 0.55), Color(0.72, 0.45, 0.95), Color(0.5, 0.85, 0.3)]
 
 const LAYER_WORLD := 1
 const LAYER_HERO := 2

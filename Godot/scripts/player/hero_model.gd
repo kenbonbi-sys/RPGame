@@ -25,7 +25,7 @@ const LIBRARIES := [
 	["res://assets/third_party/quaternius_ual/UAL2_Standard.glb", ""],
 ]
 const LOOPING := ["Idle", "Sword_Idle", "Walk", "Jog_Fwd", "Sprint", "NinjaJump_Idle", "Crouch_Idle",
-	"Spell_Simple_Idle", "Idle_Shield", "Swim_Idle", "Sitting_Idle"]
+	"Spell_Simple_Idle", "Idle_Shield", "Swim_Idle", "Sitting_Idle", "Pistol_Idle"]
 const HEAD_BONES := ["Head", "neck_01"]
 
 ## KayKit name the hero code uses -> UAL clip.
@@ -72,6 +72,10 @@ const PORTRAIT_LAYER := 1 << 10
 var skeleton: Skeleton3D
 var anim: AnimationPlayer
 var body_root: Node3D
+## The weapon in hand (Weapons.ARMORY) and the idle stance its family wants.
+var weapon_id := "w_kiem_hong_anh"
+var idle_clip := "Sword_Idle"
+var _weapon_nodes: Array[Node] = []
 ## Bone -> its height above the soles in the rest pose, for sole_height().
 var _sole_bones := {}
 var _to_model := Transform3D.IDENTITY
@@ -92,7 +96,7 @@ func _ready() -> void:
 	body_root.add_child(anim)
 	anim.add_animation_library("", _library_for(skeleton, body_root.get_path_to(skeleton)))
 	_scarf()
-	_sword()
+	set_weapon(weapon_id)
 	for n in find_children("*", "MeshInstance3D", true, false):
 		(n as MeshInstance3D).layers = 2 | PORTRAIT_LAYER
 	var n: Node = skeleton
@@ -115,6 +119,8 @@ func sole_height() -> float:
 
 
 func resolve(anim_name: String) -> String:
+	if anim_name == "Idle":
+		return idle_clip
 	return ALIASES.get(anim_name, anim_name)
 
 
@@ -306,158 +312,38 @@ func _scarf() -> void:
 		_piece("spine_03", tail, red, chest + Vector3(side * 0.06, -0.06, -0.2), Vector3.ONE, Vector3(0.22, 0, side * 0.12))
 
 
-## A broad Dauntless-style sword in the right hand: in T-pose the fist holds it pointing forward
-## (+Z of the hand's frame). Built face by face so the bevels catch the light: a blade with a
-## diamond section, bright edge bevels and a real point; a swept cross guard with a gem; a wrapped
-## grip and a faceted pommel.
-func _sword() -> void:
-	var hand := skeleton.find_bone("hand_r")
-	if hand < 0:
-		return
-	var rest := skeleton.get_bone_global_rest(hand)
-	var root := Node3D.new()
-	root.name = "Sword"
-	var att := BoneAttachment3D.new()
-	att.bone_name = "hand_r"
-	skeleton.add_child(att)
-	att.add_child(root)
-	root.transform = rest.affine_inverse() * Transform3D(Basis.IDENTITY, rest.origin + Vector3(-0.07, -0.01, 0.02))
-	var metal := StandardMaterial3D.new()
-	metal.vertex_color_use_as_albedo = true
-	metal.metallic = 0.65
-	metal.roughness = 0.32
-	metal.rim_enabled = true
-	metal.rim = 0.4
-	metal.rim_tint = 0.4
-	var leather := _mat(Color(0.24, 0.14, 0.09), 0.0, 0.85)
-	var m := MeshInstance3D.new()
-	m.mesh = sword_mesh(trim)
-	m.material_override = metal
-	root.add_child(m)
-	var g := MeshInstance3D.new()
-	g.mesh = _grip_mesh()
-	g.material_override = leather
-	root.add_child(g)
-
-
-## The metal of the sword along +Z: blade from the guard (z 0.1) to the point (z 1.28).
-static func sword_mesh(gold: Color) -> ArrayMesh:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var flat := Color(0.62, 0.66, 0.7)
-	var bevel := Color(0.88, 0.9, 0.93)
-	var fuller := Color(0.45, 0.5, 0.56)
-	# blade section: x is the thickness, y the width; stations [z, half width, half thickness]
-	var stations := [[0.1, 0.082, 0.026], [0.55, 0.09, 0.024], [0.98, 0.078, 0.021], [1.28, 0.0, 0.003]]
-	var ring := func(w: float, t: float) -> Array:
-		return [Vector2(0, w), Vector2(t * 0.55, w * 0.74), Vector2(t, w * 0.18), Vector2(t, -w * 0.18), Vector2(t * 0.55, -w * 0.74),
-			Vector2(0, -w), Vector2(-t * 0.55, -w * 0.74), Vector2(-t, -w * 0.18), Vector2(-t, w * 0.18), Vector2(-t * 0.55, w * 0.74)]
-	# faces of the ring: edge bevels bright, flats steel, the middle strip a darker fuller
-	var face_col := [bevel, flat, fuller, flat, bevel, bevel, flat, fuller, flat, bevel]
-	for i in stations.size() - 1:
-		var a: Array = stations[i]
-		var b: Array = stations[i + 1]
-		var ra: Array = ring.call(a[1], a[2])
-		var rb: Array = ring.call(b[1], b[2])
-		for k in ra.size():
-			var k2 := (k + 1) % ra.size()
-			var p0 := Vector3(ra[k].x, ra[k].y, a[0])
-			var p1 := Vector3(ra[k2].x, ra[k2].y, a[0])
-			var p2 := Vector3(rb[k2].x, rb[k2].y, b[0])
-			var p3 := Vector3(rb[k].x, rb[k].y, b[0])
-			var c: Color = face_col[k]
-			if i == stations.size() - 2 and c == fuller:
-				c = flat
-			_quad(st, p0, p1, p2, p3, c)
-	# cap the blade's root (inside the guard anyway)
-	var r0: Array = ring.call(stations[0][1], stations[0][2])
-	for k in range(1, r0.size() - 1):
-		_tri(st, Vector3(r0[0].x, r0[0].y, 0.1), Vector3(r0[k + 1].x, r0[k + 1].y, 0.1), Vector3(r0[k].x, r0[k].y, 0.1), flat)
-	# the cross guard: a bar across the width whose ends sweep toward the point, a gem in the middle
-	var dark_gold := gold.darkened(0.35)
-	_box(st, Vector3(0, 0, 0.08), Vector3(0.075, 0.2, 0.07), gold, dark_gold)
-	for side in [-1.0, 1.0]:
-		var base := Vector3(0, side * 0.1, 0.08)
-		var tip := Vector3(0, side * 0.2, 0.17)
-		_beam(st, base, tip, 0.032, 0.018, gold, dark_gold)
-		_ball(st, tip, 0.026, gold)
-	_ball(st, Vector3(0.04, 0, 0.08), 0.028, Color(0.2, 0.85, 0.75))
-	_ball(st, Vector3(-0.04, 0, 0.08), 0.028, Color(0.2, 0.85, 0.75))
-	# pommel
-	_ball(st, Vector3(0, 0, -0.2), 0.04, gold)
-	st.generate_normals()
-	return st.commit()
-
-
-static func _grip_mesh() -> ArrayMesh:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var col := Color.WHITE
-	# leather wrapped in bands: radius steps up and down along the grip
-	var n := 8
-	var zs := []
-	for i in 9:
-		zs.append(lerpf(0.045, -0.17, i / 8.0))
-	for i in zs.size() - 1:
-		var r0 := 0.024 if i % 2 == 0 else 0.021
-		var r1 := 0.021 if i % 2 == 0 else 0.024
-		for k in n:
-			var a0 := TAU * k / n
-			var a1 := TAU * (k + 1) / n
-			var p0 := Vector3(cos(a0) * r0, sin(a0) * r0, zs[i])
-			var p1 := Vector3(cos(a1) * r0, sin(a1) * r0, zs[i])
-			var p2 := Vector3(cos(a1) * r1, sin(a1) * r1, zs[i + 1])
-			var p3 := Vector3(cos(a0) * r1, sin(a0) * r1, zs[i + 1])
-			_quad(st, p0, p3, p2, p1, col)
-	st.generate_normals()
-	return st.commit()
-
-
-static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, col: Color) -> void:
-	for p in [a, b, c]:
-		st.set_color(col)
-		st.add_vertex(p)
-
-
-## A quad a-b-c-d, wound so its front faces out of the solid it bounds.
-static func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, col: Color) -> void:
-	_tri(st, a, c, b, col)
-	_tri(st, a, d, c, col)
-
-
-## A box with flat faces; the faces looking along ±Y (the bar's ends) get the darker colour.
-static func _box(st: SurfaceTool, at: Vector3, size: Vector3, col: Color, end_col: Color) -> void:
-	var h := size * 0.5
-	var c := [Vector3(-h.x, -h.y, -h.z), Vector3(h.x, -h.y, -h.z), Vector3(h.x, h.y, -h.z), Vector3(-h.x, h.y, -h.z),
-		Vector3(-h.x, -h.y, h.z), Vector3(h.x, -h.y, h.z), Vector3(h.x, h.y, h.z), Vector3(-h.x, h.y, h.z)]
-	var faces := [[0, 3, 2, 1, col], [4, 5, 6, 7, col], [0, 1, 5, 4, end_col], [3, 7, 6, 2, end_col], [0, 4, 7, 3, col], [1, 2, 6, 5, col]]
-	for f in faces:
-		_quad(st, at + c[f[0]], at + c[f[1]], at + c[f[2]], at + c[f[3]], f[4])
-
-
-## A square beam from a to b, tapering from r0 to r1.
-static func _beam(st: SurfaceTool, a: Vector3, b: Vector3, r0: float, r1: float, col: Color, side_col: Color) -> void:
-	var axis := (b - a).normalized()
-	var u := axis.cross(Vector3.RIGHT).normalized()
-	var v := axis.cross(u).normalized()
-	var corners := [u + v, u - v, -u - v, -u + v]
-	for k in 4:
-		var k2 := (k + 1) % 4
-		var c: Color = col if k % 2 == 0 else side_col
-		_quad(st, a + corners[k] * r0, a + corners[k2] * r0, b + corners[k2] * r1, b + corners[k] * r1, c)
-	_quad(st, b + corners[0] * r1, b + corners[1] * r1, b + corners[2] * r1, b + corners[3] * r1, col)
-
-
-## A faceted ball (an octahedron split once), for gems, knobs and the pommel.
-static func _ball(st: SurfaceTool, at: Vector3, r: float, col: Color) -> void:
-	var dirs := [Vector3.RIGHT, Vector3.LEFT, Vector3.UP, Vector3.DOWN, Vector3.BACK, Vector3.FORWARD]
-	var faces := [[0, 2, 4], [2, 1, 4], [1, 3, 4], [3, 0, 4], [2, 0, 5], [1, 2, 5], [3, 1, 5], [0, 3, 5]]
-	for f in faces:
-		var a: Vector3 = dirs[f[0]]
-		var b: Vector3 = dirs[f[1]]
-		var c: Vector3 = dirs[f[2]]
-		var ab := (a + b).normalized()
-		var bc := (b + c).normalized()
-		var ca := (c + a).normalized()
-		for t in [[a, ab, ca], [ab, b, bc], [ca, bc, c], [ab, bc, ca]]:
-			_tri(st, at + t[0] * r, at + t[2] * r, at + t[1] * r, col)
+## The weapon in hand (Weapons / WeaponArt): every piece is pinned to its hand bone in the hand's
+## T-pose frame; dual weapons (chain blades, strikers, repeaters) fill both hands. Its family picks
+## the idle stance (fists up for the strikers, pistols ready for the repeaters).
+func set_weapon(id: String) -> void:
+	for n in _weapon_nodes:
+		if is_instance_valid(n):
+			n.queue_free()
+	_weapon_nodes.clear()
+	weapon_id = id
+	idle_clip = String(Weapons.family(id).get("idle", "Sword_Idle"))
+	for piece in WeaponArt.build(id):
+		var bone := "hand_r" if piece.hand == "r" else "hand_l"
+		var i := skeleton.find_bone(bone)
+		if i < 0:
+			continue
+		var rest := skeleton.get_bone_global_rest(i)
+		var side := 1.0 if piece.hand == "r" else -1.0
+		var att := BoneAttachment3D.new()
+		att.bone_name = bone
+		skeleton.add_child(att)
+		_weapon_nodes.append(att)
+		var root := Node3D.new()
+		root.name = "Weapon"
+		att.add_child(root)
+		root.transform = rest.affine_inverse() * Transform3D(Basis.IDENTITY, rest.origin + Vector3(-0.07 * side, -0.01, 0.02))
+		var glow_mat := WeaponArt.material("glow:" + String(Weapons.element(id)))
+		for part in [["metal", WeaponArt.material("metal")], ["glow", glow_mat], ["grip", WeaponArt.material("grip")]]:
+			var mesh: Mesh = piece.get(part[0])
+			if mesh == null:
+				continue
+			var mi := MeshInstance3D.new()
+			mi.mesh = mesh
+			mi.material_override = part[1]
+			mi.layers = 2 | PORTRAIT_LAYER
+			root.add_child(mi)

@@ -80,8 +80,9 @@ static func damage(ctx: AbilityContext, b: Dictionary) -> void:
 	var hit: Dictionary = b.get("hit", {})
 	var d := ctx.make_damage(hit)
 	d.point = p
-	# a melee swing with a physical weapon cuts (part damage on a colossus)
-	d.cutting = d.type == Combat.Element.PHYSICAL
+	# a physical melee swing cuts (part damage on a colossus); weapon hits know their family
+	if not d.from_weapon:
+		d.cutting = d.type == Combat.Element.PHYSICAL
 	var crit := float(hit.get("critChance", 0.0))
 	var hits := 0
 	if int(b.get("shape", 0)) == 1:

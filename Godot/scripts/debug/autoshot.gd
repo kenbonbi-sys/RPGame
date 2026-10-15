@@ -4,7 +4,8 @@ extends Node
 ##   Godot.exe --path Godot -- --autoshot [--shots-dir D:/shots] [--autoshot-only climb]
 ## Exit code 0 = clean, 1 = errors in the log, 2 = ran out of time.
 ## Tours: "world" (village, forest, arena), "climb" (legs, kneel, back, stabs), "skills" (the bear's attacks),
-## "hunt" (parts, Trảm, breaking the head, Húc and the interrupt, staggered damage), "brawl".
+## "hunt" (parts, Trảm, breaking the head, Húc and the interrupt, staggered damage), "arsenal" (every
+## weapon's combo and heavy move, an element proc on the bear), "brawl".
 
 const TIMEOUT := 300.0
 
@@ -75,6 +76,8 @@ func _run() -> void:
 		await _skills()
 	if only == "" or only == "hunt":
 		await _hunt()
+	if only == "" or only == "arsenal":
+		await _arsenal()
 	if only == "" or only == "brawl":
 		await _brawl()
 	print("AUTOSHOT: %d shots in %s, %d errors, %.1f s" % [_taken, dir, counter.errors, Game.now() - _start])
@@ -392,6 +395,51 @@ func _shot_on_next_hit(shot_name: String) -> void:
 			while Game.now() < until:
 				await get_tree().process_frame
 			await _shot("%s_%d" % [shot_name, k + 1])
+
+
+## Every weapon in the armoury against the slimes: a basic combo, then its heavy move.
+func _arsenal() -> void:
+	var camp := WorldMap.tile(Vector2(47, 27.5))
+	for id in hero.weapons:
+		_put(camp + Vector2(-6, -3), camp)
+		hero.equip_weapon(id)
+		await _wait(0.6)
+		for i in 3:
+			_aim_at_nearest()
+			_press("attack")
+			await _wait(0.08)
+			_release("attack")
+			await _wait(0.3)
+		_aim_at_nearest()
+		_press("heavy")
+		await _wait(float(Weapons.family(id).heavy.charge) + 0.05)
+		_release("heavy")
+		await _wait(0.16)
+		await _shot("40_%s" % id.trim_prefix("w_"))
+		await _wait(0.6)
+	hero.equip_weapon(Weapons.START[0], false)
+	# the matchup on Gấu Ma (Terra): Shock blades proc Tê Liệt
+	bear.set_mode(GauMa.Mode.IDLE)
+	bear.respawn()
+	await _wait(0.6)
+	hero.equip_weapon("w_song_liem_loi_dieu")
+	var calf := bear.legs[0].lower.global_position
+	_put(WorldMap.map_of(calf - bear.global_basis.x * 2.4), WorldMap.map_of(calf))
+	await _wait(0.4)
+	for i in 10:
+		_face_point(calf)
+		_press("attack")
+		await _wait(0.08)
+		_release("attack")
+		await _wait(0.25)
+		if bear.mode == GauMa.Mode.STUNNED:
+			break
+	await _wait(0.2)
+	await _shot("41_te_liet")
+	print("AUTOSHOT: shock proc on Gấu Ma ", "yes" if bear.mode == GauMa.Mode.STUNNED else "no")
+	bear.set_mode(GauMa.Mode.IDLE)
+	bear.respawn()
+	hero.equip_weapon(Weapons.START[0], false)
 
 
 func _face_point(p: Vector3) -> void:

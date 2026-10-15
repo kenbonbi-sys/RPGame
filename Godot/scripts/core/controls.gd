@@ -31,6 +31,7 @@ const KEYS := {
 	"window_character": [KEY_B, KEY_I],
 	"window_bestiary": [KEY_J],
 	"window_spellbook": [KEY_K],
+	"switch_weapon": [KEY_V],
 	"track_quest": [KEY_TAB],
 }
 
@@ -48,6 +49,7 @@ const PAD := {
 	"dodge": [JOY_BUTTON_B],
 	"attack": [JOY_BUTTON_X],
 	"interact": [JOY_BUTTON_Y],
+	"switch_weapon": [JOY_BUTTON_DPAD_RIGHT],
 	"grip": [JOY_BUTTON_RIGHT_SHOULDER],
 	"look_boss": [JOY_BUTTON_LEFT_SHOULDER],
 	"pause": [JOY_BUTTON_START],

@@ -75,6 +75,9 @@ func make_damage(hit: Dictionary) -> DamageInfo:
 		power *= 1.0 + caster.imbue_power
 		status["charge"] = int(status.get("charge", 0)) + caster.imbue_charge
 	var type := int(hit.get("type", 0))
+	var weapon_hit := slot == 0 and caster.has_method("weapon_element_type")
+	if weapon_hit and type == Combat.Element.PHYSICAL:
+		type = caster.weapon_element_type()
 	var amount := power * ability.power_scale(level) * caster.stats.attack_for(type) * caster.damage_dealt_multiplier() * damage_multiplier
 	var d := DamageInfo.make(amount, Combat.Team.PLAYER, caster, point, dir, type, float(hit.get("knockback", 0.0)))
 	d.attack_scaled = true
@@ -84,6 +87,12 @@ func make_damage(hit: Dictionary) -> DamageInfo:
 	d.hit_stop = float(hit.get("hitStop", 0.0))
 	d.status = status
 	d.poise += caster.counter_poise(d.skill_name)
+	if weapon_hit:
+		d.from_weapon = true
+		d.poise *= caster.weapon_stagger()
+		var fam: Dictionary = caster.weapon_family()
+		d.cutting = fam.get("cut", false)
+		d.piercing = fam.get("pierce", false)
 	return d
 
 

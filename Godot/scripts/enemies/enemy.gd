@@ -36,6 +36,8 @@ const KNOCK_DECAY := 18.0
 @export var knockback_resist := 1.0
 @export var stun_resist := 1.0
 @export var resistances := PackedFloat32Array([0, 0, 0, 0, 0, 0, 0])
+## Dauntless element (Elements): what its opposite hits +50%, its own −20%.
+@export var element := ""
 @export var body_radius := 0.5
 @export var body_height := 1.0
 @export var head_height := 1.2
@@ -88,6 +90,7 @@ func _ready() -> void:
 	health.max_hp = max_hp
 	health.resistances = resistances
 	health.head_height = head_height
+	health.element = element
 	status = StatusEffects.new()
 	status.name = "Status"
 	status.stun_resist = stun_resist
@@ -115,6 +118,11 @@ func now() -> float:
 func set_state(s: State) -> void:
 	state = s
 	state_time = 0.0
+	if s == State.ATTACK and health:
+		# an attack under a Radiant mark detonates it and is cut short
+		var mark := RadiantMark.on(health)
+		if mark:
+			mark.detonate.call_deferred()
 
 
 func is_busy() -> bool:
@@ -379,6 +387,7 @@ func _on_damaged(d: DamageInfo, amount: float) -> void:
 		_flash_hold_until = maxf(_flash_hold_until, Game.now() + 0.06)
 		if _plate == null and Game.has_screen():
 			_plate = Nameplate.new()
+			_plate.element = element
 			_plate.setup(self, "%s · Cấp %d" % [display_name, level], head_height + 0.55)
 			add_child(_plate)
 

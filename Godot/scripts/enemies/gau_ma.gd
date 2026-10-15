@@ -115,6 +115,8 @@ const CHARGE_STOP := 0.9
 func _ready() -> void:
 	display_name = "Gấu Ma Rừng Già"
 	level = 6
+	# the old forest: Terra, so Shock weapons hit it hardest
+	element = "terra"
 	# BossBear's chest, one per hero who fought it
 	loot = [
 		{"item": "claw", "chance": 1.0, "min": 1, "max": 1},
@@ -332,6 +334,7 @@ static func _axis_basis(y: Vector3) -> Basis:
 
 # ================================================================== every frame
 func _physics_process(delta: float) -> void:
+	delta *= time_factor()
 	mode_time += delta
 	if mode != Mode.DEAD:
 		_think(delta)
@@ -806,6 +809,14 @@ func on_staggered() -> void:
 	skill_used.emit("Choáng!")
 
 
+## Shock's proc: paralysed, a short stagger.
+func proc_paralyse(seconds: float) -> void:
+	if mode == Mode.DYING or mode == Mode.DEAD or mode == Mode.KNEEL:
+		return
+	stun(seconds)
+	skill_used.emit("Tê Liệt!")
+
+
 func can_interrupt() -> bool:
 	return mode == Mode.CHARGE and _charge_open
 
@@ -860,6 +871,11 @@ func _charge(delta: float) -> void:
 		_goal_height = STAND_HEIGHT - 1.0 * S
 		_goal_head = Vector2(0, -0.6)
 		_head_free = false
+		if _once("mark"):
+			var mark := RadiantMark.on(health)
+			if mark:
+				# an Unstable Move under a Radiant mark: it detonates and interrupts
+				mark.detonate.call_deferred()
 		if Engine.get_physics_frames() % 10 == 0:
 			for leg in [legs[0], legs[1]]:
 				Fx.dust(leg.foot - Vector3.UP * 0.5 * S, 1.6 * S, 8)

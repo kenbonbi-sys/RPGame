@@ -29,6 +29,10 @@ const CHEST := 1.15
 @export var class_id := "fighter"
 @export var race_id := "human"
 @export var weapon_id := "sword"
+## The weapon in hand (Weapons.ARMORY): its family sets weapon_id (the Unity weapon behind it).
+@export var weapon_item := "w_kiem_hong_anh"
+## Every weapon the hero carries (V cycles them).
+var weapons: Array[String] = []
 @export var max_grip := 100.0
 @export var walk_speed := 2.2
 @export var run_speed := 5.4
@@ -119,11 +123,10 @@ var _stab_target: Node3D
 ## Trảm, the sword's heavy hit (right mouse): held to gather power, released to strike.
 var _heavy_charge := 0.0
 var _heavy_released := false
-var _heavy_struck := false
+var _heavy_struck := 0
 var _heavy_full := false
 
-const HEAVY_CHARGE_TIME := 0.9
-const HEAVY_REACH := 2.7
+
 var _roll_dir := Vector3.FORWARD
 var _knock_landed := -1.0
 
@@ -182,6 +185,8 @@ func _ready() -> void:
 				res.loop_mode = Animation.LOOP_LINEAR
 		play("Idle")
 	_build_components()
+	weapons.assign(Weapons.START)
+	equip_weapon(weapon_item, false)
 	grip = max_grip
 	add_to_group("heroes")
 	if not is_instance_valid(Game.hero):
@@ -358,6 +363,8 @@ func _locomotion(delta: float) -> void:
 	if not stunned and Input.is_action_just_pressed("heavy") and on_floor and action_remaining() <= 0.05:
 		_start_heavy()
 		return
+	if Input.is_action_just_pressed("switch_weapon") and action_remaining() <= 0.05 and weapons.size() > 1:
+		cycle_weapon()
 	if not stunned:
 		_skill_keys()
 
@@ -574,7 +581,10 @@ func begin_action(a: Ability, dir: Vector3) -> void:
 
 func _play_cast_anim(a: Ability) -> void:
 	var name_ := ""
-	if a.anim_base() == "attack":
+	if skills and a == skills.slots[0]:
+		var anims: Array = weapon_family().get("anims", SWINGS)
+		name_ = anims[combo_step % anims.size()]
+	elif a.anim_base() == "attack":
 		if a.has_tag(Ability.TAG_PROJECTILE):
 			name_ = "Throw" if not a.id.contains("arrow") and a.id != "piercing" and a.id != "multishot" else "1H_Ranged_Shoot"
 		elif a.has_tag(Ability.TAG_AREA) or a.has_tag(Ability.TAG_CHANNEL):
@@ -598,7 +608,8 @@ func _play_cast_anim(a: Ability) -> void:
 
 
 func _cast_anim_playing() -> bool:
-	return anim != null and anim.is_playing() and (_anim_name in SWINGS or _anim_name.begins_with("Spellcast") \
+	return anim != null and anim.is_playing() and (_anim_name in SWINGS or _anim_name in weapon_family().get("anims", []) \
+		or _anim_name.begins_with("Spellcast") \
 		or _anim_name in ["Throw", "1H_Ranged_Shoot", "2H_Melee_Attack_Spin", "1H_Melee_Attack_Chop"]) \
 		and anim.current_animation_position < anim.current_animation_length * 0.8
 
@@ -919,16 +930,65 @@ func _stab(delta: float) -> void:
 		_after_move(delta)
 
 
+# ================================================================== weapons
+## The family of the weapon in hand (Weapons.FAMILIES).
+func weapon_family() -> Dictionary:
+	return Weapons.family(weapon_item)
+
+
+## The combat element the weapon's blows deal (physical for neutral weapons).
+func weapon_element_type() -> int:
+	return Weapons.damage_type(weapon_item)
+
+
+## How much its blows stagger compared with a sword (blunt weapons more).
+func weapon_stagger() -> float:
+	return float(weapon_family().get("stagger", 1.0))
+
+
+## Takes a weapon in hand: its family's Unity weapon sets Attack and the basic combo, the model
+## changes, and the HUD says so.
+func equip_weapon(id: String, announce := true) -> void:
+	weapon_item = id if Weapons.ARMORY.has(id) else "w_kiem_hong_anh"
+	var fam := weapon_family()
+	weapon_id = String(fam.stat)
+	if stats:
+		stats.weapon_id = weapon_id
+		stats.recalculate()
+	if skills:
+		skills.apply_kit(class_id, weapon_id)
+	if model and model.has_method("set_weapon"):
+		model.set_weapon(weapon_item)
+	combo_step = 0
+	if announce and Game.has_screen():
+		var it := Weapons.item(weapon_item)
+		Game.log("Cầm %s · %s · %s" % [it.name, fam.name, Elements.display_name(it.element)], Elements.color(it.element),
+			"w:" + weapon_item)
+		Fx.burst(global_position + Vector3.UP * 1.2, Vector3.UP, Elements.color(it.element), 20, 3.0, 0.25, 0.5, 90.0, 0.0, true)
+	if anim and state == State.GROUND:
+		play("Idle", 0.15)
+
+
+func cycle_weapon() -> void:
+	var i := weapons.find(weapon_item)
+	equip_weapon(weapons[(i + 1) % weapons.size()])
+
+
 # ================================================================== Trảm, the heavy hit
-## 0..1 while gathering power for Trảm, -1 otherwise (the HUD draws it).
+## 0..1 while gathering power for the heavy move, -1 otherwise (the HUD draws it).
 func heavy_charge() -> float:
 	return _heavy_charge if state == State.HEAVY and not _heavy_released else -1.0
+
+
+func heavy_name() -> String:
+	return String(weapon_family().heavy.name)
 
 
 func _start_heavy() -> void:
 	var cam := Game.cam()
 	var dir: Vector3 = cam.forward_flat() if cam else facing
-	var target := Aim.soft_target(self, dir, 7.0)
+	var reach := float(weapon_family().heavy.reach)
+	var target := Aim.soft_target(self, dir, minf(30.0, reach + 4.0))
 	if target:
 		var to := target.aim_at(global_position) - global_position
 		to.y = 0.0
@@ -937,22 +997,24 @@ func _start_heavy() -> void:
 	facing = dir
 	_heavy_charge = 0.0
 	_heavy_released = false
-	_heavy_struck = false
+	_heavy_struck = 0
 	_heavy_full = false
 	set_state(State.HEAVY)
 
 
-## Held: the blade rises and gathers power (full in 0.9 s); released (or held 1.4 s): an overhead
-## cut that hits hard, staggers a lot and can interrupt a colossus's charge. Lướt cancels it.
+## Held: the weapon rises and gathers power (each family its own time to full); released (or held
+## 0.5 s past full): the family's heavy move. Lướt cancels it while it gathers.
 func _heavy(delta: float) -> void:
-	var a := "1H_Melee_Attack_Chop"
+	var h: Dictionary = weapon_family().heavy
+	var a := String(h.anim)
 	var wind := anim_length(a) * 0.3
+	var charge_time := float(h.charge)
 	if not _heavy_released:
 		if Input.is_action_just_pressed("dodge"):
 			set_state(State.GROUND)
 			skills.request(PlayerSkills.DASH_SLOT)
 			return
-		_heavy_charge = minf(1.0, _heavy_charge + delta / HEAVY_CHARGE_TIME)
+		_heavy_charge = minf(1.0, _heavy_charge + delta / charge_time)
 		hold(a, wind * (0.25 + 0.75 * _heavy_charge))
 		var cam := Game.cam()
 		if cam:
@@ -960,40 +1022,97 @@ func _heavy(delta: float) -> void:
 		if _heavy_charge >= 1.0 and not _heavy_full:
 			_heavy_full = true
 			if Game.has_screen():
-				Fx.flash(global_position + Vector3.UP * 1.6, Color(1.0, 0.9, 0.6), 3.0, 4.0)
-				Fx.burst(global_position + Vector3.UP * 1.8, Vector3.UP, Color(1.0, 0.9, 0.6, 1.0), 14, 3.0, 0.2, 0.4, 90.0, 0.0, true)
-		if not Input.is_action_pressed("heavy") or _state_time > 1.4:
+				var col := Elements.color(Weapons.element(weapon_item))
+				Fx.flash(global_position + Vector3.UP * 1.6, col, 3.0, 4.0)
+				Fx.burst(global_position + Vector3.UP * 1.8, Vector3.UP, col, 14, 3.0, 0.2, 0.4, 90.0, 0.0, true)
+		if not Input.is_action_pressed("heavy") or _state_time > charge_time + 0.5:
 			_heavy_released = true
 			_state_time = 0.0
 			anim.speed_scale = 1.5
 			anim.seek(wind, true)
 	else:
-		if not _heavy_struck and _state_time >= 0.13:
-			_heavy_struck = true
-			_heavy_strike(_heavy_charge)
-		if _state_time >= 0.55:
+		var hits := int(h.get("hits", 1))
+		var shape := String(h.shape)
+		if shape == "lunge" and _state_time < 0.18:
+			# the lunge carries the hero forward into the blow
+			var v := facing * float(h.lunge) / 0.18
+			velocity.x = v.x
+			velocity.z = v.z
+		while _heavy_struck < hits and _state_time >= 0.13 + 0.14 * _heavy_struck:
+			_heavy_strike(_heavy_charge, h)
+			_heavy_struck += 1
+		if _state_time >= 0.5 + 0.14 * (hits - 1):
 			anim.speed_scale = 1.0
 			set_state(State.GROUND)
 			return
-	velocity.x = move_toward(velocity.x, 0.0, 30.0 * delta)
-	velocity.z = move_toward(velocity.z, 0.0, 30.0 * delta)
+		if shape == "spin":
+			facing = facing.rotated(Vector3.UP, delta * 18.0)
+	if not (String(h.shape) == "lunge" and _heavy_released and _state_time < 0.18):
+		velocity.x = move_toward(velocity.x, 0.0, 30.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 30.0 * delta)
 	velocity.y -= gravity * delta
 	move_and_slide()
 	_after_move(delta)
 
 
-func _heavy_strike(c: float) -> void:
+## One blow of the heavy move: its shape decides where it lands (a cone ahead, a slam in front,
+## a spin around, a lunging thrust, or a charged shot).
+func _heavy_strike(c: float, h: Dictionary) -> void:
+	var fam := weapon_family()
+	var power: Array = h.power
+	var poise: Array = h.poise
+	var type := weapon_element_type()
 	var origin := global_position + Vector3.UP * 1.0 + facing * 0.6
-	var amount := stats.attack_for(Combat.Element.PHYSICAL) * (1.4 + 1.8 * c) * damage_dealt_multiplier()
-	var d := DamageInfo.make(amount, Combat.Team.PLAYER, self, origin, facing, Combat.Element.PHYSICAL, 6.0 + 4.0 * c)
+	var amount := stats.attack_for(type) * (float(power[0]) + float(power[1]) * c) * damage_dealt_multiplier()
+	var d := DamageInfo.make(amount, Combat.Team.PLAYER, self, origin, facing, type, 6.0 + 4.0 * c)
 	d.attack_scaled = true
 	d.source_level = level
-	d.skill_name = "Trảm"
-	d.poise = 30.0 + 50.0 * c
+	d.skill_name = String(h.name)
+	d.poise = float(poise[0]) + float(poise[1]) * c
 	d.hit_stop = 0.08 + 0.07 * c
 	d.heavy = true
-	d.cutting = true
-	var hits := Combat.damage_cone(get_world_3d(), origin, facing, HEAVY_REACH, 130.0, d, 0.1)
+	d.from_weapon = true
+	d.cutting = fam.get("cut", false)
+	d.piercing = fam.get("pierce", false)
+	var reach := float(h.reach)
+	var col := Elements.color(Weapons.element(weapon_item))
+	var hits := 0
+	match String(h.shape):
+		"slam":
+			var at := global_position + facing * 1.5 + Vector3.UP * 0.4
+			hits = Combat.damage_circle(get_world_3d(), at, reach, d, 0.1)
+			if Game.has_screen():
+				Fx.dust(at - Vector3.UP * 0.4, reach, 50)
+				Fx.burst(at, Vector3.UP, col, 30, 7.0, 0.3, 0.5, 70.0, -8.0, true, reach * 0.6)
+			Game.shake(0.3 + 0.2 * c)
+		"spin":
+			hits = Combat.damage_circle(get_world_3d(), global_position + Vector3.UP * 1.0, reach, d, 0.1)
+			SkillFx.play("whirl", global_position + Vector3.UP * 1.0, facing, 1.1)
+		"shot":
+			var cam := Game.cam()
+			var dir: Vector3 = facing
+			if cam and cam.cam:
+				dir = -cam.cam.global_basis.z
+				dir.y = clampf(dir.y, -0.25, 0.35)
+				dir = dir.normalized()
+			var shot := Shot.new()
+			shot.team = Combat.Team.PLAYER
+			shot.source = self
+			shot.speed = 46.0
+			shot.lifetime = reach / shot.speed
+			shot.radius = 0.35
+			shot.pierce = true
+			shot.color = col
+			shot.size = 0.32
+			shot.hit = d
+			get_parent().add_child(shot)
+			shot.launch(global_position + Vector3.UP * 1.35 + facing * 0.5, dir)
+			if Game.has_screen():
+				Fx.flash(global_position + Vector3.UP * 1.35 + facing * 0.6, col, 5.0, 5.0)
+			Game.kick(0.1)
+			return
+		_:
+			hits = Combat.damage_cone(get_world_3d(), origin, facing, reach, float(h.angle), d, 0.1)
 	SkillFx.play("slash", global_position + Vector3.UP * 1.1 + facing * 0.9, facing, 1.3 + 0.5 * c, true)
 	if hits > 0:
 		Game.shake(0.15 + 0.25 * c)

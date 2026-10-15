@@ -20,6 +20,7 @@ var _cap: Node3D
 func _init() -> void:
 	enemy_id = "shroom"
 	display_name = "Nấm Độc"
+	element = "umbral"
 	level = 3
 	max_hp = 48.0
 	move_speed = 1.9

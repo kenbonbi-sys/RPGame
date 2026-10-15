@@ -31,6 +31,7 @@ var _emblem: Emblem
 var _skills: Array[SkillSlot] = []
 var _potions: Array[PotionSlot] = []
 var _heavy: HeavyMeter
+var _weapon_tag: WeaponTag
 var _log: LogBox
 var _hint: Label
 var _area: Label
@@ -78,6 +79,8 @@ func _ready() -> void:
 		_place(root, s, Control.PRESET_CENTER_BOTTOM, Vector2(-bar_w * 0.5 + i * 78, -104), Vector2(70, 70))
 		_skills.append(s)
 
+	_weapon_tag = WeaponTag.new()
+	_place(root, _weapon_tag, Control.PRESET_CENTER_BOTTOM, Vector2(-bar_w * 0.5, -150), Vector2(330, 44))
 	_heavy = HeavyMeter.new()
 	_place(root, _heavy, Control.PRESET_CENTER_BOTTOM, Vector2(-110, -186), Vector2(220, 9))
 
@@ -157,6 +160,7 @@ func bind_hero(h: Node3D) -> void:
 	_frame.hero = h
 	_compass.hero = h
 	_heavy.hero = h
+	_weapon_tag.hero = h
 	for i in _skills.size():
 		_skills[i].skills = h.skills
 		_skills[i].index = i
@@ -454,6 +458,8 @@ class Compass:
 					_marker(strip, heading, c.global_position, Color(1.0, 0.36, 0.3), true)
 		if boss and is_instance_valid(boss) and boss.engaged and not boss.dead:
 			var title := String(boss.display_name).to_upper()
+			if String(boss.get("element")) != "":
+				title += "  ·  " + Elements.display_name(boss.element).to_upper()
 			draw_string_outline(Hud.FONT_XBOLD, Vector2(0, 64), title, HORIZONTAL_ALIGNMENT_CENTER, w, 22, 5, Color(0, 0, 0, 0.6))
 			draw_string(Hud.FONT_XBOLD, Vector2(0, 64), title, HORIZONTAL_ALIGNMENT_CENTER, w, 22, Color(1.0, 0.84, 0.66))
 			if _life_of != boss:
@@ -524,6 +530,35 @@ class Emblem:
 		draw_string(Hud.FONT_XBOLD, c + Vector2(-60, 0), txt, HORIZONTAL_ALIGNMENT_CENTER, 120, 34, Hud.TEXT)
 
 
+class WeaponTag:
+	extends Control
+	## The weapon in hand above the bar: its icon, name, family and element, and [V] to switch.
+	var hero: Node3D
+
+	func _process(_delta: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		if hero == null or not is_instance_valid(hero) or not ("weapon_item" in hero):
+			return
+		var id: String = hero.weapon_item
+		var it := Weapons.item(id)
+		var col := Elements.color(it.element)
+		Hud.slant(self, Rect2(Vector2(0, 4), Vector2(size.x, size.y - 8)), Color(0.03, 0.05, 0.07, 0.6), 10)
+		var icon := GameIcons.weapon(id, 64)
+		if icon:
+			draw_texture_rect(icon, Rect2(Vector2(6, 0), Vector2(size.y, size.y)), false)
+		var x := size.y + 10.0
+		var title := String(it.name).to_upper()
+		draw_string_outline(Hud.FONT_XBOLD, Vector2(x, 22), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 4, Color(0, 0, 0, 0.6))
+		draw_string(Hud.FONT_XBOLD, Vector2(x, 22), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Hud.TEXT)
+		var fam: Dictionary = Weapons.FAMILIES[it.family]
+		var sub := "%s · %s · Chuột phải: %s" % [fam.name, Elements.display_name(it.element), fam.heavy.name]
+		draw_string(Hud.FONT_SEMI, Vector2(x, 38), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
+		if hero.weapons.size() > 1:
+			draw_string(Hud.FONT_BOLD, Vector2(size.x - 34, 22), "[V]", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.6))
+
+
 class HeavyMeter:
 	extends Control
 	## Trảm gathering power: a bar that fills while the right mouse button is held, gold when full.
@@ -542,7 +577,8 @@ class HeavyMeter:
 		Hud.slant(self, r.grow(2), Color(0, 0, 0, 0.6), 8)
 		var col := Color(1.0, 0.82, 0.35) if c >= 1.0 else Color(0.95, 0.95, 0.9)
 		Hud.slant(self, Rect2(r.position, Vector2(r.size.x * c, r.size.y)), col, 8)
-		var label := "TRẢM · TỤ LỰC ĐẦY" if c >= 1.0 else "TRẢM"
+		var move := String(hero.heavy_name()).to_upper() if hero.has_method("heavy_name") else "TRẢM"
+		var label := move + " · TỤ LỰC ĐẦY" if c >= 1.0 else move
 		draw_string_outline(Hud.FONT_XBOLD, Vector2(0, -6), label, HORIZONTAL_ALIGNMENT_CENTER, size.x, 16, 4, Color(0, 0, 0, 0.6))
 		draw_string(Hud.FONT_XBOLD, Vector2(0, -6), label, HORIZONTAL_ALIGNMENT_CENTER, size.x, 16, col)
 

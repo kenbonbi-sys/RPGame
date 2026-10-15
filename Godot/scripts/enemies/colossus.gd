@@ -28,6 +28,8 @@ const FUR_SHADER := preload("res://shaders/fur.gdshader")
 @export var loot: Array[Dictionary] = []
 ## The Unity boss's numbers: life, and the stagger bar (Poise) with how long a stagger lasts.
 @export var max_hp := 3200.0
+## Dauntless element (Elements).
+@export var element := ""
 @export var max_stagger := 300.0
 @export var stagger_seconds := 6.0
 ## A stab into a weak point hurts its life this many times the stab.
@@ -111,6 +113,7 @@ func make_life() -> void:
 	health.display_name = display_name
 	health.level = level
 	health.max_hp = max_hp
+	health.element = element
 	health.team = Combat.Team.ENEMY
 	add_child(health)
 	health.damaged.connect(func(_d: DamageInfo, _a: float) -> void: health_changed.emit(health.hp, health.max_hp))
@@ -246,9 +249,10 @@ func after_hit(d: DamageInfo, amount: float) -> void:
 		interrupt(d.source)
 
 
-## Part damage per point of core damage: a blade cuts +50% (Dauntless slashing weapons).
+## Part damage per point of core damage: a blade cuts +50% (Dauntless slashing weapons), a pierce
+## +25%, blunt and spells 100%.
 static func part_multiplier(d: DamageInfo) -> float:
-	return PART_CUT if d.cutting else 1.0
+	return PART_CUT if d.cutting else (1.25 if d.piercing else 1.0)
 
 
 func break_part(part: Dictionary, at: Vector3) -> void:
@@ -269,6 +273,45 @@ func break_part(part: Dictionary, at: Vector3) -> void:
 	if cb.is_valid():
 		cb.call()
 	part_broken.emit(part)
+
+
+## Part damage to every breakable part within `radius` of `at` (an Umbral cyst bursting).
+func part_damage_area(at: Vector3, radius: float, amount: float) -> void:
+	for part in parts:
+		if not part.breakable or part.broken:
+			continue
+		var near := INF
+		for b in part.bodies:
+			for cs in b.get_children():
+				if cs is CollisionShape3D:
+					near = minf(near, _closest_on_shape(cs, at).distance_to(at))
+		if near <= radius:
+			part.hp = maxf(0.0, float(part.hp) - amount)
+			if Game.has_screen():
+				DamageNumbers.show(at + Vector3(randf_range(-0.5, 0.5), 0.6, randf_range(-0.5, 0.5)), str(roundi(amount)), "part", true)
+			if part.hp <= 0.0:
+				break_part(part, at)
+
+
+## Frost's proc: everything it does runs slower for a while.
+var slow_factor := 1.0
+var _slow_until := 0.0
+
+
+func proc_slow(seconds: float, amount: float) -> void:
+	slow_factor = 1.0 - amount
+	_slow_until = Game.now() + seconds
+
+
+func time_factor() -> float:
+	if slow_factor < 1.0 and Game.now() >= _slow_until:
+		slow_factor = 1.0
+	return slow_factor
+
+
+## Umbral's proc: a cyst on one of its parts.
+func proc_cyst(threshold: float, by: Node) -> void:
+	UmbralCyst.grow(self, threshold, by)
 
 
 ## A light blink of white over its whole hide (a full white flash on something this big blinds

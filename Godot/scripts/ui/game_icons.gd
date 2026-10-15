@@ -107,6 +107,12 @@ const MOTIFS := {
 	"bread": [["f", "M10 64 C 10 36, 30 22, 50 22 C 70 22, 90 36, 90 64 L90 72 C 90 78, 86 80, 80 80 L20 80 C 14 80, 10 78, 10 72 Z"], ["d", "M30 38 L38 54 M48 34 L54 52 M66 38 L70 54", 3.5]],
 	"shell": [["f", "M10 70 C 10 36, 30 14, 50 14 C 70 14, 90 36, 90 70 C 76 82, 24 82, 10 70 Z"], ["d", "M50 14 L50 78 M30 22 L36 76 M70 22 L64 76 M12 50 L88 50", 3.0]],
 	"scale": [["f", "M50 8 C 72 20, 84 44, 80 70 C 72 88, 28 88, 20 70 C 16 44, 28 20, 50 8 Z"], ["d", "M50 20 C 40 40, 40 60, 50 80", 3.0]],
+	"pike": [["f", "M47 30 L53 30 L53 98 L47 98 Z"], ["f", "M50 2 C 62 14, 62 26, 50 38 C 38 26, 38 14, 50 2 Z"],
+		["f", "M36 32 L64 32 L60 39 L40 39 Z"], ["d", "M50 8 L50 32", 2.5]],
+	"sickle": [["f", "M30 94 L39 94 L41 62 L32 62 Z"], ["f", "M33 63 C 28 40, 40 14, 66 7 C 86 3, 94 18, 87 25 C 75 18, 58 22, 50 37 C 44 47, 42 56, 42 63 Z"],
+		["d", "M44 52 C 48 36, 60 24, 76 18", 2.5]],
+	"pistol": [["f", "M10 30 L82 30 L82 45 L42 45 L38 60 L46 90 L28 94 L18 62 L10 45 Z"], ["f", "M82 33 L96 33 L96 42 L82 42 Z"],
+		["d", "M20 38 L74 38", 2.5], ["c", "M56 33 A 4 4 0 1 0 56.01 33 Z"]],
 	"rays": [["s", "M50 2 L50 22 M50 78 L50 98 M2 50 L22 50 M78 50 L98 50 M16 16 L30 30 M70 70 L84 84 M84 16 L70 30 M30 70 L16 84", 7.0],
 		["s", "M50 30 A 20 20 0 1 0 50.01 30", 5.0]],
 	"horn": [["f", "M14 90 C 18 50, 44 20, 90 8 C 66 30, 50 56, 40 92 Z"], ["d", "M26 66 L44 72 M36 46 L54 52 M50 30 L66 36", 3.0]],
@@ -262,8 +268,34 @@ static func skill(a: Ability, px := 96) -> Texture2D:
 	return icon("skill:" + a.id, recipe, kind, px)
 
 
-## Loot and log icons: "coin", "xp", "kill", "level", or an item id.
+const ELEMENT_KINDS := {"neutral": "blade", "blaze": "fire", "frost": "ice", "shock": "bolt", "terra": "poison",
+	"radiant": "holy", "umbral": "dark"}
+const FAMILY_ICONS := {
+	"sword": [["sword", "main", 50, 50, 0.9, 45]],
+	"axe": [["axe", "main", 50, 50, 0.9, 20]],
+	"hammer": [["hammer", "main", 50, 50, 0.9, -20]],
+	"chain_blades": [["sickle", "main", 40, 52, 0.75, -10], ["sickle", "main", 62, 50, 0.75, 20]],
+	"war_pike": [["pike", "main", 50, 50, 0.95, 40]],
+	"aether_strikers": [["fist", "main", 50, 52, 0.85, 0]],
+	"repeaters": [["pistol", "main", 46, 56, 0.8, -15], ["pistol", "back", 58, 42, 0.6, -15]],
+}
+
+
+## A weapon's icon: its family's shape in its element's colour.
+static func weapon(id: String, px := 64) -> Texture2D:
+	var it := Weapons.item(id)
+	return icon("weapon:" + id, FAMILY_ICONS.get(it.family, FAMILY_ICONS.sword), ELEMENT_KINDS.get(it.element, "blade"), px)
+
+
+## An element's own icon (flame, snowflake, bolt, leaf, sun, moon).
+static func element(e: String, px := 48) -> Texture2D:
+	return icon("element:" + e, [[Elements.ALL.get(e, Elements.ALL.neutral).icon, "main", 50, 50, 0.9, 0]], ELEMENT_KINDS.get(e, "blade"), px)
+
+
+## Loot and log icons: "coin", "xp", "kill", "level", "w:<weapon>", or an item id.
 static func item(id: String, px := 64) -> Texture2D:
+	if id.begins_with("w:"):
+		return weapon(id.substr(2), px)
 	var r := _item_recipe(id)
 	return icon("item:" + id, r[0], r[1], px)
 

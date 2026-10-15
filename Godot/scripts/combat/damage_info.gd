@@ -37,6 +37,10 @@ var lift := 0.0
 var heavy := false
 ## A blade's cut: +50% part damage on a colossus's breakable parts (Dauntless slashing weapons).
 var cutting := false
+## Dealt by the hero's weapon (basic combo, Trảm): fills the target's element meter (Elements).
+var from_weapon := false
+## A pierce (war pike, repeaters): +25% part damage on a colossus.
+var piercing := false
 
 
 static func make(amount: float, team: int, source: Node, point: Vector3, direction: Vector3,
@@ -57,7 +61,7 @@ func copy() -> DamageInfo:
 	var d := DamageInfo.new()
 	for p in ["amount", "type", "source_team", "source", "point", "direction", "knockback", "crit", "hit_stop",
 			"poise", "skill_name", "source_level", "attack_scaled", "pure", "contact", "dot", "feedback", "knockdown", "lift",
-			"heavy", "cutting"]:
+			"heavy", "cutting", "from_weapon", "piercing"]:
 		d.set(p, get(p))
 	d.status = status.duplicate()
 	return d

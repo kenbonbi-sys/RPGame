@@ -8,6 +8,8 @@ extends Node3D
 const WIDTH := 1.3
 
 var health: Health
+## Dauntless element shown after the name.
+var element := ""
 var _label: Label3D
 var _bar_root: Node3D
 var _fill: MeshInstance3D
@@ -23,7 +25,7 @@ func setup(owner_body: Node3D, text: String, height: float) -> void:
 	health = owner_body.get("health")
 	position = Vector3.UP * height
 	_label = Label3D.new()
-	_label.text = text
+	_label.text = text + ("  ·  " + Elements.display_name(element) if element != "" else "")
 	_label.font = load("res://assets/fonts/BarlowCondensed-Bold.ttf")
 	_label.fixed_size = true
 	_label.pixel_size = 0.0007

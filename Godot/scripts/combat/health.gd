@@ -26,6 +26,9 @@ signal evaded(d: DamageInfo)
 ## Height of the head above the origin (damage numbers, status words).
 @export var head_height := 1.6
 @export var show_damage_numbers := true
+## Dauntless element of the creature ("" = none): weapons of the opposing element hit it +50%,
+## of its own −20%, and its own element never procs on it (Elements).
+@export var element := ""
 
 var hp := 100.0
 var damage_taken_multiplier := 1.0
@@ -34,6 +37,9 @@ var is_dead := false
 var last_damage_time := -100.0
 ## Heroes who hurt it (kill credit, shared XP and loot).
 var attackers: Array[Node] = []
+## Element meters filled by weapon hits, and when each element may proc again.
+var proc_meter := {}
+var proc_ready_at := {}
 
 ## Optional hooks: evade(d) -> true to miss; endure() -> true to survive at 1; guard(d) -> multiplier.
 var evade: Callable
@@ -96,6 +102,8 @@ func reset_health(new_max := -1.0) -> void:
 	is_dead = false
 	invulnerable = false
 	attackers.clear()
+	proc_meter.clear()
+	proc_ready_at.clear()
 
 
 ## Changes max HP keeping the same fraction.
@@ -149,6 +157,7 @@ func take_damage(d: DamageInfo) -> float:
 		if guard.is_valid() and not d.dot:
 			raw *= maxf(0.0, guard.call(d))
 		raw = raw * (1.0 - armor_reduction(armor, _attacker_level(d))) * (1.0 - resistance(d.type)) * spread()
+		raw *= Elements.matchup(d.type, element)
 		amount = maxf(1.0, Combat.round_half_even(raw))
 	if amount >= hp and hp > 1.0 and endure.is_valid() and endure.call():
 		amount = hp - 1.0
@@ -164,6 +173,8 @@ func take_damage(d: DamageInfo) -> float:
 	if hp <= 0.0:
 		is_dead = true
 		died.emit(d)
+	else:
+		Elements.on_hit(self, d, amount)
 	return amount
 
 

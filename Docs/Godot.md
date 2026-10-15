@@ -18,7 +18,8 @@ Project nằm trong `Godot/`. Code viết bằng **GDScript** (máy chưa có .N
 | **Chuột trái** | Đòn thường của vũ khí (kiếm: combo Chém Gió 3 đòn). Khi đang bám hoặc đứng trên lưng colossus: giữ để vung kiếm, thả để đâm (giữ càng lâu càng đau) |
 | **1 2 3 4 5** · **R** | 5 chiêu của lớp nhân vật · Tuyệt kỹ (bản Unity: W E R A S · D) |
 | **Z X C** | Bình Máu · Bình Năng Lượng · Thuốc Thảo Mộc (bản Unity: 1 2 3) |
-| **Chuột phải** | **Trảm**, đòn nặng của kiếm: giữ để tụ lực (đầy sau 0,9 s, thanh tụ lực hiện trên thanh chiêu), thả để chém bổ xuống. Lướt huỷ được lúc đang tụ |
+| **Chuột phải** | **Đòn nặng** của vũ khí đang cầm (kiếm: Trảm): giữ để tụ lực (thanh tụ lực hiện trên thanh chiêu), thả để ra đòn. Lướt huỷ được lúc đang tụ |
+| **V** | Đổi sang vũ khí kế tiếp (tay cầm: phải của D-pad) |
 | **Giữ E** | Bám: túm lông colossus hoặc đá có thể bám, leo bằng WASD (trước đây là chuột phải) |
 | **Q** / chuột giữa | Quay camera nhìn về phía boss |
 | **F1** · **F3** · **Esc** | Bảng phím · thông số (FPS, trạng thái) · nhả chuột |
@@ -92,6 +93,37 @@ Font **Barlow Condensed** (SemiBold, Bold, ExtraBold), khung xiên như Dauntles
 **Biểu tượng** (`game_icons.gd`): khoảng 70 hình vẽ bằng đường SVG trong khung 100 × 100 (kiếm, rìu, dao găm, cung tên, khiên, tim, lửa, bông tuyết, tia sét, đầu lâu, trăng, mặt trời, mắt, bàn tay, nắm đấm, cánh, ủng, vòng xoáy, nốt nhạc, lá, dây gai, xúc tu, quả cầu, sao chổi, mũi lướt, sóng âm, giọt, bẫy, mây, cột sáng, bình thuốc, đá quý, đồng vàng...). Mỗi chiêu trong 92 chiêu có công thức riêng theo id (`SKILLS`, trùng tên sprite `sk_<id>` của bản Unity): một hình chính sáng màu, viền tối, quầng sáng theo hệ, cộng một hình nền cùng màu hệ phía sau (Chém Gió = kiếm + vệt chém, Xung Phong = khiên + mũi lướt, Bão Kiếm = ba thanh kiếm trong vòng xoáy...). Vật phẩm lấy hình theo id (bình thuốc theo màu, gel, nấm, cỏ, đá quý, giáp, ủng, bí kíp mang màu hệ của chiêu...). Godot vẽ SVG thành ảnh lúc chạy (`Image.load_svg_from_string`) và giữ lại. Xem cả bộ: `Godot_console.exe --headless --path Godot res://tools/icon_sheet.tscn -- --out D:/icons.png`.
 - **Bảng tên quái** (`nameplate.gd`): cả bảng xoay theo camera nên nền và thanh máu luôn khớp nhau. Số sát thương dùng Barlow ExtraBold.
 - **Thanh máu biết đau** (`juicy_bar.gd`, dùng cho thanh máu hero, thanh máu boss dưới la bàn và bảng tên quái): không nhảy ngay tới giá trị mới mà rút dần trong 0,75 s; một bóng mờ màu kem giữ nguyên chỗ cũ 0,4 s rồi rút theo, cho thấy vừa mất bao nhiêu; lúc trúng đòn thanh loé trắng và bị xô ngang rồi rung tắt dần; màu chuyển sang hổ phách khi còn 50% máu, đỏ khi còn 25%. Màu lúc khoẻ: hero xanh ngọc, quái và boss xanh lá.
+
+## Vũ khí kiểu Dauntless (`weapons.gd`, `weapon_art.gd`)
+
+Bảy họ vũ khí của Dauntless, mỗi họ đứng trên một vũ khí của bản Unity (`PlayerStats.WEAPONS` giữ Tấn công và combo đòn thường, nên số liệu vẫn một nguồn). Họ quyết định đòn trúng colossus thế nào, hoạt ảnh combo, tư thế đứng và đòn nặng chuột phải:
+
+| Họ | Vũ khí Unity · đòn thường | Đòn nặng (giữ chuột phải) | Kiểu |
+|---|---|---|---|
+| Kiếm | sword · Chém Gió | Trảm: chém bổ, nón 2,7 m | chém (+50% bộ phận) |
+| Rìu | axe · Bổ Rìu | Bổ Núi: tụ 1,2 s, 1,8–4,2× Tấn công, nón rộng 3 m | chém |
+| Búa | mace · Nện | Nện Aether: đập đất trước mặt, vùng 3,2 m, trấn áp 70–180 | cùn (trấn áp ×1,6) |
+| Song Liêm | dagger · Đâm Nhanh | Lốc Liêm: xoay 3 vòng quanh mình | chém, trấn áp ×0,8 |
+| Thương | spear · Đâm Thẳng | Xuyên Phá: lao tới 3,2 m rồi đâm, tầm 4,4 m | đâm (+25% bộ phận) |
+| Găng Aether | fist · Liên Quyền | Quyền Aether: lao 2,6 m, cú đấm trấn áp 60–140 | cùn (trấn áp ×1,6) |
+| Súng Ostia | bow · Bắn Tên | Phát Tụ Lực: viên đạn xuyên 30 m | đâm, trấn áp ×0,7 |
+
+Mọi đòn nặng đều là đòn nặng (gián đoạn được Húc nếu trúng đầu). Đòn thường và đòn nặng của vũ khí mang nguyên tố của vũ khí và nạp thanh nguyên tố (xem dưới). Mô hình dựng từng mặt như thanh kiếm: thép vát cạnh sáng, gỗ, vàng, và phần phát sáng màu nguyên tố (rãnh lưỡi, mép rìu, lõi búa, vòng thương, ngọc găng, vòng nòng súng); song liêm, găng và súng cầm hai tay. Găng đứng thủ quyền, súng đứng cầm súng. Xem cả giá vũ khí: `--path Godot res://tools/model_shots.tscn -- --model rack --shots-dir D:/shots`.
+
+Hero mang sẵn kho bảy món (một họ cho mỗi nguyên tố) cho tới khi có lò rèn: Kiếm Hồng Anh (Vô Hệ), Rìu Hoả Ngục (Hoả), Búa Băng Phong (Băng), Song Liêm Lôi Điểu (Lôi), Thương Mộc Lâm (Thổ), Găng Thánh Quang (Quang), Súng Hư Ảnh (Ám). HUD có thẻ vũ khí trên thanh chiêu (biểu tượng, tên, họ, nguyên tố, tên đòn nặng, [V]).
+
+## Nguyên tố (`elements.gd`)
+
+Sáu nguyên tố của Dauntless, đi trên nguyên tố chiến đấu sẵn có: Hoả = Lửa, Băng = Băng, Lôi = Lôi, **Thổ** (mới, chỉ bản 3D), Quang = Thánh Mộc, Ám = Ám. Cặp đối nghịch: Hoả ↔ Băng, Lôi ↔ Thổ, Quang ↔ Ám. Đòn mang nguyên tố đối nghịch với quái mạnh hơn **+50%**, cùng nguyên tố với quái yếu đi **−20%** (Dauntless: "rất mạnh" và "hơi yếu"; wiki không đọc được nên chọn số này). Áp cho mọi sát thương của các hệ đó, cả chiêu. Quái: Slime Rêu và Gấu Ma là Thổ (vũ khí Lôi khắc), Nấm Độc là Ám (vũ khí Quang khắc). Nguyên tố hiện sau tên trên bảng tên quái và tên boss.
+
+**Kích hoạt** (proc): đòn của vũ khí nạp thanh nguyên tố trên mục tiêu; đủ 12% máu của nó (ít nhất 30) thì kích hoạt, 6 s mới kích hoạt lại được; không bao giờ kích hoạt trên quái cùng nguyên tố:
+
+- **Hoả · Thiêu Đốt:** cháy 3 tầng (sát thương theo thời gian).
+- **Băng · Băng Giá:** chậm 45% trong 5 s; colossus làm mọi thứ chậm lại (bước, chiêu, quay đầu).
+- **Lôi · Tê Liệt:** quái choáng 2 s; colossus choáng 2,5 s và nhận sát thương lúc choáng.
+- **Thổ · Mầm Sống:** rơi 3 quả cầu xanh quanh mục tiêu, chạm vào hồi 12% máu (15 s).
+- **Quang · Ấn Quang:** dấu mặt trời trên đầu 12 s; nếu quái ra Chiêu Bất Ổn (Húc của Gấu Ma) hay quái nhỏ ra đòn thì dấu nổ, gây ít sát thương và **gián đoạn** nó; không thì nổ nhẹ khi hết giờ.
+- **Ám · Nang Ám:** trên colossus mọc một nang tím trên một bộ phận ngẫu nhiên trong 30 s (máu bằng 4% của colossus); mỗi đòn trúng nang nổ sát thương bộ phận quanh nó, phá nang thì nổ to (sát thương Ám vào colossus và sát thương bộ phận nặng). Trên quái nhỏ: một cục tối phình 3 s rồi nổ, đánh mọi quái trong 3,5 m.
 
 ## Cảm giác đòn đánh
 
@@ -185,8 +217,8 @@ Cao khoảng 10 m tới đỉnh đầu, dài khoảng 17 m (`GauMa.S = 0,8` mét
 
 ## Kiểm tra
 
-- **Test** (khoảng 30 s, 162 kiểm tra): `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot res://tests/test_runner.tscn`. Mã thoát 0 là đạt. Gồm bố cục thế giới, đất đã bake, giải IK, phím, điểm yếu/quỵ gối/ngã/hồi sinh, sát thương rơi, **leo chân gấu có vật lý thật**, giới hạn số đá; công thức sát thương (đúng ví dụ trong test Unity: Cầu Lửa 56 vào điểm yếu Lửa ra 73, có giáp ra 64), bảng XP, chỉ số cấp 1 của 9 lớp, các trạng thái, Trấn Áp, khống chế lặp lại, hero chém chết slime, Cầu Lửa gây Bỏng, bào tử làm chậm, Lướt Hoàn Hảo, Dậm Đất không đẩy hero xuống dưới đất ở cả năm chỗ đứng quanh chân gấu; máu chung, sát thương bộ phận +50% của lưỡi kiếm, chân vỡ ở đúng ngưỡng rồi chỉ còn sát thương gốc, điểm yếu ×3 và +8%, thanh choáng (đầu ×2), +50% lúc choáng, Húc chỉ bị Trảm trúng đầu gián đoạn, đầu khi lao hạ trong tầm với, Trảm đầy lực gây khoảng 3,2 lần Tấn công, thanh máu rút trong 0,75 s với bóng mờ trễ 0,4 s và đổi màu ở 50% / 25%.
-- **AutoShot** (khoảng 115 s, mở cửa sổ): `Godot_v4.7.2-stable_win64_console.exe --path Godot -- --autoshot --shots-dir D:/shots [--autoshot-only world|forest|climb|skills|hunt|brawl]`. Tour `hunt`: số vàng trên chân, tụ lực Trảm, Trảm, vỡ đầu, Húc với tia sáng, gián đoạn bằng Trảm thật (giữ rồi thả chuột phải đúng lúc), số cam lúc choáng. Tour `forest` có thêm ảnh đúng khung trúng đòn, thanh máu quái đang rút và thanh máu hero sau một đòn mạnh. Chụp 39 cảnh (làng, hai góc nhà trong làng, rừng, đấu trường; bãi slime, Chém Gió, đồ rơi, Chém Xoáy, Nấm Độc bắn, Cầu Lửa, Lôi Phạt; bám chân, đâm, quỵ gối, trên lưng, lắc mình, Dậm Đất, Ném Đá, Chụp Quăng và Choáng), rồi để gấu tự đánh 40 s. Mã 0 là sạch, 1 là có lỗi trong log, 2 là quá giờ.
+- **Test** (khoảng 40 s, 212 kiểm tra): `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot res://tests/test_runner.tscn`. Mã thoát 0 là đạt. Gồm bố cục thế giới, đất đã bake, giải IK, phím, điểm yếu/quỵ gối/ngã/hồi sinh, sát thương rơi, **leo chân gấu có vật lý thật**, giới hạn số đá; công thức sát thương (đúng ví dụ trong test Unity: Cầu Lửa 56 vào điểm yếu Lửa ra 73, có giáp ra 64), bảng XP, chỉ số cấp 1 của 9 lớp, các trạng thái, Trấn Áp, khống chế lặp lại, hero chém chết slime, Cầu Lửa gây Bỏng, bào tử làm chậm, Lướt Hoàn Hảo, Dậm Đất không đẩy hero xuống dưới đất ở cả năm chỗ đứng quanh chân gấu; máu chung, sát thương bộ phận +50% của lưỡi kiếm, chân vỡ ở đúng ngưỡng rồi chỉ còn sát thương gốc, điểm yếu ×3 và +8%, thanh choáng (đầu ×2), +50% lúc choáng, Húc chỉ bị Trảm trúng đầu gián đoạn, đầu khi lao hạ trong tầm với, Trảm đầy lực gây khoảng 3,2 lần Tấn công, thanh máu rút trong 0,75 s với bóng mờ trễ 0,4 s và đổi màu ở 50% / 25%; nguyên tố khắc +50% / cùng hệ −20%, sáu kiểu kích hoạt trên quái nhỏ và trên Gấu Ma (Lôi làm choáng, Băng làm chậm, Ám mọc nang nổ ra sát thương bộ phận, Quang làm Húc tự gián đoạn), chỉ đòn vũ khí mới kích hoạt, không kích hoạt trên quái cùng hệ, bảy họ vũ khí đúng đòn thường và số món cầm, đòn nặng của cả bảy họ đều trúng.
+- **AutoShot** (khoảng 145 s, mở cửa sổ): `Godot_v4.7.2-stable_win64_console.exe --path Godot -- --autoshot --shots-dir D:/shots [--autoshot-only world|forest|climb|skills|hunt|arsenal|brawl]`. Tour `hunt`: số vàng trên chân, tụ lực Trảm, Trảm, vỡ đầu, Húc với tia sáng, gián đoạn bằng Trảm thật (giữ rồi thả chuột phải đúng lúc), số cam lúc choáng. Tour `arsenal`: bảy vũ khí, mỗi món một combo và đòn nặng vào slime, rồi Song Liêm Lôi Điểu đánh Gấu Ma Thổ. Tour `forest` có thêm ảnh đúng khung trúng đòn, thanh máu quái đang rút và thanh máu hero sau một đòn mạnh. Chụp 47 cảnh (làng, hai góc nhà trong làng, rừng, đấu trường; bãi slime, Chém Gió, đồ rơi, Chém Xoáy, Nấm Độc bắn, Cầu Lửa, Lôi Phạt; bám chân, đâm, quỵ gối, trên lưng, lắc mình, Dậm Đất, Ném Đá, Chụp Quăng và Choáng), rồi để gấu tự đánh 40 s. Mã 0 là sạch, 1 là có lỗi trong log, 2 là quá giờ.
 - Chạy nhanh không cần cửa sổ: `--headless --path Godot --quit-after 200`.
 
 ## Lộ trình chuyển cả game

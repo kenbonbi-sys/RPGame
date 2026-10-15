@@ -33,7 +33,7 @@ static func show(pos: Vector3, text: String, kind := "normal", big := false) -> 
 	l.font = FONT
 	l.font_size = 52
 	l.outline_size = 14
-	l.modulate = COLORS.get(kind, COLORS.normal)
+	l.modulate = Elements.color(kind.trim_prefix("proc_")) if kind.begins_with("proc_") else COLORS.get(kind, COLORS.normal)
 	l.outline_modulate = Color(0, 0, 0, 0.75)
 	l.render_priority = 10
 	l.layers = 2

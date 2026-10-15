@@ -22,6 +22,7 @@ func _ready() -> void:
 	await _run("thrown rocks are capped", _test_boulder_cap)
 	await _run("the stomp keeps heroes on the land", _test_stomp_keeps_hero)
 	await preload("res://tests/combat_tests.gd").new(self).run_all()
+	await preload("res://tests/weapon_tests.gd").new(self).run_all()
 	print("\n%d checks, %d failed" % [checks, failures.size()])
 	for f in failures:
 		print("  FAIL ", f)

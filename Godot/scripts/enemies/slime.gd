@@ -20,6 +20,7 @@ var _body: Node3D
 func _init() -> void:
 	enemy_id = "slime"
 	display_name = "Slime Rêu"
+	element = "terra"
 	level = 2
 	max_hp = 60.0
 	move_speed = 2.6
