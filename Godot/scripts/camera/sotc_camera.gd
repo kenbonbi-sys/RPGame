@@ -82,6 +82,21 @@ func add_trauma(amount: float) -> void:
 	_trauma = clampf(_trauma + amount, 0.0, 1.0)
 
 
+var _kick := 0.0
+var _kick_at := 0.0
+const KICK_TIME := 0.09
+
+
+## A jolt that lasts about five frames of real time (it keeps going through a hit-stop).
+func kick(amount: float) -> void:
+	_kick = maxf(_kick * _kick_left(), amount)
+	_kick_at = Game.now()
+
+
+func _kick_left() -> float:
+	return clampf(1.0 - (Game.now() - _kick_at) / KICK_TIME, 0.0, 1.0)
+
+
 ## Camera-relative directions on the ground, for the hero's movement.
 func forward_flat() -> Vector3:
 	return Vector3(-sin(yaw), 0.0, -cos(yaw))
@@ -202,4 +217,8 @@ func _apply() -> void:
 	var t := Game.now() * 30.0
 	cam.h_offset = _noise.get_noise_2d(t, 0.0) * 0.35 * s
 	cam.v_offset = _noise.get_noise_2d(0.0, t) * 0.35 * s
+	var k := _kick * _kick_left()
+	if k > 0.0:
+		cam.h_offset += randf_range(-1.0, 1.0) * k
+		cam.v_offset += randf_range(-1.0, 1.0) * k
 	cam.rotation = Vector3(0.0, 0.0, _noise.get_noise_2d(t, t) * 0.05 * s)

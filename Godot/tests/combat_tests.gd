@@ -24,6 +24,7 @@ func run_all() -> void:
 	await t._run("Cầu Lửa burns, Nấm Độc spores slow", fireball_and_spores)
 	await t._run("Lướt Hoàn Hảo", perfect_dodge)
 	await t._run("Trảm: the heavy hit on the right button", heavy_hit)
+	await t._run("a life bar that feels the hit", juicy_bar)
 
 
 func _flat_ground() -> StaticBody3D:
@@ -300,3 +301,29 @@ func heavy_hit() -> void:
 	for c in [hero, slime, ground]:
 		c.queue_free()
 	await t._frames(2)
+
+
+func juicy_bar() -> void:
+	var b := JuicyBar.new(1.0)
+	b.update(1.0, 0.016)
+	b.update(0.6, 0.0)
+	check(is_equal_approx(b.fill, 1.0) and is_equal_approx(b.ghost, 1.0), "on the hit nothing has moved yet")
+	check(b.flash() > 0.9 and absf(b.shove()) > 0.5, "it flashes and is shoved")
+	for i in 23:
+		b.update(0.6, 0.016)
+	check(b.fill < 0.75 and b.fill > 0.6, "the fill is draining (%.2f after 0.37 s)" % b.fill)
+	check(is_equal_approx(b.ghost, 1.0), "the ghost still holds the old value before 0.4 s")
+	for i in 30:
+		b.update(0.6, 0.016)
+	check(absf(b.fill - 0.6) < 0.001, "the fill reached the new value by 0.75 s")
+	check(b.ghost > 0.6 and b.ghost < 1.0, "the ghost is draining after it (%.2f)" % b.ghost)
+	for i in 60:
+		b.update(0.6, 0.016)
+	check(absf(b.ghost - 0.6) < 0.001, "and catches up")
+	check(b.color(Color.GREEN) == Color.GREEN and absf(b.shove()) < 0.001, "healthy colour above half, no shove later")
+	b.update(0.45, 0.5)
+	b.update(0.45, 0.5)
+	check(b.color(Color.GREEN) == JuicyBar.AMBER, "amber at half life")
+	b.update(0.2, 0.5)
+	b.update(0.2, 0.5)
+	check(b.color(Color.GREEN) == JuicyBar.RED, "red at a quarter")

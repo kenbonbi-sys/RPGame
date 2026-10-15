@@ -1033,6 +1033,7 @@ func _on_damaged(d: DamageInfo, amount: float) -> void:
 	if d.dot or is_dead():
 		return
 	hurt.emit(amount)
+	Sfx.play("whack_hero", global_position + Vector3.UP, -2.0 + minf(6.0, amount / 10.0), randf_range(0.95, 1.05))
 	if chill_attackers > 0 and d.source and is_instance_valid(d.source) and d.source is Node3D \
 			and (d.source as Node3D).global_position.distance_to(global_position) <= 3.0 * AbilityRunner.SPACE:
 		var sh := Combat.health_of(d.source)

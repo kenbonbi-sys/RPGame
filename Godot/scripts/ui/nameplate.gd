@@ -2,15 +2,19 @@ class_name Nameplate
 extends Node3D
 ## "Slime Rêu · Cấp 2" and a small life bar over a monster, shown once it has been hit. The whole
 ## plate turns to face the camera as one piece (billboarding each part on its own pulled the fill
-## away from its frame).
+## away from its frame). The bar is a JuicyBar: it drains, a ghost trails what was lost, it flashes
+## and jolts sideways on a hit, and goes amber at half life, red at a quarter.
 
 const WIDTH := 1.3
 
 var health: Health
 var _label: Label3D
+var _bar_root: Node3D
 var _fill: MeshInstance3D
 var _lag: MeshInstance3D
-var _lag_value := 1.0
+var _fill_mat: StandardMaterial3D
+var _lag_mat: StandardMaterial3D
+var _life: JuicyBar
 
 static var _mats := {}
 
@@ -30,9 +34,17 @@ func setup(owner_body: Node3D, text: String, height: float) -> void:
 	_label.position = Vector3.UP * 0.2
 	_label.layers = 2
 	add_child(_label)
+	_bar_root = Node3D.new()
+	add_child(_bar_root)
+	_life = JuicyBar.new(health.fraction() if health else 1.0)
 	_bar(Vector2(WIDTH + 0.06, 0.13), Color(0.03, 0.04, 0.05, 0.8), 0.0, Vector3.ZERO)
 	_lag = _bar(Vector2(WIDTH, 0.085), Color(1.0, 0.85, 0.55, 1.0), 0.001, Vector3(-WIDTH * 0.5, 0, 0), true)
-	_fill = _bar(Vector2(WIDTH, 0.085), Color(0.86, 0.2, 0.17, 1.0), 0.002, Vector3(-WIDTH * 0.5, 0, 0), true)
+	_fill = _bar(Vector2(WIDTH, 0.085), Hud.CREATURE, 0.002, Vector3(-WIDTH * 0.5, 0, 0), true)
+	# the fill and the ghost change colour on their own, so they get their own materials
+	_lag_mat = (_lag.material_override as StandardMaterial3D).duplicate()
+	_lag.material_override = _lag_mat
+	_fill_mat = (_fill.material_override as StandardMaterial3D).duplicate()
+	_fill.material_override = _fill_mat
 
 
 ## A flat quad in the plate's own plane; anchored at its left edge when it is a fill.
@@ -47,7 +59,7 @@ func _bar(size: Vector2, col: Color, z: float, pos: Vector3, left_anchored := fa
 	mi.position = pos + Vector3(0, 0, z)
 	mi.layers = 2
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	_bar_root.add_child(mi)
 	return mi
 
 
@@ -70,9 +82,10 @@ func _process(delta: float) -> void:
 	var cam := get_viewport().get_camera_3d()
 	if cam:
 		global_basis = cam.global_basis
-	var f := health.fraction()
-	_fill.scale.x = maxf(0.001, f)
-	# the bit just lost lingers in pale gold, then drains away (Dauntless-style)
-	_lag_value = move_toward(_lag_value, f, delta * 0.8) if _lag_value > f else f
-	_lag.scale.x = maxf(0.001, _lag_value)
+	_life.update(health.fraction(), delta)
+	_fill.scale.x = maxf(0.001, _life.fill)
+	_lag.scale.x = maxf(0.001, _life.ghost)
+	_fill_mat.albedo_color = _life.color(Hud.CREATURE)
+	_lag_mat.albedo_color = _life.ghost_color()
+	_bar_root.position.x = _life.shove() * 0.07
 	visible = not health.is_dead

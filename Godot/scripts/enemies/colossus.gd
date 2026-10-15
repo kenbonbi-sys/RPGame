@@ -39,6 +39,10 @@ const PART_CUT := 1.5
 
 var health: BossHealth
 var poise: Poise
+## Its skin flashes white for a blink when struck.
+var flash_materials: Array[Material] = []
+var _flash := 0.0
+var _flash_hold_until := 0.0
 var status: StatusEffects
 ## Every part of the body: {id, name, bodies, max, hp, broken, breakable, stagger, interrupt, loot,
 ## on_break}. Parts that are not breakable (the trunk) still say how much stagger a hit there gives.
@@ -251,6 +255,7 @@ func break_part(part: Dictionary, at: Vector3) -> void:
 	part.broken = true
 	part.hp = 0.0
 	if Game.has_screen():
+		Sfx.play("crunch", at, 3.0)
 		DamageNumbers.show(at + Vector3.UP * 0.6, "VỠ %s!" % String(part.name).to_upper(), "part", true)
 		Fx.burst(at, Vector3.UP, Color(0.95, 0.82, 0.45, 1.0), 60, 9.0, 0.5, 1.0, 80.0, -9.0, true)
 		Fx.dust(at, 3.0, 40)
@@ -264,6 +269,24 @@ func break_part(part: Dictionary, at: Vector3) -> void:
 	if cb.is_valid():
 		cb.call()
 	part_broken.emit(part)
+
+
+## A light blink of white over its whole hide (a full white flash on something this big blinds
+## the screen), then a quick fade.
+func flash(_color: Color, strength: float, seconds: float) -> void:
+	_flash = maxf(_flash, strength * 0.22)
+	_flash_hold_until = Game.now() + seconds
+
+
+func update_flash(delta: float) -> void:
+	if _flash <= 0.0 and flash_materials.is_empty():
+		return
+	var v := _flash if Game.now() < _flash_hold_until else _flash * 0.6
+	if Game.now() >= _flash_hold_until:
+		_flash = move_toward(_flash, 0.0, delta * 10.0)
+	for m in flash_materials:
+		if m is ShaderMaterial:
+			(m as ShaderMaterial).set_shader_parameter("hurt", v)
 
 
 ## Colossi that can be interrupted say so (a charge in its window).

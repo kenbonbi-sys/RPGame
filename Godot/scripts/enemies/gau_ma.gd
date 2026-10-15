@@ -150,6 +150,7 @@ func _build() -> void:
 	var skin := CreatureArt.painted(Color.WHITE, 0.1, 0.0, 0.85)
 	skin.set_shader_parameter("paint_scale", 1.4)
 	var glow_mat := CreatureArt.lamp(Color(0.45, 1.0, 0.85), 1.8)
+	flash_materials = [skin, glow_mat]
 
 	torso = make_part("Torso")
 	add_capsule(torso, 3.7 * S, 16.0 * S, Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(0, 0.5, -2.0) * S), true)
@@ -344,6 +345,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _update_cues(delta: float) -> void:
+	update_flash(delta)
 	if _prompt:
 		_prompt.visible = _charge_open
 		if _charge_open:
@@ -812,6 +814,7 @@ func can_interrupt() -> bool:
 func interrupt(_by: Node) -> void:
 	skill_used.emit("Gián Đoạn!")
 	if Game.has_screen():
+		Sfx.play("interrupt", head.global_position, 4.0)
 		DamageNumbers.show(head.global_position + Vector3.UP * 2.0 * S, "GIÁN ĐOẠN!", "staggered", true)
 		Fx.flash(head.global_position, Color(1.0, 0.85, 0.45), 8.0, 14.0)
 		Fx.burst(head.global_position, Vector3.UP, Color(1.0, 0.85, 0.45, 1.0), 50, 10.0, 0.4, 0.8, 90.0, -6.0, true)

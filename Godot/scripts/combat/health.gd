@@ -70,9 +70,14 @@ func head_position() -> Vector3:
 	return global_position + Vector3.UP * head_height
 
 
-## Where a hit from `from` lands on it (big bodies override this with their closest spot).
-func hit_point(_from: Vector3) -> Vector3:
-	return head_position()
+## Where a hit from `from` lands on it: the side of its body that faces the blow, at half height
+## (big bodies override this with their closest spot).
+func hit_point(from: Vector3) -> Vector3:
+	var centre := global_position + Vector3.UP * head_height * 0.5
+	var to := Vector3(from.x - centre.x, 0.0, from.z - centre.z)
+	var owner := owner_body()
+	var r: float = owner.get("body_radius") if owner and owner.get("body_radius") != null else 0.4
+	return centre + (to.normalized() * r * 0.9 if to.length() > 0.01 else Vector3.ZERO)
 
 
 ## Where a skill aimed at it from `from` should go.

@@ -8,6 +8,8 @@ extends CanvasLayer
 ## log. All text in Barlow Condensed.
 
 const TEAL := Color(0.25, 0.85, 0.68)
+## Healthy life of monsters and colossi (JuicyBar turns it amber, then red).
+const CREATURE := Color(0.56, 0.84, 0.32)
 const TEAL_DARK := Color(0.08, 0.32, 0.28)
 const SHIELD := Color(0.35, 0.62, 1.0)
 const STAMINA := Color(1.0, 0.78, 0.22)
@@ -313,12 +315,11 @@ class PlayerFrame:
 	## the shield and the lingering loss, stamina (grip), energy in segments, XP sliver, buffs.
 	var hero: Node3D
 	var portrait: Texture2D
-	var _lag := 1.0
+	var _life := JuicyBar.new()
 
 	func _process(delta: float) -> void:
 		if hero and is_instance_valid(hero):
-			var f: float = hero.hp / maxf(1.0, hero.max_hp)
-			_lag = move_toward(_lag, f, delta * 0.6) if _lag > f else f
+			_life.update(hero.hp / maxf(1.0, hero.max_hp), delta)
 		queue_redraw()
 
 	func _draw() -> void:
@@ -339,7 +340,7 @@ class PlayerFrame:
 				uvs.append(Vector2(0.5, 0.5) + d * 0.5)
 			draw_colored_polygon(pts, Color.WHITE, uvs, portrait)
 		draw_arc(c, r + 3, 0.0, TAU, 64, Color(Hud.TEAL_DARK, 0.95), 5.0, true)
-		draw_arc(c, r + 3, PI * 0.5, PI * 0.5 + TAU * hp_f, 64, Hud.TEAL, 5.0, true)
+		draw_arc(c, r + 3, PI * 0.5, PI * 0.5 + TAU * _life.fill, 64, _life.color(Hud.TEAL), 5.0, true)
 		# level badge
 		var badge := Rect2(c + Vector2(r * 0.42, r * 0.5), Vector2(30, 26))
 		Hud.slant(self, badge.grow(2), Color(0, 0, 0, 0.7), 6)
@@ -354,10 +355,13 @@ class PlayerFrame:
 		draw_string_outline(Hud.FONT_BOLD, Vector2(nx, 28), cls, HORIZONTAL_ALIGNMENT_LEFT, -1, 17, 4, Color(0, 0, 0, 0.6))
 		draw_string(Hud.FONT_BOLD, Vector2(nx, 28), cls, HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color(Hud.TEAL, 0.95))
 		# life
-		var bar := Rect2(120, 36, 440, 20)
+		var bar := Rect2(120 + _life.shove() * 9.0, 36, 440, 20)
 		Hud.slant(self, bar.grow(2), Color(0, 0, 0, 0.62), 11)
-		Hud.slant(self, Rect2(bar.position, Vector2(bar.size.x * _lag, bar.size.y)), Color(1.0, 0.93, 0.78, 0.85), 11)
-		Hud.slant(self, Rect2(bar.position, Vector2(bar.size.x * hp_f, bar.size.y)), Hud.TEAL, 11)
+		Hud.slant(self, Rect2(bar.position, Vector2(bar.size.x * _life.ghost, bar.size.y)), _life.ghost_color(), 11)
+		Hud.slant(self, Rect2(bar.position, Vector2(bar.size.x * _life.fill, bar.size.y)), _life.color(Hud.TEAL), 11)
+		if _life.flash() > 0.0:
+			Hud.slant_outline(self, bar.grow(2), Color(1, 1, 1, _life.flash()), 11, 2.5)
+		hp_f = _life.fill
 		var guard: float = clampf(1.0 - hero.health.damage_taken_multiplier, 0.0, 1.0)
 		if guard > 0.01:
 			var gw: float = bar.size.x * hp_f * guard
@@ -404,14 +408,18 @@ class PlayerFrame:
 class Compass:
 	extends Control
 	## The heading strip; the colossi and the village are marked on it. While a colossus hunts the
-	## hero, its name and life sit under the strip; otherwise the area's name.
+	## hero, its name and life (a JuicyBar) sit under the strip; otherwise the area's name.
 	var hero: Node3D
 	var boss: Node3D
 	var area := ""
+	var _boss_life := JuicyBar.new()
+	var _life_of: Node3D
 	const MARKS := ["B", "ĐB", "Đ", "ĐN", "N", "TN", "T", "TB"]
 	const SPAN := 100.0          ## degrees either side of the centre
 
-	func _process(_delta: float) -> void:
+	func _process(delta: float) -> void:
+		if boss and is_instance_valid(boss) and boss.has_method("life_fraction") and _life_of == boss:
+			_boss_life.update(boss.life_fraction(), delta)
 		queue_redraw()
 
 	func _draw() -> void:
@@ -448,10 +456,15 @@ class Compass:
 			var title := String(boss.display_name).to_upper()
 			draw_string_outline(Hud.FONT_XBOLD, Vector2(0, 64), title, HORIZONTAL_ALIGNMENT_CENTER, w, 22, 5, Color(0, 0, 0, 0.6))
 			draw_string(Hud.FONT_XBOLD, Vector2(0, 64), title, HORIZONTAL_ALIGNMENT_CENTER, w, 22, Color(1.0, 0.84, 0.66))
-			var br := Rect2(120, 72, w - 240, 8)
+			if _life_of != boss:
+				_life_of = boss
+				_boss_life = JuicyBar.new(boss.life_fraction())
+			var br := Rect2(120 + _boss_life.shove() * 7.0, 72, w - 240, 8)
 			Hud.slant(self, br.grow(2), Color(0, 0, 0, 0.62), 6)
-			var f: float = boss.life_fraction()
-			Hud.slant(self, Rect2(br.position, Vector2(br.size.x * f, br.size.y)), Color(0.92, 0.3, 0.24), 6)
+			Hud.slant(self, Rect2(br.position, Vector2(br.size.x * _boss_life.ghost, br.size.y)), _boss_life.ghost_color(), 6)
+			Hud.slant(self, Rect2(br.position, Vector2(br.size.x * _boss_life.fill, br.size.y)), _boss_life.color(Hud.CREATURE), 6)
+			if _boss_life.flash() > 0.0:
+				Hud.slant_outline(self, br.grow(2), Color(1, 1, 1, _boss_life.flash()), 6, 2.0)
 			# the stagger bar (Dauntless keeps it hidden; here a thin blue line), orange while staggered
 			var sr := Rect2(br.position + Vector2(0, 12), Vector2(br.size.x, 4))
 			Hud.slant(self, sr.grow(1), Color(0, 0, 0, 0.5), 3)

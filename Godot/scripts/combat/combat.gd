@@ -114,7 +114,9 @@ static func damage_cone(world: World3D, origin: Vector3, dir: Vector3, radius: f
 	return hits
 
 
-## What a landed hit looks and feels like: knockback, a flash, sparks, hit-stop.
+## What a landed hit looks and feels like: knockback, the target flashing white, sparks blasting
+## out the way the blow went, a sharp whack on the impact frame, a short camera kick and a freeze
+## of a few frames.
 static func on_hit_feedback(h: Health, d: DamageInfo) -> void:
 	var owner := h.owner_body()
 	if d.knockback > 0.0 and owner and owner.has_method("add_knockback"):
@@ -125,11 +127,17 @@ static func on_hit_feedback(h: Health, d: DamageInfo) -> void:
 static func show_hit(h: Health, d: DamageInfo) -> void:
 	var owner := h.owner_body()
 	if owner and owner.has_method("flash"):
-		owner.flash(Color(1, 0.95, 0.6) if d.crit else Color.WHITE, 1.0, 0.12)
+		owner.flash(Color.WHITE, 1.0, 0.08)
 	var col: Color = ELEMENT_COLORS[clampi(d.type, 0, ELEMENT_COLORS.size() - 1)]
-	Fx.burst(d.point, -d.direction + Vector3.UP * 0.5, col, 10, 5.0, 0.18, 0.35, 70.0, -8.0, true)
-	if d.crit and d.source_team == Team.PLAYER:
-		Game.shake(0.12)
+	var hard := d.heavy or d.crit
+	# out the far side, the way the blow travelled, a little upward
+	var out := d.direction + Vector3.UP * 0.35
+	Fx.sparks(d.point, out, Color(1.0, 0.82, 0.45) if d.type == Element.PHYSICAL else col, 22 if hard else 14, 13.0 if hard else 10.0)
+	Fx.burst(d.point, out, col, 14 if hard else 8, 7.0, 0.22, 0.35, 34.0, -10.0, true)
+	Fx.impact_star(d.point - d.direction * 0.15, Color(1.0, 0.95, 0.8) if d.type == Element.PHYSICAL else col, 1.6 if hard else 1.0)
+	if d.source_team == Team.PLAYER and not d.dot:
+		Sfx.whack(d.point, hard)
+		Game.kick(0.16 if hard else 0.07)
 	var stop := hit_stop_for(h, d)
 	if stop > 0.0:
 		Game.hitstop(stop)
@@ -140,7 +148,10 @@ static func hit_stop_for(h: Health, d: DamageInfo) -> float:
 	var s := d.hit_stop
 	if d.source_team != Team.PLAYER or h == null:
 		return s
-	if d.crit and s > 0.0:
+	if not d.dot:
+		# every blow freezes for a few frames (about 3 at 60 FPS)
+		s = maxf(s, 0.05)
+	if (d.crit or d.heavy) and s > 0.0:
 		s = maxf(s, DB.c("hitStopHeavy", 0.07))
 	if h.is_dead:
 		s = maxf(s, DB.c("hitStopBreak", 0.12) if h.poise else DB.c("hitStopLight", 0.035))

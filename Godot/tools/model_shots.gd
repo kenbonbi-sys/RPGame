@@ -47,6 +47,9 @@ func _ready() -> void:
 		cam.look_at(v[2])
 		for i in 8:
 			await get_tree().process_frame
+		if model == "juice":
+			await _juice_burst(v[0])
+			continue
 		var img := get_viewport().get_texture().get_image()
 		img.save_png(dir.path_join("%s_%s.png" % [model, v[0]]))
 	print("MODEL_SHOTS: %d shots of %s in %s" % [views.size(), model, dir])
@@ -81,6 +84,13 @@ func _build() -> Array:
 			return [["front", Vector3(14, 6, -26) * s, Vector3(0, 5, -4) * s], ["side", Vector3(30, 7, 0) * s, Vector3(0, 5, -2) * s],
 				["back", Vector3(-16, 12, 22) * s, Vector3(0, 5, -2) * s], ["head", Vector3(5, 7, -18) * s, Vector3(0, 7, -12) * s],
 				["hero", Vector3(6, 2.2, -14) * s, Vector3(0, 8, -9) * s]]
+		"juice":
+			var slime := Slime.new()
+			add_child(slime)
+			slime.revive(Vector3(0, 0.05, 0))
+			slime.wander_radius = 0.01
+			_juice_target = slime
+			return [["hit", Vector3(0.4, 1.4, -3.4), Vector3(0, 0.6, 0)]]
 		"hero", "sword":
 			var hero: Node3D = preload("res://scenes/hero.tscn").instantiate()
 			root.add_child(hero)
@@ -89,3 +99,21 @@ func _build() -> Array:
 			return [["front", Vector3(1.0, 1.4, -2.6), Vector3(0, 0.9, 0)], ["feet", Vector3(0.9, 0.35, -1.6), Vector3(0, 0.15, 0)],
 				["side", Vector3(2.4, 0.5, 0), Vector3(0, 0.2, 0)]]
 	return []
+
+
+var _juice_target: Node3D
+
+
+## A blow from the left lands on the slime; frames at 0, 30, 60, 100, 160 ms of real time.
+func _juice_burst(view: String) -> void:
+	var h: Health = _juice_target.get("health")
+	var d := DamageInfo.make(12.0, Combat.Team.PLAYER, null, h.hit_point(Vector3(-2, 0.6, 0)), Vector3.RIGHT)
+	d.hit_stop = 0.05
+	h.take_damage(d)
+	Combat.on_hit_feedback(h, d)
+	var t0 := Game.now()
+	for ms in [0, 30, 60, 100, 160]:
+		while (Game.now() - t0) * 1000.0 < ms:
+			await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(dir.path_join("juice_%s_%03d.png" % [view, ms]))

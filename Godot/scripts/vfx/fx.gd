@@ -123,6 +123,48 @@ static func burst(pos: Vector3, dir: Vector3, color: Color, amount := 24, speed 
 	return p
 
 
+## Hot little streaks shot out in a narrow cone, the way a blow went.
+static func sparks(pos: Vector3, dir: Vector3, color: Color, amount := 10, speed := 10.0) -> void:
+	burst(pos, dir, color, amount, speed, 0.2, 0.32, 24.0, -12.0, false)
+	burst(pos, dir, Color(1, 1, 1, 0.9), amount / 2, speed * 1.2, 0.12, 0.2, 14.0, -8.0, true)
+
+
+static var _star_mat: StandardMaterial3D
+
+
+## A bright star that pops at the point of impact and is gone in a tenth of a second.
+static func impact_star(pos: Vector3, color: Color, size := 1.0) -> void:
+	if not Game.has_screen():
+		return
+	if _star_mat == null:
+		_star_mat = StandardMaterial3D.new()
+		_star_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_star_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_star_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_star_mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+		_star_mat.no_depth_test = true
+		_star_mat.vertex_color_use_as_albedo = true
+		_star_mat.albedo_texture = GameIcons.icon("fx:star", [["sparkle", "main", 50, 50, 1.0, 0]], "holy", 64)
+	var mi := MeshInstance3D.new()
+	var q := QuadMesh.new()
+	q.size = Vector2.ONE * size
+	mi.mesh = q
+	var m := _star_mat.duplicate() as StandardMaterial3D
+	m.albedo_color = color
+	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_world().add_child(mi)
+	mi.global_position = pos
+	mi.rotation.z = randf() * TAU
+	mi.scale = Vector3.ONE * 0.35
+	var tw := mi.create_tween()
+	tw.set_ignore_time_scale(true)
+	tw.set_parallel(true)
+	tw.tween_property(mi, "scale", Vector3.ONE * 1.15, 0.09).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(m, "albedo_color:a", 0.0, 0.12).set_delay(0.03)
+	tw.chain().tween_callback(mi.queue_free)
+
+
 static func dust(pos: Vector3, radius := 3.0, amount := 40) -> void:
 	burst(pos + Vector3.UP * 0.3, Vector3.UP, Color(0.62, 0.56, 0.46, 0.55), amount, 4.0, radius * 0.9, 1.6, 70.0, -0.6, false, radius)
 

@@ -63,6 +63,7 @@ var _asleep := false
 var _idle_for := 2.0
 var _wander_to := Vector3.ZERO
 var _flash := 0.0
+var _flash_hold_until := 0.0
 var _plate: Nameplate
 var _facing := Vector3.FORWARD
 
@@ -122,7 +123,8 @@ func is_busy() -> bool:
 
 # ================================================================== every frame
 func _physics_process(delta: float) -> void:
-	_flash = move_toward(_flash, 0.0, delta * 8.0)
+	if Game.now() >= _flash_hold_until:
+		_flash = move_toward(_flash, 0.0, delta * 12.0)
 	_update_look()
 	if state == State.DEAD:
 		_move_body(delta, Vector3.ZERO)
@@ -374,14 +376,17 @@ func _on_damaged(d: DamageInfo, amount: float) -> void:
 	if not d.dot:
 		_stagger_until = now() + STAGGER
 		_flash = 1.0
+		_flash_hold_until = maxf(_flash_hold_until, Game.now() + 0.06)
 		if _plate == null and Game.has_screen():
 			_plate = Nameplate.new()
 			_plate.setup(self, "%s · Cấp %d" % [display_name, level], head_height + 0.55)
 			add_child(_plate)
 
 
-func flash(_color: Color, strength: float, _seconds: float) -> void:
+## Full white for a blink (`seconds`, real time), then a quick fade.
+func flash(_color: Color, strength: float, seconds: float) -> void:
 	_flash = maxf(_flash, strength)
+	_flash_hold_until = Game.now() + seconds
 
 
 func _on_died(_d: DamageInfo) -> void:
@@ -455,7 +460,7 @@ func _update_look() -> void:
 	for n in model.find_children("*", "MeshInstance3D", true, false):
 		var m := (n as MeshInstance3D).material_override as ShaderMaterial
 		if m:
-			m.set_shader_parameter("hurt", _flash * 0.85)
+			m.set_shader_parameter("hurt", 1.0 if Game.now() < _flash_hold_until else _flash * 0.8)
 			m.set_shader_parameter("tint", tint)
 
 

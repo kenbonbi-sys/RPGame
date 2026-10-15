@@ -102,6 +102,12 @@ func shake(amount: float) -> void:
 		camera.add_trauma(amount)
 
 
+## A tiny sharp jolt of the camera for a few frames (a landed blow), separate from the slow shake.
+func kick(amount: float) -> void:
+	if is_instance_valid(camera) and camera.has_method("kick"):
+		camera.kick(amount)
+
+
 func nearest_colossus(from: Vector3, max_distance := INF) -> Node3D:
 	var best: Node3D = null
 	var best_d := max_distance

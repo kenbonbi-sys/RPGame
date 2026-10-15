@@ -124,6 +124,22 @@ func _forest() -> void:
 		_release("attack")
 		await _wait(0.3)
 	await _shot("22_chem_gio")
+	# the impact frame itself: white flash, sparks, the star, the bar jolting
+	await _shot_on_next_hit("22b_trung_don")
+	await _wait(0.25)
+	await _shot("22c_thanh_mau_rut")
+	# the hero's own bar taking a blow
+	var was_safe := hero.invulnerable_until
+	hero.invulnerable_until = 0.0
+	hero.health.invulnerable = false
+	var blow := DamageInfo.make(hero.max_hp * 0.55, Combat.Team.ENEMY, null, hero.global_position + Vector3.UP, hero.facing)
+	blow.pure = true
+	hero.health.take_damage(blow)
+	hero.invulnerable_until = was_safe
+	await _wait(0.12)
+	await _shot("22d_mau_hero")
+	await _wait(1.2)
+	hero.health.heal(hero.max_hp, false)
 	for i in 6:
 		_aim_at_nearest()
 		hero.skills.request(0)
@@ -346,6 +362,36 @@ func _hunt() -> void:
 	await _wait(6.0)
 	bear.set_mode(GauMa.Mode.IDLE)
 	bear.respawn()
+
+
+## Swings at the nearest monster and takes the shot on the frame its blow lands.
+func _shot_on_next_hit(shot_name: String) -> void:
+	var target: Health = null
+	var best := INF
+	for e in get_tree().get_nodes_in_group("enemies"):
+		var h: Health = e.get("health")
+		if h and not h.is_dead and e.global_position.distance_to(hero.global_position) < best:
+			best = e.global_position.distance_to(hero.global_position)
+			target = h
+	if target == null:
+		return
+	var landed := [false]
+	target.damaged.connect(func(_d: DamageInfo, _a: float) -> void: landed[0] = true, CONNECT_ONE_SHOT)
+	_aim_at_nearest()
+	_press("attack")
+	await _wait(0.06)
+	_release("attack")
+	var t0 := Game.now()
+	while not landed[0] and Game.now() - t0 < 1.5:
+		await get_tree().process_frame
+	await _shot(shot_name)
+	if only == "forest":
+		# a burst for checking the impact by eye (real time, through the hit-stop)
+		for k in 3:
+			var until := Game.now() + 0.03
+			while Game.now() < until:
+				await get_tree().process_frame
+			await _shot("%s_%d" % [shot_name, k + 1])
 
 
 func _face_point(p: Vector3) -> void:
