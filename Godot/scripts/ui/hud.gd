@@ -111,13 +111,13 @@ func _ready() -> void:
 	_debug.visible = false
 
 	Game.screen_flash.connect(_screen_flash)
-	Game.message.connect(func(t: String, c: Color) -> void: _log.add(t, c))
+	Game.message.connect(func(t: String, c: Color, icon: String) -> void: _log.add(t, c, icon))
 	Game.boss_engaged.connect(_on_boss_engaged)
 	Game.boss_defeated.connect(_on_boss_defeated)
 	Game.hero_died.connect(func() -> void: show_center("BẠN ĐÃ GỤC NGÃ", 3.0))
 	Game.enemy_killed.connect(func(e: Node3D, _credited: Array) -> void:
 		if is_instance_valid(e) and "display_name" in e:
-			_log.add("Hạ gục %s" % e.display_name, Color(0.82, 0.84, 0.86)))
+			_log.add("Hạ gục %s" % e.display_name, Color(0.82, 0.84, 0.86), "kill"))
 
 
 ## Anchors `c` to a corner or edge of `parent` and places it at `offset` from there.
@@ -157,8 +157,8 @@ func bind_hero(h: Node3D) -> void:
 		p.hero = h
 	h.hurt.connect(func(amount: float) -> void:
 		_screen_flash(Color(0.9, 0.1, 0.1), clampf(amount / 80.0, 0.12, 0.35), 0.3))
-	h.stats.leveled_up.connect(func(lv: int) -> void: _log.add("Lên cấp %d!" % lv, GOLD))
-	h.stats.xp_gained.connect(func(x: int) -> void: _log.add("+%d kinh nghiệm" % x, Color(0.72, 0.84, 1.0)))
+	h.stats.leveled_up.connect(func(lv: int) -> void: _log.add("Lên cấp %d!" % lv, GOLD, "level"))
+	h.stats.xp_gained.connect(func(x: int) -> void: _log.add("+%d kinh nghiệm" % x, Color(0.72, 0.84, 1.0), "xp"))
 	if Game.has_screen():
 		_make_portrait()
 
@@ -205,7 +205,7 @@ func _on_boss_engaged(b: Node3D) -> void:
 			boss.disconnect("skill_used", _on_skill)
 		boss = b
 		b.skill_used.connect(_on_skill)
-		_log.add("%s đã phát hiện ngươi!" % b.display_name, Color(1.0, 0.55, 0.45))
+		_log.add("%s đã phát hiện ngươi!" % b.display_name, Color(1.0, 0.55, 0.45), "kill")
 	_compass.boss = b
 	_emblem.boss = b
 
@@ -217,7 +217,7 @@ func _on_skill(skill: String) -> void:
 
 func _on_boss_defeated(b: Node3D) -> void:
 	show_center("%s ĐÃ NGÃ XUỐNG" % String(b.display_name).to_upper(), 5.0)
-	_log.add("%s đã ngã xuống." % b.display_name, GOLD)
+	_log.add("%s đã ngã xuống." % b.display_name, GOLD, "level")
 
 
 func show_center(text: String, seconds: float) -> void:
@@ -494,7 +494,7 @@ class Emblem:
 
 class SkillSlot:
 	extends Control
-	## One skill: a slanted tile with the element's glyph, its key, the energy it costs, the cooldown
+	## One skill: a slanted tile with the skill's icon, its key, the energy it costs, the cooldown
 	## as a darkening sweep with the seconds left, dimmed when there is not enough energy.
 	var skills: PlayerSkills
 	var index := 0
@@ -510,12 +510,15 @@ class SkillSlot:
 		if a == null:
 			Hud.slant_outline(self, r, Color(1, 1, 1, 0.15), 12, 1.5)
 			return
-		var kind := HudIcons.element_of(a)
-		var col := HudIcons.tint(kind)
+		var col := GameIcons.tint(GameIcons.element_of(a))
 		var left := skills.cooldown_left(index)
 		var cooling := left > 0.05
 		var poor: bool = skills.hero != null and skills.hero.energy < a.energy_cost()
-		HudIcons.glyph(self, kind, size * 0.5 + Vector2(0, -1), size.y * 0.3, Color(col, 0.3 if cooling or poor else 1.0))
+		var tex := GameIcons.skill(a, 96)
+		if tex:
+			var side := size.y * 0.86
+			var dim := 0.32 if cooling or poor else 1.0
+			draw_texture_rect(tex, Rect2(size * 0.5 - Vector2(side, side) * 0.5 + Vector2(0, -1), Vector2(side, side)), false, Color(dim, dim, dim, 0.45 + 0.55 * dim))
 		if cooling:
 			var frac := skills.cooldown_fraction(index)
 			Hud.slant(self, Rect2(12.0 * (1.0 - frac), size.y * (1.0 - frac), size.x - 12.0 * (1.0 - frac), size.y * frac), Color(0, 0, 0, 0.5), 12.0 * frac)
@@ -552,8 +555,11 @@ class PotionSlot:
 		draw_rect(box, Color(0.78, 0.78, 0.8, 0.6), false, 2.0)
 		var id: String = Hero.POTIONS[index]
 		var n: int = hero.inventory.count(id)
-		var col: Color = COLORS[index]
-		HudIcons.flask(self, box.get_center() + Vector2(0, 3), box.size.x * 0.42, Color(col, 1.0 if n > 0 else 0.3))
+		var tex := GameIcons.item(id, 96)
+		if tex:
+			var side := box.size.x * 0.92
+			draw_texture_rect(tex, Rect2(box.get_center() - Vector2(side, side) * 0.5 + Vector2(0, 2), Vector2(side, side)), false,
+				Color.WHITE if n > 0 else Color(0.5, 0.5, 0.5, 0.45))
 		draw_string(Hud.FONT_BOLD, box.position + Vector2(6, 17), KEYS[index], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(1, 1, 1, 0.75))
 		var cnt := "×%d" % n
 		draw_string_outline(Hud.FONT_XBOLD, Vector2(0, box.end.y + 26), cnt, HORIZONTAL_ALIGNMENT_CENTER, size.x, 25, 5, Color(0, 0, 0, 0.6))
@@ -562,11 +568,21 @@ class PotionSlot:
 
 class LogBox:
 	extends Control
-	## Recent events, newest at the bottom, fading after a while; the chat line underneath.
-	var lines: Array = []   # [text, color, time]
+	## Recent events with their icons, newest at the bottom, fading after a while; the chat line
+	## underneath. Pickups of the same thing in a row add up ("+1 vàng" twice is "+2 vàng").
+	var lines: Array = []   # [text, color, time, icon]
+	static var _count := RegEx.create_from_string("^[+]([0-9]+) (.+)$")
 
-	func add(text: String, color: Color) -> void:
-		lines.append([text, color, Game.now()])
+	func add(text: String, color: Color, icon := "") -> void:
+		var m := _count.search(text)
+		if m and not lines.is_empty():
+			var last: Array = lines[-1]
+			var lm := _count.search(last[0])
+			if lm and lm.get_string(2) == m.get_string(2) and last[3] == icon and Game.now() - float(last[2]) < 4.0:
+				last[0] = "+%d %s" % [int(lm.get_string(1)) + int(m.get_string(1)), m.get_string(2)]
+				last[2] = Game.now()
+				return
+		lines.append([text, color, Game.now(), icon])
 		while lines.size() > 8:
 			lines.pop_front()
 
@@ -582,9 +598,15 @@ class LogBox:
 			if a <= 0.0:
 				continue
 			var col: Color = l[1]
-			draw_string_outline(Hud.FONT_SEMI, Vector2(12, y), l[0], HORIZONTAL_ALIGNMENT_LEFT, size.x - 20, 18, 4, Color(0, 0, 0, 0.6 * a))
-			draw_string(Hud.FONT_SEMI, Vector2(12, y), l[0], HORIZONTAL_ALIGNMENT_LEFT, size.x - 20, 18, Color(col, a))
-			y -= 22.0
+			var x := 12.0
+			if l[3] != "":
+				var tex := GameIcons.item(l[3], 64)
+				if tex:
+					draw_texture_rect(tex, Rect2(Vector2(8, y - 21), Vector2(28, 28)), false, Color(1, 1, 1, a))
+				x = 40.0
+			draw_string_outline(Hud.FONT_SEMI, Vector2(x, y), l[0], HORIZONTAL_ALIGNMENT_LEFT, size.x - x - 8, 18, 4, Color(0, 0, 0, 0.6 * a))
+			draw_string(Hud.FONT_SEMI, Vector2(x, y), l[0], HORIZONTAL_ALIGNMENT_LEFT, size.x - x - 8, 18, Color(col, a))
+			y -= 27.0
 		var chat := Rect2(0, size.y - 30, size.x, 28)
 		Hud.slant(self, chat, Color(0.03, 0.05, 0.07, 0.55), 10)
 		draw_string(Hud.FONT_SEMI, chat.position + Vector2(14, 20), "[Enter] Để trò chuyện" + ("" if Game.is_online() else "  ·  khi chơi online"),

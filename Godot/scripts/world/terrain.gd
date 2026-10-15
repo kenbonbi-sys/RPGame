@@ -27,6 +27,15 @@ static func height_at_world(p: Vector3) -> float:
 	return current.data.height_at_world(p) if current else 0.0
 
 
+## Height of the land as drawn (feet are put on this, not on the collider).
+static func drawn_height_at_world(p: Vector3) -> float:
+	return current.data.mesh_height_at(p.x, -p.z) if current else 0.0
+
+
+static func is_ground(body: Object) -> bool:
+	return body is Node and current != null and (body as Node).get_parent() == current
+
+
 func _build_meshes() -> void:
 	var d := data
 	var normals := PackedVector3Array()

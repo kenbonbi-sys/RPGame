@@ -6,7 +6,8 @@ signal boss_engaged(boss: Node3D)
 signal boss_defeated(boss: Node3D)
 signal hero_died
 ## A line for the event log (loot, kills, level-ups).
-signal message(text: String, color: Color)
+## `icon`: a GameIcons.item id ("coin", "xp", "kill", "level" or an item) shown before the line.
+signal message(text: String, color: Color, icon: String)
 ## A flash of colour over the whole screen (skills, being hurt).
 signal screen_flash(color: Color, strength: float, seconds: float)
 ## A monster fell; `credited` are the heroes who share its XP and loot (quests, bestiary).
@@ -88,8 +89,8 @@ func slow_motion(scale: float, seconds: float, ease := 0.4) -> void:
 	_slow_ease = maxf(0.0, ease)
 
 
-func log(text: String, color := Color(0.92, 0.9, 0.84)) -> void:
-	message.emit(text, color)
+func log(text: String, color := Color(0.92, 0.9, 0.84), icon := "") -> void:
+	message.emit(text, color, icon)
 
 
 func flash_screen(color: Color, strength: float, seconds: float) -> void:

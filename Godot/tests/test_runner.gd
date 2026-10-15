@@ -19,6 +19,7 @@ func _ready() -> void:
 	await _run("fall damage", _test_fall_damage)
 	await _run("climbing a hind leg", _test_climb_leg)
 	await _run("thrown rocks are capped", _test_boulder_cap)
+	await _run("the stomp keeps heroes on the land", _test_stomp_keeps_hero)
 	await preload("res://tests/combat_tests.gd").new(self).run_all()
 	print("\n%d checks, %d failed" % [checks, failures.size()])
 	for f in failures:
@@ -207,3 +208,40 @@ func _test_boulder_cap() -> void:
 	check(alive.size() == Boulder.MAX_ROCKS, "at most %d rocks stay (%d)" % [Boulder.MAX_ROCKS, alive.size()])
 	for r in alive:
 		r.queue_free()
+
+
+func _test_stomp_keeps_hero() -> void:
+	var ground := StaticBody3D.new()
+	var cs := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(300, 1, 300)
+	cs.shape = box
+	cs.position = Vector3(0, -0.5, 0)
+	ground.add_child(cs)
+	add_child(ground)
+	var bear := _new_bear()
+	await _frames(3)
+	var root := bear.global_transform
+	var spot := root * (Vector3(0, 0, -11.5) * GauMa.S)
+	var spots := [spot, spot + root.basis.x * 2.4 * GauMa.S, spot - root.basis.x * 2.4 * GauMa.S,
+		spot + root.basis.x * 2.4 * GauMa.S + root.basis.z * 1.5, spot + root.basis.z * 4.0]
+	for i in spots.size():
+		var hero: Hero = HERO.instantiate()
+		add_child(hero)
+		hero.revive(Vector3(spots[i].x, 0.2, spots[i].z))
+		await _frames(10)
+		bear.set_mode(GauMa.Mode.STOMP)
+		var low := INF
+		for f in 200:
+			await _frames(1)
+			low = minf(low, hero.global_position.y)
+		var flung := Vector2(hero.global_position.x - spots[i].x, hero.global_position.z - spots[i].z).length()
+		print("spot %d: lowest y %.2f, end y %.2f, flung %.1f m, state %d" % [i, low, hero.global_position.y, flung, hero.state])
+		check(low > -0.6, "spot %d: the stomp does not push the hero under the land (lowest %.2f)" % [i, low])
+		check(flung < 25.0, "spot %d: the shockwave does not fling the hero far (%.1f m)" % [i, flung])
+		hero.queue_free()
+		bear.set_mode(GauMa.Mode.IDLE)
+		await _frames(60)
+	bear.queue_free()
+	ground.queue_free()
+	await _frames(2)

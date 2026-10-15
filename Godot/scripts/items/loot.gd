@@ -134,5 +134,6 @@ func _collect(hero: Node3D) -> void:
 		var label := "+%d vàng" % count if item_id == "coin" else "+%d %s" % [count, it.get("displayName", item_id)]
 		DamageNumbers.show(hero.global_position + Vector3.UP * 2.0, label, "text")
 		if hero == Game.hero:
-			Game.log(label, Color(1.0, 0.85, 0.4) if item_id == "coin" else RARITY_COLORS[clampi(int(DB.item(item_id).get("rarity", 0)), 0, 3)])
+			Game.log(label, Color(1.0, 0.85, 0.4) if item_id == "coin" else RARITY_COLORS[clampi(int(DB.item(item_id).get("rarity", 0)), 0, 3)],
+				item_id)
 	queue_free()

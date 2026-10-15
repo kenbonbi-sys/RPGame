@@ -36,6 +36,24 @@ func height_at_world(p: Vector3) -> float:
 	return height_at(p.x, -p.z)
 
 
+## Height of the drawn land (Terrain's 2 m triangles, split from (i+1, j) to (i, j+1)), which can
+## sit a little above or below the bilinear collision between samples.
+func mesh_height_at(u: float, v: float) -> float:
+	var fx := clampf(u / spacing, 0.0, width - 1.001)
+	var fv := clampf(v / spacing, 0.0, depth - 1.001)
+	var ix := int(fx)
+	var iv := int(fv)
+	var tx := fx - ix
+	var tv := fv - iv
+	var ha := height_at_sample(ix, iv)
+	var hb := height_at_sample(ix + 1, iv)
+	var hc := height_at_sample(ix, iv + 1)
+	if tx + tv <= 1.0:
+		return ha + tx * (hb - ha) + tv * (hc - ha)
+	var he := height_at_sample(ix + 1, iv + 1)
+	return he + (1.0 - tx) * (hc - he) + (1.0 - tv) * (hb - he)
+
+
 func splat_at(u: float, v: float) -> Color:
 	var ix := clampi(roundi(u / spacing), 0, width - 1)
 	var iv := clampi(roundi(v / spacing), 0, depth - 1)

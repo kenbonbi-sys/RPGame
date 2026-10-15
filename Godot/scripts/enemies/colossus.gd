@@ -29,6 +29,8 @@ var dead := false
 var engaged := false
 var home: Transform3D
 
+## False when the looks come from a sculpt: shapes then only collide.
+var draw_shapes := true
 var fur_material: ShaderMaterial
 var armor_material: ShaderMaterial
 var claw_material: ShaderMaterial
@@ -75,7 +77,7 @@ func _add_shape(body: Node3D, shape: Shape3D, mesh: Mesh, xf: Transform3D, climb
 	cs.transform = xf
 	cs.set_meta("climbable", climbable)
 	body.add_child(cs)
-	if mesh == null:
+	if mesh == null or not draw_shapes:
 		return cs
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
@@ -89,8 +91,8 @@ func add_capsule(body: Node3D, radius: float, height: float, xf: Transform3D, cl
 	var s := CapsuleShape3D.new()
 	s.radius = radius
 	s.height = height
-	var cs := _add_shape(body, s, fur_mesh(radius, height), xf, climbable, fur_material if climbable else armor_material)
-	if tufts > 0:
+	var cs := _add_shape(body, s, fur_mesh(radius, height) if draw_shapes else null, xf, climbable, fur_material if climbable else armor_material)
+	if tufts > 0 and draw_shapes:
 		_add_tufts(body, xf, radius, height, tufts)
 	return cs
 
@@ -98,8 +100,8 @@ func add_capsule(body: Node3D, radius: float, height: float, xf: Transform3D, cl
 func add_sphere(body: Node3D, radius: float, xf: Transform3D, climbable := true, tufts := 0) -> CollisionShape3D:
 	var s := SphereShape3D.new()
 	s.radius = radius
-	var cs := _add_shape(body, s, fur_mesh(radius, radius * 2.0), xf, climbable, fur_material if climbable else armor_material)
-	if tufts > 0:
+	var cs := _add_shape(body, s, fur_mesh(radius, radius * 2.0) if draw_shapes else null, xf, climbable, fur_material if climbable else armor_material)
+	if tufts > 0 and draw_shapes:
 		_add_tufts(body, xf, radius, radius * 2.0, tufts)
 	return cs
 
@@ -271,11 +273,12 @@ func heroes_on_me() -> Array[Node3D]:
 	return heroes().filter(func(h): return is_on_me(h))
 
 
-## Hurts heroes on the ground within a radius (those clinging to the colossus are spared).
+## Hurts heroes on the ground within a radius. Those clinging to the colossus or riding high on
+## it are spared; one standing on a paw is not (the paw is what slams down).
 func hit_area(center: Vector3, radius: float, amount: float, knock := 8.0, lift := 5.0, skill := "") -> int:
 	var n := 0
 	for h in heroes():
-		if is_on_me(h) or h.get("is_climbing"):
+		if h.get("is_climbing") or (is_on_me(h) and h.global_position.y > center.y + 2.5):
 			continue
 		var d := Vector2(h.global_position.x - center.x, h.global_position.z - center.z).length()
 		if d <= radius and absf(h.global_position.y - center.y) < 6.0:

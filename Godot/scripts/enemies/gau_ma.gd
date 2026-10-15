@@ -13,8 +13,10 @@ extends Colossus
 
 enum Mode { IDLE, WALK, SWIPE, STOMP, THROW, POUNCE, SHAKE, KNEEL, STUNNED, DYING, DEAD }
 
-## Every length below is in "bear units"; S turns them into metres (about 18 m to the crown).
-const S := 1.4
+## Every length below is in "bear units"; S turns them into metres (about 10 m to the crown).
+const S := 0.8
+## Reach of its skills, set when it was 1.4 bear units to the metre; shrinks with it.
+const REACH := S / 1.4
 const STAND_HEIGHT := 7.4 * S
 const STRIDE := 2.8 * S
 const STEP_TIME := 0.85
@@ -68,7 +70,6 @@ var head: AnimatableBody3D
 var legs: Array[Leg] = []
 var eye_mat: StandardMaterial3D
 var leg_point: WeakPoint
-var _bone_mat: Material
 
 var _cooldowns := {"swipe": 2.0, "stomp": 4.0, "throw": 3.0, "pounce": 8.0, "shake": 0.0}
 var _on_me_time := 0.0
@@ -116,47 +117,38 @@ func _ready() -> void:
 
 
 # ================================================================== the body
+const SCULPT := "res://assets/creatures/gau_ma.glb"
+
+
+## Colliders here, looks from the sculpt (Tools/Sculpt/bear.py, built over these same shapes in
+## bear units, so the fur heroes grab is where the mesh shows it).
 func _build() -> void:
-	var bone := CreatureArt.painted(Color(0.92, 0.88, 0.78), 0.14, 0.15, 0.7)
-	bone.set_shader_parameter("paint_scale", 0.6)
-	var dark := StandardMaterial3D.new()
-	dark.albedo_color = Color(0.05, 0.05, 0.05)
-	dark.roughness = 0.4
-	_bone_mat = bone
+	draw_shapes = false
+	var parts := CreatureArt.sculpt(SCULPT)
+	var skin := CreatureArt.painted(Color.WHITE, 0.1, 0.0, 0.85)
+	skin.set_shader_parameter("paint_scale", 1.4)
+	var glow_mat := CreatureArt.lamp(Color(0.45, 1.0, 0.85), 1.8)
 
 	torso = make_part("Torso")
-	add_capsule(torso, 3.7 * S, 16.0 * S, Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(0, 0.5, -2.0) * S), true, 620)
+	add_capsule(torso, 3.7 * S, 16.0 * S, Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(0, 0.5, -2.0) * S), true)
+	add_sphere(torso, 3.4 * S, Transform3D(Basis.IDENTITY, Vector3(0, 2.2, -5.5) * S), true)   # shoulder hump
 	for side in [-1.0, 1.0]:
 		var flank := Transform3D(Basis(Vector3.FORWARD, side * 0.2), Vector3(side * 3.45, -0.3, -3.2) * S)
 		add_box(torso, Vector3(0.8, 3.6, 9.5) * S, flank, null, false)
-		# drawn as three bark plates overlapping like scales
-		var plates := MeshKit.new()
-		for k in 3:
-			var off := Vector3(side * 0.12 * k, 0.12 * (k - 1), (k - 1) * 3.0) * S
-			plates.rounded_box(Vector3(0.7, 3.5 - absf(k - 1) * 0.35, 3.8) * S, 0.28 * S,
-				flank * Transform3D(Basis(Vector3.UP, side * 0.07 * (k - 1)), off), Color.WHITE)
-		CreatureArt.built(torso, plates, armor_material)
-	_dress_back()
-	var chest := Transform3D(Basis(Vector3.RIGHT, 0.28), Vector3(0, -0.6, -9.7) * S)
-	add_box(torso, Vector3(5.8, 4.4, 1.0) * S, chest, null, false)
-	# drawn as three bark plates, the upper ones over the lower
-	var breast := MeshKit.new()
-	for k in 3:
-		breast.rounded_box(Vector3(5.6 - k * 0.5, 1.8, 0.9) * S, 0.3 * S,
-			chest * Transform3D(Basis(Vector3.RIGHT, -0.12), Vector3(0, (1.3 - k * 1.35), -0.1 * (2 - k)) * S), Color.WHITE)
-	CreatureArt.built(torso, breast, armor_material)
-	add_weak_point(torso, Vector3(0, 4.18, 1.6) * S, Vector3(0, 1, 0.2), 120.0, true, 2.4)
+	add_box(torso, Vector3(5.8, 4.4, 1.0) * S, Transform3D(Basis(Vector3.RIGHT, 0.28), Vector3(0, -0.6, -9.7) * S), null, false)
+	_look(torso, parts["Torso"], skin)
+	_look(torso, parts["TorsoGlow"], glow_mat)
+	add_weak_point(torso, Vector3(0, 4.18, 1.6) * S, Vector3(0, 1, 0.2), 120.0, true, 2.4 * S / 1.4)
 
 	neck = make_part("Neck")
 	var nd := Vector3(0, 1.0, -3.4) * S
-	add_capsule(neck, 2.4 * S, 5.6 * S, Transform3D(_axis_basis(nd.normalized()), nd * 0.5), true, 160)
+	add_capsule(neck, 2.4 * S, 5.6 * S, Transform3D(_axis_basis(nd.normalized()), nd * 0.5), true)
+	_look(neck, parts["Neck"], skin)
 
 	head = make_part("Head")
-	var skull := add_sphere(head, 2.7 * S, Transform3D.IDENTITY, true, 130)
-	_reshape(head, skull, Vector3(1.0, 0.92, 1.12))
-	# the bone mask over the face, the muzzle and the nose (none of it can be held)
+	add_sphere(head, 2.7 * S, Transform3D.IDENTITY, true)
+	# the bone mask over the face, the muzzle and the jaw (none of it can be held)
 	add_box(head, Vector3(3.6, 2.8, 1.0) * S, Transform3D(Basis.IDENTITY, Vector3(0, 0.1, -2.3) * S), null, false)
-	_ellipsoid(head, Vector3(2.0, 1.6, 0.8) * S, Vector3(0, 0.15, -2.2) * S, bone)
 	var snout := CapsuleShape3D.new()
 	snout.radius = 0.95 * S
 	snout.height = 3.4 * S
@@ -165,34 +157,19 @@ func _build() -> void:
 	scs.transform = Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(0, -1.1, -3.0) * S)
 	scs.set_meta("climbable", false)
 	head.add_child(scs)
-	_ellipsoid(head, Vector3(1.05, 0.95, 1.9) * S, Vector3(0, -1.1, -3.1) * S, fur_material)
-	_ellipsoid(head, Vector3(0.95, 0.5, 1.5) * S, Vector3(0, -0.75, -3.0) * S, bone)
-	_ellipsoid(head, Vector3(0.5, 0.38, 0.35) * S, Vector3(0, -0.95, -4.85) * S, dark)
-	_ellipsoid(head, Vector3(0.8, 0.35, 1.3) * S, Vector3(0, -1.85, -2.6) * S, fur_material)
-	add_weak_point(head, Vector3(0, 2.5, 0.45) * S, Vector3(0, 1, 0.15), 120.0, true, 2.2)
+	_look(head, parts["Head"], skin)
 	eye_mat = StandardMaterial3D.new()
 	eye_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	eye_mat.albedo_color = Color(0.7, 1.0, 0.85)
 	eye_mat.emission_enabled = true
 	eye_mat.emission = Color(0.6, 1.0, 0.8)
 	eye_mat.emission_energy_multiplier = 4.0
-	for side in [-1.0, 1.0]:
-		_ellipsoid(head, Vector3(0.5, 0.42, 0.3) * S, Vector3(side * 0.82, 0.45, -2.85) * S, dark)
-		_ellipsoid(head, Vector3(0.24, 0.2, 0.12) * S, Vector3(side * 0.82, 0.45, -3.05) * S, eye_mat)
-		var ear := MeshInstance3D.new()
-		var cm := CapsuleMesh.new()
-		cm.radius = 0.7 * S
-		cm.height = 2.3 * S
-		ear.mesh = cm
-		ear.material_override = fur_material
-		ear.transform = Transform3D(Basis(Vector3.FORWARD, side * -0.5), Vector3(side * 1.8, 2.3, 0.3) * S)
-		ear.layers = 4
-		head.add_child(ear)
-	_dress_head(bone)
+	_look(head, parts["HeadGlow"], eye_mat)
+	add_weak_point(head, Vector3(0, 2.5, 0.45) * S, Vector3(0, 1, 0.15), 120.0, true, 2.2 * S / 1.4)
 	var glow := OmniLight3D.new()
 	glow.light_color = Color(0.6, 1.0, 0.8)
 	glow.light_energy = 2.0
-	glow.omni_range = 9.0
+	glow.omni_range = 9.0 * S / 1.4
 	glow.position = Vector3(0, 0.4, -3.8) * S
 	head.add_child(glow)
 
@@ -200,35 +177,27 @@ func _build() -> void:
 	_add_leg("FR", Vector3(2.6, -1.4, -7.0), 4.1, 4.2, 1.5, 1.2, 1.0, 1)
 	_add_leg("HL", Vector3(-2.8, -0.9, 3.6), 4.4, 4.0, 1.75, 1.25, -1.0, 1)
 	_add_leg("HR", Vector3(2.8, -0.9, 3.6), 4.4, 4.0, 1.75, 1.25, -1.0, 0)
+	for leg in legs:
+		var kind := "Front" if leg.bend > 0.0 else "Hind"
+		_look(leg.upper, parts["Upper" + kind], skin)
+		_look(leg.lower, parts["Lower" + kind], skin)
+		_look(leg.paw, parts["Paw"], skin)
 	# the left hind calf: stab it and the bear kneels
 	var hl := legs[2]
-	leg_point = add_weak_point(hl.lower, Vector3(0, 0.2 * S, hl.r2 * 0.98), Vector3(0, 0, 1), 45.0, false, 1.9)
+	leg_point = add_weak_point(hl.lower, Vector3(0, 0.2 * S, hl.r2 * 0.98), Vector3(0, 0, 1), 45.0, false, 1.9 * S / 1.4)
 	for n in find_children("*", "VisualInstance3D", true, false):
 		if not (n is Light3D):
 			(n as VisualInstance3D).layers = 4
 
 
-## A visual-only ellipsoid (a sphere of radius 1 stretched to `radii`).
-func _ellipsoid(body: Node3D, radii: Vector3, pos: Vector3, mat: Material) -> MeshInstance3D:
+## A sculpted mesh on a part, in bear units.
+func _look(body: Node3D, mesh: Mesh, mat: Material) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
-	var sm := SphereMesh.new()
-	sm.radius = 1.0
-	sm.height = 2.0
-	sm.radial_segments = 20
-	sm.rings = 10
-	mi.mesh = sm
+	mi.mesh = mesh
 	mi.material_override = mat
-	mi.transform = Transform3D(Basis.IDENTITY.scaled(radii), pos)
+	mi.scale = Vector3.ONE * S
 	body.add_child(mi)
 	return mi
-
-
-## Stretches the mesh drawn for a shape (the collider stays as it is).
-func _reshape(body: Node3D, shape: CollisionShape3D, stretch: Vector3) -> void:
-	for c in body.get_children():
-		if c is MeshInstance3D and c.transform.origin == shape.transform.origin and not (c is MultiMeshInstance3D):
-			c.scale = stretch
-			return
 
 
 func _add_leg(leg_name: String, hip: Vector3, l1: float, l2: float, r1: float, r2: float, bend: float, group: int) -> void:
@@ -242,100 +211,14 @@ func _add_leg(leg_name: String, hip: Vector3, l1: float, l2: float, r1: float, r
 	leg.bend = bend
 	leg.group = group
 	leg.upper = make_part(leg_name + "_Upper")
-	add_capsule(leg.upper, leg.r1, leg.l1 + leg.r1, Transform3D.IDENTITY, true, 90)
+	add_capsule(leg.upper, leg.r1, leg.l1 + leg.r1, Transform3D.IDENTITY, true)
 	leg.lower = make_part(leg_name + "_Lower")
-	add_capsule(leg.lower, leg.r2, leg.l2 + leg.r2 * 0.6, Transform3D.IDENTITY, true, 60)
+	add_capsule(leg.lower, leg.r2, leg.l2 + leg.r2 * 0.6, Transform3D.IDENTITY, true)
 	# bark shin plate on the front of the lower leg
-	add_box(leg.lower, Vector3(leg.r2 * 1.7, leg.l2 * 0.7, 0.55 * S), Transform3D(Basis.IDENTITY, Vector3(0, -0.2 * S, -leg.r2 * 0.95)))
+	add_box(leg.lower, Vector3(leg.r2 * 1.7, leg.l2 * 0.7, 0.55 * S), Transform3D(Basis.IDENTITY, Vector3(0, -0.2 * S, -leg.r2 * 0.95)), null, false)
 	leg.paw = make_part(leg_name + "_Paw")
 	add_box(leg.paw, Vector3(2.5, 1.1, 3.1) * S, Transform3D(Basis.IDENTITY, Vector3(0, -0.1, -0.5) * S), null, false)
-	_ellipsoid(leg.paw, Vector3(1.35, 0.62, 1.7) * S, Vector3(0, 0.0, -0.45) * S, fur_material)
-	# four hooked claws, dark at the root and pale at the tip, and the toes over them
-	var claws := MeshKit.new()
-	var toes := MeshKit.new()
-	for i in 4:
-		var x := (-0.9 + i * 0.6) * S
-		_tube_along(claws, Vector3(x, -0.2 * S, -1.85 * S), Vector3(0, -0.2, -1), 1.2 * S, 0.22 * S, 0.02 * S, 7,
-			Vector3(0, -0.5 * S, 0), Color(0.42, 0.36, 0.32), Color(1.0, 0.98, 0.94))
-		toes.lump(Vector3(0.36, 0.3, 0.42) * S, 1, Transform3D(Basis.IDENTITY, Vector3(x, 0.05 * S, -1.75 * S)), 0.1, i, _white())
-	CreatureArt.built(leg.paw, claws, _bone_mat)
-	CreatureArt.built(leg.paw, toes, fur_material)
 	legs.append(leg)
-
-
-static func _white() -> Callable:
-	return func(_p: Vector3, _c: Vector3) -> Color:
-		return Color.WHITE
-
-
-## A tapered tube from `from` along `dir`, bent by `bend` (body space) toward its tip.
-static func _tube_along(kit: MeshKit, from: Vector3, dir: Vector3, length: float, r0: float, r1: float, sides: int,
-		bend: Vector3, color: Color, tip := Color(-1, 0, 0)) -> void:
-	var xf := Transform3D(_axis_basis(dir), from)
-	kit.tube(r0, r1, length, sides, xf, color, xf.basis.inverse() * bend, 3, tip)
-
-
-## Where a bent tube's centre line is at `t` (0..1).
-static func _along(from: Vector3, dir: Vector3, length: float, bend: Vector3, t: float) -> Vector3:
-	return from + dir.normalized() * length * t + bend * t * t
-
-
-## The face and crown: a heavy bone brow, teeth and tusks, and a pair of mossy branch antlers
-## (the old forest grows on it).
-func _dress_head(bone: Material) -> void:
-	var kb := MeshKit.new()
-	for side in [-1.0, 1.0]:
-		kb.lump(Vector3(0.8, 0.3, 0.5) * S, 2, Transform3D(Basis(Vector3.FORWARD, side * 0.28), Vector3(side * 0.86, 0.97, -2.7) * S), 0.06, 3, _white())
-		for i in 4:
-			var z := lerpf(-4.35, -3.25, i / 3.0)
-			_tube_along(kb, Vector3(side * lerpf(0.5, 0.78, i / 3.0), -1.72, z) * S, Vector3(0, -1, -0.1), 0.45 * S, 0.11 * S, 0.01 * S, 6,
-				Vector3.ZERO, Color(0.9, 0.88, 0.84))
-		_tube_along(kb, Vector3(side * 0.62, -1.95, -3.55) * S, Vector3(side * 0.35, 1.0, -0.4), 1.35 * S, 0.19 * S, 0.02 * S, 8,
-			Vector3(side * 0.25, 0, 0.3) * S, Color(0.85, 0.82, 0.76), Color(1.0, 1.0, 0.98))
-	CreatureArt.built(head, kb, bone)
-	var wood := CreatureArt.painted(Color(0.46, 0.34, 0.24), 0.25, 0.75, 0.95)
-	var ka := MeshKit.new()
-	for side in [-1.0, 1.0]:
-		var from := Vector3(side * 1.05, 2.05, 0.95) * S
-		var dir := Vector3(side * 0.6, 0.85, 0.3)
-		var length := 4.8 * S
-		var bend := Vector3(side * 1.4, -0.4, 1.6) * S
-		_tube_along(ka, from, dir, length, 0.46 * S, 0.14 * S, 9, bend, Color(0.75, 0.72, 0.7), Color(1.0, 0.98, 0.95))
-		var tines := [[0.3, Vector3(side * 0.1, 1.0, -0.5), 2.3], [0.55, Vector3(side * 0.3, 1.0, -0.2), 2.0], [0.78, Vector3(side * 0.45, 1.0, 0.1), 1.6],
-			[0.97, Vector3(side * 0.7, 0.7, 0.4), 1.2]]
-		for tn in tines:
-			var at := _along(from, dir, length, bend, tn[0])
-			_tube_along(ka, at, tn[1], tn[2] * S, 0.24 * S, 0.04 * S, 7, Vector3(side * 0.2, 0, 0.35) * S, Color(0.85, 0.82, 0.8), Color(1.0, 0.98, 0.95))
-		# a cushion of moss where the antler meets the skull
-		ka.lump(Vector3(0.55, 0.3, 0.55) * S, 1, Transform3D(Basis.IDENTITY, from + Vector3(0, -0.05, 0) * S), 0.2, 9,
-			func(_p: Vector3, _c: Vector3) -> Color: return Color(0.62, 0.95, 0.42))
-	CreatureArt.built(head, ka, wood)
-
-
-## Glowing mushrooms in clumps on its flanks and shoulders, off the climbing line and the weak point.
-func _dress_back() -> void:
-	var stems := MeshKit.new()
-	var caps := MeshKit.new()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 908
-	for spot in [[-55.0, -6.6], [55.0, -6.0], [-60.0, -1.8], [58.0, 4.0], [-52.0, 4.6]]:
-		var phi := deg_to_rad(spot[0])
-		var n := Vector3(sin(phi), cos(phi), 0)
-		var base := Vector3(0, 0.5, spot[1]) * S + n * 3.6 * S
-		for i in rng.randi_range(3, 5):
-			var off := Vector3(rng.randf_range(-0.6, 0.6), 0, rng.randf_range(-0.8, 0.8)) * S
-			var dir := (n + Vector3(rng.randf_range(-0.3, 0.3), 0.35, rng.randf_range(-0.3, 0.3))).normalized()
-			var h := rng.randf_range(0.45, 0.95) * S
-			var p := base + off
-			_tube_along(stems, p, dir, h, 0.11 * S, 0.08 * S, 6, Vector3.ZERO, Color(0.92, 0.9, 0.84))
-			var r := rng.randf_range(0.3, 0.55) * S
-			caps.lump(Vector3(r, r * 0.45, r), 1, Transform3D(_axis_basis(dir), p + dir * h), 0.1, i, _white(), Vector3.INF, 0.0, 0.3)
-	var stem_mat := CreatureArt.painted(Color(0.9, 0.88, 0.82), 0.1)
-	var cap_mat := CreatureArt.painted(Color(0.36, 0.86, 0.8), 0.12)
-	cap_mat.set_shader_parameter("glow", Color(0.3, 1.0, 0.85))
-	cap_mat.set_shader_parameter("glow_energy", 1.4)
-	CreatureArt.built(torso, stems, stem_mat)
-	CreatureArt.built(torso, caps, cap_mat)
 
 
 static func _axis_basis(y: Vector3) -> Basis:
@@ -436,26 +319,26 @@ func _think(delta: float) -> void:
 	var d := to.length()
 	var front := (-global_basis.z).dot(to.normalized()) if d > 0.1 else 1.0
 	var cd := 0.7 if rage else 1.0
-	if d < 15.0 and front > 0.45 and _cooldowns.swipe <= 0.0:
+	if d < 15.0 * REACH and front > 0.45 and _cooldowns.swipe <= 0.0:
 		_swipe_side = 1.0 if global_basis.x.dot(to) > 0.0 else -1.0
 		set_mode(Mode.SWIPE)
 		_cooldowns.swipe = 3.6 * cd
 		skill_used.emit("Vồ")
-	elif d < 17.0 and front > 0.0 and _cooldowns.stomp <= 0.0:
+	elif d < 17.0 * REACH and front > 0.0 and _cooldowns.stomp <= 0.0:
 		set_mode(Mode.STOMP)
 		_cooldowns.stomp = 6.5 * cd
 		skill_used.emit("Dậm Đất")
-	elif d > 17.0 and d < 42.0 and _cooldowns.pounce <= 0.0 and front > 0.6:
+	elif d > 17.0 * REACH and d < 42.0 * REACH and _cooldowns.pounce <= 0.0 and front > 0.6:
 		set_mode(Mode.POUNCE)
 		_cooldowns.pounce = 13.0 * cd
 		skill_used.emit("Chụp Quăng")
-	elif d > 26.0 and _cooldowns.throw <= 0.0 and front > 0.7:
+	elif d > 26.0 * REACH and _cooldowns.throw <= 0.0 and front > 0.7:
 		set_mode(Mode.THROW)
 		_cooldowns.throw = 7.5 * cd
 		skill_used.emit("Ném Đá Lớn")
 	else:
 		mode = Mode.WALK
-		_walk_to(target.global_position, 3.4 if rage else 2.4, 11.0, delta)
+		_walk_to(target.global_position, 3.4 if rage else 2.4, 11.0 * REACH, delta)
 
 
 func _wander(delta: float) -> void:
@@ -628,7 +511,7 @@ func _throw(delta: float) -> void:
 			rock.radius = 2.3 * S * 0.8
 			get_parent().add_child(rock)
 			rock.launch(from, aim, flight, self)
-			Fx.telegraph(aim, 5.5, flight)
+			Fx.telegraph(aim, 5.5 * REACH, flight)
 			_held_rock = null
 		if t > 1.6:
 			leg.override_on = false

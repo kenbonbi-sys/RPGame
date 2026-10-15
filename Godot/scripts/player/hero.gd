@@ -299,6 +299,19 @@ func _physics_process(delta: float) -> void:
 	_update_grip(delta)
 	_orient_model(delta)
 	is_climbing = _climb_body != null and (state == State.CLIMB or state == State.STAB)
+	_keep_above_land()
+
+
+## A colossus paw coming down on the hero can push it into the land, and a heightmap has nothing
+## below it to stand on: put the hero back on top instead of letting it fall out of the world.
+func _keep_above_land() -> void:
+	if is_climbing:
+		return
+	var floor_y := Terrain.height_at_world(global_position)
+	if global_position.y < floor_y - 0.4:
+		global_position.y = floor_y + 0.05
+		velocity.y = maxf(velocity.y, 0.0)
+		_peak_y = global_position.y
 
 
 # ================================================================== on the ground and in the air
@@ -1130,6 +1143,23 @@ func _orient_model(delta: float) -> void:
 	var cur := model.basis.orthonormalized()
 	var q := Quaternion(cur).slerp(Quaternion(want.orthonormalized()), 1.0 - exp(-14.0 * delta))
 	model.basis = Basis(q).scaled(Vector3.ONE * model_scale)
+	model.position.y = lerpf(model.position.y, _feet_lift(), 1.0 - exp(-14.0 * delta))
+
+
+## Keeps the soles on the land as it is drawn: the drawn triangles can sit above the collider
+## between samples, and the sword idle dips the feet a few centimetres below the rest pose.
+func _feet_lift() -> float:
+	if not (state == State.GROUND or state == State.ROLL) or on_colossus or not is_on_floor():
+		return 0.0
+	var lift := 0.0
+	for i in get_slide_collision_count():
+		if Terrain.is_ground(get_slide_collision(i).get_collider()):
+			var drawn := Terrain.drawn_height_at_world(global_position) - global_position.y
+			lift = clampf(drawn, -0.2, 0.3)
+			break
+	if model.has_method("sole_height"):
+		lift -= minf(0.0, model.sole_height() * model_scale)
+	return lift
 
 
 ## A basis whose +Z (the KayKit model's front) points along `fwd`, upright along `up`.

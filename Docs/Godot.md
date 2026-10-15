@@ -44,13 +44,14 @@ Godot/
     enemies/           colossus.gd (nền chung) · gau_ma.gd · weak_point.gd · boulder.gd · enemy.gd (quái thường) · slime.gd · shroom.gd · enemy_spawner.gd · creature_art.gd
     world/             world_map.gd (bố cục) · terrain*.gd · foliage.gd · village.gd · arena.gd · props.gd · palette.gd · grass.gd
                        mesh_kit.gd (dựng hình bằng code) · tree_art.gd (cây, bụi) · rock_art.gd (đá, khối vách) · house_art.gd (nhà, sạp, thùng, cờ, rào)
-    ui/hud.gd · vfx/fx.gd · debug/autoshot.gd
+    ui/hud.gd · ui/game_icons.gd (biểu tượng vẽ bằng SVG) · vfx/fx.gd · debug/autoshot.gd
   shaders/             đất, nước, lông colossus, ấn ký điểm yếu, tán cây (canopy), bề mặt vẽ tay (painted), đá, cỏ, ánh sáng chung (stylized_light)
   world/               terrain_data.res (đất đã bake) · map_preview.png · environment.tres (trời, sương, màu)
   data/                số liệu chuyển từ Unity (abilities, items, classes, races, quests, combat, progression .json)
+  assets/creatures/    slime.glb · shroom.glb · gau_ma.glb, nặn bằng Tools/Sculpt (xem dưới)
   assets/third_party/  model CC0 (xem cuối trang)
   tests/               test_runner.tscn
-  tools/               bake_world.gd · list_anims.gd · measure.gd
+  tools/               bake_world.gd · list_anims.gd · measure.gd · model_shots.tscn (chụp một model) · icon_sheet.tscn (bảng mọi biểu tượng)
 ```
 
 ## Số liệu: một nguồn cho cả hai bản
@@ -83,9 +84,11 @@ Font **Barlow Condensed** (SemiBold, Bold, ExtraBold), khung xiên như Dauntles
 - **Góc trái trên:** chân dung hero quay trực tiếp (một camera nhỏ chỉ thấy lớp 11), vòng quanh chân dung là máu; huy hiệu cấp; tên và lớp; thanh máu xanh ngọc (phần xanh lam là lượng sát thương đang được buff đỡ, phần trắng là máu vừa mất đang rút dần); thanh vàng là sức bám; năng lượng chia ô 10 điểm; vạch kinh nghiệm; ô buff với số giây còn lại.
 - **Giữa trên:** la bàn B, ĐB, Đ, ĐN, N, TN, T, TB theo hướng camera; chấm xanh là làng, hình thoi đỏ là colossus. Khi colossus đang săn hero thì tên và thanh máu của nó hiện ngay dưới la bàn, còn lại là tên vùng.
 - **Phải trên:** biểu tượng tam giác ngược với phần trăm máu còn lại của colossus.
-- **Giữa dưới:** 8 ô chiêu có biểu tượng theo hệ (kiếm, lửa, băng, sét, độc, thánh, bóng tối, hỗ trợ, di chuyển), phím, năng lượng tốn, hồi chiêu dạng màn che có số giây, tên chiêu.
+- **Giữa dưới:** 8 ô chiêu, mỗi chiêu một biểu tượng riêng (xem dưới), phím, năng lượng tốn, hồi chiêu dạng màn che có số giây, tên chiêu.
 - **Phải dưới:** 3 bình thuốc Z X C và số lượng.
-- **Trái dưới:** nhật ký sự kiện (nhặt đồ, hạ quái, kinh nghiệm, lên cấp, boss phát hiện) qua `Game.log(text, color)` / tín hiệu `Game.message`, mờ đi sau 8 s; dòng "[Enter] Để trò chuyện" dành cho bản online.
+- **Trái dưới:** nhật ký sự kiện (nhặt đồ, hạ quái, kinh nghiệm, lên cấp, boss phát hiện), mỗi dòng có biểu tượng (đồng vàng, ngôi sao kinh nghiệm, đầu lâu, bình thuốc, giọt gel...), qua `Game.log(text, color, icon)` / tín hiệu `Game.message`; nhặt cùng một thứ liên tiếp thì cộng dồn ("+1 vàng" hai lần thành "+2 vàng"); mờ đi sau 8 s; dòng "[Enter] Để trò chuyện" dành cho bản online.
+
+**Biểu tượng** (`game_icons.gd`): khoảng 70 hình vẽ bằng đường SVG trong khung 100 × 100 (kiếm, rìu, dao găm, cung tên, khiên, tim, lửa, bông tuyết, tia sét, đầu lâu, trăng, mặt trời, mắt, bàn tay, nắm đấm, cánh, ủng, vòng xoáy, nốt nhạc, lá, dây gai, xúc tu, quả cầu, sao chổi, mũi lướt, sóng âm, giọt, bẫy, mây, cột sáng, bình thuốc, đá quý, đồng vàng...). Mỗi chiêu trong 92 chiêu có công thức riêng theo id (`SKILLS`, trùng tên sprite `sk_<id>` của bản Unity): một hình chính sáng màu, viền tối, quầng sáng theo hệ, cộng một hình nền cùng màu hệ phía sau (Chém Gió = kiếm + vệt chém, Xung Phong = khiên + mũi lướt, Bão Kiếm = ba thanh kiếm trong vòng xoáy...). Vật phẩm lấy hình theo id (bình thuốc theo màu, gel, nấm, cỏ, đá quý, giáp, ủng, bí kíp mang màu hệ của chiêu...). Godot vẽ SVG thành ảnh lúc chạy (`Image.load_svg_from_string`) và giữ lại. Xem cả bộ: `Godot_console.exe --headless --path Godot res://tools/icon_sheet.tscn -- --out D:/icons.png`.
 - **Bảng tên quái** (`nameplate.gd`): cả bảng xoay theo camera nên nền và thanh máu luôn khớp nhau; phần vàng là máu vừa mất rút dần. Số sát thương dùng Barlow ExtraBold.
 
 ## Camera kiểu SotC (`sotc_camera.gd`)
@@ -96,12 +99,14 @@ Camera nằm trên `SpringArm3D` (không xuyên tường), đi theo hero hơi tr
 
 Trạng thái: đất, không trung, Lướt, chém, bám, đâm, ngã, chết.
 
-**Model** (`hero_model.gd`): bộ đồ **Ranger** của Quaternius (Modular Character Outfits – Fantasy), đầu, mắt, tóc lấy từ Universal Base Characters (phần đầu và cổ được cắt khỏi thân theo trọng số xương), khăn quàng đỏ và thanh kiếm bản to gắn vào xương tay phải. Hoạt ảnh lấy từ Universal Animation Library 1 và 2 (cùng bộ xương kiểu Unreal: `pelvis`, `spine_01`, `upperarm_l`...): chỉ chép xoay của từng xương và vị trí hông (đã đổi tỉ lệ), bỏ xương gốc và scale. `ALIASES` ánh xạ tên hoạt ảnh cũ (KayKit) sang tên trong UAL, nên `hero.gd` không phải đổi. Lưới của hero nằm ở lớp hiển thị 2 (không dính decal) và lớp 11 (chỉ hero, cho camera chân dung trên HUD).
+**Model** (`hero_model.gd`): bộ đồ **Ranger** của Quaternius (Modular Character Outfits – Fantasy), đầu, mắt, tóc lấy từ Universal Base Characters (phần đầu và cổ được cắt khỏi thân theo trọng số xương), khăn quàng đỏ và thanh kiếm gắn vào xương tay phải. Kiếm dựng từng mặt (`HeroModel.sword_mesh`): lưỡi tiết diện hình thoi có cạnh vát sáng, rãnh máu sẫm, mũi nhọn thật, chắn tay mạ vàng hai đầu vểnh về phía mũi, hai viên ngọc, chuôi quấn da từng khoanh, núm chuôi nhiều mặt. Hoạt ảnh lấy từ Universal Animation Library 1 và 2 (cùng bộ xương kiểu Unreal: `pelvis`, `spine_01`, `upperarm_l`...): chỉ chép xoay của từng xương và vị trí hông (đã đổi tỉ lệ), bỏ xương gốc và scale. `ALIASES` ánh xạ tên hoạt ảnh cũ (KayKit) sang tên trong UAL, nên `hero.gd` không phải đổi. Lưới của hero nằm ở lớp hiển thị 2 (không dính decal) và lớp 11 (chỉ hero, cho camera chân dung trên HUD).
 
 - **Sức bám** (thanh vàng dưới thanh máu, 100 điểm): bám đứng yên tốn 5/s, leo tốn 10/s, colossus lắc mình tốn thêm tới 34/s, gồng đâm tốn thêm 6/s. Hồi 38/s trên đất, 14/s khi đứng trên lưng colossus. Hết sức bám thì rơi.
 - **Leo:** bề mặt bám được là va chạm có `meta climbable = true` (lông). Giáp vỏ cây, mặt nạ xương và móng thì không bám được. Điểm bám được lưu theo toạ độ riêng của bộ phận đang bám, nên hero đi theo con quái khi nó bước, quay hay lắc. Leo tới mép thì tự trèo lên mặt trên.
 - **Đứng trên lưng:** hero được mang theo bộ phận dưới chân. Khi colossus lắc mình mà không giữ chuột phải thì bị hất văng.
 - **Rơi:** rơi quá 7,5 m mất 7 máu mỗi mét.
+- **Chân chạm đất:** đất vẽ là tam giác 2 m còn va chạm là lưới 1 m nội suy, nên ở khoảng 9% bản đồ mặt đất nhìn thấy cao hơn chỗ chân thật sự đứng; hoạt ảnh thủ kiếm khi đứng yên cũng hạ chân 3 cm dưới tư thế gốc. Model được nâng hạ cho đế giày nằm trên mặt đất nhìn thấy (`Hero._feet_lift`, `Terrain.drawn_height_at_world`, `HeroModel.sole_height`).
+- **Không rơi khỏi bản đồ:** chân colossus giáng xuống có thể ấn hero xuống dưới mặt đất, mà heightmap không có gì bên dưới; hễ hero (không đang bám) thấp hơn mặt đất 0,4 m là được đặt lại lên trên (`Hero._keep_above_land`).
 - Gục ngã thì sau 3,5 s về lại làng.
 
 ## Chiến đấu (giai đoạn 2)
@@ -122,24 +127,32 @@ Bản Unity chỉ có hai loài trong rừng; cả hai đã sang 3D (dựng bằ
 - **Slime Rêu** (cấp 2, 60 máu): nhảy cóc đuổi theo, ngồi thụp 0,25 s rồi lao tới (10 sát thương, đẩy lùi 5), chạm vào người gây 6. Rơi Gel Slime, vàng, đôi khi Bình Máu. 16 XP.
 - **Nấm Độc** (cấp 3, 48 máu, yếu Lửa 30%): giữ khoảng cách, lùi khi bị áp sát, đi ngang, bắn bào tử (9 sát thương Độc, chậm 35% trong 1,8 s). Rơi Mũ Nấm Đỏ, vàng, Bình Năng Lượng, Cỏ Thuốc. 20 XP.
 
-Hình dáng (`creature_art.gd`): Slime là thạch trong suốt có ánh ướt, sỏi và cành con mắc bên trong, mũ rêu có mầm lá và một cây nấm đỏ tí hon, mắt to có chấm sáng và lông mày cau. Nấm Độc có mũ tím sần với các đốm nổi, phiến nấm bên dưới, chân rễ, tay ngắn. Mặt quái nhìn về −Z; trước đây model bị quay ngược nên quái đi lùi, đã sửa trong `enemy.gd`.
+Hình dáng (`creature_art.gd`, lưới nặn bằng `Tools/Sculpt`): Slime là khối thạch xanh bạc hà trong suốt hình giọt kẹo, chân chảy xệ thành bảy giọt, đôi mắt giận dữ đen bóng có chấm sáng, miệng cau có lưỡi, mũ rêu dày mép lởm chởm có sợi rêu rủ xuống, mầm lá và một cây nấm đỏ đốm trắng, sỏi và cành con mắc bên trong. Nấm Độc có thân bụng phệ màu kem ửng tím, mũ tím đậm nhô đỉnh với mép gợn sóng và mụn vàng chanh, phiến nấm bên dưới, vòng da dưới mũ, mắt vàng chanh phát sáng xếch giận, mày tím, miệng há có hai răng nanh, tay ngắn, chân rễ ba ngón. Mặt quái nhìn về −Z; trước đây model bị quay ngược nên quái đi lùi, đã sửa trong `enemy.gd`.
+
+### Nặn quái bằng trường khoảng cách (`Tools/Sculpt`)
+
+`python Tools/Sculpt/creatures.py [slime] [shroom] [gau_ma] [--only head,torso]` nặn quái và ghi `Godot/assets/creatures/<tên>.glb` (mỗi bộ phận một node), rồi mở editor hoặc chạy `--headless --path Godot --import` để Godot nhập lại. Cần Python có numpy.
+
+- `sdf.py`: hình cơ bản (cầu, elipxoit, côn tròn, hộp bo cạnh, xuyến, mặt phẳng, ống theo đường cong) ghép bằng hợp mềm (màu hoà vào nhau ở chỗ nối), khoét mềm (chỗ khoét có màu riêng: hốc mắt, miệng), giao, lớp vỏ ôm theo thân (`shell`, cho giáp), đẩy mặt bằng nhiễu. **Lông**: các lọn lông xếp chồng như ngói (`clumps`), dài theo hướng chải, gốc to đầu nhọn, cao nhất ngay trước mút, có rãnh sợi chạy dọc; ở đầu mút thân (mông, ngực, đầu gối) lọn đổi sang hướng chải thứ hai để luôn nằm dọc theo da. Mặt lưới dựng bằng *surface nets*, đỉnh được kéo đúng lên mặt, pháp tuyến lấy từ trường, màu đỉnh có sẵn bóng khe (tối trong kẽ) và độ cong (sáng trên gờ) cho giống vẽ tay.
+- `creatures.py`: Slime (nặn ở bán kính 1, game nhân theo `radius`), Nấm Độc (mét); `bear.py`: Gấu Ma theo đơn vị gấu, mỗi bộ phận trong khung của `AnimatableBody3D` của nó và ôm đúng khối va chạm: mặt lông bắt đầu lõm vào trong 0,12 rồi lọn lông nhô ra quá một chút, nên hero bám đúng chỗ nhìn thấy. Bộ phận đã nặn được giữ trong `Tools/Sculpt/.cache`; `--only` chỉ nặn lại những phần nêu tên (cả con gấu mất khoảng 2 phút).
+- Xem nhanh một model dưới trời và nắng của game: `Godot_console.exe --path Godot res://tools/model_shots.tscn -- --model slime|shroom|bear|hero|sword --shots-dir D:/shots`.
 
 Vùng phát hiện, bán kính dây xích, lang thang và ngủ được nhân `Enemy.AREA = 1,6` vì thế giới 3D rộng hơn; tầm đánh và đạn giữ nguyên. Sói, Ong Bắp Cày, Cây Ma, Ma Rừng, Sói Đầu Đàn, Vua Slime Hoàng Kim mới nằm trong kế hoạch của bản Unity, chưa có code nên cũng chưa chuyển.
 
 ## Colossus
 
-`Colossus` là lớp nền chung. Thân con quái là các `AnimatableBody3D` trên lớp vật lý `colossus` (layer 4), được đặt lại vị trí mỗi khung hình. Lông vẽ tay (`fur.gdshader`): vệt lông mềm, lưng sáng bụng sẫm, rêu mọc trên lưng; các lọn lông cong dày phủ quanh thân (`Colossus.lock_mesh`). Phần lông được vẽ bằng lưới sần (`Colossus.fur_mesh`): mặt da lồi lõm thành từng mảng dài theo thân, phần lớn lõm vào trong khối va chạm, lồi ra tối đa khoảng 0,25 m, nên tay chân hero vẫn bám đúng chỗ nhìn thấy; ấn ký điểm yếu đặt cách da 0,3 m cho khỏi bị lông che. Giáp vẽ thành nhiều tấm vỏ cây chồng lên nhau như vảy (va chạm vẫn là một khối). **Điểm yếu** (`WeakPoint`) là ấn ký phát sáng: điểm *vital* giữ máu boss, điểm thường gây hiệu ứng khi bị phá. Chém kiếm vào da không có tác dụng (chỉ toé lửa). Mọi colossus hồi sinh sau 3 phút như mọi boss trong game.
+`Colossus` là lớp nền chung. Thân con quái là các `AnimatableBody3D` trên lớp vật lý `colossus` (layer 4), được đặt lại vị trí mỗi khung hình. Colossus có model nặn sẵn (như Gấu Ma) đặt `draw_shapes = false`: khối va chạm khi đó không vẽ gì. Cách vẽ cũ vẫn còn cho colossus khác: lông vẽ tay (`fur.gdshader`): vệt lông mềm, lưng sáng bụng sẫm, rêu mọc trên lưng; các lọn lông cong dày phủ quanh thân (`Colossus.lock_mesh`). Phần lông được vẽ bằng lưới sần (`Colossus.fur_mesh`): mặt da lồi lõm thành từng mảng dài theo thân, phần lớn lõm vào trong khối va chạm, lồi ra tối đa khoảng 0,25 m, nên tay chân hero vẫn bám đúng chỗ nhìn thấy; ấn ký điểm yếu đặt cách da 0,3 m cho khỏi bị lông che. Giáp vẽ thành nhiều tấm vỏ cây chồng lên nhau như vảy (va chạm vẫn là một khối). **Điểm yếu** (`WeakPoint`) là ấn ký phát sáng: điểm *vital* giữ máu boss, điểm thường gây hiệu ứng khi bị phá. Chém kiếm vào da không có tác dụng (chỉ toé lửa). Mọi colossus hồi sinh sau 3 phút như mọi boss trong game.
 
 ### Gấu Ma Rừng Già (`gau_ma.gd`)
 
-Cao khoảng 18 m, dài khoảng 30 m, sống trong Hang Gấu Ma (sàn phẳng bán kính 50 m, có 4 Tảng Đá Lớn và tàn tích cột đá). Bốn chân bước theo kiểu IK thủ tục (chân chéo nhau thay phiên), mỗi bước làm rung đất, giẫm trúng thì bị ngã.
+Cao khoảng 10 m tới đỉnh đầu, dài khoảng 17 m (`GauMa.S = 0,8` mét mỗi đơn vị gấu; trước là 1,4 và cao 18 m, người chơi thấy quá to; tầm các chiêu nhân theo `REACH = S / 1,4`), sống trong Hang Gấu Ma (sàn phẳng bán kính 50 m, có 4 Tảng Đá Lớn và tàn tích cột đá). Bốn chân bước theo kiểu IK thủ tục (chân chéo nhau thay phiên), mỗi bước làm rung đất, giẫm trúng thì bị ngã.
 
-- **Đường leo:** lông sau bắp chân sau → mông → lưng → cổ → đỉnh đầu. Hai bên sườn có giáp vỏ cây, ngực có tấm giáp, mặt là mặt nạ xương.
-- **Hình dáng:** đôi gạc như cành cây cổ thụ có rêu ở gốc, mày xương nặng, hàng răng và hai nanh cong ở hàm dưới, bàn chân có ngón và bốn vuốt cong (gốc sẫm, đầu ngà), cụm nấm phát sáng xanh ngọc trên hai bên sườn và vai (tránh đường leo và điểm yếu). Gạc, răng, nấm chỉ là hình, không có va chạm.
+- **Đường leo:** lông sau bắp chân sau → mông → lưng (qua u vai, có thêm một khối cầu va chạm) → cổ → đỉnh đầu. Hai bên sườn có giáp vỏ cây, ngực có tấm giáp, mặt là mặt nạ xương.
+- **Hình dáng** (nặn bằng `Tools/Sculpt/bear.py`): một con gấu già bị rừng mọc lên người. Lông nâu sẫm thành từng lọn chải về sau và xuống, đầu lọn sáng, bụng tối, chân "đi tất" sẫm; thảm rêu xanh dày trên lưng và u vai; hai hàng vảy vỏ cây hình bầu dục ôm theo sườn, ba tấm ngang ngực, tấm ốp ống chân, đều có vết nứt vỏ cây, địa y và rêu trên mép; mặt nạ xương ngà phủ trán, quanh mắt và sống mũi, hốc mắt sâu có mắt phát sáng, vết nứt, vạch xanh ngọc; mõm rộng, mũi đen, hàng răng và hai nanh cong; tai lông; đôi gạc như cành cây có rêu ở gốc và lá ở đầu; bàn chân bốn ngón với vuốt cong (gốc sẫm, đầu ngà); cụm nấm phát sáng xanh ngọc hai bên sườn và vai (tránh đường leo và điểm yếu). Gạc, răng, nấm chỉ là hình, không có va chạm.
 - **Điểm yếu:** bắp chân sau trái (45 máu, phá được thì gấu **Quỵ Gối** khoảng 10 s, lưng hạ xuống thành dốc) · u lưng (120) · đỉnh đầu (120). Đâm hết 2 điểm vital thì gấu ngã xuống.
 - **Chiêu** (lấy từ boss 2D, mỗi chiêu có vòng cảnh báo đỏ trên đất và chữ "Kỹ năng: …"):
   - *Vồ*: quét chân trước.
-  - *Dậm Đất*: chồm lên, giáng xuống, sóng chấn bán kính 15 m.
+  - *Dậm Đất*: chồm lên, giáng xuống, sóng chấn bán kính 11 đơn vị gấu (8,8 m). Hero đứng trên bàn chân cũng trúng (trước đây được coi như "đang ở trên gấu" nên không bị đánh, rồi bị chân ấn lọt xuống dưới đất).
   - *Ném Đá Lớn*: ném đá, đá nằm lại thành *Tảng Đá Lớn*, tối đa 4 tảng.
   - *Chụp Quăng*: nhảy vồ. Đáp cạnh một Tảng Đá Lớn thì bị **Choáng** 7 s, đầu gục xuống đất, leo lên đầu được ngay.
   - *Lắc Mình*: khi có người trên lưng.
@@ -147,7 +160,7 @@ Cao khoảng 18 m, dài khoảng 30 m, sống trong Hang Gấu Ma (sàn phẳng 
 
 ## Kiểm tra
 
-- **Test** (khoảng 20 s, 113 kiểm tra): `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot res://tests/test_runner.tscn`. Mã thoát 0 là đạt. Gồm bố cục thế giới, đất đã bake, giải IK, phím, điểm yếu/quỵ gối/ngã/hồi sinh, sát thương rơi, **leo chân gấu có vật lý thật**, giới hạn số đá; công thức sát thương (đúng ví dụ trong test Unity: Cầu Lửa 56 vào điểm yếu Lửa ra 73, có giáp ra 64), bảng XP, chỉ số cấp 1 của 9 lớp, các trạng thái, Trấn Áp, khống chế lặp lại, hero chém chết slime, Cầu Lửa gây Bỏng, bào tử làm chậm, Lướt Hoàn Hảo.
+- **Test** (khoảng 25 s, 123 kiểm tra): `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot res://tests/test_runner.tscn`. Mã thoát 0 là đạt. Gồm bố cục thế giới, đất đã bake, giải IK, phím, điểm yếu/quỵ gối/ngã/hồi sinh, sát thương rơi, **leo chân gấu có vật lý thật**, giới hạn số đá; công thức sát thương (đúng ví dụ trong test Unity: Cầu Lửa 56 vào điểm yếu Lửa ra 73, có giáp ra 64), bảng XP, chỉ số cấp 1 của 9 lớp, các trạng thái, Trấn Áp, khống chế lặp lại, hero chém chết slime, Cầu Lửa gây Bỏng, bào tử làm chậm, Lướt Hoàn Hảo, Dậm Đất không đẩy hero xuống dưới đất ở cả năm chỗ đứng quanh chân gấu.
 - **AutoShot** (khoảng 75 s, mở cửa sổ): `Godot_v4.7.2-stable_win64_console.exe --path Godot -- --autoshot --shots-dir D:/shots [--autoshot-only world|forest|climb|skills|brawl]`. Chụp 29 cảnh (làng, hai góc nhà trong làng, rừng, đấu trường; bãi slime, Chém Gió, đồ rơi, Chém Xoáy, Nấm Độc bắn, Cầu Lửa, Lôi Phạt; bám chân, đâm, quỵ gối, trên lưng, lắc mình, Dậm Đất, Ném Đá, Chụp Quăng và Choáng), rồi để gấu tự đánh 40 s. Mã 0 là sạch, 1 là có lỗi trong log, 2 là quá giờ.
 - Chạy nhanh không cần cửa sổ: `--headless --path Godot --quit-after 200`.
 
