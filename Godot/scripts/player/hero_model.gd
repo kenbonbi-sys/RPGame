@@ -130,10 +130,24 @@ func _ready() -> void:
 		var i := skeleton.find_bone(b)
 		if i >= 0:
 			_sole_bones[i] = (_to_model * skeleton.get_bone_global_rest(i)).origin.y
+	_sturdy()
+	CharacterLook.stylize(self)
 
 
 ## How high the lower sole is above the model's origin in the current pose; some clips (the
 ## sword idle) dip the feet below where the rest pose stands.
+## Dauntless's slayers are built sturdier than the kit: bigger hands and feet. The clips carry no
+## scale, so a scale set on these bones stays.
+const STURDY := {"hand_l": 1.14, "hand_r": 1.14, "foot_l": 1.1, "foot_r": 1.1}
+
+
+func _sturdy() -> void:
+	for b in STURDY:
+		var i := skeleton.find_bone(b)
+		if i >= 0:
+			skeleton.set_bone_pose_scale(i, Vector3.ONE * float(STURDY[b]))
+
+
 func _layers() -> int:
 	return 2 | (PORTRAIT_LAYER if portrait else 0)
 
@@ -421,6 +435,7 @@ func set_weapon(id: String) -> void:
 			mi.material_override = part[1]
 			mi.layers = _layers()
 			root.add_child(mi)
+			CharacterLook.stylize_mesh(mi)
 
 
 ## The armour worn (Armour): each slot whose piece changed is drawn again (ArmourArt); a helmet
@@ -440,6 +455,7 @@ func set_armour(worn: Dictionary) -> void:
 		var nodes := ArmourArt.dress(skeleton, _armour_sources(), slot, want)
 		for mi in nodes:
 			mi.layers = _layers()
+			CharacterLook.stylize_mesh(mi)
 		if not nodes.is_empty():
 			_armour_nodes[slot] = nodes
 	armour = worn.duplicate()

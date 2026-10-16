@@ -1,5 +1,7 @@
 # Rừng Thì Thầm 3D (Godot)
 
+> **17/10/2026: dự án chuyển sang Unreal Engine 5** (xem `Docs/Unreal.md`). Bản Godot dừng phát triển ở đây và được giữ làm bản mẫu khi viết lại: luật chiến đấu, số liệu, bố cục thế giới, menu, test.
+
 Từ 14/10/2026 game được chuyển sang **Godot 4.7 3D**, góc nhìn như *Shadow of the Colossus*: camera treo sau lưng nhân vật, boss là những colossus khổng lồ phải leo lên và đâm vào điểm yếu. Bản Unity trong `Assets/` vẫn là bản bạn bè đang chơi online (máy chủ protocol 13) cho tới khi bản Godot bắt kịp. Hai bản sống chung một repo, cùng nhánh `main`.
 
 Project nằm trong `Godot/`. Code viết bằng **GDScript** (máy chưa có .NET). Engine: `C:\Users\PC\Godot\Godot_v4.7.2-stable_win64.exe`, đã đối chiếu SHA512 với bản chính thức.
@@ -92,13 +94,15 @@ Bảy ngôi nhà khung gỗ quanh bãi cỏ giữa làng, dựng bằng code: m�
 
 Font **Barlow Condensed** (SemiBold, Bold, ExtraBold), khung xiên như Dauntless.
 
-- **Góc trái trên:** chân dung hero quay trực tiếp (một camera nhỏ chỉ thấy lớp 11), vòng quanh chân dung là máu; huy hiệu cấp; tên và lớp; thanh máu xanh ngọc (phần xanh lam là lượng sát thương đang được buff đỡ, phần trắng là máu vừa mất đang rút dần); thanh vàng là sức bám; năng lượng chia ô 10 điểm; vạch kinh nghiệm; ô buff với số giây còn lại.
-- **Giữa trên:** la bàn B, ĐB, Đ, ĐN, N, TN, T, TB theo hướng camera; chấm xanh là làng, hình thoi đỏ là colossus. Khi colossus đang săn hero thì tên và thanh máu của nó hiện ngay dưới la bàn, còn lại là tên vùng.
-- **Phải trên:** biểu tượng tam giác ngược với phần trăm máu còn lại của colossus.
+Từ 17/10/2026 HUD được làm lại theo đúng ảnh HUD của Dauntless (tối giản):
+
+- **Góc trái trên:** tên nhỏ; vòng tròn đèn lồng viền xanh lơ (thay cho chân dung); thanh máu **xanh lá** dài và mảnh, nghiêng ở đầu (phần xanh lam là lượng sát thương đang được buff đỡ, bóng nhạt là máu vừa mất đang rút); thanh thể lực vàng mỏng ngay dưới (sức bám); ô phím V và ô cấp màu cam; thanh vũ khí ngắn có núm tròn (năng lượng); ô buff. Không có số máu, tên lớp, vạch kinh nghiệm.
+- **Giữa trên:** dải la bàn mờ dần hai đầu, các hướng B, ĐB, Đ, ĐN, N, TN, T, TB; chấm xanh là làng, hình thoi đỏ là colossus. Không có thanh máu boss (Dauntless không có), không tên chiêu của boss.
+- **Phải trên:** tam giác ngược nhỏ màu nâu với phần trăm máu còn lại của colossus; chuyển cam khi nó đang choáng.
 - **Giữa dưới:** không có thanh chiêu, như HUD của Dauntless (từ 17/10/2026; vũ khí là bộ chiêu, đồ đạc nằm trong Trang Bị). Chỉ còn thanh tụ lực đòn nặng và dòng gợi ý ("Giữ E để bám", "[F] Nói chuyện với …").
-- **Phải dưới:** 4 ô vật phẩm như Dauntless: ô cao bo tròn, nền tối trong, biểu tượng ở giữa, "×4" ở dưới, phím nhỏ phía trên. Z X C là ba bình thuốc, ô thứ tư còn trống.
+- **Phải dưới:** 4 ô vật phẩm như Dauntless: ô cao bo tròn, nền trong, quả cầu phát sáng (đỏ có chữ thập trắng, xanh lam có tia sét, xanh lục có lá), "×4" ở dưới, phím nhỏ phía trên. Z X C là ba bình thuốc, ô thứ tư còn trống.
 - Khi một menu hay cuộc nói chuyện đang mở, cả HUD ẩn đi (như Dauntless).
-- **Trái dưới:** nhật ký sự kiện (nhặt đồ, hạ quái, kinh nghiệm, lên cấp, boss phát hiện), mỗi dòng có biểu tượng (đồng vàng, ngôi sao kinh nghiệm, đầu lâu, bình thuốc, giọt gel...), qua `Game.log(text, color, icon)` / tín hiệu `Game.message`; nhặt cùng một thứ liên tiếp thì cộng dồn ("+1 vàng" hai lần thành "+2 vàng"); mờ đi sau 8 s; dòng "[Enter] Để trò chuyện" dành cho bản online.
+- **Trái dưới:** nhật ký sự kiện (nhặt đồ, hạ quái, kinh nghiệm, lên cấp, boss phát hiện), mỗi dòng có biểu tượng (đồng vàng, ngôi sao kinh nghiệm, đầu lâu, bình thuốc, giọt gel...), qua `Game.log(text, color, icon)` / tín hiệu `Game.message`; nhặt cùng một thứ liên tiếp thì cộng dồn ("+1 vàng" hai lần thành "+2 vàng"); mờ đi sau 8 s; mỗi dòng có giờ ở đầu như Dauntless; dòng "[Enter] Để trò chuyện" dành cho bản online.
 
 **Biểu tượng** (`game_icons.gd`): khoảng 70 hình vẽ bằng đường SVG trong khung 100 × 100 (kiếm, rìu, dao găm, cung tên, khiên, tim, lửa, bông tuyết, tia sét, đầu lâu, trăng, mặt trời, mắt, bàn tay, nắm đấm, cánh, ủng, vòng xoáy, nốt nhạc, lá, dây gai, xúc tu, quả cầu, sao chổi, mũi lướt, sóng âm, giọt, bẫy, mây, cột sáng, bình thuốc, đá quý, đồng vàng...). Mỗi chiêu trong 92 chiêu có công thức riêng theo id (`SKILLS`, trùng tên sprite `sk_<id>` của bản Unity): một hình chính sáng màu, viền tối, quầng sáng theo hệ, cộng một hình nền cùng màu hệ phía sau (Chém Gió = kiếm + vệt chém, Xung Phong = khiên + mũi lướt, Bão Kiếm = ba thanh kiếm trong vòng xoáy...). Vật phẩm lấy hình theo id (bình thuốc theo màu, gel, nấm, cỏ, đá quý, giáp, ủng, bí kíp mang màu hệ của chiêu...). Godot vẽ SVG thành ảnh lúc chạy (`Image.load_svg_from_string`) và giữ lại. Xem cả bộ: `Godot_console.exe --headless --path Godot res://tools/icon_sheet.tscn -- --out D:/icons.png`.
 - **Bảng tên quái** (`nameplate.gd`): cả bảng xoay theo camera nên nền và thanh máu luôn khớp nhau. Số sát thương dùng Barlow ExtraBold.
@@ -186,6 +190,10 @@ Mỗi đòn trúng (`Combat.show_hit`):
 
 Thời gian GPU đổi theo lúc đo (máy nóng lên thì chậm hơn), nên hai bản được đo liền nhau; lúc máy còn mát thì là 4,10 → 3,39 ms. Phần GPU còn lại chủ yếu là chi phí cố định theo độ phân giải (SSAO, bloom, sương, đổ bóng điểm ảnh); máy yếu hơn sẽ thấy lợi nhiều hơn vì phải xử lý ít tam giác hơn hẳn. Đo lại: `Godot_console.exe --path Godot res://tools/perf_probe.tscn -- --out D:/perf.txt [--skip Grass,Foliage] [--no-shadows]` (cần cửa sổ; in cả thời gian nạp từng phần của thế giới).
 
+## Nhân vật kiểu Dauntless (17/10/2026)
+
+Hero và NPC không còn dùng chất liệu chân thực của bộ asset: mọi chất liệu chuẩn trên người họ (cả giáp và vũ khí) được đổi sang `shaders/character.gdshader` (`CharacterLook`): cùng ánh sáng vẽ tay với cảnh vật (chuyển sáng tối mềm, bóng ngả xanh), màu đậm hơn, viền sáng mạnh, kim loại có điểm sáng gọn. Texture bộ đồ không được làm mờ vì là tấm ghép nhiều mảnh (làm mờ thì màu các mảnh tràn sang nhau). Bàn tay to hơn 14%, bàn chân 10% (`HeroModel.STURDY`, các clip không có track scale nên giữ nguyên).
+
 ## Cảm giác chuyển động (17/10/2026)
 
 **Hero nhún và giãn** (`Hero.squash`, kéo theo thân model, giữ nguyên thể tích):
@@ -230,7 +238,7 @@ Vẽ bằng `menu_kit.gd` theo ảnh menu Dauntless: tấm nền xám xanh, dả
 | Kết Cấu (lọc bất đẳng hướng · mip) | 2× · +1 | 4× · +0,5 | 4× | 16× |
 | Hiệu Ứng Đặc Biệt (số hạt · mật độ cỏ) | 35% · 40% | 60% · 70% | 100% · 100% | 100% · 125% |
 
-- **Trang Bị** (B, `loadout_menu.gd`), theo màn Loadout của Dauntless: cột biểu tượng ô bên trái (vũ khí, mũ, giáp, găng, giày, đèn lồng); mỗi ô một hàng xanh đậm có hình món đồ, con số to (vũ khí: sức mạnh = Tấn Công của vũ khí; giáp: điểm kháng), các chip nguyên tố "+X vs" (xanh) và "−X vs" (đỏ) kèm biểu tượng hệ, và các ô Cell. Hàng đang chọn có viền sáng và dòng "Đổi Vũ Khí / Cell" bên dưới; Enter hay bấm vào hàng thì mở danh sách để đổi. Trên đầu có hai đồng xu: tổng kháng và sức mạnh. Bên phải là nhân vật xoay chậm trong bộ đồ đang mặc, dưới là bảng Kháng Nguyên Tố (điểm và % sát thương của sáu hệ). Góc phải dưới là 4 ô vật phẩm.
+- **Trang Bị** (B, `loadout_menu.gd`), theo màn Loadout của Dauntless: cột biểu tượng ô bên trái (vũ khí, mũ, giáp, găng, giày, đèn lồng); mỗi ô một hàng xanh đậm có hình món đồ, con số to (vũ khí: sức mạnh = Tấn Công của vũ khí; giáp: điểm kháng), các chip nguyên tố "+X vs" (xanh) và "−X vs" (đỏ) kèm biểu tượng hệ, và các ô Cell. Hàng đang chọn có viền sáng và dòng "Đổi Vũ Khí / Cell" bên dưới; Enter hay bấm vào hàng thì mở danh sách để đổi. Trên đầu có hai đồng xu: tổng kháng và sức mạnh. Từ 17/10/2026 bố cục theo màn Loadout thật: camera bay ra trước mặt nhân vật (`SotcCamera.showcase`), nhân vật đứng to giữa màn hình trên cảnh thật, không phủ tối; hai bên chỉ có dải tối mờ dần. Mỗi món hiện **hình 3D của chính nó** (`item_studio.gd` dựng món đồ trong một thế giới riêng có đèn, chụp một lần rồi giữ lại). Bên phải là bảng "Tổng Kết" đầu tím như Perk Summary (thẻ vũ khí, thẻ kháng/yếu từng hệ); dưới cùng là 4 ô vật phẩm và dải nút ĐỔI / QUAY LẠI.
   - Số trên chip là luật của game này: vũ khí "+50% vs" hệ khắc nó và "−20% vs" chính hệ của nó; giáp "+P vs" hệ của nó và "−P vs" hệ đối nghịch (mỗi điểm 0,5% sát thương). Dauntless ghi "+0,8 × sức mạnh / −0,4 × sức mạnh", nhưng wiki không nói con số đó đổi ra sát thương thế nào, nên không chép.
   - Cell, perk và đèn lồng chưa có trong game: ô Cell để trống (kiểu Prismatic, cell nào cũng gắn được), hàng đèn lồng mờ.
 

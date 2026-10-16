@@ -1,11 +1,14 @@
 class_name LoadoutMenu
 extends Control
-## The loadout, laid out like Dauntless's: a column of slot glyphs on the left (weapon, head,
-## torso, arms, legs, lantern), one dark navy row per slot with the item's icon, its number (the
-## weapon's power, an armour piece's resistance) and its element chips, "+X vs" what it is good
-## against and "−X vs" what it is poor against, and its cell sockets; the row picked has a bright
-## edge and "Đổi Vũ Khí / Cell" under it. Enter (or a click) opens the list to change that slot.
-## On the right the slayer turns slowly in what they wear, over the element resistances.
+## The loadout as Dauntless shows it. The camera swings round in front of the slayer, who stands
+## in the middle of the screen in the world as it is (no dimming). Down the left, over a dark wash:
+## the "Trang Bị" title with its emblem, a column of slot glyphs, and one dark navy row per slot
+## (weapon, head, torso, arms, legs, lantern) with the piece itself as a picture (ItemStudio), its
+## number (the weapon's power, a piece's resistance), its element chips "+X vs" and "−X vs", and its
+## cell sockets; the row picked has a bright edge and "Đổi Vũ Khí / Cell" under it. Enter or a click
+## opens the list to change that slot. On the right, the summary panel under a purple header (where
+## Dauntless sums the perks: here the weapon's element and the armour's resistances), and the
+## consumables; along the bottom a bar with the buttons.
 ##
 ## The numbers are this game's own: a weapon's power is its Attack; its element hits +50% against
 ## the opposing element and −20% against its own (Elements); an armour piece is worth its points
@@ -16,75 +19,58 @@ extends Control
 signal closed
 
 const SLOTS := ["weapon", "head", "torso", "arms", "legs", "lantern"]
-const GLYPHS := {"weapon": "sword", "head": "helm", "torso": "armor", "arms": "fist", "legs": "boot", "lantern": "orb"}
-const ROW_W := 560.0
-const ROW_H := 84.0
-const GAP := 12.0
+const GLYPHS := {"weapon": "axe", "head": "helm", "torso": "armor", "arms": "fist", "legs": "boot", "lantern": "orb"}
+const ROW_W := 520.0
+const ROW_H := 86.0
+const GAP := 10.0
+const PURPLE := Color(0.45, 0.16, 0.72)
 
 var hero: Node3D
 var selected := 0
-## The list to change the selected slot (-1 = closed) and the line picked in it.
+## The list to change the selected slot is open, and the line picked in it.
 var choosing := false
 var pick := 0
 var _options: Array = []
-var _preview_vp: SubViewport
-var _preview_cam: Camera3D
-var _spin := 0.0
+var _studio: ItemStudio
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	if Game.has_screen() and hero:
-		_make_preview()
+	_studio = ItemStudio.new()
+	add_child(_studio)
+	var cam := Game.cam()
+	if cam:
+		cam.showcase = true
 
 
 func _exit_tree() -> void:
-	if _preview_vp:
-		_preview_vp.queue_free()
+	var cam := Game.cam()
+	if cam:
+		cam.showcase = false
 
 
-func _process(delta: float) -> void:
-	_spin += delta * 0.35
-	_update_preview()
+func _process(_delta: float) -> void:
 	queue_redraw()
-
-
-# ------------------------------------------------------------------ the slayer turning in their gear
-func _make_preview() -> void:
-	_preview_vp = SubViewport.new()
-	_preview_vp.size = Vector2i(420, 560)
-	_preview_vp.transparent_bg = true
-	_preview_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	add_child(_preview_vp)
-	_preview_cam = Camera3D.new()
-	_preview_cam.fov = 30.0
-	_preview_cam.cull_mask = HeroModel.PORTRAIT_LAYER
-	var env := Environment.new()
-	env.background_mode = Environment.BG_CLEAR_COLOR
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.62, 0.7, 0.82)
-	env.ambient_light_energy = 0.85
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_preview_cam.environment = env
-	_preview_vp.add_child(_preview_cam)
-
-
-func _update_preview() -> void:
-	if _preview_cam == null or not is_instance_valid(hero):
-		return
-	var center: Vector3 = hero.global_position + Vector3.UP * 0.95
-	# from the front, swinging slowly side to side
-	var f: Vector3 = hero.facing
-	var a := atan2(f.x, f.z) + 0.5 + sin(_spin) * 0.6
-	var dir := Vector3(sin(a), 0.12, cos(a)).normalized()
-	var from := center + dir * 4.6
-	_preview_cam.global_transform = Transform3D(Basis.looking_at(center - from, Vector3.UP), from)
 
 
 # ------------------------------------------------------------------ what each row shows
 func _armour_slot(slot: String) -> bool:
 	return slot in Armour.SLOTS
+
+
+func _picture_weapon(id: String) -> Texture2D:
+	var tex := _studio.picture("w:" + id, ItemStudio.weapon_builder(id))
+	return tex if tex else GameIcons.weapon(id, 96)
+
+
+func _picture_piece(slot: String, set_id: String) -> Texture2D:
+	var model := hero.get("model") as HeroModel
+	var tex: Texture2D = null
+	# a bare head (Krolachi has no helm) is better told by the glyph
+	if model and (ArmourArt.drawn(set_id) or slot != "head"):
+		tex = _studio.picture("a:%s:%s" % [slot, set_id], ItemStudio.armour_builder(model, slot, set_id))
+	return tex if tex else GameIcons.armour_piece(slot, String(Armour.set_of(set_id).element), 96)
 
 
 func _row_item(slot: String) -> Dictionary:
@@ -98,20 +84,19 @@ func _row_item(slot: String) -> Dictionary:
 		if e != "neutral":
 			chips = [["+%d%%" % roundi((Elements.STRONG - 1.0) * 100.0), Elements.ALL[e].opposite, true],
 				["−%d%%" % roundi((1.0 - Elements.WEAK) * 100.0), e, false]]
-		return {"icon": GameIcons.weapon(id, 96), "name": it.name, "sub": "%s · %s" % [fam.name, Elements.display_name(e)],
-			"number": roundi(power), "glyph": "fist", "chips": chips, "cells": 2}
+		return {"icon": _picture_weapon(id), "name": it.name, "number": roundi(power), "word": "SỨC MẠNH",
+			"glyph": "fist", "chips": chips, "cells": 2}
 	if _armour_slot(slot):
 		var set_id := String(hero.armour.get(slot, ""))
 		var p := Armour.piece(set_id, slot)
 		if p.is_empty():
-			return {"empty": true, "name": "Chưa mặc %s" % Armour.SLOT_NAMES[slot]}
+			return {"empty": true, "name": "Chưa mặc %s" % Armour.SLOT_NAMES[slot], "cells": 0}
 		var chips := []
 		if p.element != "neutral":
 			chips = [["+%d" % int(p.resist), p.element, true], ["−%d" % int(p.resist), Elements.ALL[p.element].opposite, false]]
-		return {"icon": GameIcons.armour_piece(slot, p.element, 96), "name": p.name,
-			"sub": "Bộ %s · %s" % [Armour.set_of(set_id).name, Elements.display_name(p.element)],
-			"number": int(p.resist), "glyph": "shield", "chips": chips, "cells": 1}
-	return {"empty": true, "name": "Đèn Lồng", "sub": "Chưa có đèn lồng"}
+		return {"icon": _picture_piece(slot, set_id), "name": p.name, "number": int(p.resist), "word": "KHÁNG",
+			"glyph": "shield", "chips": chips, "cells": 1}
+	return {"empty": true, "name": "Đèn Lồng", "sub": "Chưa có đèn lồng", "cells": 1}
 
 
 func _change_label(slot: String) -> String:
@@ -129,14 +114,14 @@ func _options_for(slot: String) -> Array:
 		for id in hero.weapons:
 			var it := Weapons.item(id)
 			out.append([it.name, "%s · %s" % [Weapons.FAMILIES[it.family].name, Elements.display_name(it.element)],
-				GameIcons.weapon(id, 64), id, id == hero.weapon_item])
+				_picture_weapon(id), id, id == hero.weapon_item])
 	elif _armour_slot(slot):
 		for set_id in hero.wardrobe:
 			var p := Armour.piece(set_id, slot)
 			if p.is_empty():
 				continue
 			var sub := "Bộ %s · %s %d" % [Armour.set_of(set_id).name, Elements.display_name(p.element), int(p.resist)]
-			out.append([p.name, sub, GameIcons.armour_piece(slot, p.element, 64), set_id, String(hero.armour.get(slot, "")) == set_id])
+			out.append([p.name, sub, _picture_piece(slot, set_id), set_id, String(hero.armour.get(slot, "")) == set_id])
 	return out
 
 
@@ -164,23 +149,28 @@ func _choose(i: int) -> void:
 
 # ------------------------------------------------------------------ layout
 func _origin() -> Vector2:
-	return Vector2(maxf(40.0, size.x * 0.5 - 640.0), maxf(90.0, size.y * 0.5 - 330.0))
+	return Vector2(36.0, maxf(96.0, size.y * 0.5 - 330.0))
 
 
 func _row_rect(i: int) -> Rect2:
 	var o := _origin()
-	var extra := 22.0 if i > selected else 0.0
-	return Rect2(o + Vector2(70, i * (ROW_H + GAP) + extra), Vector2(ROW_W, ROW_H))
+	var extra := 20.0 if i > selected else 0.0
+	return Rect2(o + Vector2(62, i * (ROW_H + GAP) + extra), Vector2(ROW_W, ROW_H))
 
 
-func _list_rect() -> Rect2:
-	var o := _origin()
-	return Rect2(o + Vector2(70 + ROW_W + 24, 0), Vector2(380, 6 * (ROW_H + GAP)))
+func _right_rect() -> Rect2:
+	return Rect2(Vector2(size.x - 430, _origin().y - 10), Vector2(396, 470))
 
 
 func _option_rect(i: int) -> Rect2:
-	var l := _list_rect()
-	return Rect2(l.position + Vector2(10, 46 + i * 58), Vector2(l.size.x - 20, 52))
+	var l := _right_rect()
+	return Rect2(l.position + Vector2(10, 52 + i * 62), Vector2(l.size.x - 20, 56))
+
+
+func _buttons() -> Array:
+	var y := size.y - 50.0
+	return [[Rect2(Vector2(size.x - 170, y), Vector2(130, 34)), "QUAY LẠI", "back"],
+		[Rect2(Vector2(size.x - 320, y), Vector2(140, 34)), "ĐỔI", "change"]]
 
 
 # ------------------------------------------------------------------ input
@@ -195,6 +185,14 @@ func _gui_input(event: InputEvent) -> void:
 				if _row_rect(i).has_point(event.position):
 					selected = i
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		for b in _buttons():
+			if (b[0] as Rect2).has_point(event.position):
+				if b[2] == "back":
+					closed.emit()
+				else:
+					_open_choice()
+				accept_event()
+				return
 		if choosing:
 			for i in _options.size():
 				if _option_rect(i).has_point(event.position):
@@ -246,166 +244,242 @@ func _input(event: InputEvent) -> void:
 
 
 # ------------------------------------------------------------------ drawing
+## A wash of colour across the screen: `col` at x0, fading to nothing at x1.
+func _wash(x0: float, x1: float, col: Color) -> void:
+	var n := 16
+	for i in n:
+		var u0 := float(i) / n
+		var u1 := float(i + 1) / n
+		var a0 := col.a * (1.0 - u0) * (1.0 - u0)
+		var a1 := col.a * (1.0 - u1) * (1.0 - u1)
+		var xa := lerpf(x0, x1, u0)
+		var xb := lerpf(x0, x1, u1)
+		draw_polygon(PackedVector2Array([Vector2(xa, 0), Vector2(xb, 0), Vector2(xb, size.y), Vector2(xa, size.y)]),
+			PackedColorArray([Color(col, a0), Color(col, a1), Color(col, a1), Color(col, a0)]))
+
+
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0.0, 0.01, 0.02, 0.6))
 	if hero == null or not is_instance_valid(hero):
 		return
+	_wash(0.0, size.x * 0.46, Color(0.03, 0.05, 0.08, 0.82))
+	_wash(size.x, size.x * 0.66, Color(0.03, 0.05, 0.08, 0.7))
 	var o := _origin()
-	MenuKit.text(self, o + Vector2(70, -30), "TRANG BỊ", 34, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_LEFT, -1, "xbold")
-	var total := 0
-	for slot in Armour.SLOTS:
-		var p := Armour.piece(String(hero.armour.get(slot, "")), slot)
-		if not p.is_empty():
-			total += int(p.resist)
-	var w_item := _row_item("weapon")
-	_coin(o + Vector2(ROW_W + 10, -42), "fist", str(w_item.number), "SỨC MẠNH")
-	_coin(o + Vector2(ROW_W - 120, -42), "shield", str(total), "KHÁNG")
+	# the title with its round emblem, on a steel strip fading to the right
+	var strip := Rect2(Vector2(0, o.y - 74), Vector2(ROW_W + 90, 34))
+	var n := 12
+	for i in n:
+		var u0 := float(i) / n
+		var u1 := float(i + 1) / n
+		draw_polygon(PackedVector2Array([Vector2(strip.size.x * u0, strip.position.y), Vector2(strip.size.x * u1, strip.position.y),
+			Vector2(strip.size.x * u1, strip.end.y), Vector2(strip.size.x * u0, strip.end.y)]),
+			PackedColorArray([Color(0.55, 0.6, 0.66, 0.85 * (1.0 - u0)), Color(0.55, 0.6, 0.66, 0.85 * (1.0 - u1)),
+				Color(0.32, 0.36, 0.42, 0.85 * (1.0 - u1)), Color(0.32, 0.36, 0.42, 0.85 * (1.0 - u0))]))
+	var em := Vector2(o.x + 26, strip.get_center().y)
+	draw_circle(em, 25, Color(0, 0, 0, 0.6))
+	draw_circle(em, 22, Color(0.12, 0.22, 0.4))
+	draw_arc(em, 22, 0, TAU, 40, Color(0.75, 0.82, 0.9), 2.0, true)
+	var g := GameIcons.icon("glyph:helm", [["helm", "main", 50, 50, 0.8, 0]], "blade", 48)
+	if g:
+		draw_texture_rect(g, Rect2(em - Vector2(14, 14), Vector2(28, 28)), false)
+	MenuKit.text(self, Vector2(o.x + 58, strip.end.y - 8), "Trang Bị", 28, Color(0.98, 0.98, 1.0), HORIZONTAL_ALIGNMENT_LEFT, -1, "bold")
 	# the slot glyphs down the left
-	draw_rect(Rect2(o + Vector2(0, -6), Vector2(56, 6 * (ROW_H + GAP) + 28)), Color(0.03, 0.05, 0.07, 0.7))
+	draw_rect(Rect2(o + Vector2(0, -6), Vector2(52, 6 * (ROW_H + GAP) + 26)), Color(0.02, 0.03, 0.05, 0.75))
 	for i in SLOTS.size():
 		var r := _row_rect(i)
-		var g := GameIcons.icon("glyph:" + SLOTS[i], [[GLYPHS[SLOTS[i]], "main", 50, 50, 0.85, 0]], "blade", 64)
-		if g:
-			draw_texture_rect(g, Rect2(Vector2(o.x + 8, r.position.y + r.size.y * 0.5 - 20), Vector2(40, 40)), false,
-				Color(1, 1, 1, 0.9 if i == selected else 0.4))
+		var gl := GameIcons.icon("glyph:" + SLOTS[i], [[GLYPHS[SLOTS[i]], "main", 50, 50, 0.85, 0]], "blade", 64)
+		if gl:
+			draw_texture_rect(gl, Rect2(Vector2(o.x + 7, r.position.y + r.size.y * 0.5 - 19), Vector2(38, 38)), false,
+				Color(1, 1, 1, 0.95 if i == selected else 0.45))
 		_row(i, r)
 	if choosing:
 		_draw_list()
 	else:
 		_draw_summary()
-	# the consumables, bottom right as on the Dauntless loadout
-	var cx := size.x - 330.0
+	# consumables over the bottom bar, right
+	var cx := size.x - 300.0
+	var cy := size.y - 160.0
+	var pnl := Rect2(Vector2(cx - 12, cy - 10), Vector2(270, 100))
+	MenuKit.panel(self, pnl, Color(0.05, 0.08, 0.12, 0.78))
 	for k in 4:
-		var box := Rect2(Vector2(cx + k * 72, size.y - 130), Vector2(62, 92))
+		var box := Rect2(Vector2(cx + k * 64, cy), Vector2(54, 80))
 		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(0.02, 0.03, 0.05, 0.6)
-		sb.set_corner_radius_all(9)
-		sb.border_color = Color(1, 1, 1, 0.15)
+		sb.bg_color = Color(0.0, 0.01, 0.02, 0.5)
+		sb.set_corner_radius_all(8)
+		sb.border_color = Color(1, 1, 1, 0.12)
 		sb.set_border_width_all(1)
 		draw_style_box(sb, box)
 		if k < Hero.POTIONS.size():
 			var id: String = Hero.POTIONS[k]
 			var tex := GameIcons.item(id, 96)
 			if tex:
-				draw_texture_rect(tex, Rect2(box.position + Vector2(4, 8), Vector2(54, 54)), false)
-			MenuKit.text(self, Vector2(box.position.x, box.end.y - 10), "×%d" % hero.inventory.count(id), 18, MenuKit.VALUE,
+				draw_texture_rect(tex, Rect2(box.position + Vector2(4, 6), Vector2(46, 46)), false)
+			MenuKit.text(self, Vector2(box.position.x, box.end.y - 8), str(hero.inventory.count(id)), 18, MenuKit.VALUE,
 				HORIZONTAL_ALIGNMENT_CENTER, box.size.x, "xbold")
-	var y := size.y - 24.0
-	var x := o.x + 70.0
-	x += MenuKit.hint(self, Vector2(x, y), "Enter", "Đổi")
-	x += MenuKit.hint(self, Vector2(x, y), "↑ ↓", "Chọn ô")
-	MenuKit.hint(self, Vector2(x, y), "Esc", "Quay lại")
-
-
-## A coin badge in the header: a glyph, a number, a word under it.
-func _coin(at: Vector2, glyph: String, number: String, word: String) -> void:
-	draw_circle(at + Vector2(18, 18), 18, Color(0.12, 0.1, 0.06, 0.9))
-	draw_arc(at + Vector2(18, 18), 18, 0, TAU, 32, MenuKit.GOLD, 2.0, true)
-	var g := GameIcons.icon("glyph:" + glyph, [[glyph, "main", 50, 50, 0.8, 0]], "holy", 48)
-	if g:
-		draw_texture_rect(g, Rect2(at + Vector2(6, 6), Vector2(24, 24)), false)
-	MenuKit.text(self, at + Vector2(42, 22), number, 26, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_LEFT, -1, "xbold")
-	MenuKit.text(self, at + Vector2(42, 38), word, 13, MenuKit.LABEL)
+	# the bottom bar with its buttons
+	var bar := Rect2(Vector2(0, size.y - 64), Vector2(size.x, 64))
+	draw_rect(bar, Color(0.03, 0.05, 0.07, 0.82))
+	draw_line(Vector2(0, bar.position.y), Vector2(size.x, bar.position.y), Color(0.6, 0.66, 0.72, 0.6), 2.0)
+	for b in _buttons():
+		var br: Rect2 = b[0]
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.12, 0.16, 0.2, 0.95)
+		sb.set_corner_radius_all(3)
+		sb.border_color = Color(0.75, 0.8, 0.86, 0.7)
+		sb.set_border_width_all(1)
+		draw_style_box(sb, br)
+		MenuKit.text(self, Vector2(br.position.x, br.position.y + 23), b[1], 17, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_CENTER, br.size.x, "bold")
+	var x := o.x
+	x += MenuKit.hint(self, Vector2(x, size.y - 24), "Enter", "Đổi")
+	x += MenuKit.hint(self, Vector2(x, size.y - 24), "↑ ↓", "Chọn ô")
+	MenuKit.hint(self, Vector2(x, size.y - 24), "Esc", "Quay lại")
 
 
 func _row(i: int, r: Rect2) -> void:
 	var slot: String = SLOTS[i]
 	var on := i == selected
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = MenuKit.NAVY if not on else Color(0.12, 0.17, 0.25, 0.97)
-	sb.set_corner_radius_all(6)
-	sb.border_color = Color(0.92, 0.95, 1.0, 0.95) if on else MenuKit.NAVY_EDGE
+	sb.bg_color = Color(0.1, 0.14, 0.21, 0.94) if not on else Color(0.13, 0.18, 0.27, 0.97)
+	sb.set_corner_radius_all(5)
+	sb.border_color = Color(0.95, 0.97, 1.0, 0.95) if on else Color(0.3, 0.37, 0.46, 0.9)
 	sb.set_border_width_all(2 if on else 1)
 	draw_style_box(sb, r)
 	var it := _row_item(slot)
-	# the upgrade chevrons on the left edge
+	# the two upgrade chevrons on the left edge
 	for k in 2:
-		draw_polyline(PackedVector2Array([Vector2(r.position.x + 10, r.position.y + 34 + k * 10), Vector2(r.position.x + 16, r.position.y + 28 + k * 10),
-			Vector2(r.position.x + 22, r.position.y + 34 + k * 10)]), Color(1, 1, 1, 0.35), 2.0, true)
+		draw_polyline(PackedVector2Array([Vector2(r.position.x + 9, r.position.y + 36 + k * 9), Vector2(r.position.x + 15, r.position.y + 30 + k * 9),
+			Vector2(r.position.x + 21, r.position.y + 36 + k * 9)]), Color(1, 1, 1, 0.4), 2.0, true)
 	if it.get("empty", false):
-		MenuKit.text(self, Vector2(r.position.x + 110, r.position.y + 40), it.name, 20, MenuKit.DIM, HORIZONTAL_ALIGNMENT_LEFT, -1, "bold")
+		MenuKit.text(self, Vector2(r.position.x + 120, r.position.y + 42), it.name, 20, MenuKit.DIM, HORIZONTAL_ALIGNMENT_LEFT, -1, "bold")
 		if it.has("sub"):
-			MenuKit.text(self, Vector2(r.position.x + 110, r.position.y + 62), it.sub, 15, MenuKit.DIM)
+			MenuKit.text(self, Vector2(r.position.x + 120, r.position.y + 64), it.sub, 15, MenuKit.DIM)
 	else:
-		var icon_r := Rect2(r.position + Vector2(34, 6), Vector2(r.size.y - 12, r.size.y - 12))
-		draw_rect(icon_r, Color(0, 0, 0, 0.3))
+		# the piece itself, on a dark tile
+		var tile := Rect2(r.position + Vector2(30, 5), Vector2(r.size.y - 10, r.size.y - 10))
+		var ts := StyleBoxFlat.new()
+		ts.bg_color = Color(0.03, 0.05, 0.08, 0.9)
+		ts.set_corner_radius_all(3)
+		draw_style_box(ts, tile)
 		if it.icon:
-			draw_texture_rect(it.icon, icon_r, false)
-		var x := icon_r.end.x + 16.0
+			draw_texture_rect(it.icon, tile.grow(-2), false)
+		var x := tile.end.x + 14.0
 		var g := GameIcons.icon("glyph:" + String(it.glyph), [[it.glyph, "main", 50, 50, 0.8, 0]], "blade", 48)
 		if g:
-			draw_texture_rect(g, Rect2(Vector2(x, r.position.y + 14), Vector2(26, 26)), false, Color(1, 1, 1, 0.8))
-		MenuKit.text(self, Vector2(x + 30, r.position.y + 36), str(it.number), 30, MenuKit.GOLD if slot == "weapon" else MenuKit.VALUE,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, "xbold")
-		MenuKit.text(self, Vector2(x, r.position.y + 62), it.name, 16, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_LEFT, 210, "bold")
-		MenuKit.text(self, Vector2(x, r.position.y + 78), it.sub, 13, MenuKit.LABEL, HORIZONTAL_ALIGNMENT_LEFT, 210)
-		# element chips: "+X vs" then "−X vs"
-		var cy := r.position.y + 14.0
+			draw_texture_rect(g, Rect2(Vector2(x, r.position.y + 16), Vector2(28, 28)), false, Color(1, 1, 1, 0.85))
+		MenuKit.text(self, Vector2(x + 32, r.position.y + 42), str(it.number), 34, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_LEFT, -1, "xbold")
+		MenuKit.text(self, Vector2(x, r.position.y + 62), it.word, 12, MenuKit.LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, "bold")
+		MenuKit.text(self, Vector2(x, r.position.y + 78), it.name, 14, Color(0.86, 0.89, 0.93), HORIZONTAL_ALIGNMENT_LEFT, 190, "semi")
+		# element chips: "+X vs" then "−X vs", each with the element's sign
+		var cy := r.position.y + 12.0
 		for chip in it.chips:
-			var cr := Rect2(Vector2(r.position.x + 330, cy), Vector2(118, 26))
-			draw_rect(cr, Color(0, 0, 0, 0.35))
-			draw_rect(Rect2(cr.position, Vector2(3, cr.size.y)), MenuKit.GOOD if chip[2] else MenuKit.BAD)
-			MenuKit.text(self, cr.position + Vector2(10, 19), "%s vs" % chip[0], 17, MenuKit.GOOD if chip[2] else MenuKit.BAD,
+			var cr := Rect2(Vector2(r.position.x + 300, cy), Vector2(104, 28))
+			var cs := StyleBoxFlat.new()
+			cs.bg_color = Color(0.03, 0.05, 0.08, 0.85)
+			cs.set_corner_radius_all(3)
+			draw_style_box(cs, cr)
+			MenuKit.text(self, cr.position + Vector2(8, 20), "%s vs" % chip[0], 17, MenuKit.GOOD if chip[2] else MenuKit.BAD,
 				HORIZONTAL_ALIGNMENT_LEFT, -1, "bold")
 			var et := GameIcons.element(String(chip[1]), 48)
 			if et:
-				draw_texture_rect(et, Rect2(cr.end - Vector2(28, 25), Vector2(24, 24)), false)
-			cy += 30.0
-	# cell sockets: empty Prismatic hexagons
-	var n: int = int(it.get("cells", 1)) if not it.get("empty", false) or slot == "lantern" else 0
-	for k in n:
-		var c := Vector2(r.end.x - 34 - k * 46, r.get_center().y)
+				draw_texture_rect(et, Rect2(cr.end - Vector2(29, 26), Vector2(24, 24)), false)
+			cy += 33.0
+	# cell sockets: empty Prismatic hexagons in the cell purple
+	var cells: int = int(it.get("cells", 0))
+	for k in cells:
+		var c := Vector2(r.end.x - 32 - k * 44, r.get_center().y)
 		var hexa := PackedVector2Array()
 		for a in 7:
 			hexa.append(c + Vector2.from_angle(TAU * a / 6.0 + PI / 6.0) * 18.0)
-		draw_colored_polygon(hexa, Color(0.17, 0.06, 0.24, 0.9))
-		draw_polyline(hexa, Color(0.73, 0.0, 1.0, 0.7), 2.0, true)
+		draw_colored_polygon(hexa, Color(0.2, 0.06, 0.3, 0.95))
+		draw_polyline(hexa, Color(0.73, 0.0, 1.0, 0.85), 2.0, true)
 		var star := GameIcons.icon("glyph:cellstar", [["star", "main", 50, 50, 0.7, 0]], "dark", 32)
 		if star:
-			draw_texture_rect(star, Rect2(c - Vector2(10, 10), Vector2(20, 20)), false, Color(1, 1, 1, 0.35))
+			draw_texture_rect(star, Rect2(c - Vector2(10, 10), Vector2(20, 20)), false, Color(1, 1, 1, 0.45))
 	if on:
-		MenuKit.text(self, Vector2(r.position.x, r.end.y + 17), _change_label(slot), 15, MenuKit.VALUE,
+		MenuKit.text(self, Vector2(r.position.x, r.end.y + 16), _change_label(slot), 15, MenuKit.VALUE,
 			HORIZONTAL_ALIGNMENT_CENTER, r.size.x, "bold")
 
 
+## A panel under a purple header with a round emblem, as Dauntless's perk summary.
+func _purple_panel(r: Rect2, title: String, glyph: String) -> void:
+	MenuKit.panel(self, r, Color(0.06, 0.09, 0.13, 0.85))
+	var head := Rect2(r.position + Vector2(18, 0), Vector2(r.size.x - 18, 34))
+	draw_rect(head, PURPLE)
+	draw_rect(Rect2(head.position, Vector2(head.size.x, 12)), Color(1, 1, 1, 0.12))
+	var c := Vector2(r.position.x + 20, head.get_center().y)
+	draw_circle(c, 24, Color(0.18, 0.06, 0.3))
+	draw_arc(c, 24, 0, TAU, 40, Color(0.95, 0.9, 1.0), 2.0, true)
+	draw_circle(c, 20, PURPLE.darkened(0.2))
+	var g := GameIcons.icon("glyph:" + glyph, [[glyph, "main", 50, 50, 0.8, 0]], "holy", 48)
+	if g:
+		draw_texture_rect(g, Rect2(c - Vector2(13, 13), Vector2(26, 26)), false)
+	MenuKit.text(self, head.position + Vector2(36, 24), title.to_upper(), 18, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT, -1, "bold")
+
+
+## A card in the summary: a glyph, a title, one or two lines.
+func _card(r: Rect2, glyph: String, kind: String, title: String, lines: Array) -> void:
+	draw_rect(r, Color(0.1, 0.13, 0.18, 0.9))
+	draw_rect(r, Color(0.85, 0.88, 0.92, 0.55), false, 1.0)
+	var g := GameIcons.icon("glyph:%s:%s" % [glyph, kind], [[glyph, "main", 50, 50, 0.8, 0]], kind, 48)
+	if g:
+		draw_texture_rect(g, Rect2(r.position + Vector2(8, r.size.y * 0.5 - 15), Vector2(30, 30)), false)
+	MenuKit.text(self, r.position + Vector2(48, 20), title, 17, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 56, "bold")
+	var y := r.position.y + 37.0
+	for l in lines:
+		MenuKit.text(self, Vector2(r.position.x + 48, y), String(l), 13, MenuKit.LABEL, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 56)
+		y += 15.0
+
+
+func _draw_summary() -> void:
+	var r := _right_rect()
+	_purple_panel(r, "Tổng Kết", "star")
+	var y := r.position.y + 48.0
+	var it := Weapons.item(String(hero.weapon_item))
+	var fam: Dictionary = Weapons.FAMILIES[it.family]
+	var e: String = it.element
+	var w_lines := ["Đòn nặng: %s" % fam.heavy.name]
+	if e != "neutral":
+		w_lines.append("+50%% vs %s · −20%% vs %s" % [Elements.display_name(Elements.ALL[e].opposite), Elements.display_name(e)])
+	else:
+		w_lines.append("Vô hệ: không khắc, không kỵ")
+	_card(Rect2(Vector2(r.position.x + 12, y), Vector2(r.size.x - 24, 66)), "sword", GameIcons.ELEMENT_KINDS.get(e, "blade"),
+		"%s · %s" % [fam.name, it.name], w_lines)
+	y += 74.0
+	var pts := Armour.points(hero.armour)
+	var shown := 0
+	for el in ["blaze", "frost", "shock", "terra", "radiant", "umbral"]:
+		var v := int(pts.get(el, 0))
+		if v == 0:
+			continue
+		var pct := roundi(absf(1.0 - Armour.multiplier(pts, el)) * 100.0)
+		var title := ("Kháng %s %d" if v > 0 else "Yếu %s %d") % [Elements.display_name(el), absi(v)]
+		var line := ("−%d%% sát thương %s" if v > 0 else "+%d%% sát thương %s") % [pct, Elements.display_name(el)]
+		_card(Rect2(Vector2(r.position.x + 12, y), Vector2(r.size.x - 24, 52)), String(Elements.ALL[el].icon),
+			GameIcons.ELEMENT_KINDS.get(el, "blade"), title, [line])
+		y += 60.0
+		shown += 1
+		if shown >= 5:
+			break
+	if shown == 0:
+		_card(Rect2(Vector2(r.position.x + 12, y), Vector2(r.size.x - 24, 52)), "shield", "blade", "Không kháng hệ",
+			["Giáp vô hệ: đòn của hệ nào cũng như nhau"])
+
+
 func _draw_list() -> void:
-	var l := _list_rect()
-	MenuKit.panel(self, l)
-	MenuKit.header(self, Rect2(l.position, Vector2(l.size.x, 36)), _change_label(SLOTS[selected]).split(" /")[0])
+	var l := _right_rect()
+	_purple_panel(l, _change_label(SLOTS[selected]).split(" /")[0], GLYPHS[SLOTS[selected]])
 	for i in _options.size():
 		var r := _option_rect(i)
 		var opt: Array = _options[i]
 		var on := i == pick
-		if on:
-			draw_rect(r, MenuKit.HOVER)
-			draw_rect(r, Color(1, 1, 1, 0.6), false, 1.5)
-		if opt[2]:
-			draw_texture_rect(opt[2], Rect2(r.position + Vector2(6, 4), Vector2(44, 44)), false)
-		MenuKit.text(self, r.position + Vector2(60, 22), opt[0], 18, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 120, "bold")
-		MenuKit.text(self, r.position + Vector2(60, 42), opt[1], 14, MenuKit.LABEL, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 120)
+		draw_rect(r, Color(0.13, 0.18, 0.26, 0.95) if on else Color(0.08, 0.11, 0.16, 0.85))
+		draw_rect(r, Color(1, 1, 1, 0.85) if on else Color(1, 1, 1, 0.12), false, 1.5 if on else 1.0)
+		var tile := Rect2(r.position + Vector2(4, 4), Vector2(48, 48))
+		draw_rect(tile, Color(0.03, 0.05, 0.08, 0.9))
+		# the picture may have been taken since the list opened
+		var tex: Texture2D = _picture_weapon(opt[3]) if SLOTS[selected] == "weapon" else _picture_piece(SLOTS[selected], opt[3])
+		if tex:
+			draw_texture_rect(tex, tile, false)
+		MenuKit.text(self, r.position + Vector2(62, 24), opt[0], 17, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 130, "bold")
+		MenuKit.text(self, r.position + Vector2(62, 44), opt[1], 13, MenuKit.LABEL, HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 130)
 		if opt[4]:
-			MenuKit.text(self, r.position + Vector2(0, 32), "ĐANG DÙNG", 13, MenuKit.CYAN, HORIZONTAL_ALIGNMENT_RIGHT, r.size.x - 10, "bold")
-
-
-## The slayer in their gear, and what the armour resists and what it is weak to.
-func _draw_summary() -> void:
-	var l := _list_rect()
-	if _preview_vp:
-		draw_texture_rect(_preview_vp.get_texture(), Rect2(l.position + Vector2(-20, -40), Vector2(420, 560)), false)
-	var box := Rect2(Vector2(l.position.x, l.end.y - 150), Vector2(l.size.x, 170))
-	MenuKit.panel(self, box, Color(0.075, 0.1, 0.13, 0.85))
-	MenuKit.header(self, Rect2(box.position, Vector2(box.size.x, 34)), "Kháng Nguyên Tố")
-	var pts := Armour.points(hero.armour)
-	var i := 0
-	for e in ["blaze", "frost", "shock", "terra", "radiant", "umbral"]:
-		var at := box.position + Vector2(18 + (i % 3) * 120, 52 + (i / 3) * 52)
-		var et := GameIcons.element(e, 48)
-		if et:
-			draw_texture_rect(et, Rect2(at, Vector2(30, 30)), false)
-		var v := int(pts.get(e, 0))
-		var col := MenuKit.GOOD if v > 0 else (MenuKit.BAD if v < 0 else MenuKit.DIM)
-		MenuKit.text(self, at + Vector2(36, 16), ("+%d" % v) if v > 0 else str(v), 20, col, HORIZONTAL_ALIGNMENT_LEFT, -1, "xbold")
-		var pct := roundi((1.0 - Armour.multiplier(pts, e)) * 100.0)
-		MenuKit.text(self, at + Vector2(36, 32), ("−%d%% sát thương" % pct) if pct > 0 else (("+%d%% sát thương" % -pct) if pct < 0 else "—"),
-			12, MenuKit.LABEL)
-		i += 1
+			MenuKit.text(self, r.position + Vector2(0, 32), "ĐANG DÙNG", 12, MenuKit.CYAN, HORIZONTAL_ALIGNMENT_RIGHT, r.size.x - 10, "bold")

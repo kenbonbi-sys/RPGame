@@ -21,6 +21,9 @@ extends Node3D
 var yaw := 0.0
 var pitch := deg_to_rad(-8.0)
 var target: Node3D
+## The loadout's shot: the camera swings round in front of the slayer and frames them head to toe
+## (Dauntless shows its loadout over the slayer standing in the world).
+var showcase := false
 
 var _focus := Vector3.ZERO
 var _last_input := -100.0
@@ -165,6 +168,12 @@ func _process(delta: float) -> void:
 	if off.length() > 1.6:
 		_focus = goal + off.normalized() * 1.6
 
+	if showcase:
+		var f: Vector3 = target.get("facing") if target.get("facing") != null else Vector3.FORWARD
+		var ks := 1.0 - exp(-5.0 * dt)
+		yaw = lerp_angle(yaw, atan2(f.x, f.z), ks)
+		pitch = lerpf(pitch, deg_to_rad(-2.0), ks)
+		_last_input = Game.now()
 	# look at the colossus while the button is held
 	var looking := Input.is_action_pressed("look_boss") and boss != null and not Game.menu_open
 	_boss_look = move_toward(_boss_look, 1.0 if looking else 0.0, dt * 3.0)
@@ -195,11 +204,16 @@ func _process(delta: float) -> void:
 		want_h = 1.2
 	elif riding:
 		want_len = 4.6
+	if showcase:
+		want_len = 4.7
+		want_fov = 30.0
+		want_h = 0.98
 	var speed := Vector2(target.velocity.x, target.velocity.z).length() if "velocity" in target else 0.0
 	want_fov += smoothstep(6.0, 8.5, speed) * 6.0
-	_arm_len = lerpf(_arm_len, want_len, 1.0 - exp(-2.5 * dt))
-	_fov = lerpf(_fov, want_fov, 1.0 - exp(-3.0 * dt))
-	_height = lerpf(_height, want_h, 1.0 - exp(-3.0 * dt))
+	var kf := 6.0 if showcase else 1.0
+	_arm_len = lerpf(_arm_len, want_len, 1.0 - exp(-2.5 * kf * dt))
+	_fov = lerpf(_fov, want_fov, 1.0 - exp(-3.0 * kf * dt))
+	_height = lerpf(_height, want_h, 1.0 - exp(-3.0 * kf * dt))
 
 	_trauma = maxf(0.0, _trauma - dt * 1.4)
 	_apply()

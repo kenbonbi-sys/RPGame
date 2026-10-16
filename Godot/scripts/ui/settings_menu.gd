@@ -194,7 +194,7 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.0, 0.01, 0.02, 0.55))
 	var p := _panel_rect()
 	MenuKit.panel(self, p)
-	MenuKit.text(self, p.position + Vector2(0, -12), "CÀI ĐẶT  ·  ĐỒ HOẠ", 26, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_CENTER, W, "xbold")
+	MenuKit.text(self, p.position + Vector2(0, -12), "CÀI ĐẶT  ·  ĐỒ HOẠ", 22, Color(0.86, 0.89, 0.92), HORIZONTAL_ALIGNMENT_CENTER, W, "bold")
 	for i in rows.size():
 		var row: Dictionary = rows[i]
 		var r := _row_rect(i)
@@ -203,7 +203,7 @@ func _draw() -> void:
 			continue
 		if i == selected:
 			draw_rect(Rect2(r.position + Vector2(8, 3), r.size - Vector2(16, 6)), MenuKit.HOVER)
-		MenuKit.text(self, Vector2(r.position.x, r.position.y + r.size.y * 0.5 + 7), row.label, 18,
+		MenuKit.text(self, Vector2(r.position.x, r.position.y + r.size.y * 0.5 + 6), row.label, 16,
 			MenuKit.VALUE if i == selected else MenuKit.LABEL, HORIZONTAL_ALIGNMENT_RIGHT, LABEL_W)
 		var c := _control_rect(i)
 		var mid := c.position.y + c.size.y * 0.5
@@ -214,7 +214,7 @@ func _draw() -> void:
 			"choice":
 				var idx := _index(row)
 				var label: String = row.options[clampi(idx, 0, row.options.size() - 1)]
-				MenuKit.text(self, Vector2(c.position.x, mid + 3), label, 20, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_CENTER, c.size.x, "bold")
+				MenuKit.text(self, Vector2(c.position.x, mid + 2), label, 19, MenuKit.VALUE, HORIZONTAL_ALIGNMENT_CENTER, c.size.x, "bold")
 				var n: int = 4 if row.get("levels", false) else row.options.size()
 				MenuKit.dots(self, Vector2(c.get_center().x, mid + 14), n, idx)
 			"slider":

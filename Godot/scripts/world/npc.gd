@@ -76,11 +76,12 @@ func _ready() -> void:
 	if Game.has_screen():
 		_make_labels()
 		# nothing to animate while no camera sees them
+		# (the path is set before it enters the tree: by default it would switch off this whole
+		# townsperson, not just the animation)
 		var seen := VisibleOnScreenEnabler3D.new()
 		seen.aabb = AABB(Vector3(-0.8, 0, -0.8), Vector3(1.6, 2.4, 1.6))
+		seen.enable_node_path = NodePath("../" + String(get_path_to(_anim))) if _anim else NodePath()
 		add_child(seen)
-		if _anim:
-			seen.enable_node_path = seen.get_path_to(_anim)
 
 
 func _make_labels() -> void:

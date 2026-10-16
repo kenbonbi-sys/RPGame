@@ -285,6 +285,11 @@ func heavy_hit() -> void:
 	slime.revive(Vector3(-60, 0.1, -61.8))
 	slime.health.reset_health(500.0)
 	await t._frames(5)
+	# it was dropped a little above the ground: let it land before the button goes down
+	for f in 30:
+		if hero.is_on_floor() and hero.state == Hero.State.GROUND:
+			break
+		await t._frames(1)
 	var hp0 := slime.health.hp
 	Input.action_press("heavy")
 	await t._frames(3)

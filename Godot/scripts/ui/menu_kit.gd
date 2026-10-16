@@ -5,16 +5,16 @@ extends RefCounted
 ## value between two chevrons, page dots under a choice, cyan sliders with a white knob, a pill
 ## switch, and the loadout's dark navy rows with a bright edge on the one selected. Barlow Condensed.
 
-const PANEL := Color(0.075, 0.1, 0.13, 0.94)
-const BAND := Color(0.15, 0.19, 0.235, 0.98)
-const BAND_LINE := Color(0.62, 0.67, 0.72)
-const HOVER := Color(0.32, 0.42, 0.52, 0.32)
-const LABEL := Color(0.74, 0.79, 0.84)
+const PANEL := Color(0.11, 0.145, 0.185, 0.96)
+const BAND := Color(0.22, 0.27, 0.32, 1.0)
+const BAND_LINE := Color(0.66, 0.71, 0.76)
+const HOVER := Color(0.4, 0.5, 0.6, 0.13)
+const LABEL := Color(0.76, 0.8, 0.84)
 const VALUE := Color(0.96, 0.97, 0.98)
 const DIM := Color(0.5, 0.55, 0.6)
-const CYAN := Color(0.27, 0.8, 1.0)
-const CYAN_DEEP := Color(0.06, 0.42, 0.66)
-const TRACK := Color(0.02, 0.035, 0.05, 0.95)
+const CYAN := Color(0.3, 0.84, 1.0)
+const CYAN_DEEP := Color(0.08, 0.5, 0.78)
+const TRACK := Color(0.04, 0.06, 0.08, 1.0)
 const NAVY := Color(0.09, 0.13, 0.19, 0.95)
 const NAVY_EDGE := Color(0.27, 0.34, 0.43)
 const GOOD := Color(0.0, 0.8, 0.4)
@@ -51,7 +51,9 @@ static func panel(ci: CanvasItem, r: Rect2, col := PANEL) -> void:
 
 ## A section band: dark, full width, its top line curling down at both ends, the title centred.
 static func header(ci: CanvasItem, r: Rect2, title: String) -> void:
+	# the band is a little lighter at the top, like brushed steel
 	ci.draw_rect(r, BAND)
+	ci.draw_rect(Rect2(r.position, Vector2(r.size.x, r.size.y * 0.45)), Color(1, 1, 1, 0.05))
 	var y := r.position.y + 1.5
 	var curl := 14.0
 	var pts := PackedVector2Array()
@@ -92,18 +94,21 @@ static func dots(ci: CanvasItem, c: Vector2, count: int, index: int) -> void:
 ## A slider: dark track, cyan fill brightening toward the knob, a white knob.
 static func slider(ci: CanvasItem, r: Rect2, f: float) -> void:
 	f = clampf(f, 0.0, 1.0)
-	var track := Rect2(r.position + Vector2(0, r.size.y * 0.5 - 4), Vector2(r.size.x, 8))
+	var track := Rect2(r.position + Vector2(0, r.size.y * 0.5 - 3), Vector2(r.size.x, 6))
+	ci.draw_rect(track.grow(1), Color(0, 0, 0, 0.6))
 	ci.draw_rect(track, TRACK)
-	ci.draw_rect(track, Color(1, 1, 1, 0.12), false, 1.0)
 	var fill := Rect2(track.position, Vector2(track.size.x * f, track.size.y))
 	var steps := 12
 	for i in steps:
 		var seg := Rect2(fill.position + Vector2(fill.size.x * i / steps, 0), Vector2(fill.size.x / steps + 0.5, fill.size.y))
 		ci.draw_rect(seg, CYAN_DEEP.lerp(CYAN, float(i) / (steps - 1)))
+	# a light edge along the top of the fill
+	ci.draw_rect(Rect2(fill.position, Vector2(fill.size.x, 1.5)), Color(0.8, 0.95, 1.0, 0.7))
 	var kx := track.position.x + track.size.x * f
-	var knob := Rect2(Vector2(kx - 4, r.position.y + r.size.y * 0.5 - 11), Vector2(8, 22))
-	ci.draw_rect(knob.grow(1), Color(0, 0, 0, 0.5))
-	ci.draw_rect(knob, Color(0.95, 0.97, 1.0))
+	var knob := Rect2(Vector2(kx - 3.5, r.position.y + r.size.y * 0.5 - 10), Vector2(7, 20))
+	ci.draw_rect(knob.grow(1.5), Color(0, 0, 0, 0.7))
+	ci.draw_rect(knob, Color(0.96, 0.97, 0.99))
+	ci.draw_rect(Rect2(knob.position + Vector2(0, knob.size.y - 4), Vector2(knob.size.x, 4)), Color(0.72, 0.76, 0.82))
 
 
 ## The pill switch: cyan with the knob right when on, dark with it left when off.
