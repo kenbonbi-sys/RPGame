@@ -1,8 +1,10 @@
 class_name Slime
 extends Enemy
-## Slime Rêu (SlimeAI.cs): hops after the hero (pause, hop, pause…), crouches for 0.25 s — its
-## only tell — then lunges; anyone it reaches in the lunge takes 10 and is knocked back. Touching
-## it hurts a little too. Wandering and going home it just slides along.
+## Slime Rêu (SlimeAI.cs): hops after the hero (pause, hop, pause…), then winds up a lunge you can
+## read (Anticipation): it bobs up and leans in a touch, sinks into a deep squat leaning away,
+## quivers at the bottom with a glint, then lunges fast; anyone it reaches takes 10 and is knocked
+## back, and it sits flattened for a moment after (the opening). Touching it hurts a little too.
+## Wandering and going home it just slides along.
 
 @export var hop_time := 0.45
 @export var hop_pause := 0.5
@@ -15,6 +17,10 @@ var _hopping := false
 var _lunged := false
 var _lunge_dir := Vector3.FORWARD
 var _body: Node3D
+## The lunge's beats: 0.64 s of warning (the 2D game's crouch was 0.25 s, too quick to read in 3D).
+var beats := Anticipation.Beats.new(0.12, 0.38, 0.14)
+const LUNGE_TIME := 0.25
+const RECOVER := 0.5
 
 
 func _init() -> void:
@@ -65,11 +71,15 @@ func chase(t: Node3D, dist: float, delta: float) -> void:
 			_hop_timer = hop_time
 
 
-func attack(t: Node3D, _dist: float, _delta: float) -> void:
+func attack(t: Node3D, _dist: float, delta: float) -> void:
 	var st := state_time
-	if st < 0.25:
+	var go := beats.strike_at()
+	if beats.hold_begins(st, delta):
+		Anticipation.glint(global_position + Vector3.UP * radius * 1.3 - _facing * 0.1, Color(0.75, 1.0, 0.6), 0.7, 1.25)
+	if st < go:
 		stop()
-		if t:
+		# it keeps turning to follow until the hold, then commits
+		if t and st < beats.hold_at():
 			face(t.global_position)
 	elif not _lunged:
 		_lunged = true
@@ -78,15 +88,15 @@ func attack(t: Node3D, _dist: float, _delta: float) -> void:
 			to.y = 0.0
 			_lunge_dir = to.normalized() if to.length() > 0.01 else _facing
 		face(global_position + _lunge_dir)
-		dash(_lunge_dir * lunge_speed, 0.25)
-	elif st >= 0.3 and st < 0.55 and t and is_instance_valid(t):
+		dash(_lunge_dir * lunge_speed, LUNGE_TIME)
+	elif st >= go + 0.05 and st < go + LUNGE_TIME + 0.05 and t and is_instance_valid(t):
 		if _flat_distance(global_position, t.global_position) < 0.8 + body_radius and absf(t.global_position.y - global_position.y) < 1.5:
 			var d := DamageInfo.make(lunge_damage, Combat.Team.ENEMY, self, t.global_position + Vector3.UP, _lunge_dir,
 				Combat.Element.PHYSICAL, 5.0)
 			d.skill_name = "Lao Tới"
 			hit_hero(t, d)
-			state_time = 0.56
-	elif st >= 0.9:
+			state_time = go + LUNGE_TIME + 0.06
+	elif st >= go + LUNGE_TIME + RECOVER:
 		start_cooldown()
 		set_state(State.CHASE)
 
@@ -104,27 +114,46 @@ func _physics_process(delta: float) -> void:
 	_animate(delta)
 
 
-## Squash and stretch: hops arc up, the wind-up squats, idle breathes.
+## Squash and stretch: hops arc up, idle breathes; the attack follows its beats (bob up and lean
+## in, sink and lean away, quiver, stretch long through the lunge, splat flat on stopping).
 func _animate(_delta: float) -> void:
-	if not _body:
+	if not _body or state == State.DEAD or not on_screen:
 		return
 	var t := Game.now()
 	var y := 0.0
+	var lean := 0.0
 	var squash := 1.0 + sin(t * 3.0 + get_instance_id()) * 0.04
-	if state == State.DEAD:
-		return
+	var rate := 0.3
 	if state == State.CHASE and _hopping:
 		var k := 1.0 - clampf(_hop_timer / hop_time, 0.0, 1.0)
 		y = sin(k * PI) * 0.45
 		squash = 1.0 + sin(k * PI) * 0.25
 	elif state == State.ATTACK:
-		if state_time < 0.25:
-			squash = 1.0 - state_time * 1.4
-		elif state_time < 0.55:
-			squash = 1.3
+		var st := state_time
+		var go := beats.strike_at()
+		rate = 0.45
+		if st < go:
+			var w := beats.windup(st, 0.35)
+			# the tell rises and leans in (w < 0); the wind sinks deep and leans back
+			squash = 1.0 - 0.42 * w
+			y = -0.1 * maxf(w, 0.0) + 0.08 * maxf(-w, 0.0)
+			lean = 0.32 * w
+			squash += beats.tremble(st) * 0.035
+		elif st < go + LUNGE_TIME + 0.05:
+			# long and low through the lunge
+			squash = 1.35
 			y = 0.15
+			lean = -0.45
+			rate = 0.6
+		elif st < go + LUNGE_TIME + RECOVER * 0.6:
+			# splat: the opening
+			squash = 0.68
+			lean = 0.0
+		else:
+			squash = 1.0
 	elif (state == State.WANDER or state == State.RETURN) and velocity.length() > 0.2:
 		y = absf(sin(t * 9.0)) * 0.12
-	_body.position.y = lerpf(_body.position.y, y, 0.35)
+	_body.position.y = lerpf(_body.position.y, y, rate)
+	_body.rotation.x = lerpf(_body.rotation.x, lean, rate)
 	var s := Vector3(1.0 / sqrt(squash), squash, 1.0 / sqrt(squash))
-	_body.scale = _body.scale.lerp(s, 0.3)
+	_body.scale = _body.scale.lerp(s, rate)

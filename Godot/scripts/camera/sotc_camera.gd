@@ -62,6 +62,20 @@ func _ready() -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
+## The settings' motion blur (0 = off): a compositor effect on this camera.
+func set_motion_blur(strength: float) -> void:
+	if cam == null:
+		return
+	if strength <= 0.001:
+		cam.compositor = null
+		return
+	if cam.compositor == null:
+		var c := Compositor.new()
+		c.compositor_effects = [MotionBlur.new()]
+		cam.compositor = c
+	(cam.compositor.compositor_effects[0] as MotionBlur).strength = strength
+
+
 func attach(t: Node3D) -> void:
 	target = t
 	snap()
@@ -119,10 +133,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		pitch = clampf(pitch, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
 		_last_input = Game.now()
 	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
-			and not Game.has_arg("--autoshot") and not get_tree().paused:
+			and not Game.has_arg("--autoshot") and not get_tree().paused and not Game.menu_open:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	elif event.is_action_pressed("pause"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _process(delta: float) -> void:
@@ -154,7 +166,7 @@ func _process(delta: float) -> void:
 		_focus = goal + off.normalized() * 1.6
 
 	# look at the colossus while the button is held
-	var looking := Input.is_action_pressed("look_boss") and boss != null
+	var looking := Input.is_action_pressed("look_boss") and boss != null and not Game.menu_open
 	_boss_look = move_toward(_boss_look, 1.0 if looking else 0.0, dt * 3.0)
 	if looking:
 		var p: Vector3 = boss.call("look_point") if boss.has_method("look_point") else boss.global_position

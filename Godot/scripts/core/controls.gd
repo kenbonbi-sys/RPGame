@@ -106,9 +106,13 @@ func _add(action: StringName, e: InputEvent) -> void:
 
 ## Movement input on the ground plane: x = right, y = forward (both -1..1).
 static func move_vector() -> Vector2:
+	if Game.menu_open:
+		return Vector2.ZERO
 	var v := Input.get_vector("move_left", "move_right", "move_back", "move_forward")
 	return v.limit_length(1.0)
 
 
 static func camera_stick() -> Vector2:
+	if Game.menu_open:
+		return Vector2.ZERO
 	return Input.get_vector("cam_left", "cam_right", "cam_up", "cam_down")

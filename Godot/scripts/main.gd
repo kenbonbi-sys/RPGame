@@ -12,6 +12,8 @@ var spawn_point := Vector3.ZERO
 
 
 func _ready() -> void:
+	Game.world = self
+	GameSettings.apply(self)
 	var v := WorldMap.village_center() + Vector2(10, -3)
 	spawn_point = Props.ground(v) + Vector3.UP * 0.2
 	hero.global_position = spawn_point
@@ -20,6 +22,9 @@ func _ready() -> void:
 	hero.facing = Vector3(to.x, 0, to.z).normalized()
 	camera.attach(hero)
 	hud.bind_hero(hero)
+	var menus := Menus.new()
+	menus.name = "Menus"
+	add_child(menus)
 	var den := WorldMap.world(WorldMap.arena_center())
 	var gate := WorldMap.arena_gate_dir()
 	bear.reset_to(Transform3D(Basis(Vector3.UP, atan2(-gate.x, gate.y)), den))

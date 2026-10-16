@@ -8,6 +8,8 @@ Writes Godot/assets/sfx/*.wav (16-bit mono, 44.1 kHz, peak -1 dBFS):
     whack_hero      a dull thud for blows the hero takes
     crunch          bark and bone breaking (a colossus part breaks)
     interrupt       a big impact with a ringing clang (a charge interrupted)
+    tell            a monster's wind-up peaks: a quick rising shimmer ending on a glint, the "now,
+                    dodge" cue (big monsters play it lower)
 
 Run:  python Tools/AudioGen/gen_godot_sfx.py
 """
@@ -69,6 +71,15 @@ def interrupt(rng):
     return g.reverb(y + ring + sub, 0.2, 0.8, seed=5, damp=3500)
 
 
+def tell(rng):
+    n = g.ns(0.5)
+    rise = g.whoosh(n, rng, [(0.0, 700), (0.62, 3800), (1.0, 5200)], q=2.2, peak=0.62, rise=2.6, fall=5.0)
+    glint = np.zeros(n)
+    g.place(glint, g.chime(2350, g.ns(0.3), tau=0.1, bright=0.7), g.ns(0.3))
+    g.place(glint, 0.6 * g.chime(3520, g.ns(0.24), tau=0.07, bright=0.5), g.ns(0.31))
+    return g.reverb(0.7 * g.rmsn(rise) + 0.9 * glint, 0.18, 0.45, seed=9, damp=6500)
+
+
 SOUNDS = {
     "whack_1": lambda r: whack(r, 0.0),
     "whack_2": lambda r: whack(r, 0.1),
@@ -78,6 +89,7 @@ SOUNDS = {
     "whack_hero": whack_hero,
     "crunch": crunch,
     "interrupt": interrupt,
+    "tell": tell,
 }
 
 

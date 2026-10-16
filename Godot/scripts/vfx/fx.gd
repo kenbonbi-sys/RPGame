@@ -9,6 +9,10 @@ static var _disc: ImageTexture
 static var _quad_mats := {}
 
 
+## The settings' "Hiệu Ứng Đặc Biệt": how many particles a burst throws (1 = all).
+static var detail := 1.0
+
+
 static func _world() -> Node:
 	return Engine.get_main_loop().current_scene
 
@@ -75,7 +79,7 @@ static func burst(pos: Vector3, dir: Vector3, color: Color, amount := 24, speed 
 		life := 1.0, spread := 35.0, gravity := -6.0, additive := false, ring_radius := 0.0) -> GPUParticles3D:
 	var p := GPUParticles3D.new()
 	p.one_shot = true
-	p.amount = amount
+	p.amount = maxi(1, roundi(amount * detail))
 	p.lifetime = life
 	p.explosiveness = 0.95
 	p.local_coords = false

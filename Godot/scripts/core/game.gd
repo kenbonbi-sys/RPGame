@@ -18,6 +18,11 @@ var hero: Node3D
 var camera: Node3D
 ## Colossi in the world, for the camera's "look at the boss" and the HUD.
 var colossi: Array[Node3D] = []
+## A menu or a talk has the screen: the hero stands still and the mouse is free (the world goes
+## on, as in Dauntless).
+var menu_open := false
+## The world scene (main.tscn's root) while it runs, for the settings to reach its lights and land.
+var world: Node
 
 ## Command line after "--", e.g. `godot --path . -- --autoshot --shots-dir D:/shots`.
 var args := PackedStringArray()

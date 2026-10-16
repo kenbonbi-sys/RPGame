@@ -2,6 +2,9 @@ class_name Shroom
 extends Enemy
 ## Nấm Độc (ShroomAI.cs): keeps its distance — backs off when crowded, walks in when far, sidesteps
 ## in between — and shoots a slowing spore when the hero is in range and in sight. Weak to fire.
+## The shot is told (Anticipation): a small nod, then it rears back while its cap swells and a
+## glowing spore gathers in front of it, a quiver and a glint at the peak, then it snaps forward
+## and spits.
 ## Ranges are the Unity ones × RANGE (the 3D camera sees further).
 
 const RANGE := 1.3
@@ -15,6 +18,10 @@ var _fired := false
 var _seed := 0.0
 var _body: Node3D
 var _cap: Node3D
+var _orb: MeshInstance3D
+## The shot's beats: 0.64 s of warning (the 2D game's was 0.32 s).
+var beats := Anticipation.Beats.new(0.1, 0.42, 0.12)
+const RECOVER := 0.4
 
 
 func _init() -> void:
@@ -45,6 +52,19 @@ func build_model(root: Node3D) -> void:
 	_body = CreatureArt.poison_shroom(root, 1.0)
 	_cap = _body.get_node("Cap")
 	_seed = randf() * 100.0
+	# the spore it gathers before spitting
+	_orb = MeshInstance3D.new()
+	_orb.mesh = CreatureArt.sphere(0.16, 12)
+	var glow := StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.albedo_color = Color(0.85, 0.55, 1.0)
+	glow.emission_enabled = true
+	glow.emission = Color(0.75, 0.4, 1.0)
+	glow.emission_energy_multiplier = 3.0
+	_orb.material_override = glow
+	_orb.position = Vector3(0, 1.12, -0.42)
+	_orb.visible = false
+	_body.add_child(_orb)
 
 
 func chase(t: Node3D, dist: float, _delta: float) -> void:
@@ -65,15 +85,17 @@ func chase(t: Node3D, dist: float, _delta: float) -> void:
 	face(t.global_position)
 
 
-func attack(t: Node3D, _dist: float, _delta: float) -> void:
+func attack(t: Node3D, _dist: float, delta: float) -> void:
 	stop()
-	if t:
+	if t and state_time < beats.strike_at():
 		face(t.global_position)
-	if state_time > 0.32 and not _fired:
+	if beats.hold_begins(state_time, delta) and _orb:
+		Anticipation.glint(_orb.global_position, Color(0.85, 0.55, 1.0), 0.7, 1.1)
+	if state_time >= beats.strike_at() and not _fired:
 		_fired = true
 		if t and is_instance_valid(t):
 			_fire(t)
-	if state_time > 0.75:
+	if state_time > beats.strike_at() + RECOVER:
 		start_cooldown(attack_cooldown * randf_range(0.9, 1.3))
 		set_state(State.CHASE)
 
@@ -108,15 +130,35 @@ func on_death() -> void:
 	Fx.burst(global_position + Vector3.UP * 0.9, Vector3.UP, Color(0.7, 0.5, 0.85, 0.7), 24, 2.5, 0.6, 1.2, 80.0, 0.3)
 
 
+func on_attack_interrupted() -> void:
+	_fired = true
+
+
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
-	if not _body or state == State.DEAD:
+	if not _body:
+		return
+	var aiming := state == State.ATTACK and not _fired and state_time < beats.strike_at()
+	_orb.visible = aiming and state_time > beats.tell
+	if state == State.DEAD or not on_screen:
 		return
 	var t := Game.now()
 	var walk := Vector2(velocity.x, velocity.z).length()
 	_body.position.y = absf(sin(t * 10.0)) * 0.08 * clampf(walk, 0.0, 1.0)
 	_body.rotation.z = sin(t * 10.0) * 0.08 * clampf(walk, 0.0, 1.0)
 	var puff := 1.0
-	if state == State.ATTACK and state_time < 0.4:
-		puff = 1.0 + sin(clampf(state_time / 0.32, 0.0, 1.0) * PI) * 0.25
-	_cap.scale = _cap.scale.lerp(Vector3(puff, 2.0 - puff, puff), 0.3)
+	var lean := 0.0
+	if state == State.ATTACK:
+		var st := state_time
+		if st < beats.strike_at():
+			var w := beats.windup(st, 0.3)
+			# the nod leans in a touch, the wind rears back with the cap swelling
+			lean = 0.34 * w + beats.tremble(st) * 0.03
+			puff = 1.0 + 0.3 * maxf(w, 0.0)
+			_orb.scale = Vector3.ONE * (0.3 + 0.9 * maxf(w, 0.0) + beats.tremble(st) * 0.08)
+		elif st < beats.strike_at() + 0.16:
+			# the spit: snaps forward, cap squeezed
+			lean = -0.32
+			puff = 0.8
+	_body.rotation.x = lerpf(_body.rotation.x, lean, 0.45)
+	_cap.scale = _cap.scale.lerp(Vector3(puff, 2.0 - puff, puff), 0.35)

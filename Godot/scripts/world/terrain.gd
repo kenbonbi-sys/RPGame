@@ -1,9 +1,12 @@
 class_name Terrain
 extends Node3D
 ## Builds the land from the baked TerrainData: 64 m mesh chunks painted by terrain.gdshader,
-## one heightmap collider over the whole map at 1 m, and the swamp's water.
+## one heightmap collider over the whole map at 1 m, the swamp's water, and an occluder: a coarse
+## copy of the land kept just under it, so whatever stands behind a hill or a ridge is not drawn.
 
 const CHUNK_CELLS := 32
+## Samples per side of an occluder square (2 m samples: 8 m squares, about 13 000 triangles).
+const OCCLUDER_STEP := 4
 
 @export var data: TerrainData = preload("res://world/terrain_data.res")
 @export var material: Material = preload("res://shaders/terrain_material.tres")
@@ -20,6 +23,7 @@ func _ready() -> void:
 	_build_meshes()
 	_build_collision()
 	_build_water()
+	_build_occluder()
 
 
 ## Ground height under a world position (no physics needed).
@@ -128,3 +132,43 @@ func _build_water() -> void:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.position = Vector3(360.0 + plane.size.x * 0.5, WorldMap.WATER_LEVEL, -plane.size.y * 0.5 + 10.0)
 	add_child(mi)
+
+
+## The land as an occluder for occlusion culling. Each corner sits at the lowest height of the
+## squares around it, so every triangle lies under the land it covers (it can never hide anything
+## that shows above the ground) and a hill still hides the forest behind it.
+func _build_occluder() -> void:
+	var d := data
+	var k := OCCLUDER_STEP
+	var nu := (d.width - 1) / k
+	var nv := (d.depth - 1) / k
+	var low := PackedFloat32Array()
+	low.resize(nu * nv)
+	for cv in nv:
+		for cu in nu:
+			var m := INF
+			for iv in range(cv * k, cv * k + k + 1):
+				for ix in range(cu * k, cu * k + k + 1):
+					m = minf(m, d.heights[iv * d.width + ix])
+			low[cv * nu + cu] = m
+	var verts := PackedVector3Array()
+	for jv in nv + 1:
+		for ju in nu + 1:
+			var m := INF
+			for cv in [jv - 1, jv]:
+				for cu in [ju - 1, ju]:
+					if cv >= 0 and cv < nv and cu >= 0 and cu < nu:
+						m = minf(m, low[cv * nu + cu])
+			verts.append(Vector3(ju * k * d.spacing, m - 0.5, -jv * k * d.spacing))
+	var idx := PackedInt32Array()
+	var row := nu + 1
+	for jv in nv:
+		for ju in nu:
+			var a := jv * row + ju
+			idx.append_array([a, a + row, a + 1, a + 1, a + row, a + row + 1])
+	var occ := ArrayOccluder3D.new()
+	occ.set_arrays(verts, idx)
+	var oi := OccluderInstance3D.new()
+	oi.name = "LandOccluder"
+	oi.occluder = occ
+	add_child(oi)

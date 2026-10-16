@@ -5,7 +5,9 @@ extends Node
 ## Exit code 0 = clean, 1 = errors in the log, 2 = ran out of time.
 ## Tours: "world" (village, forest, arena), "climb" (legs, kneel, back, stabs), "skills" (the bear's attacks),
 ## "hunt" (parts, Trảm, breaking the head, Húc and the interrupt, staggered damage), "arsenal" (every
-## weapon's combo and heavy move, three armour sets, an element proc on the bear), "brawl".
+## weapon's combo and heavy move, three armour sets, an element proc on the bear), "feel" (the hero's
+## squash and stretch, each monster's tell at its peak), "town" (the townsfolk, a talk, the loadout,
+## the settings, a practice dummy), "brawl".
 
 const TIMEOUT := 300.0
 
@@ -78,6 +80,10 @@ func _run() -> void:
 		await _hunt()
 	if only == "" or only == "arsenal":
 		await _arsenal()
+	if only == "" or only == "feel":
+		await _feel()
+	if only == "" or only == "town":
+		await _town()
 	if only == "" or only == "brawl":
 		await _brawl()
 	print("AUTOSHOT: %d shots in %s, %d errors, %.1f s" % [_taken, dir, counter.errors, Game.now() - _start])
@@ -454,6 +460,173 @@ func _face_point(p: Vector3) -> void:
 	to.y = 0.0
 	if to.length() > 0.1:
 		hero.facing = to.normalized()
+
+
+## Squash and stretch on the hero (from the side), and each monster's tell caught at its peak.
+func _feel() -> void:
+	var camp := WorldMap.tile(Vector2(47, 27.5))
+	var open := camp + Vector2(-22, -12)
+	_put(open, open + Vector2(20, 0))
+	await _wait(0.8)
+	# film from the side so the squat and the stretch read
+	cam.yaw += PI * 0.5
+	await _wait(0.4)
+	_press("jump")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_release("jump")
+	await _shot("40_nhun_truoc_khi_nhay")
+	await _wait(0.1)
+	await _shot("41_gian_khi_bay_len")
+	var was_air := false
+	for f in 120:
+		await get_tree().physics_frame
+		if hero.state == Hero.State.AIR:
+			was_air = true
+		elif was_air and hero.state == Hero.State.GROUND:
+			break
+	await get_tree().physics_frame
+	await _shot("42_dap_dat_bep")
+	await _wait(0.6)
+	hero.dash(hero.facing, 5.0, 0.22, 0.28, false)
+	for f in 4:
+		await get_tree().physics_frame
+	await _shot("43_luot_gian_dai")
+	await _wait(0.8)
+	# the slime at the bottom of its squat, the mushroom with its spore gathered
+	var slime := _nearest_of(Slime, camp)
+	if slime:
+		var s: Slime = slime
+		_put(WorldMap.map_of(s.global_position) + Vector2(-3.2, -2.0), WorldMap.map_of(s.global_position))
+		_aim_at(s.global_position)
+		await _wait(1.0)
+		s.target = hero
+		s._lunged = false
+		s.set_state(Enemy.State.ATTACK)
+		await _wait(s.beats.hold_at() + 0.05)
+		await _shot("44_slime_lay_da")
+	var shroom := _nearest_of(Shroom, camp)
+	if shroom:
+		var m: Shroom = shroom
+		_put(WorldMap.map_of(m.global_position) + Vector2(-4.5, -2.5), WorldMap.map_of(m.global_position))
+		_aim_at(m.global_position)
+		await _wait(1.0)
+		m.target = hero
+		m._fired = false
+		m.set_state(Enemy.State.ATTACK)
+		await _wait(m.beats.hold_at() + 0.05)
+		await _shot("45_nam_tu_bao_tu")
+	# the bear: its paw up and trembling, then reared up before the stomp
+	bear.set_mode(GauMa.Mode.IDLE)
+	await _wait(0.5)
+	var fwd := -bear.global_basis.z.normalized()
+	_put(WorldMap.map_of(bear.global_position + fwd * 16.0 + bear.global_basis.x * 9.0), WorldMap.map_of(bear.global_position))
+	await _wait(0.5)
+	bear.target = hero
+	bear.set_mode(GauMa.Mode.SWIPE)
+	await _look_boss(bear.swipe_beats.hold_at() + 0.08)
+	await _shot("46_gau_vo_giu_da")
+	await _wait(1.6)
+	bear.set_mode(GauMa.Mode.STOMP)
+	await _look_boss(bear.stomp_beats.hold_at() + 0.1)
+	await _shot("47_gau_dam_dat_dinh")
+	await _wait(2.0)
+	bear.set_mode(GauMa.Mode.IDLE)
+
+
+func _nearest_of(type: Variant, near_m: Vector2) -> Node3D:
+	var best: Node3D = null
+	var bd := INF
+	var p := WorldMap.world(near_m)
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_of(e, type) or e.state == Enemy.State.DEAD or not e.visible:
+			continue
+		var d: float = e.global_position.distance_to(p)
+		if d < bd:
+			bd = d
+			best = e
+	return best
+
+
+func _aim_at(p: Vector3) -> void:
+	_face_point(p)
+	var to := p - hero.global_position
+	cam.yaw = atan2(-to.x, -to.z)
+
+
+## The townsfolk one by one, a talk and its pages, the loadout, the settings, the Esc menu and a
+## practice dummy taking a combo.
+func _town() -> void:
+	var town := main.get_node_or_null("Townsfolk") as Townsfolk
+	if town == null or Menus.current == null:
+		return
+	# portraits: the hero hidden just in front, the camera over where they stand
+	for id in town.npcs:
+		var npc: Npc = town.npcs[id]
+		var fwd := Vector3(sin(npc.rotation.y), 0, cos(npc.rotation.y))
+		_put(WorldMap.map_of(npc.global_position + fwd * 1.1), WorldMap.map_of(npc.global_position))
+		hero.model.visible = false
+		await _wait(1.2)
+		cam.look_at_point(npc.head_position() + Vector3.DOWN * 0.5)
+		await _wait(0.2)
+		await _shot("60_npc_" + id)
+	hero.model.visible = true
+	var strega: Npc = town.npcs.strega
+	var sf := Vector3(sin(strega.rotation.y), 0, cos(strega.rotation.y))
+	_put(WorldMap.map_of(strega.global_position + sf * 2.4), WorldMap.map_of(strega.global_position))
+	await _wait(0.8)
+	await _shot("61_noi_chuyen_goi_y")
+	Menus.current.open("talk", "", strega)
+	await _wait(0.8)
+	await _shot("62_noi_chuyen_strega")
+	(Menus.current.page as TalkMenu)._do("shop")
+	await _wait(0.3)
+	await _shot("63_ke_thuoc")
+	Menus.current.close()
+	var priyani: Npc = town.npcs.priyani
+	Menus.current.open("talk", "", priyani)
+	(Menus.current.page as TalkMenu)._do("beasts")
+	await _wait(0.4)
+	await _shot("64_ho_so_behemoth")
+	Menus.current.close()
+	Menus.current.open("talk", "", town.npcs.gaius)
+	(Menus.current.page as TalkMenu)._do("map")
+	await _wait(0.4)
+	await _shot("64b_ban_do")
+	Menus.current.close()
+	Menus.current.open("loadout")
+	await _wait(0.8)
+	await _shot("65_trang_bi")
+	var lo := Menus.current.page as LoadoutMenu
+	lo.selected = 2
+	lo._open_choice()
+	await _wait(0.3)
+	await _shot("66_doi_giap")
+	Menus.current.close()
+	Menus.current.open("settings")
+	await _wait(0.3)
+	await _shot("67_cai_dat")
+	Menus.current.open("pause")
+	await _wait(0.3)
+	await _shot("68_menu_esc")
+	Menus.current.close()
+	# a combo on a practice dummy
+	var dummy: Node3D = null
+	for c in town.get_children():
+		if c is TrainingDummy:
+			dummy = c
+			break
+	if dummy:
+		var df := Vector3(sin(dummy.rotation.y), 0, cos(dummy.rotation.y))
+		_put(WorldMap.map_of(dummy.global_position + df * 1.6), WorldMap.map_of(dummy.global_position))
+		await _wait(0.5)
+		for i in 4:
+			_press("attack")
+			await _wait(0.12)
+			_release("attack")
+			await _wait(0.35)
+		await _wait(0.3)
+		await _shot("69_hinh_nom")
 
 
 ## The bear decides for itself for a while; every skill should come up and nothing may break.

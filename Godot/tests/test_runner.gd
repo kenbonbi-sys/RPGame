@@ -24,6 +24,9 @@ func _ready() -> void:
 	await preload("res://tests/combat_tests.gd").new(self).run_all()
 	await preload("res://tests/weapon_tests.gd").new(self).run_all()
 	await preload("res://tests/armour_tests.gd").new(self).run_all()
+	await preload("res://tests/feel_tests.gd").new(self).run_all()
+	await preload("res://tests/render_tests.gd").new(self).run_all()
+	await preload("res://tests/town_tests.gd").new(self).run_all()
 	print("\n%d checks, %d failed" % [checks, failures.size()])
 	for f in failures:
 		print("  FAIL ", f)

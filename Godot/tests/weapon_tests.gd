@@ -134,6 +134,9 @@ func colossus_procs() -> void:
 	check(cysts.size() == 1, "Umbral grows a cyst on one of its parts")
 	if cysts.size() == 1:
 		var cyst: UmbralCyst = cysts[0]
+		# it grows on a random part; burst it on the head so the check does not hang on where
+		# (a cyst on the trunk, far from every breakable part, rightly breaks nothing)
+		cyst.global_position = bear.head.global_position
 		await t._frames(1)
 		var parts_before := 0.0
 		for p in bear.parts:

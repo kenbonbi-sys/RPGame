@@ -51,8 +51,18 @@ const START := ["w_kiem_hong_anh", "w_riu_hoa_nguc", "w_bua_bang_phong", "w_song
 	"w_gang_thanh_quang", "w_sung_hu_anh"]
 
 
+## Weapons the townsfolk hold (never the hero's): Wils's and Moyra's hammers, Janek Zai's repeater
+## glowing with aether, Kat's blade, Bulvar's axe.
+const PROPS := {
+	"npc_bua_ren": {"family": "hammer", "element": "neutral", "name": "Búa Rèn"},
+	"npc_sung_janek": {"family": "repeaters", "element": "frost", "name": "Súng Ostia"},
+	"npc_kiem_kat": {"family": "sword", "element": "neutral", "name": "Kiếm"},
+	"npc_riu_bulvar": {"family": "axe", "element": "frost", "name": "Rìu"},
+}
+
+
 static func item(id: String) -> Dictionary:
-	return ARMORY.get(id, ARMORY.w_kiem_hong_anh)
+	return ARMORY.get(id, PROPS.get(id, ARMORY.w_kiem_hong_anh))
 
 
 static func family(id: String) -> Dictionary:

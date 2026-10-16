@@ -54,6 +54,13 @@ func _house(rng: RandomNumberGenerator, m: Vector2, yaw: float, w: float, d: flo
 	cs.position = Vector3(0, size.y * 0.5, 0)
 	body.add_child(cs)
 	root.add_child(body)
+	# the walls hide what stands behind the house (kept inside the walls and under the roof)
+	var occ := OccluderInstance3D.new()
+	var box := BoxOccluder3D.new()
+	box.size = Vector3(size.x * 0.85, size.y * 0.55, size.z * 0.85)
+	occ.occluder = box
+	occ.position = Vector3(0, size.y * 0.3, 0)
+	root.add_child(occ)
 
 
 ## Places a built mesh on the ground; `solid` gives it a small box (or cylinder) collider.

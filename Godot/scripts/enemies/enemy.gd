@@ -68,6 +68,10 @@ var _flash := 0.0
 var _flash_hold_until := 0.0
 var _plate: Nameplate
 var _facing := Vector3.FORWARD
+var _meshes: Array[MeshInstance3D] = []
+## Whether any camera sees it: its looks (flash, tint, squash) are only worked out while it does;
+## the rules never ask.
+var on_screen := true
 
 
 func _ready() -> void:
@@ -102,6 +106,16 @@ func _ready() -> void:
 	model.name = "Model"
 	add_child(model)
 	build_model(model)
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		_meshes.append(n as MeshInstance3D)
+	if Game.has_screen():
+		var seen := VisibleOnScreenNotifier3D.new()
+		var r := maxf(body_radius, 0.5) * 2.5
+		seen.aabb = AABB(Vector3(-r, -0.2, -r), Vector3(r * 2.0, head_height + 1.2, r * 2.0))
+		seen.screen_entered.connect(func() -> void: on_screen = true)
+		seen.screen_exited.connect(func() -> void: on_screen = false)
+		add_child(seen)
+		on_screen = false
 	home = global_position
 	_idle_for = randf_range(1.5, 3.5)
 
@@ -465,9 +479,11 @@ func _update_look() -> void:
 	# models look along -Z
 	var want := atan2(-_facing.x, -_facing.z)
 	model.rotation.y = lerp_angle(model.rotation.y, want, 0.25)
+	if not on_screen:
+		return
 	var tint := status.tint() if status else Color(0, 0, 0, 0)
-	for n in model.find_children("*", "MeshInstance3D", true, false):
-		var m := (n as MeshInstance3D).material_override as ShaderMaterial
+	for mi in _meshes:
+		var m := mi.material_override as ShaderMaterial
 		if m:
 			m.set_shader_parameter("hurt", 1.0 if Game.now() < _flash_hold_until else _flash * 0.8)
 			m.set_shader_parameter("tint", tint)

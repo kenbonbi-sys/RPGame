@@ -134,6 +134,17 @@ var _heavy_full := false
 var _roll_dir := Vector3.FORWARD
 var _knock_landed := -1.0
 
+## Squash and stretch of the body (the model's local x, y, z scale, volume kept), on a springy
+## settle: a squat before every jump, stretched while rising or dropping fast, flattened on
+## landing, and drawn out along a Lướt so the speed reads.
+var squash := Vector3.ONE
+var _squash_vel := Vector3.ZERO
+## Seconds left of the squat before take-off (0 = not jumping). Short: a hero's moves are quick.
+var _jump_squat := 0.0
+const JUMP_SQUAT := 0.06
+## The deepest squat, before a jump (fraction of height kept).
+const SQUAT_DEPTH := 0.72
+
 var _climb_body: CollisionObject3D
 var _climb_local := Vector3.ZERO
 var _climb_normal_local := Vector3.UP
@@ -247,6 +258,19 @@ func attached_colossus() -> Node:
 	return null
 
 
+# ================================================================== input
+## The player's buttons, unless a menu (or a talk) has the screen: then the hero just stands.
+func _pressed(action: StringName) -> bool:
+	return not Game.menu_open and Input.is_action_just_pressed(action)
+
+
+func _held(action: StringName) -> bool:
+	# a hand already holding on keeps holding while a menu is up
+	if action == &"grip":
+		return Input.is_action_pressed(action)
+	return not Game.menu_open and Input.is_action_pressed(action)
+
+
 # ================================================================== animation
 func _clip(anim_name: String) -> String:
 	return _resolve.call(anim_name) if _resolve.is_valid() else anim_name
@@ -289,6 +313,8 @@ func set_state(s: State) -> void:
 			_release_grip()
 	state = s
 	_state_time = 0.0
+	if s != State.GROUND:
+		_jump_squat = 0.0
 
 
 func is_dead() -> bool:
@@ -354,24 +380,24 @@ func _locomotion(delta: float) -> void:
 		_potions()
 
 	# Shift: Lướt the moment it is pressed (on the ground or in the air); keep holding it to sprint
-	if Input.is_action_just_pressed("dodge") and not stunned and not rooted:
+	if _pressed("dodge") and not stunned and not rooted:
 		_dodge_down_at = Game.now()
 		skills.request(PlayerSkills.DASH_SLOT)
 		if state == State.ROLL:
 			return
-	_sprinting = Input.is_action_pressed("dodge") and Game.now() - _dodge_down_at >= Controls.DODGE_TAP_TIME and amount > 0.3
+	_sprinting = _held("dodge") and Game.now() - _dodge_down_at >= Controls.DODGE_TAP_TIME and amount > 0.3
 
-	if not stunned and Input.is_action_pressed("grip") and _try_grip():
+	if not stunned and _held("grip") and _try_grip():
 		return
-	if not stunned and Input.is_action_just_pressed("attack") and weak_point_near and on_colossus:
+	if not stunned and _pressed("attack") and weak_point_near and on_colossus:
 		_start_stab(weak_point_near)
 		return
-	if not stunned and Input.is_action_just_pressed("heavy") and on_floor and action_remaining() <= 0.05:
+	if not stunned and _pressed("heavy") and on_floor and action_remaining() <= 0.05:
 		_start_heavy()
 		return
-	if Input.is_action_just_pressed("switch_weapon") and action_remaining() <= 0.05 and weapons.size() > 1:
+	if _pressed("switch_weapon") and action_remaining() <= 0.05 and weapons.size() > 1:
 		cycle_weapon()
-	if Input.is_action_just_pressed("switch_armour") and action_remaining() <= 0.05 and wardrobe.size() > 1:
+	if _pressed("switch_armour") and action_remaining() <= 0.05 and wardrobe.size() > 1:
 		cycle_armour()
 	if not stunned:
 		_skill_keys()
@@ -392,18 +418,22 @@ func _locomotion(delta: float) -> void:
 	elif amount > 0.05:
 		facing = facing.slerp(dir.normalized(), 1.0 - exp(-(12.0 if on_floor else 4.0) * delta)).normalized()
 
-	if on_floor and not stunned and not rooted:
-		if Input.is_action_just_pressed("jump"):
-			velocity.y = jump_speed
-			_peak_y = global_position.y
-			set_state(State.AIR)
-			play("Jump_Start", 0.08)
-			_ride_body = null
-			on_colossus = false
+	if _jump_squat > 0.0:
+		_jump_squat -= delta
+		if stunned or rooted:
+			_jump_squat = 0.0
+		elif _jump_squat <= 0.0:
+			_take_off()
 			return
+	elif on_floor and not stunned and not rooted and _pressed("jump"):
+		# a few frames of squat first: the anticipation, short enough to still feel instant
+		_jump_squat = JUMP_SQUAT
+	var fall_speed := velocity.y
 	velocity.y -= gravity * delta
 	move_and_slide()
 	_after_move(delta)
+	if is_on_floor() and state == State.AIR:
+		_land_squash(-fall_speed)
 
 	if is_on_floor():
 		if state == State.AIR:
@@ -432,6 +462,79 @@ func _locomotion(delta: float) -> void:
 		_peak_y = maxf(_peak_y, global_position.y)
 		if _anim_name != "Jump_Start" or _state_time > 0.25:
 			play("Jump_Idle", 0.2)
+
+
+func _take_off() -> void:
+	velocity.y = jump_speed
+	_peak_y = global_position.y
+	set_state(State.AIR)
+	play("Jump_Start", 0.08)
+	_ride_body = null
+	on_colossus = false
+	# out of the squat straight into a stretch
+	squash = _stretch_y(1.28)
+	_squash_vel = Vector3.ZERO
+
+
+## Flattens on touching down, harder the faster the fall.
+func _land_squash(speed: float) -> void:
+	var k := clampf((speed - 2.0) / 16.0, 0.0, 1.0)
+	if k <= 0.0:
+		return
+	squash = _stretch_y(1.0 - 0.32 * k)
+	_squash_vel = Vector3.ZERO
+
+
+## Volume-keeping scale stretched (or squashed, below 1) along the model's up.
+static func _stretch_y(s: float) -> Vector3:
+	var w := 1.0 / sqrt(s)
+	return Vector3(w, s, w)
+
+
+## ...and along the model's front (+Z, the way it faces and dashes).
+static func _stretch_z(s: float) -> Vector3:
+	var w := 1.0 / sqrt(s)
+	return Vector3(w, w, s)
+
+
+## What the body leans toward this frame; a stiff spring with a little overshoot follows it.
+func _squash_goal() -> Vector3:
+	match state:
+		State.ROLL:
+			if _roll_style == "blink":
+				return Vector3.ONE
+			var t := clampf(_state_time / maxf(0.01, _roll_time_now), 0.0, 1.0)
+			# snaps long at once, keeps it through the burst, eases back as the dash slows
+			var a := smoothstep(0.0, 0.08, t) * (1.0 - smoothstep(0.3, 0.95, t))
+			return _stretch_z(1.0 + (0.42 if _roll_style == "roll" else 0.3) * a)
+		State.AIR:
+			# long while rising or dropping fast, round at the top of the arc
+			var k := clampf(absf(velocity.y) / jump_speed, 0.0, 1.0)
+			return _stretch_y(1.0 + (0.16 if velocity.y > 0.0 else 0.1) * k * k)
+		State.GROUND:
+			if _jump_squat > 0.0:
+				var p := clampf(1.0 - _jump_squat / JUMP_SQUAT, 0.0, 1.0)
+				return _stretch_y(lerpf(0.8, SQUAT_DEPTH, sin(p * PI * 0.5)))
+	return Vector3.ONE
+
+
+func _update_squash(delta: float) -> void:
+	var goal := _squash_goal()
+	if _jump_squat > 0.0:
+		# the squat is a handful of frames: it is the pose itself, not something eased toward
+		squash = goal
+		_squash_vel = Vector3.ZERO
+		return
+	if state == State.ROLL:
+		# driven by the dash's own curve; the spring only settles what is left after
+		squash = squash.lerp(goal, 1.0 - exp(-40.0 * delta))
+		_squash_vel = Vector3.ZERO
+		return
+	# semi-implicit spring: about 20% overshoot, settled in a quarter of a second
+	_squash_vel += (goal - squash) * 420.0 * delta
+	_squash_vel *= exp(-17.0 * delta)
+	squash += _squash_vel * delta
+	squash = squash.clamp(Vector3.ONE * 0.5, Vector3.ONE * 1.6)
 
 
 func _land() -> void:
@@ -481,7 +584,7 @@ func _follow_attachment() -> void:
 		facing = facing.normalized() if facing.length() > 0.01 else Vector3.FORWARD
 		_ride_basis = b
 		var shake := _colossus_shake(_ride_body)
-		if shake > 0.4 and not Input.is_action_pressed("grip"):
+		if shake > 0.4 and not _held("grip"):
 			_thrown_off(_ride_body)
 
 
@@ -524,6 +627,7 @@ func dash(dir: Vector3, distance: float, time: float, invuln: float, perfect: bo
 		_perfect_until = Game.now() + DB.c("perfectWindow", 0.15)
 		_perfect_used = false
 	_knock = Vector3.ZERO
+	_jump_squat = 0.0
 	_air_dash = not is_on_floor()
 	if _air_dash:
 		velocity.y = maxf(velocity.y, 0.5)
@@ -554,6 +658,10 @@ func _roll(delta: float) -> void:
 			model.visible = true
 		velocity.x *= 0.3
 		velocity.z *= 0.3
+		if _roll_style != "blink":
+			# the stop: a short bunch-up along the run before the spring settles it
+			squash = _stretch_z(0.88)
+			_squash_vel = Vector3.ZERO
 		set_state(State.GROUND if is_on_floor() else State.AIR)
 
 
@@ -564,7 +672,7 @@ func move_dir() -> Vector3:
 
 func _skill_keys() -> void:
 	for i in Controls.SKILL_ACTIONS.size():
-		if Input.is_action_just_pressed(Controls.SKILL_ACTIONS[i]):
+		if _pressed(Controls.SKILL_ACTIONS[i]):
 			skills.request(i)
 
 
@@ -782,7 +890,7 @@ func _release_grip() -> void:
 
 
 func _climb(delta: float) -> void:
-	if not _climb_body or not Input.is_action_pressed("grip") or grip <= 0.0:
+	if not _climb_body or not _held("grip") or grip <= 0.0:
 		_let_go(Vector3.ZERO)
 		return
 	var g := _grip_world()
@@ -790,10 +898,10 @@ func _climb(delta: float) -> void:
 	var n: Vector3 = g[1]
 	var top := n.y > 0.72
 
-	if Input.is_action_just_pressed("jump"):
+	if _pressed("jump"):
 		_let_go(n * 3.5 + Vector3.UP * 6.0)
 		return
-	if Input.is_action_just_pressed("attack"):
+	if _pressed("attack"):
 		_start_stab(weak_point_near)
 		return
 
@@ -898,7 +1006,7 @@ func _start_stab(target: Node3D) -> void:
 
 func _stab(delta: float) -> void:
 	var climbing := _climb_body != null
-	if climbing and (not Input.is_action_pressed("grip") or grip <= 0.0):
+	if climbing and (not _held("grip") or grip <= 0.0):
 		_let_go(Vector3.ZERO)
 		return
 	var a := "1H_Melee_Attack_Stab"
@@ -906,7 +1014,7 @@ func _stab(delta: float) -> void:
 	if not _stab_released:
 		_stab_charge = minf(1.0, _stab_charge + delta / 1.1)
 		hold(a, wind * (0.4 + 0.6 * _stab_charge))
-		if not Input.is_action_pressed("attack"):
+		if not _held("attack"):
 			_stab_released = true
 			_state_time = 0.0
 			anim.speed_scale = 1.6
@@ -1053,7 +1161,7 @@ func _heavy(delta: float) -> void:
 	var wind := anim_length(a) * 0.3
 	var charge_time := float(h.charge)
 	if not _heavy_released:
-		if Input.is_action_just_pressed("dodge"):
+		if _pressed("dodge"):
 			set_state(State.GROUND)
 			skills.request(PlayerSkills.DASH_SLOT)
 			return
@@ -1068,7 +1176,7 @@ func _heavy(delta: float) -> void:
 				var col := Elements.color(Weapons.element(weapon_item))
 				Fx.flash(global_position + Vector3.UP * 1.6, col, 3.0, 4.0)
 				Fx.burst(global_position + Vector3.UP * 1.8, Vector3.UP, col, 14, 3.0, 0.2, 0.4, 90.0, 0.0, true)
-		if not Input.is_action_pressed("heavy") or _state_time > charge_time + 0.5:
+		if not _held("heavy") or _state_time > charge_time + 0.5:
 			_heavy_released = true
 			_state_time = 0.0
 			anim.speed_scale = 1.5
@@ -1273,7 +1381,7 @@ func _update_vitals(delta: float) -> void:
 
 func _potions() -> void:
 	for i in 3:
-		if Input.is_action_just_pressed("potion_%d" % (i + 1)):
+		if _pressed("potion_%d" % (i + 1)):
 			use_item(POTIONS[i])
 
 
@@ -1398,7 +1506,10 @@ func _orient_model(delta: float) -> void:
 		want = _basis_facing(facing, Vector3.UP)
 	var cur := model.basis.orthonormalized()
 	var q := Quaternion(cur).slerp(Quaternion(want.orthonormalized()), 1.0 - exp(-14.0 * delta))
-	model.basis = Basis(q).scaled(Vector3.ONE * model_scale)
+	_update_squash(delta)
+	if is_climbing or state == State.STAB or state == State.DEAD:
+		squash = Vector3.ONE
+	model.basis = Basis(q).scaled_local(squash * model_scale)
 	model.position.y = lerpf(model.position.y, _feet_lift(), 1.0 - exp(-14.0 * delta))
 
 

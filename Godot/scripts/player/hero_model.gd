@@ -60,11 +60,22 @@ const ALIASES := {
 @export var body := "Male"
 @export var outfit := "Ranger"
 @export var hood := false
+## One hair piece, or several joined with commas ("Hair_Buzzed,Hair_Beard").
 @export var hair := "Hair_SimpleParted"
 @export var light_skin := true
 @export var hair_color := Color(0.26, 0.16, 0.09)
+## Alpha 0: no scarf.
 @export var scarf := Color(0.80, 0.12, 0.10)
 @export var trim := Color(0.80, 0.60, 0.28)
+## Another colour sheet of the outfit ("T_Ranger_3_BaseColor", "T_Peasant_2_BaseColor"), or "".
+@export var outfit_texture := ""
+## Multiplies the outfit's colours (a navy coat from the cream sheet).
+@export var outfit_tint := Color.WHITE
+## Drawn on the HUD's portrait layer too (the hero); NPCs are not.
+@export var portrait := true
+## Sculpt every armour plate up front so changing sets never hitches (the hero); townsfolk only
+## build what they wear.
+@export var warm_armour := true
 
 ## Render layer 2 keeps decals off the hero; layer 11 is only the hero, for the HUD's portrait camera.
 const PORTRAIT_LAYER := 1 << 10
@@ -87,6 +98,7 @@ var _to_model := Transform3D.IDENTITY
 
 static var _library: AnimationLibrary
 static var _heads := {}
+static var _head_sources := {}
 
 
 func _ready() -> void:
@@ -102,13 +114,14 @@ func _ready() -> void:
 	anim.add_animation_library("", _library_for(skeleton, body_root.get_path_to(skeleton)))
 	_scarf()
 	set_weapon(weapon_id)
-	ArmourArt.warm(_armour_sources())
+	if warm_armour:
+		ArmourArt.warm(_armour_sources())
 	if not armour.is_empty():
 		var worn := armour
 		armour = {}
 		set_armour(worn)
 	for n in find_children("*", "MeshInstance3D", true, false):
-		(n as MeshInstance3D).layers = 2 | PORTRAIT_LAYER
+		(n as MeshInstance3D).layers = _layers()
 	var n: Node = skeleton
 	while n != self:
 		_to_model = (n as Node3D).transform * _to_model
@@ -121,6 +134,24 @@ func _ready() -> void:
 
 ## How high the lower sole is above the model's origin in the current pose; some clips (the
 ## sword idle) dip the feet below where the rest pose stands.
+func _layers() -> int:
+	return 2 | (PORTRAIT_LAYER if portrait else 0)
+
+
+## Pins a mesh to a bone, placed in T-pose model space (metres): NPCs' hats, staffs, books.
+func attach(bone: String, mesh: Mesh, mat: Material, at: Vector3, scale := Vector3.ONE, rot := Vector3.ZERO) -> Node3D:
+	var mi := _piece(bone, mesh, mat, at, scale, rot)
+	if mi:
+		(mi as MeshInstance3D).layers = _layers()
+	return mi
+
+
+## Where a bone sits in T-pose model space, to place things against it.
+func bone_rest(bone: String) -> Vector3:
+	var i := skeleton.find_bone(bone)
+	return skeleton.get_bone_global_rest(i).origin if i >= 0 else Vector3.ZERO
+
+
 func sole_height() -> float:
 	var low := INF
 	for i in _sole_bones:
@@ -192,20 +223,24 @@ func _dress_outfit() -> void:
 			# the outfit's bare skin (hands, neck) matches the head's skin
 			if m.resource_name.begins_with("MI_Regular"):
 				sm.albedo_texture = load(UBC_DIR + SKIN_TEXTURES[body][0 if light_skin else 1])
+			elif outfit_texture != "" and sm.albedo_texture and sm.albedo_texture.resource_path.get_file().begins_with("T_" + outfit):
+				sm.albedo_texture = load(OUTFITS.get_base_dir().path_join(outfit_texture + ".png"))
+			if not m.resource_name.begins_with("MI_Regular"):
+				sm.albedo_color = sm.albedo_color * outfit_tint
 			mi.set_surface_override_material(s, sm)
 
 
 ## The head (and eyes, brows) of the Universal Base Character, bound to the outfit's skeleton.
 func _add_head() -> void:
-	var src: Node = (load(HEADS[body]) as PackedScene).instantiate()
-	for n in src.find_children("*", "MeshInstance3D", true, false):
-		var mi := n as MeshInstance3D
+	for part in _head_parts(body):
+		var mi_name: String = part[0]
+		var mesh: Mesh = part[1]
 		var copy := MeshInstance3D.new()
-		copy.skin = mi.skin
-		if mi.name.begins_with("SuperHero"):
-			copy.mesh = _head_only(mi.mesh, mi.skin)
+		copy.skin = part[2]
+		if mi_name.begins_with("SuperHero"):
+			copy.mesh = _head_only(mesh, part[2])
 			_head_mesh = copy
-			var m := mi.mesh.surface_get_material(0)
+			var m := mesh.surface_get_material(0)
 			if m is BaseMaterial3D:
 				var sm := (m as BaseMaterial3D).duplicate() as BaseMaterial3D
 				sm.albedo_texture = load(UBC_DIR + SKIN_TEXTURES[body][0 if light_skin else 1])
@@ -213,10 +248,23 @@ func _add_head() -> void:
 				sm.rim = 0.35
 				copy.material_override = sm
 		else:
-			copy.mesh = mi.mesh
+			copy.mesh = mesh
 		skeleton.add_child(copy)
 		copy.skeleton = copy.get_path_to(skeleton)
+
+
+## The meshes of a Universal Base Character ([name, mesh, skin]), read once per body.
+static func _head_parts(body_kind: String) -> Array:
+	if _head_sources.has(body_kind):
+		return _head_sources[body_kind]
+	var out := []
+	var src: Node = (load(HEADS[body_kind]) as PackedScene).instantiate()
+	for n in src.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		out.append([String(mi.name), mi.mesh, mi.skin])
 	src.free()
+	_head_sources[body_kind] = out
+	return out
 
 
 ## Keeps only the triangles whose corners mostly follow the head and neck bones.
@@ -256,9 +304,17 @@ static func _head_only(mesh: Mesh, skin: Skin) -> ArrayMesh:
 
 ## Hair from the pack, bound to this skeleton's head bone.
 func _add_hair() -> void:
-	if hair == "" or hood:
+	if hair == "":
 		return
-	var path := HAIR % hair
+	for piece in hair.split(",", false):
+		# a hood covers the hair, not a beard
+		if hood and not piece.contains("Beard"):
+			continue
+		_add_hair_piece(piece.strip_edges())
+
+
+func _add_hair_piece(piece: String) -> void:
+	var path := HAIR % piece
 	if not ResourceLoader.exists(path):
 		return
 	var h: Node = (load(path) as PackedScene).instantiate()
@@ -310,6 +366,8 @@ func _piece(bone: String, mesh: Mesh, mat: Material, at: Vector3, scale := Vecto
 
 ## Hồng Anh's red scarf: a wrap at the neck and two tails over the back.
 func _scarf() -> void:
+	if scarf.a <= 0.0:
+		return
 	var red := _mat(scarf, 0.0, 0.85)
 	var neck := skeleton.get_bone_global_rest(skeleton.find_bone("neck_01")).origin
 	var wrap := CylinderMesh.new()
@@ -333,6 +391,10 @@ func set_weapon(id: String) -> void:
 			n.queue_free()
 	_weapon_nodes.clear()
 	weapon_id = id
+	if id == "":
+		# empty-handed (townsfolk)
+		idle_clip = "Idle"
+		return
 	idle_clip = String(Weapons.family(id).get("idle", "Sword_Idle"))
 	for piece in WeaponArt.build(id):
 		var bone := "hand_r" if piece.hand == "r" else "hand_l"
@@ -357,7 +419,7 @@ func set_weapon(id: String) -> void:
 			var mi := MeshInstance3D.new()
 			mi.mesh = mesh
 			mi.material_override = part[1]
-			mi.layers = 2 | PORTRAIT_LAYER
+			mi.layers = _layers()
 			root.add_child(mi)
 
 
@@ -377,7 +439,7 @@ func set_armour(worn: Dictionary) -> void:
 		_armour_nodes.erase(slot)
 		var nodes := ArmourArt.dress(skeleton, _armour_sources(), slot, want)
 		for mi in nodes:
-			mi.layers = 2 | PORTRAIT_LAYER
+			mi.layers = _layers()
 		if not nodes.is_empty():
 			_armour_nodes[slot] = nodes
 	armour = worn.duplicate()

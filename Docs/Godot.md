@@ -16,14 +16,17 @@ Project nằm trong `Godot/`. Code viết bằng **GDScript** (máy chưa có .N
 | **Space** | Nhảy; khi đang bám thì bật nhảy khỏi bề mặt |
 | **Shift** | Bấm là Lướt ngay, cả khi đang trên không (lộn né, bất tử 0,28 s, hồi 2,2 s; lướt trên không gần như không rơi) · giữ quá 0,22 s: chạy nhanh |
 | **Chuột trái** | Đòn thường của vũ khí (kiếm: combo Chém Gió 3 đòn). Khi đang bám hoặc đứng trên lưng colossus: giữ để vung kiếm, thả để đâm (giữ càng lâu càng đau) |
-| **1 2 3 4 5** · **R** | 5 chiêu của lớp nhân vật · Tuyệt kỹ (bản Unity: W E R A S · D) |
+| **1 2 3 4 5** · **R** | 5 chiêu của lớp nhân vật · Tuyệt kỹ (bản Unity: W E R A S · D). HUD không vẽ thanh chiêu (Dauntless không có), phím vẫn dùng được |
 | **Z X C** | Bình Máu · Bình Năng Lượng · Thuốc Thảo Mộc (bản Unity: 1 2 3) |
-| **Chuột phải** | **Đòn nặng** của vũ khí đang cầm (kiếm: Trảm): giữ để tụ lực (thanh tụ lực hiện trên thanh chiêu), thả để ra đòn. Lướt huỷ được lúc đang tụ |
-| **V** | Đổi sang vũ khí kế tiếp (tay cầm: phải của D-pad) |
-| **G** | Mặc bộ giáp kế tiếp (tay cầm: trái của D-pad) |
+| **Chuột phải** | **Đòn nặng** của vũ khí đang cầm (kiếm: Trảm): giữ để tụ lực (thanh tụ lực hiện ở giữa dưới màn hình), thả để ra đòn. Lướt huỷ được lúc đang tụ |
+| **V** | Đổi sang vũ khí kế tiếp (tay cầm: phải của D-pad); chọn hẳn thì vào Trang Bị |
+| **G** | Mặc bộ giáp kế tiếp (tay cầm: trái của D-pad); chọn từng món thì vào Trang Bị |
+| **F** | Nói chuyện với người trong làng đang đứng gần (giữa dưới hiện "[F] Nói chuyện với …") |
+| **B** / **I** | Trang Bị (loadout kiểu Dauntless) |
+| **Esc** | Menu: Tiếp Tục, Trang Bị, Cài Đặt, Thoát Game. Trong menu: lùi một bước |
 | **Giữ E** | Bám: túm lông colossus hoặc đá có thể bám, leo bằng WASD (trước đây là chuột phải) |
 | **Q** / chuột giữa | Quay camera nhìn về phía boss |
-| **F1** · **F3** · **Esc** | Bảng phím · thông số (FPS, trạng thái) · nhả chuột |
+| **F1** · **F3** | Bảng phím · thông số (FPS, trạng thái) |
 
 Có hỗ trợ tay cầm: cần trái chạy, cần phải xoay camera, A nhảy, B Lướt, X chém, RT Trảm, RB bám, LB nhìn boss.
 
@@ -37,7 +40,8 @@ Godot/
   choi.cmd             chạy game / mở editor
   scenes/              main.tscn (thế giới), hero.tscn
   scripts/
-    core/              controls.gd (mọi phím, autoload Controls) · db.gd (autoload DB: số liệu) · game.gd (autoload Game: hero trên màn hình, hit-stop, rung)
+    core/              controls.gd (mọi phím, autoload Controls) · db.gd (autoload DB: số liệu) · game.gd (autoload Game: hero trên màn hình, hit-stop, rung, menu đang mở)
+                       game_settings.gd (cài đặt đồ hoạ, lưu user://settings.cfg)
     combat/            combat.gd · damage_info.gd · health.gd · status_effects.gd · poise.gd · shot.gd
     abilities/         ability.gd · ability_context.gd · ability_runner.gd (14 loại khối) · aim.gd
     progression/       player_stats.gd (6 chỉ số D&D, cấp, XP)
@@ -45,9 +49,12 @@ Godot/
     camera/            sotc_camera.gd
     player/            hero.gd · hero_model.gd · weapon_art.gd · armour_art.gd (giáp nặn từ bộ đồ) · player_skills.gd
     enemies/           colossus.gd (nền chung) · gau_ma.gd · weak_point.gd · boulder.gd · enemy.gd (quái thường) · slime.gd · shroom.gd · enemy_spawner.gd · creature_art.gd
+                       anticipation.gd (nhịp báo trước đòn đánh của quái)
     world/             world_map.gd (bố cục) · terrain*.gd · foliage.gd · village.gd · arena.gd · props.gd · palette.gd · grass.gd
                        mesh_kit.gd (dựng hình bằng code) · tree_art.gd (cây, bụi) · rock_art.gd (đá, khối vách) · house_art.gd (nhà, sạp, thùng, cờ, rào)
-    ui/hud.gd · ui/game_icons.gd (biểu tượng vẽ bằng SVG) · vfx/fx.gd · debug/autoshot.gd
+                       townsfolk.gd (dàn NPC và chỗ làm của họ) · npc.gd · npc_gear.gd (mũ, gậy, sách… của NPC) · training_dummy.gd
+    ui/hud.gd · ui/game_icons.gd (biểu tượng vẽ bằng SVG) · vfx/fx.gd · vfx/motion_blur.gd · debug/autoshot.gd
+    ui/menu_kit.gd (cách vẽ menu Dauntless) · menus.gd (Esc, quản lý menu) · settings_menu.gd · loadout_menu.gd · talk_menu.gd
   shaders/             đất, nước, lông colossus, ấn ký điểm yếu, tán cây (canopy), bề mặt vẽ tay (painted), đá, cỏ, ánh sáng chung (stylized_light)
   world/               terrain_data.res (đất đã bake) · map_preview.png · environment.tres (trời, sương, màu)
   data/                số liệu chuyển từ Unity (abilities, items, classes, races, quests, combat, progression .json)
@@ -55,6 +62,7 @@ Godot/
   assets/third_party/  model CC0 (xem cuối trang)
   tests/               test_runner.tscn
   tools/               bake_world.gd · list_anims.gd · measure.gd · model_shots.tscn (chụp một model) · icon_sheet.tscn (bảng mọi biểu tượng)
+                       perf_probe.tscn (đo một khung hình tốn bao nhiêu, xem dưới)
 ```
 
 ## Số liệu: một nguồn cho cả hai bản
@@ -87,8 +95,9 @@ Font **Barlow Condensed** (SemiBold, Bold, ExtraBold), khung xiên như Dauntles
 - **Góc trái trên:** chân dung hero quay trực tiếp (một camera nhỏ chỉ thấy lớp 11), vòng quanh chân dung là máu; huy hiệu cấp; tên và lớp; thanh máu xanh ngọc (phần xanh lam là lượng sát thương đang được buff đỡ, phần trắng là máu vừa mất đang rút dần); thanh vàng là sức bám; năng lượng chia ô 10 điểm; vạch kinh nghiệm; ô buff với số giây còn lại.
 - **Giữa trên:** la bàn B, ĐB, Đ, ĐN, N, TN, T, TB theo hướng camera; chấm xanh là làng, hình thoi đỏ là colossus. Khi colossus đang săn hero thì tên và thanh máu của nó hiện ngay dưới la bàn, còn lại là tên vùng.
 - **Phải trên:** biểu tượng tam giác ngược với phần trăm máu còn lại của colossus.
-- **Giữa dưới:** 8 ô chiêu, mỗi chiêu một biểu tượng riêng (xem dưới), phím, năng lượng tốn, hồi chiêu dạng màn che có số giây, tên chiêu.
-- **Phải dưới:** 3 bình thuốc Z X C và số lượng.
+- **Giữa dưới:** không có thanh chiêu, như HUD của Dauntless (từ 17/10/2026; vũ khí là bộ chiêu, đồ đạc nằm trong Trang Bị). Chỉ còn thanh tụ lực đòn nặng và dòng gợi ý ("Giữ E để bám", "[F] Nói chuyện với …").
+- **Phải dưới:** 4 ô vật phẩm như Dauntless: ô cao bo tròn, nền tối trong, biểu tượng ở giữa, "×4" ở dưới, phím nhỏ phía trên. Z X C là ba bình thuốc, ô thứ tư còn trống.
+- Khi một menu hay cuộc nói chuyện đang mở, cả HUD ẩn đi (như Dauntless).
 - **Trái dưới:** nhật ký sự kiện (nhặt đồ, hạ quái, kinh nghiệm, lên cấp, boss phát hiện), mỗi dòng có biểu tượng (đồng vàng, ngôi sao kinh nghiệm, đầu lâu, bình thuốc, giọt gel...), qua `Game.log(text, color, icon)` / tín hiệu `Game.message`; nhặt cùng một thứ liên tiếp thì cộng dồn ("+1 vàng" hai lần thành "+2 vàng"); mờ đi sau 8 s; dòng "[Enter] Để trò chuyện" dành cho bản online.
 
 **Biểu tượng** (`game_icons.gd`): khoảng 70 hình vẽ bằng đường SVG trong khung 100 × 100 (kiếm, rìu, dao găm, cung tên, khiên, tim, lửa, bông tuyết, tia sét, đầu lâu, trăng, mặt trời, mắt, bàn tay, nắm đấm, cánh, ủng, vòng xoáy, nốt nhạc, lá, dây gai, xúc tu, quả cầu, sao chổi, mũi lướt, sóng âm, giọt, bẫy, mây, cột sáng, bình thuốc, đá quý, đồng vàng...). Mỗi chiêu trong 92 chiêu có công thức riêng theo id (`SKILLS`, trùng tên sprite `sk_<id>` của bản Unity): một hình chính sáng màu, viền tối, quầng sáng theo hệ, cộng một hình nền cùng màu hệ phía sau (Chém Gió = kiếm + vệt chém, Xung Phong = khiên + mũi lướt, Bão Kiếm = ba thanh kiếm trong vòng xoáy...). Vật phẩm lấy hình theo id (bình thuốc theo màu, gel, nấm, cỏ, đá quý, giáp, ủng, bí kíp mang màu hệ của chiêu...). Godot vẽ SVG thành ảnh lúc chạy (`Image.load_svg_from_string`) và giữ lại. Xem cả bộ: `Godot_console.exe --headless --path Godot res://tools/icon_sheet.tscn -- --out D:/icons.png`.
@@ -154,6 +163,92 @@ Mỗi đòn trúng (`Combat.show_hit`):
 - **Hạt văng theo hướng đòn:** tia lửa nhỏ bắn ra phía bên kia của mục tiêu theo đúng hướng nhát chém, kèm một ngôi sao loé ở điểm trúng (0,1 s).
 - **Rung và khựng:** camera giật nhẹ khoảng 5 khung hình (`Game.kick`, riêng với rung chậm `Game.shake`), và mọi đòn của hero làm thời gian khựng lại ít nhất 0,05 s (khoảng 3 khung hình), đòn nặng và chí mạng lâu hơn.
 - Xem từng khung hình của một đòn: `--path Godot res://tools/model_shots.tscn -- --model juice --shots-dir D:/shots` (0, 30, 60, 100, 160 ms).
+
+## Chỉ vẽ thứ đang nhìn thấy (17/10/2026)
+
+Ý tưởng "nhìn hướng nào thì mới render hướng đó" thì Godot đã tự làm sẵn ở mỗi khung hình (frustum culling): thứ gì nằm ngoài khung nhìn thì không được gửi đi vẽ. Đo thật cho thấy điều đó: ở làng, quay camera về hướng trống thì số lệnh vẽ giảm từ 2 066 còn 672. Còn "bỏ hẳn khỏi bộ nhớ khi quay đi rồi nạp lại khi quay lại" thì không làm, vì quay camera nửa vòng chỉ mất 0,1 s: nạp lại kịp sẽ gây giật, nặng hơn là giữ sẵn.
+
+Đo (`tools/perf_probe.tscn`: hero đứng ở 5 chỗ, quay camera 8 hướng mỗi chỗ, lấy trung bình) thì phần vẽ thừa nằm ở **bóng đổ**: bóng của cây được vẽ cả cho cây sau lưng camera, và chiếm 2/3 số tam giác. Đã sửa:
+
+- **Cây cối chia ô nhỏ ở gần:** bản chi tiết (bản đổ bóng) chia thành ô 32 m thay vì 128 m, nên camera quay đi là cả loạt ô sau lưng bị bỏ, và bản chi tiết dừng đúng ở 150 m chứ không lan theo cả một ô lớn tới 240 m. Bản xa vẫn gom ô 128 m (`Foliage.NEAR_CELL`, `CELL`).
+- **Bản xa không đổ bóng;** bóng mặt trời chỉ tới 150 m (trước 260 m).
+- **Bóng của cây gần lấy từ bản cây đơn giản** (khoảng 700 tam giác thay vì 3 400, `Foliage.SHADOW_PROXY`). Ảnh chụp trước và sau giống hệt nhau.
+- **Che khuất (occlusion culling):** mặt đất có một bản sao thô (ô 8 m, khoảng 13 000 tam giác) nằm ngay dưới mặt đất thật. Mỗi góc của nó lấy độ cao thấp nhất của các ô quanh nó, nên nó không bao giờ nhô lên che nhầm thứ đang lộ ra; vậy mà đồi và vách vẫn che được rừng phía sau. Mỗi nhà làng có thêm một khối che trong tường. Giúp 10–25% ở chỗ có đồi núi quanh (Hang Gấu Ma, Thảo Nguyên), gần như 0 ở làng phẳng.
+- **Quái và NPC ngoài khung nhìn** không tính hình (loé trắng, màu trạng thái, nhún nhảy) và NPC dừng hoạt ảnh; luật chơi vẫn chạy như cũ.
+- **Tầm Nhìn** trong Cài Đặt co giãn mọi tầm vẽ (cây, đá, cỏ, camera).
+
+| Trung bình 40 hướng nhìn | Trước | Sau |
+|---|---|---|
+| Tam giác mỗi khung | 4,08 triệu | 1,82 triệu |
+| Trong đó của bóng đổ | 2,72 triệu | 0,76 triệu |
+| Lệnh vẽ | 1 051 | 993 |
+| Thời gian GPU (máy này, 1600×900, hai bản đo liền nhau) | 6,96 ms | 6,01 ms |
+
+Thời gian GPU đổi theo lúc đo (máy nóng lên thì chậm hơn), nên hai bản được đo liền nhau; lúc máy còn mát thì là 4,10 → 3,39 ms. Phần GPU còn lại chủ yếu là chi phí cố định theo độ phân giải (SSAO, bloom, sương, đổ bóng điểm ảnh); máy yếu hơn sẽ thấy lợi nhiều hơn vì phải xử lý ít tam giác hơn hẳn. Đo lại: `Godot_console.exe --path Godot res://tools/perf_probe.tscn -- --out D:/perf.txt [--skip Grass,Foliage] [--no-shadows]` (cần cửa sổ; in cả thời gian nạp từng phần của thế giới).
+
+## Cảm giác chuyển động (17/10/2026)
+
+**Hero nhún và giãn** (`Hero.squash`, kéo theo thân model, giữ nguyên thể tích):
+
+- **Nhảy:** bấm Space là thụp xuống 0,06 s (khoảng 4 khung hình, còn 72% chiều cao) rồi mới bật lên, vừa rời đất thì giãn dài 28%. Khi bay: lên nhanh hay rơi nhanh thì dài ra, tới đỉnh thì tròn lại. Chạm đất thì bẹp xuống tuỳ tốc độ rơi (tới 32%) rồi nảy về như lò xo (vượt quá khoảng 20%, yên sau một phần tư giây).
+- **Lướt:** thân kéo dài tới 42% theo hướng lướt ngay từ đầu, giữ qua lúc lao nhanh, thu về khi chậm lại; dừng thì co lại một nhịp (88%).
+
+**Quái báo trước đòn đánh** (`anticipation.gd`): quái được lấy đà dài, dễ đọc để người chơi kịp phản ứng; còn đòn của hero vẫn ngắn và nhanh. Mỗi đòn đi theo nhịp:
+
+1. **Cử động ngược nhỏ** trước (thụp trước khi chồm, ngả tới trước khi ngả ra sau): mắt người chơi bắt được trước cả khi kịp nghĩ.
+2. **Lấy đà** to và chậm dần.
+3. **Khựng ở đỉnh:** rung nhẹ, loé sáng ở chỗ đòn sắp tới, kèm tiếng "keng" (`tell.wav`, `Tools/AudioGen/gen_godot_sfx.py`; quái to phát trầm hơn).
+4. **Ra đòn** thật nhanh.
+5. **Hồi lại** đủ lâu để mở ra một khoảng hở.
+
+| Đòn | Cử động ngược · lấy đà · khựng | Báo trước (trước → sau) |
+|---|---|---|
+| Slime Rêu · Lao Tới | nhô lên ngả tới · thụp sâu ngả ra sau · rung | 0,25 s → 0,64 s, sau đó bẹp ra một lúc |
+| Nấm Độc · Bào Tử | gật nhẹ · ngả ra sau, mũ phồng, gom một quả bào tử tím phát sáng · rung | 0,32 s → 0,64 s |
+| Gấu Ma · Vồ | dồn trọng tâm sang chân sắp quét, hạ người · nhấc chân · chân rung | 0,85 s → 1,08 s |
+| Gấu Ma · Dậm Đất | cúi đầu, hạ người · chồm lên · rung ở đỉnh | 1,45 s → 1,65 s tới lúc giáng |
+| Gấu Ma · Ném Đá Lớn | cúi nhặt đá · nhấc cao hơn · đá rung | 1,35 s → 1,6 s |
+| Gấu Ma · Chụp Quăng | nhổm cao lên · thu mình · rung | 1,0 s → 1,2 s |
+| Gấu Ma · Húc | ngẩng đầu khịt mũi · cúi đầu · cào đất | giữ 1,1 s (khung gián đoạn không đổi) |
+
+## Menu kiểu Dauntless (17/10/2026)
+
+Vẽ bằng `menu_kit.gd` theo ảnh menu Dauntless: tấm nền xám xanh, dải tiêu đề có đường viền cong xuống ở hai đầu và tên ở giữa, nhãn căn phải, giá trị nằm giữa hai mũi tên `<` `>` với chấm trang bên dưới, thanh trượt xanh lơ có núm trắng, công tắc dạng viên thuốc. Chuột, bàn phím (mũi tên / WASD, Enter) và tay cầm đều dùng được. Mở menu thì hero đứng yên, chuột được thả ra, HUD ẩn đi; thế giới vẫn chạy (Dauntless không dừng game).
+
+- **Esc:** Tiếp Tục, Trang Bị, Cài Đặt, Thoát Game.
+- **Cài Đặt · Đồ hoạ** (`game_settings.gd`, lưu ở `user://settings.cfg`, áp dụng ngay khi đổi, R về mặc định):
+  - **Hiển Thị:** Chế Độ Hiển Thị (Cửa Sổ / Cửa Sổ Không Viền / Toàn Màn Hình), Độ Phân Giải, Tỉ Lệ Chất Lượng (50–100%, dưới 100% thì dùng FSR), Độ Sáng, Làm Mờ Chuyển Động, Góc Nhìn (50–90°), VSync.
+  - **Làm Mờ Chuyển Động** (`motion_blur.gd`) là một compositor effect: hai lượt compute, làm nhoè từng điểm ảnh theo đúng vector chuyển động của nó. Nhờ vậy hero (camera bám theo) vẫn nét, còn cảnh vật thì nhoè khi lướt hay quay nhanh. Mặc định **tắt**: bật lên tốn khoảng 0,5 ms mỗi khung (Godot phải vẽ thêm vector chuyển động).
+  - **Nâng Cao** (Thấp / Trung Bình / Cao / Epic): Chất Lượng đặt cả sáu hàng còn lại; chỉnh lẻ một hàng thì nó thành "Tuỳ Chỉnh". Mặc định là **Cao**, đúng bằng hình ảnh game đã được chỉnh tới giờ.
+
+| Hàng | Thấp | Trung Bình | Cao | Epic |
+|---|---|---|---|---|
+| Tầm Nhìn (tầm vẽ cây đá · camera · vòng cỏ) | ×0,45 · 700 m · 1 ô | ×0,65 · 1 000 m · 2 ô | ×1 · 1 600 m · 3 ô | ×1,25 · 2 000 m · 3 ô |
+| Khử Răng Cưa | tắt | FXAA | FXAA + MSAA 2× | SMAA + MSAA 4× |
+| Đổ Bóng (tầm · bản đồ bóng · lọc mềm) | 60 m · 2048 · rất thấp | 100 m · 2048 · thấp | 150 m · 4096 · vừa | 220 m · 4096 · cao |
+| Hậu Kỳ | không bloom, không SSAO | bloom | bloom + SSAO | bloom + SSAO cao, đủ phân giải |
+| Kết Cấu (lọc bất đẳng hướng · mip) | 2× · +1 | 4× · +0,5 | 4× | 16× |
+| Hiệu Ứng Đặc Biệt (số hạt · mật độ cỏ) | 35% · 40% | 60% · 70% | 100% · 100% | 100% · 125% |
+
+- **Trang Bị** (B, `loadout_menu.gd`), theo màn Loadout của Dauntless: cột biểu tượng ô bên trái (vũ khí, mũ, giáp, găng, giày, đèn lồng); mỗi ô một hàng xanh đậm có hình món đồ, con số to (vũ khí: sức mạnh = Tấn Công của vũ khí; giáp: điểm kháng), các chip nguyên tố "+X vs" (xanh) và "−X vs" (đỏ) kèm biểu tượng hệ, và các ô Cell. Hàng đang chọn có viền sáng và dòng "Đổi Vũ Khí / Cell" bên dưới; Enter hay bấm vào hàng thì mở danh sách để đổi. Trên đầu có hai đồng xu: tổng kháng và sức mạnh. Bên phải là nhân vật xoay chậm trong bộ đồ đang mặc, dưới là bảng Kháng Nguyên Tố (điểm và % sát thương của sáu hệ). Góc phải dưới là 4 ô vật phẩm.
+  - Số trên chip là luật của game này: vũ khí "+50% vs" hệ khắc nó và "−20% vs" chính hệ của nó; giáp "+P vs" hệ của nó và "−P vs" hệ đối nghịch (mỗi điểm 0,5% sát thương). Dauntless ghi "+0,8 × sức mạnh / −0,4 × sức mạnh", nhưng wiki không nói con số đó đổi ra sát thương thế nào, nên không chép.
+  - Cell, perk và đèn lồng chưa có trong game: ô Cell để trống (kiểu Prismatic, cell nào cũng gắn được), hàng đèn lồng mờ.
+
+## Người trong làng: dàn NPC của Ramsgate (17/10/2026)
+
+Chín người của Ramsgate trong Dauntless (tên, chức danh, ngoại hình, việc họ làm lấy từ [Dauntless wiki](https://dauntless.fandom.com/wiki/NPCs)) đứng trong Làng Lá Xanh, xếp theo cách Ramsgate xếp họ (`townsfolk.gd`). Thân dựng từ chính bộ model của hero (bộ đồ Ranger/Peasant, các bảng màu khác, nhuộm màu, tóc, giáp, vũ khí) cộng đồ riêng dựng bằng code (`npc_gear.gd`). Tên và chức danh hiện trên đầu với cỡ chữ cố định như Dauntless, trong vòng 16 m. Người không bận việc thì quay sang khi hero tới gần. Đứng gần rồi bấm **F** để nói chuyện (`talk_menu.gd`): tên to, chức danh, lời thoại ở dải dưới, các lựa chọn bên phải; camera quay về phía họ. Lời thoại được **viết mới bằng tiếng Việt** theo tính cách trên wiki, không chép lời trong game. Làng vẫn tên Làng Lá Xanh. Dựng chín người làm thế giới nạp lâu hơn khoảng 1,2 s (lần đầu đọc bộ đồ, cắt đầu, nặn giáp cho từng kiểu người); NPC chỉ nặn đúng món giáp họ mặc (`HeroModel.warm_armour`), không vẽ khi ở xa quá 70 m, và dừng hoạt ảnh khi ra khỏi khung nhìn.
+
+| NPC | Chức danh | Chỗ đứng (như Ramsgate) | Dáng | Làm gì |
+|---|---|---|---|---|
+| Katerin Sorrel | Người Hướng Dẫn | cầu thang bên trái lò rèn, cạnh Sparkforge (bệ đá có tinh thể aether xanh) | áo trắng, đai da nâu, tóc nâu sẫm, giáp tay thép xanh, khoanh tay | lời khuyên theo cấp và theo việc Gấu Ma đã ngã chưa; "Con Đường Thợ Săn": Thăng Cấp Chiến Trường (cấp 10), Dẫn Đường (30), Thành Công Nhờ Chuẩn Bị (40) |
+| Wils Bormen | Thợ Rèn Vũ Khí | lò rèn bên quảng trường, đập búa trên đe | râu tóc bạc, mũ lưỡi trai nâu đỏ, áo ô liu, búa rèn | mở Trang Bị ở hàng vũ khí |
+| Moyra Heigsketter | Thợ Rèn Giáp | lò rèn, cạnh giá giáp | tóc đỏ đồng, đồ tối màu, búa | mở Trang Bị ở hàng giáp |
+| The Middleman | Người Buôn Cell | sân gỗ bên phải lò rèn, cạnh bệ Cell | giáp kín người, mặt nạ ô liu, viên Cell hồng phát sáng trên tay | Cell chưa có trong game (nói thẳng như vậy) |
+| Dr. Shaed Priyani | Nhà Nghiên Cứu Behemoth | rìa làng phía đông, bàn nghiên cứu có lọ mẫu vật | áo trắng tím nhạt, tóc dài đen, cầm sổ | Hồ Sơ Behemoth: Gấu Ma, Slime Rêu, Nấm Độc (hệ, máu, bộ phận phá được, nên mang vũ khí và giáp gì, mẹo) |
+| Gaius Copperwheel | Nhà Vẽ Bản Đồ | bàn bản đồ phía nam quảng trường | áo đỏ trùm mũ, giáp vai thép xanh, tì người trên bàn | Bản Đồ: toàn thế giới, các vùng, hero đang ở đâu và nhìn hướng nào |
+| Janek Zai | Đô Đốc Ostia | sân gỗ bên phải lò rèn, cạnh thùng lựu đạn | tóc bạch kim, áo khoác xanh hải quân, khăn kem, kính một mắt, súng aether xanh | đưa Súng Ostia (cầm ngay Súng Hư Ảnh); lựu đạn chưa có |
+| Granny Strega | Bà Bán Thuốc | giữa quảng trường, cạnh vạc thuốc xanh sủi bọt | mũ phù thuỷ cam tím to có lông chim và con ếch, gậy đầu mắt, nhỏ người | Kệ Thuốc: Bình Máu 10 vàng, Bình Năng Lượng 10, Thuốc Thảo Mộc 25 (đúng giá trị món đồ trong dữ liệu; không bán chịu) |
+| Bulvar Rosk | Bậc Thầy Vũ Khí · Crimson Blades | Bãi Tập (Training Grounds) phía đông bắc: rào, cờ Crimson Blades đỏ thẫm, ba hình nộm | to lớn, giáp ngực và vai băng xanh, rìu | bảy loại vũ khí và đòn nặng của từng loại; hình nộm tập đánh: không bao giờ ngã, bảng trên đầu ghi tổng sát thương, DPS, đòn cuối, số đòn, trấn áp (đếm lại sau 5 s không đánh) |
 
 ## Camera kiểu SotC (`sotc_camera.gd`)
 
@@ -237,8 +332,8 @@ Cao khoảng 10 m tới đỉnh đầu, dài khoảng 17 m (`GauMa.S = 0,8` mét
 
 ## Kiểm tra
 
-- **Test** (khoảng 40 s, 283 kiểm tra): `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot res://tests/test_runner.tscn`. Mã thoát 0 là đạt. Gồm bố cục thế giới, đất đã bake, giải IK, phím, điểm yếu/quỵ gối/ngã/hồi sinh, sát thương rơi, **leo chân gấu có vật lý thật**, giới hạn số đá; công thức sát thương (đúng ví dụ trong test Unity: Cầu Lửa 56 vào điểm yếu Lửa ra 73, có giáp ra 64), bảng XP, chỉ số cấp 1 của 9 lớp, các trạng thái, Trấn Áp, khống chế lặp lại, hero chém chết slime, Cầu Lửa gây Bỏng, bào tử làm chậm, Lướt Hoàn Hảo, Dậm Đất không đẩy hero xuống dưới đất ở cả năm chỗ đứng quanh chân gấu; máu chung, sát thương bộ phận +50% của lưỡi kiếm, chân vỡ ở đúng ngưỡng rồi chỉ còn sát thương gốc, điểm yếu ×3 và +8%, thanh choáng (đầu ×2), +50% lúc choáng, Húc chỉ bị Trảm trúng đầu gián đoạn, đầu khi lao hạ trong tầm với, Trảm đầy lực gây khoảng 3,2 lần Tấn công, thanh máu rút trong 0,75 s với bóng mờ trễ 0,4 s và đổi màu ở 50% / 25%; nguyên tố khắc +50% / cùng hệ −20%, sáu kiểu kích hoạt trên quái nhỏ và trên Gấu Ma (Lôi làm choáng, Băng làm chậm, Ám mọc nang nổ ra sát thương bộ phận, Quang làm Húc tự gián đoạn), chỉ đòn vũ khí mới kích hoạt, không kích hoạt trên quái cùng hệ, bảy họ vũ khí đúng đòn thường và số món cầm, đòn nặng của cả bảy họ đều trúng; giáp: 35 bộ đúng wiki, kháng / yếu theo cả ba cặp, cộng dồn và triệt tiêu khi mặc lẫn, trần ±50%, đòn Hoả vào người mặc Charrogg ra 80 và đòn Băng ra 120, đòn vật lý của quái Thổ tính là Thổ, giáp Unity trước rồi mới tới giáp Dauntless, đòn `pure` bỏ qua giáp, hero mặc và đổi bộ bằng G, Recruit không mũ, mặc lẫn từng món, cú lao của slime vào Krolachi / Gnasher / Shrike, các tấm giáp được vẽ, gắn xương và mũ ẩn tóc.
-- **AutoShot** (khoảng 145 s, mở cửa sổ): `Godot_v4.7.2-stable_win64_console.exe --path Godot -- --autoshot --shots-dir D:/shots [--autoshot-only world|forest|climb|skills|hunt|arsenal|brawl]`. Tour `hunt`: số vàng trên chân, tụ lực Trảm, Trảm, vỡ đầu, Húc với tia sáng, gián đoạn bằng Trảm thật (giữ rồi thả chuột phải đúng lúc), số cam lúc choáng. Tour `arsenal`: bảy vũ khí, mỗi món một combo và đòn nặng vào slime, ba bộ giáp (Charrogg, Gnasher, Valomyr) nhìn từ sau lưng, rồi Song Liêm Lôi Điểu đánh Gấu Ma Thổ. Tour `forest` có thêm ảnh đúng khung trúng đòn, thanh máu quái đang rút và thanh máu hero sau một đòn mạnh. Chụp 50 cảnh (làng, hai góc nhà trong làng, rừng, đấu trường; bãi slime, Chém Gió, đồ rơi, Chém Xoáy, Nấm Độc bắn, Cầu Lửa, Lôi Phạt; bám chân, đâm, quỵ gối, trên lưng, lắc mình, Dậm Đất, Ném Đá, Chụp Quăng và Choáng), rồi để gấu tự đánh 40 s. Mã 0 là sạch, 1 là có lỗi trong log, 2 là quá giờ.
+- **Test** (khoảng 60 s, 337 kiểm tra): `Godot_v4.7.2-stable_win64_console.exe --headless --path Godot res://tests/test_runner.tscn`. Mã thoát 0 là đạt. Gồm bố cục thế giới, đất đã bake, giải IK, phím, điểm yếu/quỵ gối/ngã/hồi sinh, sát thương rơi, **leo chân gấu có vật lý thật**, giới hạn số đá; công thức sát thương (đúng ví dụ trong test Unity: Cầu Lửa 56 vào điểm yếu Lửa ra 73, có giáp ra 64), bảng XP, chỉ số cấp 1 của 9 lớp, các trạng thái, Trấn Áp, khống chế lặp lại, hero chém chết slime, Cầu Lửa gây Bỏng, bào tử làm chậm, Lướt Hoàn Hảo, Dậm Đất không đẩy hero xuống dưới đất ở cả năm chỗ đứng quanh chân gấu; máu chung, sát thương bộ phận +50% của lưỡi kiếm, chân vỡ ở đúng ngưỡng rồi chỉ còn sát thương gốc, điểm yếu ×3 và +8%, thanh choáng (đầu ×2), +50% lúc choáng, Húc chỉ bị Trảm trúng đầu gián đoạn, đầu khi lao hạ trong tầm với, Trảm đầy lực gây khoảng 3,2 lần Tấn công, thanh máu rút trong 0,75 s với bóng mờ trễ 0,4 s và đổi màu ở 50% / 25%; nguyên tố khắc +50% / cùng hệ −20%, sáu kiểu kích hoạt trên quái nhỏ và trên Gấu Ma (Lôi làm choáng, Băng làm chậm, Ám mọc nang nổ ra sát thương bộ phận, Quang làm Húc tự gián đoạn), chỉ đòn vũ khí mới kích hoạt, không kích hoạt trên quái cùng hệ, bảy họ vũ khí đúng đòn thường và số món cầm, đòn nặng của cả bảy họ đều trúng; giáp: 35 bộ đúng wiki, kháng / yếu theo cả ba cặp, cộng dồn và triệt tiêu khi mặc lẫn, trần ±50%, đòn Hoả vào người mặc Charrogg ra 80 và đòn Băng ra 120, đòn vật lý của quái Thổ tính là Thổ, giáp Unity trước rồi mới tới giáp Dauntless, đòn `pure` bỏ qua giáp, hero mặc và đổi bộ bằng G, Recruit không mũ, mặc lẫn từng món, cú lao của slime vào Krolachi / Gnasher / Shrike, các tấm giáp được vẽ, gắn xương và mũ ẩn tóc; nhịp báo trước (cử động ngược, khựng, ra đòn nhanh), mọi đòn của Gấu Ma báo trước ít nhất 0,9 s và Húc giữ đúng khung gián đoạn, hero thụp trước khi nhảy rồi giãn khi bay và bẹp khi chạm đất (giữ thể tích), Lướt kéo dài thân, slime chỉ lao sau 0,6 s, nấm chỉ phun sau 0,6 s; tấm che mặt đất luôn nằm dưới mặt đất (4 000 điểm), cây gần chia ô nhỏ, bản xa không đổ bóng, bóng cây gần lấy từ bản đơn giản, Tầm Nhìn co giãn tầm vẽ; Cài Đặt (Chất Lượng đặt cả sáu hàng, chỉnh lẻ thành Tuỳ Chỉnh, Mặc định), chín NPC đúng tên và chức danh theo wiki, có thân và đang cử động, không lọt vào chân dung hero, mỗi người một chỗ, ba hình nộm; F nói chuyện với người gần nhất, hero không nhảy khi menu đang mở, mua Bình Máu mất đúng 10 vàng và không bán chịu, Janek đưa súng, Trang Bị đổi giáp và vũ khí; hình nộm đếm đòn, sát thương, trấn áp và không bao giờ ngã. Nang Ám trong test giờ nổ ở đầu gấu (trước đây mọc ngẫu nhiên, mọc trúng thân thì test hỏng).
+- **AutoShot** (khoảng 185 s, mở cửa sổ): `Godot_v4.7.2-stable_win64_console.exe --path Godot -- --autoshot --shots-dir D:/shots [--autoshot-only world|forest|climb|skills|hunt|arsenal|feel|town|brawl]`. Tour `feel`: hero thụp trước khi nhảy, giãn khi bay, bẹp khi chạm đất, kéo dài khi lướt (quay ngang để thấy), slime và nấm đúng lúc khựng ở đỉnh, Gấu Ma giữ chân trên cao và chồm lên trước Dậm Đất. Tour `town`: chín NPC, nói chuyện với Granny Strega và kệ thuốc, hồ sơ behemoth, bản đồ, Trang Bị và danh sách đổi giáp, Cài Đặt, menu Esc, một combo vào hình nộm. Tour `hunt`: số vàng trên chân, tụ lực Trảm, Trảm, vỡ đầu, Húc với tia sáng, gián đoạn bằng Trảm thật (giữ rồi thả chuột phải đúng lúc), số cam lúc choáng. Tour `arsenal`: bảy vũ khí, mỗi món một combo và đòn nặng vào slime, ba bộ giáp (Charrogg, Gnasher, Valomyr) nhìn từ sau lưng, rồi Song Liêm Lôi Điểu đánh Gấu Ma Thổ. Tour `forest` có thêm ảnh đúng khung trúng đòn, thanh máu quái đang rút và thanh máu hero sau một đòn mạnh. Chụp 77 cảnh (làng, hai góc nhà trong làng, rừng, đấu trường; bãi slime, Chém Gió, đồ rơi, Chém Xoáy, Nấm Độc bắn, Cầu Lửa, Lôi Phạt; bám chân, đâm, quỵ gối, trên lưng, lắc mình, Dậm Đất, Ném Đá, Chụp Quăng và Choáng), rồi để gấu tự đánh 40 s. Mã 0 là sạch, 1 là có lỗi trong log, 2 là quá giờ.
 - Chạy nhanh không cần cửa sổ: `--headless --path Godot --quit-after 200`.
 
 ## Lộ trình chuyển cả game
@@ -248,7 +343,7 @@ Cao khoảng 10 m tới đỉnh đầu, dài khoảng 17 m (`GauMa.S = 0,8` mét
 | 1 · Nền móng | Project, phím, camera SotC, hero (chạy/nhảy/Lướt/combo/bám/leo/đâm/rơi), thế giới 800×512 m theo bố cục Unity, làng, Hang Gấu Ma, **Gấu Ma thành colossus**, HUD, test, AutoShot | **Xong** (14/10/2026) |
 | 2 · Chiến đấu & tiến trình | Công thức sát thương, kháng hệ, trạng thái, Trấn Áp, hit-stop 3 mức, Lướt Hoàn Hảo, cả 92 chiêu chạy từ dữ liệu, cấp/XP, 6 chỉ số D&D; số liệu chuyển từ `Assets/Data` bằng script; Slime Rêu và Nấm Độc; túi đồ, rơi đồ, bình thuốc | **Phần lớn xong** (15/10/2026). Còn: cửa sổ cộng điểm chỉ số, Sách Chiêu (K), cấp chiêu |
 | 2b · Art kiểu Dauntless | Hero Quaternius (bộ đồ, đầu, tóc, hoạt ảnh UAL), ánh sáng kiểu vẽ tay, tán cây tròn, cỏ dày, đá rêu, trời và sương; HUD như Dauntless; bảng tên quái sửa lệch thanh máu; Lướt cả trên không | **Phần lớn xong** (15/10/2026): thêm nhà làng, cây và bụi dựng bằng code, slime/nấm/Gấu Ma vẽ tay; đá và vách núi dựng bằng code, Gấu Ma có lông sần, gạc, nanh, vuốt, nấm phát sáng. Còn: NPC trong làng, mặt đất trên đỉnh vách còn phẳng, thanh kiếm |
-| 3 · Đồ, nhiệm vụ, hội thoại | Túi đồ, trang bị, chế tạo, rơi đồ, nhiệm vụ (`QuestDef`), hội thoại Yarn (đọc lại các file `.yarn`), NPC làng, Bách Khoa Trùm, lưu game, các cửa sổ B/I/C, J, K | Chưa |
+| 3 · Đồ, nhiệm vụ, hội thoại | Túi đồ, trang bị, chế tạo, rơi đồ, nhiệm vụ (`QuestDef`), hội thoại Yarn (đọc lại các file `.yarn`), NPC làng, Bách Khoa Trùm, lưu game, các cửa sổ B/I/C, J, K | **Bắt đầu** (17/10/2026): dàn NPC Ramsgate có nói chuyện, cửa hàng thuốc, hồ sơ behemoth, bản đồ, hình nộm; Trang Bị (B) và menu Esc / Cài Đặt kiểu Dauntless. Còn: nhiệm vụ, chế tạo, Cell / perk / đèn lồng, lưu game |
 | 4 · Các vùng | Đầm Lầy (Cóc Tía, Xà Mẫu thành colossus dưới nước), Hang Pha Lê (hang trong lòng núi, Golem Pha Lê Cổ, Nhện Chúa), Thảo Nguyên Gió (gió, Khe Vực, Cột Gió, Bò Rừng Sắt, Thủ Lĩnh Hắc Phong) | Chưa |
 | 5 · Nhân vật | Lớp D&D và chủng tộc (KayKit có Knight, Barbarian, Mage, Rogue), tạo nhân vật, màn hình chính xanh lá–vàng | Chưa |
 | 6 · Âm thanh | Dùng lại SFX/nhạc từ `Tools/AudioGen`, âm thanh 3D theo vị trí | Chưa |

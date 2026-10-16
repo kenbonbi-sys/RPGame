@@ -8,6 +8,10 @@ const CELL := 16.0
 const RADIUS := 3            ## cells each way: a 7×7 window, about 50 m around the camera
 const PER_CELL := 520
 
+## The settings: cells each way, and clumps per cell as a share of PER_CELL.
+var radius := RADIUS
+var density := 1.0
+
 var data: TerrainData
 var _mesh: ArrayMesh
 var _mat: ShaderMaterial
@@ -20,6 +24,19 @@ func _ready() -> void:
 	_mesh = _clump_mesh()
 	_mat = ShaderMaterial.new()
 	_mat.shader = preload("res://shaders/grass.gdshader")
+
+
+## View distance and density from the settings; the window is rebuilt on the next frame.
+func set_quality(cells: int, share: float) -> void:
+	if cells == radius and is_equal_approx(share, density):
+		return
+	radius = cells
+	density = share
+	for k in _cells:
+		if _cells[k]:
+			_cells[k].queue_free()
+	_cells.clear()
+	_center = Vector2i(99999, 99999)
 
 
 func _process(_delta: float) -> void:
@@ -37,8 +54,8 @@ func _process(_delta: float) -> void:
 		return
 	_center = c
 	var keep := {}
-	for dz in range(-RADIUS, RADIUS + 1):
-		for dx in range(-RADIUS, RADIUS + 1):
+	for dz in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
 			var k := Vector2i(c.x + dx, c.y + dz)
 			keep[k] = true
 			if not _cells.has(k):
@@ -54,7 +71,7 @@ func _build_cell(k: Vector2i) -> MultiMeshInstance3D:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(k) ^ 0x5eed
 	var xfs: Array[Transform3D] = []
-	for i in PER_CELL:
+	for i in roundi(PER_CELL * density):
 		var x := (k.x + rng.randf()) * CELL
 		var z := (k.y + rng.randf()) * CELL
 		var u := x

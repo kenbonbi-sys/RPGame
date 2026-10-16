@@ -4,9 +4,17 @@ extends Node3D
 ## along the map's edge, pines toward the mountains, crooked trees in the swamp, flat-topped
 ## acacias on the steppe, bushes (TreeArt), boulders and the rock chunks that make the steep slopes
 ## read as cliffs (RockArt), and logs, mushrooms and flowers from the Kenney Nature Kit. Drawn with
-## MultiMeshes in 128 m cells, built things with a light far version; trees and rocks are solid.
+## MultiMeshes, built things with a light far version; trees and rocks are solid.
+##
+## What is drawn follows what the camera sees: every batch is culled on its own when it is off
+## screen, so batches are small where it counts. Up close (the detailed versions, which also cast
+## the shadows) they are NEAR_CELL squares, so a turn of the camera drops all the trees behind
+## and the detailed version stops right at NEAR[kind] instead of a whole big cell further out;
+## the far versions are grouped in CELL squares and cast no shadow (the sun's shadows end well
+## before them, and a shadow is drawn even for things behind the camera).
 
 const CELL := 128.0
+const NEAR_CELL := 32.0
 const KIT := "res://assets/third_party/kenney_nature/%s.glb"
 
 ## "gen:" models are built by TreeArt (metres); the rest are Kenney models.
@@ -29,11 +37,16 @@ const LOGS := ["stump_old", "stump_oldTall", "log", "log_large", "stump_round"]
 const RANGE := {"tree": 650.0, "rock": 520.0, "cliff": 900.0, "bush": 180.0, "small": 75.0, "log": 220.0}
 ## built things switch to their far version here
 const NEAR := {"tree": 150.0, "bush": 70.0, "rock": 140.0, "cliff": 200.0}
+## Kinds whose shadow comes from the light far version even up close (a fifth of the triangles;
+## a canopy's shadow is a soft blob either way).
+const SHADOW_PROXY := ["tree"]
 
 @export var data: TerrainData = preload("res://world/terrain_data.res")
 
 var _parts_cache := {}
-var _batches := {}          # key "kind|model|cx|cz" -> Array[Transform3D]
+var _batches := {}          # key "kind|model|cx|cz" (NEAR_CELL squares) -> Array[Transform3D]
+## The settings' view distance (1 = as designed); scales every RANGE and NEAR.
+var view_scale := 1.0
 var _solid: StaticBody3D
 var _rng := RandomNumberGenerator.new()
 var _density := FastNoiseLite.new()
@@ -106,7 +119,7 @@ func _add(kind: String, model: String, u: float, v: float, scale: float, sink :=
 	var b := Basis(Vector3.UP, _rng.randf() * TAU)
 	b = Basis(Vector3(_rng.randf_range(-1, 1), 0, _rng.randf_range(-1, 1)).normalized(), _rng.randf_range(0.0, tilt)) * b
 	var xf := Transform3D(b.scaled(Vector3.ONE * scale), Vector3(u, h - sink, -v))
-	var key := "%s|%s|%d|%d" % [kind, model, int(u / CELL), int(v / CELL)]
+	var key := "%s|%s|%d|%d" % [kind, model, int(u / NEAR_CELL), int(v / NEAR_CELL)]
 	if not _batches.has(key):
 		_batches[key] = []
 	_batches[key].append(xf)
@@ -220,7 +233,7 @@ func _cliff_at(u: float, v: float) -> void:
 	if axis.length() > 0.001:
 		b = Basis(axis.normalized(), Vector3.UP.angle_to(up)) * b
 	var xf := Transform3D(b.scaled(Vector3.ONE * scale), Vector3(u, h - 0.45 * scale, -v))
-	var key := "cliff|%s|%d|%d" % [model, int(u / CELL), int(v / CELL)]
+	var key := "cliff|%s|%d|%d" % [model, int(u / NEAR_CELL), int(v / NEAR_CELL)]
 	if not _batches.has(key):
 		_batches[key] = []
 	_batches[key].append(xf)
@@ -305,54 +318,72 @@ func _small_at(u: float, v: float) -> void:
 
 
 func _build_batches() -> void:
+	# far versions: the small squares merged into big ones
+	var far := {}
 	for key in _batches:
 		var bits: PackedStringArray = key.split("|")
-		var kind := bits[0]
 		var model := bits[1]
 		var xfs: Array = _batches[key]
 		if model.begins_with("gen:"):
-			_add_built(kind, model.substr(4), xfs, key)
+			_add_mmi(bits[0], built(model.substr(4), false), xfs, key, false)
+			if SHADOW_PROXY.has(bits[0]):
+				_add_mmi(bits[0], built(model.substr(4), true), xfs, key + "|shadow", false, true)
+			var per := int(CELL / NEAR_CELL)
+			var big := "%s|%s|%d|%d" % [bits[0], model, int(bits[2]) / per, int(bits[3]) / per]
+			if not far.has(big):
+				far[big] = []
+			far[big].append_array(xfs)
 			continue
 		for part in parts(model):
-			var mm := MultiMesh.new()
-			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.mesh = part[0]
-			mm.instance_count = xfs.size()
-			for i in xfs.size():
-				mm.set_instance_transform(i, xfs[i] * part[1])
-			var mmi := MultiMeshInstance3D.new()
-			mmi.name = key.replace("|", "_")
-			mmi.multimesh = mm
-			mmi.visibility_range_end = RANGE[kind]
+			var placed_xfs := []
+			for xf in xfs:
+				placed_xfs.append(xf * part[1])
+			_add_mmi(bits[0], part[0], placed_xfs, key, false)
+	for key in far:
+		var bits: PackedStringArray = key.split("|")
+		_add_mmi(bits[0], built(bits[1].substr(4), true), far[key], key, true)
+	set_view_distance(view_scale)
+
+
+## One batch. Built things (`far` set or not) split at NEAR[kind]: the full version up close,
+## the light one beyond; Kenney models have one version out to RANGE[kind].
+func _add_mmi(kind: String, mesh: Mesh, xfs: Array, key: String, far: bool, shadow_only := false) -> void:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
+	mm.instance_count = xfs.size()
+	for i in xfs.size():
+		mm.set_instance_transform(i, xfs[i])
+	var mmi := MultiMeshInstance3D.new()
+	mmi.name = key.replace("|", "_").replace(":", "_") + ("_far" if far else "")
+	mmi.multimesh = mm
+	mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	mmi.set_meta("kind", kind)
+	mmi.set_meta("far", far)
+	if far or kind == "small" or (SHADOW_PROXY.has(kind) and not shadow_only):
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	elif shadow_only:
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+	add_child(mmi)
+
+
+## Scales how far the land is drawn (the settings menu's View Distance): 0.5 = half as far.
+func set_view_distance(scale: float) -> void:
+	view_scale = scale
+	for n in get_children():
+		var mmi := n as MultiMeshInstance3D
+		if mmi == null:
+			continue
+		var kind: String = mmi.get_meta("kind")
+		var end: float = RANGE[kind] * scale
+		if not NEAR.has(kind):
+			mmi.visibility_range_end = end
 			mmi.visibility_range_end_margin = 20.0
-			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-			if kind == "small":
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			add_child(mmi)
-
-
-## A built batch (trees, bushes, rocks): the full version up close, the light one beyond NEAR[kind].
-func _add_built(kind: String, tree_name: String, xfs: Array, key: String) -> void:
-	var split: float = NEAR.get(kind, 120.0)
-	for far in [false, true]:
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = built(tree_name, far)
-		mm.instance_count = xfs.size()
-		for i in xfs.size():
-			mm.set_instance_transform(i, xfs[i])
-		var mmi := MultiMeshInstance3D.new()
-		mmi.name = key.replace("|", "_").replace(":", "_") + ("_far" if far else "")
-		mmi.multimesh = mm
-		if far:
-			mmi.visibility_range_begin = split
+		elif mmi.get_meta("far"):
+			mmi.visibility_range_begin = NEAR[kind] * minf(1.0, scale)
 			mmi.visibility_range_begin_margin = 12.0
-			mmi.visibility_range_end = RANGE[kind]
+			mmi.visibility_range_end = end
 			mmi.visibility_range_end_margin = 20.0
 		else:
-			mmi.visibility_range_end = split
+			mmi.visibility_range_end = NEAR[kind] * minf(1.0, scale)
 			mmi.visibility_range_end_margin = 12.0
-		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-		if kind == "bush" and far:
-			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(mmi)

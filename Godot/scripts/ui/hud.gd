@@ -4,8 +4,9 @@ extends CanvasLayer
 ## teal life bar (blue where a guard buff shields it), the yellow stamina bar (the grip), the
 ## segmented energy bar and the buffs; top centre a compass with the colossus and the village
 ## marked and the colossus's name and life under it; top right the hunt emblem with how much life
-## the colossus has left; bottom centre the skills, bottom right the potions, bottom left the event
-## log. All text in Barlow Condensed.
+## the colossus has left; bottom right the consumable slots, bottom left the event log; nothing
+## else (Dauntless shows no skill bar: the weapon is the moveset, the loadout lives in its menu).
+## All text in Barlow Condensed.
 
 const TEAL := Color(0.25, 0.85, 0.68)
 ## Healthy life of monsters and colossi (JuicyBar turns it amber, then red).
@@ -20,7 +21,6 @@ const TEXT := Color(0.95, 0.94, 0.9)
 const FONT_SEMI := preload("res://assets/fonts/BarlowCondensed-SemiBold.ttf")
 const FONT_BOLD := preload("res://assets/fonts/BarlowCondensed-Bold.ttf")
 const FONT_XBOLD := preload("res://assets/fonts/BarlowCondensed-ExtraBold.ttf")
-const SLOT_KEYS := ["CHUỘT T", "1", "2", "3", "4", "5", "R", "SHIFT"]
 
 var hero: Node3D
 var boss: Node3D
@@ -28,11 +28,8 @@ var boss: Node3D
 var _frame: PlayerFrame
 var _compass: Compass
 var _emblem: Emblem
-var _skills: Array[SkillSlot] = []
 var _potions: Array[PotionSlot] = []
 var _heavy: HeavyMeter
-var _weapon_tag: WeaponTag
-var _armour_tag: ArmourTag
 var _log: LogBox
 var _hint: Label
 var _area: Label
@@ -73,24 +70,14 @@ func _ready() -> void:
 	_place(root, _fps, Control.PRESET_TOP_RIGHT, Vector2(-170, 6), Vector2(160, 20))
 	_fps.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
-	var bar_w := 8 * 78 - 8
-	for i in 8:
-		var s := SkillSlot.new()
-		s.key = SLOT_KEYS[i]
-		_place(root, s, Control.PRESET_CENTER_BOTTOM, Vector2(-bar_w * 0.5 + i * 78, -104), Vector2(70, 70))
-		_skills.append(s)
-
-	_weapon_tag = WeaponTag.new()
-	_place(root, _weapon_tag, Control.PRESET_CENTER_BOTTOM, Vector2(-bar_w * 0.5, -150), Vector2(318, 44))
-	_armour_tag = ArmourTag.new()
-	_place(root, _armour_tag, Control.PRESET_CENTER_BOTTOM, Vector2(bar_w * 0.5 - 290, -150), Vector2(290, 44))
 	_heavy = HeavyMeter.new()
-	_place(root, _heavy, Control.PRESET_CENTER_BOTTOM, Vector2(-110, -186), Vector2(220, 9))
+	_place(root, _heavy, Control.PRESET_CENTER_BOTTOM, Vector2(-110, -120), Vector2(220, 9))
 
-	for i in 3:
+	# Dauntless's four consumable slots (the fourth is free for now)
+	for i in 4:
 		var p := PotionSlot.new()
 		p.index = i
-		_place(root, p, Control.PRESET_BOTTOM_RIGHT, Vector2(-280 + i * 86, -128), Vector2(76, 110))
+		_place(root, p, Control.PRESET_BOTTOM_RIGHT, Vector2(-292 + i * 68, -122), Vector2(60, 108))
 		_potions.append(p)
 
 	_log = LogBox.new()
@@ -99,7 +86,7 @@ func _ready() -> void:
 	_skill_label = _label(root, 26, Color(1.0, 0.8, 0.5), FONT_XBOLD, true)
 	_place(root, _skill_label, Control.PRESET_CENTER_TOP, Vector2(-450, 108), Vector2(900, 34))
 	_hint = _label(root, 21, TEXT, FONT_SEMI, true)
-	_place(root, _hint, Control.PRESET_CENTER_BOTTOM, Vector2(-450, -150), Vector2(900, 30))
+	_place(root, _hint, Control.PRESET_CENTER_BOTTOM, Vector2(-450, -170), Vector2(900, 30))
 
 	_area = _label(root, 46, Color(0.98, 0.95, 0.85), FONT_XBOLD, true)
 	_place(root, _area, Control.PRESET_CENTER_TOP, Vector2(-450, 190), Vector2(900, 60))
@@ -111,9 +98,9 @@ func _ready() -> void:
 
 	_help = _label(root, 18, TEXT, FONT_SEMI)
 	_help.text = "WASD chạy · Chuột xoay camera · Space nhảy · Shift lướt (cả khi đang bay; giữ để chạy nhanh)\n" + \
-		"Chuột trái đòn thường · 1–5 chiêu · R tuyệt kỹ · Z X C bình thuốc · V đổi vũ khí · G đổi giáp\n" + \
-		"Chuột phải: Trảm (giữ để tụ lực) · giữ E để bám và leo · đang bám thì giữ rồi thả chuột trái để đâm\n" + \
-		"Q / chuột giữa nhìn về phía boss · Esc nhả chuột · F1 bảng phím · F3 gỡ lỗi"
+		"Chuột trái đòn thường · Chuột phải đòn nặng (giữ để tụ lực) · Z X C bình thuốc · F nói chuyện\n" + \
+		"Giữ E để bám và leo · đang bám thì giữ rồi thả chuột trái để đâm · Q / chuột giữa nhìn về phía boss\n" + \
+		"B trang bị · Esc menu và cài đặt · F1 bảng phím · F3 gỡ lỗi"
 	_place(root, _help, Control.PRESET_TOP_RIGHT, Vector2(-780, 196), Vector2(760, 110))
 	_help.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	get_tree().create_timer(14.0).timeout.connect(func() -> void: _fade(_help, 0.0, 1.5))
@@ -163,11 +150,6 @@ func bind_hero(h: Node3D) -> void:
 	_frame.hero = h
 	_compass.hero = h
 	_heavy.hero = h
-	_weapon_tag.hero = h
-	_armour_tag.hero = h
-	for i in _skills.size():
-		_skills[i].skills = h.skills
-		_skills[i].index = i
 	for p in _potions:
 		p.hero = h
 	h.hurt.connect(func(amount: float) -> void:
@@ -284,6 +266,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _hint_text() -> String:
 	if hero.is_dead():
 		return ""
+	if Game.menu_open:
+		return ""
+	if Npc.focus and is_instance_valid(Npc.focus):
+		return "[F]  Nói chuyện với %s" % Npc.focus.data.name
 	if hero.weak_point_near and (hero.is_climbing or hero.on_colossus):
 		return "Giữ chuột trái rồi thả để đâm vào điểm yếu"
 	if hero.is_climbing:
@@ -534,72 +520,6 @@ class Emblem:
 		draw_string(Hud.FONT_XBOLD, c + Vector2(-60, 0), txt, HORIZONTAL_ALIGNMENT_CENTER, 120, 34, Hud.TEXT)
 
 
-class WeaponTag:
-	extends Control
-	## The weapon in hand above the bar: its icon, name, family and element, and [V] to switch.
-	var hero: Node3D
-
-	func _process(_delta: float) -> void:
-		queue_redraw()
-
-	func _draw() -> void:
-		if hero == null or not is_instance_valid(hero) or not ("weapon_item" in hero):
-			return
-		var id: String = hero.weapon_item
-		var it := Weapons.item(id)
-		var col := Elements.color(it.element)
-		Hud.slant(self, Rect2(Vector2(0, 4), Vector2(size.x, size.y - 8)), Color(0.03, 0.05, 0.07, 0.6), 10)
-		var icon := GameIcons.weapon(id, 64)
-		if icon:
-			draw_texture_rect(icon, Rect2(Vector2(6, 0), Vector2(size.y, size.y)), false)
-		var x := size.y + 10.0
-		var title := String(it.name).to_upper()
-		draw_string_outline(Hud.FONT_XBOLD, Vector2(x, 22), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 4, Color(0, 0, 0, 0.6))
-		draw_string(Hud.FONT_XBOLD, Vector2(x, 22), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Hud.TEXT)
-		var fam: Dictionary = Weapons.FAMILIES[it.family]
-		var sub := "%s · %s · Chuột phải: %s" % [fam.name, Elements.display_name(it.element), fam.heavy.name]
-		draw_string(Hud.FONT_SEMI, Vector2(x, 38), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
-		if hero.weapons.size() > 1:
-			draw_string(Hud.FONT_BOLD, Vector2(size.x - 34, 22), "[V]", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.6))
-
-
-class ArmourTag:
-	extends Control
-	## The armour worn, right of the weapon tag: the set's icon and name (or "giáp phối" when the
-	## pieces are mixed), what it resists and what it is weak to, the four slots in their
-	## elements' colours, and [G] to change.
-	var hero: Node3D
-
-	func _process(_delta: float) -> void:
-		queue_redraw()
-
-	func _draw() -> void:
-		if hero == null or not is_instance_valid(hero) or not ("armour" in hero):
-			return
-		var worn: Dictionary = hero.armour
-		var whole := Armour.whole_set(worn)
-		var e := Armour.main_element(worn)
-		Hud.slant(self, Rect2(Vector2(0, 4), Vector2(size.x, size.y - 8)), Color(0.03, 0.05, 0.07, 0.6), 10)
-		var icon := GameIcons.armour(whole if whole != "" else Armour.START, 64)
-		if icon:
-			draw_texture_rect(icon, Rect2(Vector2(6, 0), Vector2(size.y, size.y)), false)
-		var x := size.y + 10.0
-		var title := ("BỘ " + String(Armour.set_of(whole).name)).to_upper() if whole != "" else "GIÁP PHỐI"
-		draw_string_outline(Hud.FONT_XBOLD, Vector2(x, 22), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 4, Color(0, 0, 0, 0.6))
-		draw_string(Hud.FONT_XBOLD, Vector2(x, 22), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Hud.TEXT)
-		draw_string(Hud.FONT_SEMI, Vector2(x, 38), Armour.summary(worn), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Elements.color(e))
-		# the four slots: a piece in its element's colour, a bare slot dimmed
-		var px := size.x - 38.0 - 4.0 * 19.0
-		for slot in Armour.SLOTS:
-			var p := Armour.piece(String(worn.get(slot, "")), slot)
-			var tex := GameIcons.armour_piece(slot, String(p.element) if not p.is_empty() else "neutral", 48)
-			if tex:
-				draw_texture_rect(tex, Rect2(Vector2(px, 6), Vector2(19, 19)), false, Color(1, 1, 1, 1.0 if not p.is_empty() else 0.22))
-			px += 19.0
-		if hero.wardrobe.size() > 1:
-			draw_string(Hud.FONT_BOLD, Vector2(size.x - 34, 22), "[G]", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.6))
-
-
 class HeavyMeter:
 	extends Control
 	## Trảm gathering power: a bar that fills while the right mouse button is held, gold when full.
@@ -624,56 +544,14 @@ class HeavyMeter:
 		draw_string(Hud.FONT_XBOLD, Vector2(0, -6), label, HORIZONTAL_ALIGNMENT_CENTER, size.x, 16, col)
 
 
-class SkillSlot:
-	extends Control
-	## One skill: a slanted tile with the skill's icon, its key, the energy it costs, the cooldown
-	## as a darkening sweep with the seconds left, dimmed when there is not enough energy.
-	var skills: PlayerSkills
-	var index := 0
-	var key := ""
-
-	func _process(_delta: float) -> void:
-		queue_redraw()
-
-	func _draw() -> void:
-		var r := Rect2(Vector2.ZERO, size)
-		var a: Ability = skills.slots[index] if skills and index < skills.slots.size() else null
-		Hud.slant(self, r, Color(0.03, 0.05, 0.07, 0.72), 12)
-		if a == null:
-			Hud.slant_outline(self, r, Color(1, 1, 1, 0.15), 12, 1.5)
-			return
-		var col := GameIcons.tint(GameIcons.element_of(a))
-		var left := skills.cooldown_left(index)
-		var cooling := left > 0.05
-		var poor: bool = skills.hero != null and skills.hero.energy < a.energy_cost()
-		var tex := GameIcons.skill(a, 96)
-		if tex:
-			var side := size.y * 0.86
-			var dim := 0.32 if cooling or poor else 1.0
-			draw_texture_rect(tex, Rect2(size * 0.5 - Vector2(side, side) * 0.5 + Vector2(0, -1), Vector2(side, side)), false, Color(dim, dim, dim, 0.45 + 0.55 * dim))
-		if cooling:
-			var frac := skills.cooldown_fraction(index)
-			Hud.slant(self, Rect2(12.0 * (1.0 - frac), size.y * (1.0 - frac), size.x - 12.0 * (1.0 - frac), size.y * frac), Color(0, 0, 0, 0.5), 12.0 * frac)
-			var s := ("%.1f" % left) if left < 10.0 else str(int(left))
-			draw_string_outline(Hud.FONT_XBOLD, Vector2(0, size.y * 0.5 + 10), s, HORIZONTAL_ALIGNMENT_CENTER, size.x, 27, 5, Color(0, 0, 0, 0.7))
-			draw_string(Hud.FONT_XBOLD, Vector2(0, size.y * 0.5 + 10), s, HORIZONTAL_ALIGNMENT_CENTER, size.x, 27, Color.WHITE)
-		var edge := Color(1.0, 0.55, 0.3) if a.has_tag(Ability.TAG_ULTIMATE) else Color(col, 0.7 if not cooling else 0.35)
-		Hud.slant_outline(self, r, edge, 12, 2.0)
-		draw_string(Hud.FONT_BOLD, Vector2(14, 16), key, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.8))
-		if a.energy_cost() > 0.0:
-			draw_string(Hud.FONT_BOLD, Vector2(0, size.y - 6), str(roundi(a.energy_cost())), HORIZONTAL_ALIGNMENT_RIGHT, size.x - 14, 15,
-				Color(1.0, 0.42, 0.36) if poor else Hud.ENERGY)
-		draw_string_outline(Hud.FONT_SEMI, Vector2(-14, size.y + 17), a.display_name(), HORIZONTAL_ALIGNMENT_CENTER, size.x + 28, 14, 4, Color(0, 0, 0, 0.6))
-		draw_string(Hud.FONT_SEMI, Vector2(-14, size.y + 17), a.display_name(), HORIZONTAL_ALIGNMENT_CENTER, size.x + 28, 14, Color(Hud.TEXT, 0.75))
-
-
 class PotionSlot:
 	extends Control
-	## A potion: a framed flask with its key and how many are left.
+	## A consumable slot as Dauntless draws them: a tall rounded dark slot, the item's round badge
+	## in it, how many are left underneath; the key in small letters on top. Empty slots stay as
+	## dim frames.
 	var hero: Node3D
 	var index := 0
-	const COLORS := [Color(0.92, 0.24, 0.2), Color(0.28, 0.52, 1.0), Color(0.38, 0.86, 0.36)]
-	const KEYS := ["Z", "X", "C"]
+	const KEYS := ["Z", "X", "C", ""]
 
 	func _process(_delta: float) -> void:
 		queue_redraw()
@@ -681,21 +559,27 @@ class PotionSlot:
 	func _draw() -> void:
 		if hero == null or not is_instance_valid(hero):
 			return
-		var box := Rect2(Vector2(4, 4), Vector2(size.x - 8, size.x - 8))
-		draw_rect(box, Color(0.16, 0.18, 0.2, 0.82))
-		draw_rect(Rect2(box.position, Vector2(box.size.x, 7)), Color(1, 1, 1, 0.07))
-		draw_rect(box, Color(0.78, 0.78, 0.8, 0.6), false, 2.0)
+		var box := Rect2(Vector2(2, 14), Vector2(size.x - 4, size.y - 16))
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.02, 0.03, 0.05, 0.5)
+		sb.set_corner_radius_all(9)
+		sb.border_color = Color(1, 1, 1, 0.12)
+		sb.set_border_width_all(1)
+		draw_style_box(sb, box)
+		if index >= Hero.POTIONS.size():
+			return
 		var id: String = Hero.POTIONS[index]
 		var n: int = hero.inventory.count(id)
+		var c := box.position + Vector2(box.size.x * 0.5, box.size.y * 0.4)
 		var tex := GameIcons.item(id, 96)
 		if tex:
-			var side := box.size.x * 0.92
-			draw_texture_rect(tex, Rect2(box.get_center() - Vector2(side, side) * 0.5 + Vector2(0, 2), Vector2(side, side)), false,
-				Color.WHITE if n > 0 else Color(0.5, 0.5, 0.5, 0.45))
-		draw_string(Hud.FONT_BOLD, box.position + Vector2(6, 17), KEYS[index], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(1, 1, 1, 0.75))
+			var side := box.size.x * 0.95
+			draw_texture_rect(tex, Rect2(c - Vector2(side, side) * 0.5, Vector2(side, side)), false,
+				Color.WHITE if n > 0 else Color(0.45, 0.45, 0.45, 0.4))
+		draw_string(Hud.FONT_BOLD, Vector2(0, 11), KEYS[index], HORIZONTAL_ALIGNMENT_CENTER, size.x, 13, Color(1, 1, 1, 0.55))
 		var cnt := "×%d" % n
-		draw_string_outline(Hud.FONT_XBOLD, Vector2(0, box.end.y + 26), cnt, HORIZONTAL_ALIGNMENT_CENTER, size.x, 25, 5, Color(0, 0, 0, 0.6))
-		draw_string(Hud.FONT_XBOLD, Vector2(0, box.end.y + 26), cnt, HORIZONTAL_ALIGNMENT_CENTER, size.x, 25, Hud.TEXT if n > 0 else Color(1, 0.42, 0.36))
+		draw_string_outline(Hud.FONT_XBOLD, Vector2(0, box.end.y - 8), cnt, HORIZONTAL_ALIGNMENT_CENTER, size.x, 19, 4, Color(0, 0, 0, 0.6))
+		draw_string(Hud.FONT_XBOLD, Vector2(0, box.end.y - 8), cnt, HORIZONTAL_ALIGNMENT_CENTER, size.x, 19, Hud.TEXT if n > 0 else Color(1, 0.42, 0.36))
 
 
 class LogBox:

@@ -111,6 +111,20 @@ const CHARGE_WIND := 1.1
 const CHARGE_RUN := 1.9
 const CHARGE_STOP := 0.9
 
+## Every attack is told the same way (Anticipation): a small counter-move first, a big slow build,
+## a trembling beat at the peak with a glint and a "shing", then the blow, fast.
+var swipe_beats := Anticipation.Beats.new(0.18, 0.7, 0.2)
+var stomp_beats := Anticipation.Beats.new(0.22, 0.93, 0.25)
+## (the throw's tell is reaching down for the rock)
+var throw_beats := Anticipation.Beats.new(0.7, 0.65, 0.25)
+var pounce_beats := Anticipation.Beats.new(0.18, 0.82, 0.2)
+## Húc's beats fill CHARGE_WIND exactly (it is the interrupt window).
+var charge_beats := Anticipation.Beats.new(0.22, 0.68, 0.2)
+const SWIPE_TIME := 0.35
+const SLAM_TIME := 0.25
+## How fast the body eases to its pose this mode (0 = the usual).
+var _pose_rate := 0.0
+
 
 func _ready() -> void:
 	display_name = "Gấu Ma Rừng Già"
@@ -378,6 +392,7 @@ func _plant_feet() -> void:
 func set_mode(m: Mode) -> void:
 	mode = m
 	mode_time = 0.0
+	_pose_rate = 0.0
 	_charge_open = false
 	_step_scale = 1.0
 	_event_done.clear()
@@ -530,23 +545,37 @@ func _run_mode(delta: float) -> void:
 
 func _swipe(delta: float) -> void:
 	var t := mode_time
+	var b := swipe_beats
 	var leg := legs[1] if _swipe_side > 0.0 else legs[0]
 	var root := global_transform
+	var go := b.strike_at()
 	if _once("start"):
-		Fx.telegraph(root * (Vector3(_swipe_side * 1.5, 0, -11.0) * S), 8.5 * S, 0.95)
-	if target and t < 0.8:
+		Fx.telegraph(root * (Vector3(_swipe_side * 1.5, 0, -11.0) * S), 8.5 * S, go + SWIPE_TIME * 0.5)
+	if target and t < b.hold_at():
 		_face(target.global_position, 0.6, delta)
-	leg.override_on = true
-	if t < 0.85:
-		_goal_roll = -_swipe_side * 0.06
-		leg.override_pos = body_xf * (Vector3(_swipe_side * 4.2, -0.6, -6.5) * S)
-		leg.override_rate = 6.0
-	elif t < 1.2:
-		var k := (t - 0.85) / 0.35
+	if t < b.tell:
+		# the counter-move: it shifts its weight onto the paw it will swing, dipping a little
+		_pose_rate = 9.0
+		_goal_roll = _swipe_side * 0.06
+		_goal_height = STAND_HEIGHT - 0.35 * S
+	elif t < go:
+		_pose_rate = 0.0
+		_goal_height = STAND_HEIGHT
+		_goal_roll = -_swipe_side * 0.09
+		leg.override_on = true
+		var shiver := Vector3(0, b.tremble(t) * 0.12, 0) * S
+		leg.override_pos = body_xf * (Vector3(_swipe_side * 4.4, -0.3, -6.3) * S + shiver)
+		leg.override_rate = 6.0 if t < b.hold_at() else 14.0
+		if b.hold_begins(t, delta):
+			Anticipation.glint(leg.foot + Vector3.UP * 0.6 * S, Color(1.0, 0.88, 0.6), 2.0, 0.6)
+	elif t < go + SWIPE_TIME:
+		leg.override_on = true
+		var k := b.strike(t, SWIPE_TIME)
 		var p := root * (Vector3(lerpf(_swipe_side * 7.0, -_swipe_side * 3.5, k), 0, lerpf(-9.0, -12.0, k)) * S)
 		p.y = Terrain.height_at_world(p) + 0.9 * S
 		leg.override_pos = p
 		leg.override_rate = 30.0
+		_goal_roll = _swipe_side * 0.05
 		for h in heroes():
 			if _hit_this_swing.has(h) or is_on_me(h):
 				continue
@@ -555,7 +584,7 @@ func _swipe(delta: float) -> void:
 				hurt_hero(h, 22.0, leg.foot, 12.0, 6.0, "Vồ")
 		if _once("whoosh"):
 			Game.shake(0.15)
-	elif t < 2.0:
+	elif t < go + SWIPE_TIME + 0.8:
 		leg.override_on = false
 		_goal_roll = 0.0
 	else:
@@ -564,16 +593,26 @@ func _swipe(delta: float) -> void:
 
 func _stomp(delta: float) -> void:
 	var t := mode_time
+	var b := stomp_beats
 	var root := global_transform
+	var impact := b.strike_at() + SLAM_TIME
 	if _once("start"):
 		_stomp_point = root * (Vector3(0, 0, -11.5) * S)
 		_stomp_point.y = Terrain.height_at_world(_stomp_point)
-		Fx.telegraph(_stomp_point, 11.0 * S, 1.45)
+		Fx.telegraph(_stomp_point, 11.0 * S, impact)
 	pitch_pivot_z = 3.6 * S
 	var fl := legs[0]
 	var fr := legs[1]
-	if t < 1.15:
-		_goal_pitch = 0.46
+	if t < b.tell:
+		# the counter-move: it drops its head and sinks before it rears up
+		_pose_rate = 8.0
+		_goal_pitch = -0.1
+		_goal_height = STAND_HEIGHT - 0.8 * S
+		_goal_head = Vector2(0, -0.35)
+		_head_free = false
+	elif t < b.strike_at():
+		_pose_rate = 0.0
+		_goal_pitch = 0.46 + b.tremble(t) * 0.02
 		_goal_height = STAND_HEIGHT + 0.5 * S
 		for leg in [fl, fr]:
 			leg.override_on = true
@@ -581,14 +620,18 @@ func _stomp(delta: float) -> void:
 			leg.override_pos = body_xf * Vector3(leg.hip.x, leg.hip.y - 5.2 * S, leg.hip.z - 2.0 * S)
 		_goal_head = Vector2(0, 0.25)
 		_head_free = false
-	elif t < 1.45:
+		if b.hold_begins(t, delta):
+			Anticipation.glint(head.global_position + Vector3.UP * 1.2 * S, Color(1.0, 0.86, 0.55), 2.2, 0.55)
+	elif t < impact:
+		_pose_rate = 14.0
 		_goal_pitch = -0.08
 		for leg in [fl, fr]:
 			var p := _stomp_point + root.basis.x * signf(leg.hip.x) * 2.4 * S
 			p.y = Terrain.height_at_world(p) + 0.6 * S
 			leg.override_pos = p
-			leg.override_rate = 22.0
-	elif t < 2.7:
+			leg.override_rate = 26.0
+	elif t < impact + 1.25:
+		_pose_rate = 0.0
 		if _once("impact"):
 			hit_area(_stomp_point, 11.0 * S, 28.0, 10.0, 6.0, "Dậm Đất")
 			Fx.dust(_stomp_point, 7.0 * S, 80)
@@ -597,7 +640,7 @@ func _stomp(delta: float) -> void:
 			shake_amount = maxf(shake_amount, 0.8)
 		_goal_pitch = 0.0
 		_head_free = true
-		if t > 1.9:
+		if t > impact + 0.45:
 			for leg in [fl, fr]:
 				leg.override_on = false
 	else:
@@ -611,7 +654,8 @@ func _throw(delta: float) -> void:
 	if target:
 		_face(target.global_position, 0.5, delta)
 	leg.override_on = true
-	if t < 0.7:
+	var b := throw_beats
+	if t < b.tell:
 		var p := root * (Vector3(1.8, 0, -10.5) * S)
 		p.y = Terrain.height_at_world(p) + 0.7 * S
 		leg.override_pos = p
@@ -619,15 +663,18 @@ func _throw(delta: float) -> void:
 		_goal_head = Vector2(0.2, -0.45)
 		_head_free = false
 		_goal_pitch = -0.1
-	elif t < 1.35:
+	elif t < b.strike_at():
 		if _once("grab"):
 			_held_rock = _make_rock(2.3 * S * 0.8)
 			Fx.dust(leg.foot, 3.0 * S, 30)
-		leg.override_pos = body_xf * (Vector3(3.6, 4.5, -7.5) * S)
-		leg.override_rate = 5.0
-		_goal_head = Vector2(0, 0.2)
-		_goal_pitch = 0.12
-	elif t < 2.5:
+		# up and back, further than it needs (the wind), trembling at the top
+		leg.override_pos = body_xf * (Vector3(3.8, 4.9 + b.tremble(t) * 0.1, -6.9) * S)
+		leg.override_rate = 5.0 if t < b.hold_at() else 12.0
+		_goal_head = Vector2(0, 0.28)
+		_goal_pitch = 0.16
+		if b.hold_begins(t, delta) and _held_rock:
+			Anticipation.glint(_held_rock.global_position + Vector3.UP * 1.4 * S, Color(1.0, 0.86, 0.55), 2.0, 0.6)
+	elif t < b.strike_at() + 1.15:
 		if _once("release") and _held_rock and target:
 			var aim: Vector3 = target.global_position + (target.velocity if "velocity" in target else Vector3.ZERO) * 0.5
 			aim.y = Terrain.height_at_world(aim)
@@ -640,7 +687,7 @@ func _throw(delta: float) -> void:
 			rock.launch(from, aim, flight, self)
 			Fx.telegraph(aim, 5.5 * REACH, flight)
 			_held_rock = null
-		if t > 1.6:
+		if t > b.strike_at() + 0.25:
 			leg.override_on = false
 		_head_free = true
 		_goal_pitch = 0.0
@@ -661,7 +708,8 @@ func _make_rock(radius: float) -> Node3D:
 
 func _pounce(delta: float) -> void:
 	var t := mode_time
-	const CROUCH := 1.0
+	var b := pounce_beats
+	var crouch := b.strike_at()
 	const FLIGHT := 1.5
 	if _once("start") and target:
 		var to := target.global_position - global_position
@@ -675,13 +723,22 @@ func _pounce(delta: float) -> void:
 		_jump_to.y = Terrain.height_at_world(_jump_to)
 		var land := _jump_to + to.normalized() * 9.0 * S
 		land.y = Terrain.height_at_world(land)
-		Fx.telegraph(land, 8.5 * S, CROUCH + FLIGHT)
-	if t < CROUCH:
+		Fx.telegraph(land, 8.5 * S, crouch + FLIGHT)
+	if t < b.tell:
+		# the counter-move: it rises up tall before it coils
+		_pose_rate = 8.0
+		_goal_height = STAND_HEIGHT + 0.5 * S
+		_goal_pitch = 0.06
+	elif t < crouch:
+		_pose_rate = 4.0
 		_face(_jump_to + (_jump_to - _jump_from), 1.2, delta)
-		_goal_height = STAND_HEIGHT - 2.4 * S
-		_goal_pitch = -0.06
-	elif t < CROUCH + FLIGHT:
-		var k := (t - CROUCH) / FLIGHT
+		_goal_height = STAND_HEIGHT - 2.6 * S + b.tremble(t) * 0.08 * S
+		_goal_pitch = -0.08
+		if b.hold_begins(t, delta):
+			Anticipation.glint(head.global_position + Vector3.UP * 0.8 * S, Color(1.0, 0.86, 0.55), 2.0, 0.6)
+	elif t < crouch + FLIGHT:
+		_pose_rate = 0.0
+		var k := (t - crouch) / FLIGHT
 		var p := _jump_from.lerp(_jump_to, k)
 		p.y = lerpf(_jump_from.y, _jump_to.y, k) + sin(k * PI) * 9.0 * S
 		global_position = p
@@ -715,7 +772,7 @@ func _pounce(delta: float) -> void:
 				return
 		_goal_height = STAND_HEIGHT
 		_goal_pitch = 0.0
-		if t > CROUCH + FLIGHT + 1.4:
+		if t > crouch + FLIGHT + 1.4:
 			set_mode(Mode.IDLE)
 
 
@@ -865,17 +922,28 @@ func _charge(delta: float) -> void:
 			var p := _charge_from.lerp(_charge_to, (i + 1) / 4.0)
 			p.y = Terrain.height_at_world(p)
 			Fx.telegraph(p, 3.2 * S, CHARGE_WIND + CHARGE_RUN * (i + 1) / 4.0)
-	if t < CHARGE_WIND:
+	var b := charge_beats
+	if t < CHARGE_WIND and _once("mark"):
+		var mark := RadiantMark.on(health)
+		if mark:
+			# an Unstable Move under a Radiant mark: it detonates and interrupts
+			mark.detonate.call_deferred()
+	if t < b.tell:
+		# the counter-move: the head comes up first (a snort), then goes down to ram
 		_face(_charge_to, 2.6, delta)
-		_goal_pitch = -0.3
-		_goal_height = STAND_HEIGHT - 1.0 * S
-		_goal_head = Vector2(0, -0.6)
+		_pose_rate = 8.0
+		_goal_pitch = 0.08
+		_goal_head = Vector2(0, 0.35)
 		_head_free = false
-		if _once("mark"):
-			var mark := RadiantMark.on(health)
-			if mark:
-				# an Unstable Move under a Radiant mark: it detonates and interrupts
-				mark.detonate.call_deferred()
+	elif t < CHARGE_WIND:
+		_pose_rate = 0.0 if t < b.hold_at() else 6.0
+		_face(_charge_to, 2.6, delta)
+		_goal_pitch = -0.32 + b.tremble(t) * 0.015
+		_goal_height = STAND_HEIGHT - 1.05 * S
+		_goal_head = Vector2(0, -0.62)
+		_head_free = false
+		if b.hold_begins(t, delta):
+			Anticipation.glint(head.global_position + Vector3.UP * 0.6 * S, Color(1.0, 0.86, 0.55), 2.2, 0.55)
 		if Engine.get_physics_frames() % 10 == 0:
 			for leg in [legs[0], legs[1]]:
 				Fx.dust(leg.foot - Vector3.UP * 0.5 * S, 1.6 * S, 8)
@@ -1004,7 +1072,7 @@ func reset_to(xf: Transform3D) -> void:
 
 # ================================================================== posing
 func _ease_pose(delta: float) -> void:
-	var k := 1.0 - exp(-(5.0 if mode == Mode.STOMP else 2.6) * delta)
+	var k := 1.0 - exp(-(_pose_rate if _pose_rate > 0.0 else (5.0 if mode == Mode.STOMP else 2.6)) * delta)
 	if mode == Mode.DYING or mode == Mode.DEAD:
 		k = 1.0 - exp(-0.9 * delta)
 	height = lerpf(height, _goal_height, k)
