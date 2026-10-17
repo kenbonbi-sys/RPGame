@@ -76,6 +76,8 @@ ARttHero::ARttHero()
 	Head->SetRelativeLocation(FVector(6.f, 0.f, 72.f));
 	Head->SetRelativeScale3D(FVector(0.45f));
 	Head->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	Health = CreateDefaultSubobject<URttHealth>(TEXT("Health"));
 }
 
 double ARttHero::Now() const
@@ -93,6 +95,9 @@ void ARttHero::BeginPlay()
 	Super::BeginPlay();
 	TakeParagonBody();
 	bDemoRun = FParse::Param(FCommandLine::Get(), TEXT("RttDemoRun"));
+	bDemoFight = FParse::Param(FCommandLine::Get(), TEXT("RttDemoFight"));
+	StartXf = GetActorTransform();
+	SetUpCombat();
 }
 
 void ARttHero::TakeParagonBody()
@@ -116,6 +121,18 @@ void ARttHero::TakeParagonBody()
 	Skin->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()), FRotator(0.f, -90.f, 0.f));
 	Skin->SetRelativeScale3D(FVector(HeroScale));
 	Dodge = DodgeAnimation.IsNull() ? nullptr : Cast<UAnimSequenceBase>(DodgeAnimation.TryLoad());
+	BodyAnimClass = HeroAnimClass.IsNull() ? nullptr : HeroAnimClass.TryLoadClass<UAnimInstance>();
+	for (const FSoftObjectPath& Path : AttackMontages)
+	{
+		if (UAnimMontage* M = Cast<UAnimMontage>(Path.TryLoad()))
+		{
+			Swings.Add(M);
+		}
+	}
+	HeavySwing = HeavyMontage.IsNull() ? nullptr : Cast<UAnimMontage>(HeavyMontage.TryLoad());
+	HitFront = HitReactFront.IsNull() ? nullptr : Cast<UAnimSequenceBase>(HitReactFront.TryLoad());
+	HitBack = HitReactBack.IsNull() ? nullptr : Cast<UAnimSequenceBase>(HitReactBack.TryLoad());
+	Fall = DeathAnimation.IsNull() ? nullptr : Cast<UAnimSequenceBase>(DeathAnimation.TryLoad());
 	Body->SetVisibility(false);
 	Head->SetVisibility(false);
 	bParagonBody = true;
@@ -143,6 +160,8 @@ void ARttHero::BuildControls()
 	LookAction = MakeAction(TEXT("Look"), EInputActionValueType::Axis2D);
 	JumpAction = MakeAction(TEXT("Jump"), EInputActionValueType::Boolean);
 	DodgeAction = MakeAction(TEXT("Dodge"), EInputActionValueType::Boolean);
+	AttackAction = MakeAction(TEXT("Attack"), EInputActionValueType::Boolean);
+	HeavyAction = MakeAction(TEXT("Heavy"), EInputActionValueType::Boolean);
 
 	// W/S drive Y and A/D drive X of the 2D move, as in Unreal's own third-person template.
 	auto Map = [this](UInputAction* Action, const FKey& Key, bool bNegate, bool bSwizzle, bool bNegateYOnly = false)
@@ -179,6 +198,11 @@ void ARttHero::BuildControls()
 	Map(JumpAction, EKeys::Gamepad_FaceButton_Bottom, false, false);
 	Map(DodgeAction, EKeys::LeftShift, false, false);
 	Map(DodgeAction, EKeys::Gamepad_FaceButton_Right, false, false);
+	// controls.gd: the left mouse button is the basic attack, the right one the heavy hit
+	Map(AttackAction, EKeys::LeftMouseButton, false, false);
+	Map(AttackAction, EKeys::Gamepad_FaceButton_Left, false, false);
+	Map(HeavyAction, EKeys::RightMouseButton, false, false);
+	Map(HeavyAction, EKeys::Gamepad_RightTrigger, false, false);
 }
 
 void ARttHero::SetupPlayerInputComponent(UInputComponent* PlayerInput)
@@ -197,6 +221,9 @@ void ARttHero::SetupPlayerInputComponent(UInputComponent* PlayerInput)
 	Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	Input->BindAction(DodgeAction, ETriggerEvent::Started, this, &ARttHero::DodgePressed);
 	Input->BindAction(DodgeAction, ETriggerEvent::Completed, this, &ARttHero::DodgeReleased);
+	Input->BindAction(AttackAction, ETriggerEvent::Started, this, &ARttHero::AttackPressed);
+	Input->BindAction(HeavyAction, ETriggerEvent::Started, this, &ARttHero::HeavyPressed);
+	Input->BindAction(HeavyAction, ETriggerEvent::Completed, this, &ARttHero::HeavyReleased);
 }
 
 void ARttHero::PawnClientRestart()
@@ -216,6 +243,10 @@ void ARttHero::PawnClientRestart()
 
 void ARttHero::Move(const FInputActionValue& Value)
 {
+	if (!CanAct())
+	{
+		return;
+	}
 	const FVector2D Axis = Value.Get<FVector2D>();
 	const FRotator Yaw(0.f, GetControlRotation().Yaw, 0.f);
 	const FRotationMatrix Facing(Yaw);
@@ -252,9 +283,22 @@ void ARttHero::DodgeReleased()
 
 void ARttHero::Dash()
 {
-	if (GetCharacterMovement()->IsFalling())
+	if (GetCharacterMovement()->IsFalling() || !CanAct())
 	{
 		return;
+	}
+	// Lướt cancels a heavy move while it gathers, and a swing
+	bHeavyCharging = false;
+	HeavyHitAt = -1.0;
+	SwingHitAt = -1.0;
+	bSwingQueued = false;
+	if (UAnimInstance* Playing = GetMesh()->GetAnimInstance())
+	{
+		Playing->Montage_Stop(0.1f);
+	}
+	if (Perfect)
+	{
+		Perfect->StartDash(Now());
 	}
 	FVector Direction = GetLastMovementInputVector();
 	Direction.Z = 0.0;
@@ -285,6 +329,12 @@ void ARttHero::Tick(float DeltaSeconds)
 	{
 		AddMovementInput(GetActorForwardVector(), 1.f);
 	}
+	if (bDemoFight && !IsDown())
+	{
+		DemoFight();
+	}
+	UpdateCombat();
+	UpdateTime();
 	if (!bCameraPlaced && GetController())
 	{
 		PlaceCamera();
@@ -352,6 +402,11 @@ void ARttHero::UpdateCamera(float RealDelta)
 	ArmLength = FMath::Lerp(ArmLength, CameraDistance, 1.f - FMath::Exp(-2.5f * Dt));
 	Fov = FMath::Lerp(Fov, WantFov, 1.f - FMath::Exp(-3.f * Dt));
 	Boom->SetWorldLocationAndRotation(Focus, View);
+	// shake through the lens: the spring arm owns the camera's place (sotc_camera.gd)
+	Trauma = FMath::Max(0.f, Trauma - Dt * 1.4f);
+	const float Sq = Trauma * Trauma;
+	const float Tn = static_cast<float>(RealNow()) * 30.f;
+	Camera->SetRelativeLocation(FVector(0.f, FMath::PerlinNoise1D(Tn) * 35.f * Sq, FMath::PerlinNoise1D(Tn + 57.3f) * 35.f * Sq));
 	Boom->TargetArmLength = ArmLength;
 
 	// Godot's field of view is vertical; Unreal's is horizontal

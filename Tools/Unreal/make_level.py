@@ -1,4 +1,5 @@
-"""Builds the Unreal port's first map, /Game/Maps/ThuNghiem, from scratch (editor Python):
+"""Builds the Unreal port's maps from scratch (editor Python): /Game/Maps/ThuNghiem, the test
+ground, and /Game/Maps/HangGau, Gấu Ma's den (the MVP boss fight):
 
     Tools\\Unreal\\ue.cmd level
 
@@ -11,6 +12,7 @@ the hero. ue.cmd deletes the old map and material first, so this always builds t
 import unreal
 
 MAP = "/Game/Maps/ThuNghiem"
+ARENA = "/Game/Maps/HangGau"
 MATERIALS = "/Game/Materials"
 GRID_NAME = "M_Grid"
 CUBE = "/Engine/BasicShapes/Cube"
@@ -91,29 +93,39 @@ def block(label, mesh, x, y, z, sx, sy, sz, yaw=0.0):
 
 
 GRID = make_grid()
-# new_level refuses to replace a map, so ue.cmd deletes the old one first
-if not levels.new_level(MAP):
-    raise RuntimeError("cannot create " + MAP + " (delete Content/Maps/ThuNghiem.umap first)")
 
-# the ground: Plane is 1 m across. Stretched that far its distance field is too coarse to light
-# anything by, so it stays out of distance-field lighting.
-ground = block("Ground", PLANE, 0, 0, 0, 400, 400, 1)
-ground.static_mesh_component.set_editor_property("affect_distance_field_lighting", False)
 
-sun = spawn(unreal.DirectionalLight, "Sun", z=800, pitch=-38.0, yaw=-35.0)
-sun_light = movable(sun, unreal.DirectionalLightComponent)
-sun_light.set_editor_property("atmosphere_sun_light", True)
-sun_light.set_editor_property("intensity", 10.0)
-spawn(unreal.SkyAtmosphere, "Sky Atmosphere")
-sky = spawn(unreal.SkyLight, "Sky Light", z=600)
-sky_light = movable(sky, unreal.SkyLightComponent)
-sky_light.set_editor_property("real_time_capture", True)
-spawn(unreal.VolumetricCloud, "Clouds")
-spawn(unreal.ExponentialHeightFog, "Height Fog", z=-200)
-post = spawn(unreal.PostProcessVolume, "Post Process")
-post.set_editor_property("unbound", True)
+def outdoors(map_path):
+    """A new map with the ground, a sun, sky, clouds and fog, all lit live."""
+    # new_level refuses to replace a map, so ue.cmd deletes the old ones first
+    if not levels.new_level(map_path):
+        raise RuntimeError("cannot create " + map_path + " (delete its .umap first)")
+    # the ground: Plane is 1 m across. Stretched that far its distance field is too coarse to light
+    # anything by, so it stays out of distance-field lighting.
+    ground = block("Ground", PLANE, 0, 0, 0, 400, 400, 1)
+    ground.static_mesh_component.set_editor_property("affect_distance_field_lighting", False)
+    sun = spawn(unreal.DirectionalLight, "Sun", z=800, pitch=-38.0, yaw=-35.0)
+    sun_light = movable(sun, unreal.DirectionalLightComponent)
+    sun_light.set_editor_property("atmosphere_sun_light", True)
+    sun_light.set_editor_property("intensity", 10.0)
+    spawn(unreal.SkyAtmosphere, "Sky Atmosphere")
+    sky = spawn(unreal.SkyLight, "Sky Light", z=600)
+    sky_light = movable(sky, unreal.SkyLightComponent)
+    sky_light.set_editor_property("real_time_capture", True)
+    spawn(unreal.VolumetricCloud, "Clouds")
+    spawn(unreal.ExponentialHeightFog, "Height Fog", z=-200)
+    post = spawn(unreal.PostProcessVolume, "Post Process")
+    post.set_editor_property("unbound", True)
 
-# blocks for scale (Cube is 1 m): a 2 m wall, steps, a ring of 4 m pillars, a boulder
+
+def save(map_path):
+    if not levels.save_current_level():
+        raise RuntimeError("cannot save " + map_path)
+    print("RTT_LEVEL_OK " + map_path)
+
+
+# ThuNghiem: blocks for scale (Cube is 1 m): a 2 m wall, steps, a ring of 4 m pillars, a boulder
+outdoors(MAP)
 block("Wall", CUBE, 900, -300, 100, 0.5, 6, 2)
 for i in range(5):
     block("Step %d" % (i + 1), CUBE, 500 + i * 80, 500, 20 + i * 20, 0.8, 3, 0.4 + i * 0.4)
@@ -122,9 +134,15 @@ for i in range(8):
     v = unreal.MathLibrary.rotate_angle_axis(unreal.Vector(1800, 0, 0), angle, unreal.Vector(0, 0, 1))
     block("Pillar %d" % (i + 1), CUBE, v.x, v.y, 200, 1, 1, 4, yaw=angle)
 block("Boulder", SPHERE, -700, 400, 100, 3, 3, 2.2)
-
 spawn(unreal.PlayerStart, "Player Start", z=120)
+save(MAP)
 
-if not levels.save_current_level():
-    raise RuntimeError("cannot save " + MAP)
-print("RTT_LEVEL_OK " + MAP)
+# HangGau: Gấu Ma's den, the MVP fight. The bear stands 35 m off facing the hero; its den reaches
+# 38 m around where it stands (BearStats::DenRadius).
+outdoors(ARENA)
+spawn(unreal.PlayerStart, "Player Start", z=120)
+bear = unreal.load_class(None, "/Script/RungThiTham.RttGauMa")
+if bear is None:
+    raise RuntimeError("the RttGauMa class is not built: run ue.cmd build first")
+spawn(bear, "Gau Ma", x=3500, yaw=180.0)
+save(ARENA)

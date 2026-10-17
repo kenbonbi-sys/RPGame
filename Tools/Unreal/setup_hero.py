@@ -73,12 +73,25 @@ unreal.log("RTT_HERO animation blueprints: " + ", ".join(n for _, n in anims))
 unreal.log("RTT_HERO animations: " + ", ".join(n for _, n in sorted(sequences, key=lambda s: s[1])))
 unreal.log("RTT_HERO height: %.0f cm" % height)
 
+montages = sorted([(p, n) for c, p, n in items if c == "AnimMontage" and "primary" in n.lower()], key=lambda s: s[1])
+plain = {n.lower(): (p, n) for c, p, n in items if c == "AnimSequence"}
+hit_front = plain.get("hitreact_front")
+hit_back = plain.get("hitreact_back")
+death = plain.get("death")
+
 lines = [SECTION,
          "; the Paragon hero, found by Tools/Unreal/setup_hero.py (%s, %.0f cm tall)" % (hero, height),
          "HeroMesh=" + object_path(*mesh),
          "HeroAnimClass=" + (object_path(*anim) + "_C" if anim else ""),
          "DodgeAnimation=" + (object_path(*dodge) if dodge else ""),
          "HeroScale=1.0"]
+# Chém Gió's three swings are the hero's primary attack montages; the heavy move swings the last
+for m in montages[:3]:
+    lines.append("+AttackMontages=" + object_path(*m))
+lines.append("HeavyMontage=" + (object_path(*montages[-1]) if montages else ""))
+lines.append("HitReactFront=" + (object_path(*hit_front) if hit_front else ""))
+lines.append("HitReactBack=" + (object_path(*hit_back) if hit_back else ""))
+lines.append("DeathAnimation=" + (object_path(*death) if death else ""))
 
 ini = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_config_dir()), "DefaultGame.ini")
 with io.open(ini, encoding="utf-8") as fh:

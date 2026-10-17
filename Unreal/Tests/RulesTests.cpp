@@ -4,6 +4,7 @@
 // weakness lands for 73, the XP table, every class's level-1 sheet, the wiki's armour sets).
 #include "Rules/RttAbility.h"
 #include "Rules/RttArmour.h"
+#include "Rules/RttColossus.h"
 #include "Rules/RttDamage.h"
 #include "Rules/RttProcs.h"
 #include "Rules/RttSheet.h"
@@ -674,6 +675,44 @@ namespace
 		Expect(Near(cold.CooldownLeft(0, 0.0), swing / 0.76), "two Lạnh stacks slow the basic attack");
 	}
 
+	void Colossus(const Data&)
+	{
+		Current = "Gấu Ma: beats, moves, parts";
+		const Rtt::Beats swipe{0.18, 0.7, 0.2};
+		Expect(Near(swipe.HoldAt(), 0.88) && Near(swipe.StrikeAt(), 1.08), "Vồ: the hold at 0.88 s, the blow at 1.08 s");
+		Expect(swipe.Windup(0.09) < 0.0 && Near(swipe.Windup(0.88), 1.0) && swipe.Windup(0.0) == 0.0, "a counter-move first, then the wind-up to the peak");
+		Expect(swipe.Tremble(0.5) == 0.0 && swipe.Tremble(1.2) == 0.0 && swipe.HoldBegins(0.89, 0.02) && !swipe.HoldBegins(0.95, 0.02), "it trembles only through the hold");
+		Expect(Near(swipe.Strike(swipe.StrikeAt(), 0.35), 0.0) && Near(swipe.Strike(1.08 + 0.35, 0.35), 1.0) && swipe.Strike(1.08 + 0.1, 0.35) > 0.5, "the strike is fast out of the gate");
+
+		using Rtt::BearMove;
+		const double r = Rtt::BearReach;
+		Rtt::BearCooldowns cd;
+		Expect(Rtt::ChooseBearMove(6.0, 1.0, false, cd) == BearMove::Walk, "at the start every move is still cooling down: it walks");
+		cd = Rtt::BearCooldowns{0, 0, 0, 0, 0};
+		Expect(Rtt::ChooseBearMove(14.0 * r, 0.9, false, cd) == BearMove::Swipe && Near(cd.Swipe, 3.6), "a hero close in front: Vồ, again in 3.6 s");
+		Expect(Rtt::ChooseBearMove(14.0 * r, 0.9, false, cd) == BearMove::Stomp && Near(cd.Stomp, 6.5), "then Dậm Đất");
+		Expect(Rtt::ChooseBearMove(14.0 * r, 0.9, false, cd) == BearMove::Walk, "then it closes in");
+		cd = Rtt::BearCooldowns{0, 0, 0, 0, 0};
+		Expect(Rtt::ChooseBearMove(20.0 * r, 0.8, true, cd) == BearMove::Charge && Near(cd.Charge, 11.0 * 0.7), "further off, straight ahead: Húc (sooner again in a rage)");
+		Expect(Rtt::ChooseBearMove(20.0 * r, 0.8, false, cd, false, false) == BearMove::Walk, "a body without Chụp Quăng or Ném Đá Lớn walks instead");
+		Expect(Rtt::ChooseBearMove(20.0 * r, 0.8, false, cd) == BearMove::Pounce, "else Chụp Quăng");
+		Expect(Rtt::ChooseBearMove(30.0 * r, 0.8, false, cd) == BearMove::Throw, "far off: Ném Đá Lớn");
+		Expect(Rtt::ChooseBearMove(5.0, -0.5, false, cd) == BearMove::Walk, "a hero behind it: it turns to face them");
+		cd.Tick(10.0);
+		Expect(cd.Swipe == 0.0 && cd.Charge == 0.0, "cooldowns run down to 0");
+
+		std::vector<Rtt::BossPart> parts = Rtt::BearStats::Parts();
+		Expect(parts.size() == 7 && parts[0].Id == "head" && parts[0].Name == "Đầu" && Near(parts[0].Max, 640.0) && parts[0].Interrupt, "the head: 640, a heavy hit there interrupts");
+		Expect(!parts[2].Breakable() && Near(parts[0].Stagger, 2.0) && Near(parts[3].Max, 400.0), "the trunk does not break; the head staggers double; legs 400");
+		Rtt::BossPart& head = parts[0];
+		Expect(!Rtt::DamagePart(head, 100.0, true, false, false) && Near(head.Hp, 490.0), "a blade cuts the part for 150% of the hit");
+		Expect(!Rtt::DamagePart(head, 100.0, false, true, false) && Near(head.Hp, 365.0), "a pierce 125%");
+		Expect(!Rtt::DamagePart(head, 100.0, false, false, true) && Near(head.Hp, 365.0), "ticks do not wear parts down");
+		Expect(Rtt::DamagePart(head, 400.0, false, false, false) && head.Broken && head.Hp == 0.0, "at 0 it breaks");
+		Expect(!Rtt::DamagePart(head, 400.0, false, false, false), "only once");
+		Expect(Near(Rtt::AreaFalloff(28.0, 0.0, 8.8), 28.0) && Near(Rtt::AreaFalloff(28.0, 8.8, 8.8), 16.8), "Dậm Đất: 28 at the centre, 40% less at the rim");
+	}
+
 	void Perfect(const Data& d)
 	{
 		Current = "Lướt Hoàn Hảo";
@@ -733,6 +772,7 @@ int main(int argc, char** argv)
 	Abilities(d);
 	SkillBars(d);
 	Perfect(d);
+	Colossus(d);
 	std::printf("%d checks, %d failed\n", Checks, Failures);
 	return Failures == 0 ? 0 : 1;
 }

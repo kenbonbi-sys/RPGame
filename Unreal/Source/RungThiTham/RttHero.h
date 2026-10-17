@@ -10,9 +10,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "RttHealth.h"
+#include "Rules/RttAbility.h"
 
 #include "RttHero.generated.h"
 
+class ARttGauMa;
+class UAnimMontage;
 class UAnimSequenceBase;
 class UCameraComponent;
 class UInputAction;
@@ -76,6 +80,45 @@ public:
 	FSoftObjectPath DodgeAnimation;
 	UPROPERTY(Config, EditAnywhere, Category = "Body")
 	float HeroScale = 1.f;
+	// Chém Gió's three swings, the heavy move's swing, being hit and falling (the Paragon hero's)
+	UPROPERTY(Config, EditAnywhere, Category = "Body")
+	TArray<FSoftObjectPath> AttackMontages;
+	UPROPERTY(Config, EditAnywhere, Category = "Body")
+	FSoftObjectPath HeavyMontage;
+	UPROPERTY(Config, EditAnywhere, Category = "Body")
+	FSoftObjectPath HitReactFront;
+	UPROPERTY(Config, EditAnywhere, Category = "Body")
+	FSoftObjectPath HitReactBack;
+	UPROPERTY(Config, EditAnywhere, Category = "Body")
+	FSoftObjectPath DeathAnimation;
+
+	// the weapon in hand (Content/Data/weapons.json) and the hero's sheet (classes.json, races.json)
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FString WeaponItem = TEXT("w_kiem_hong_anh");
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FString ClassId = TEXT("fighter");
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FString RaceId = TEXT("human");
+	// how fast the Paragon swings play (they are slower than Chém Gió's 0.42 s)
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float SwingRate = 1.3f;
+	// the big sword reaches this much past the data's reach (cm)
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float BladeReach = 60.f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
+	TObjectPtr<URttHealth> Health;
+
+	URttHealth* GetHealth() const { return Health; }
+	FVector GetFeet() const;
+	bool IsDown() const { return Health && Health->bDead; }
+	float RespawnIn() const;
+	// 0..1 while gathering power for the heavy move, -1 otherwise (the HUD draws it)
+	float HeavyCharge() const;
+	FString HeavyName() const;
+	const Rtt::Sheet* GetSheet() const { return Sheet.Get(); }
+	// camera trauma, 0..1
+	void Shake(float Amount);
 
 	bool IsInvulnerable() const;
 	bool IsSprinting() const { return bSprinting; }
@@ -110,13 +153,56 @@ private:
 	TObjectPtr<UInputAction> DodgeAction;
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimSequenceBase> Dodge;
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> AttackAction;
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> HeavyAction;
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UAnimMontage>> Swings;
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> HeavySwing;
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimSequenceBase> HitFront;
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimSequenceBase> HitBack;
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimSequenceBase> Fall;
+	UPROPERTY(Transient)
+	TObjectPtr<UClass> BodyAnimClass;
+
+	// combat (RttHeroCombat.cpp)
+	TUniquePtr<Rtt::Sheet> Sheet;
+	TUniquePtr<Rtt::PerfectDodge> Perfect;
+	const Rtt::WeaponFamily* Family = nullptr;
+	Rtt::Element WeaponType = Rtt::Element::Physical;
+	Rtt::ComboState Combo;
+	int32 SwingStage = 0;
+	double SwingHitAt = -1.0;
+	double NextSwingAt = 0.0;
+	double SwingBonus = 1.0;
+	bool bSwingQueued = false;
+	bool bHeavyCharging = false;
+	bool bHeavyFull = false;
+	double HeavyStart = 0.0;
+	double HeavyHitAt = -1.0;
+	double HeavyChargeAtRelease = 0.0;
+	double KnockedUntil = 0.0;
+	double RespawnAt = 0.0;
+	FTransform StartXf;
+	float Trauma = 0.f;
+	double HitStopUntil = 0.0;
+	double SlowMoUntil = 0.0;
 
 	double DodgeDownAt = -1.0;
 	double InvulnerableUntil = 0.0;
 	bool bSprinting = false;
 	bool bParagonBody = false;
-	// -RttDemoRun: runs on by itself (screenshots of the run)
+	// -RttDemoRun: runs on by itself (screenshots of the run); -RttDemoFight: goes for the colossus
+	// and swings at it, with a Trảm now and then (screenshots of the fight)
 	bool bDemoRun = false;
+	bool bDemoFight = false;
+	double DemoHeavyAt = 6.0;
+	void DemoFight();
 
 	// the camera rig: where it looks, how far back, how wide (vertical degrees)
 	FVector Focus = FVector::ZeroVector;
@@ -126,6 +212,24 @@ private:
 	bool bCameraPlaced = false;
 
 	void TakeParagonBody();
+	void SetUpCombat();
+	bool CanAct() const;
+	void AttackPressed();
+	void HeavyPressed();
+	void HeavyReleased();
+	void Swing();
+	void LandSwing();
+	void LandHeavy();
+	void FaceFoe();
+	// blows every colossus in reach of the hero's front (cm, degrees); the number struck
+	int32 Strike(const FRttBlow& Blow, float ReachCm, float AngleDegrees, float HitStopSeconds);
+	void UpdateCombat();
+	void OnHurt(const FRttBlow& Blow, float Amount);
+	void OnEvaded(const FRttBlow& Blow);
+	void OnFall(const FRttBlow& Blow);
+	void Rise();
+	void HitStop(float Seconds);
+	void UpdateTime();
 	void BuildControls();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);

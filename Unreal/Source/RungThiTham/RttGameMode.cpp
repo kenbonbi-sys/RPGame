@@ -9,6 +9,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "RttHero.h"
+#include "RttHud.h"
 #include "TimerManager.h"
 #include "UnrealClient.h"
 #if WITH_EDITOR
@@ -39,6 +40,7 @@ namespace
 ARttGameMode::ARttGameMode()
 {
 	DefaultPawnClass = ARttHero::StaticClass();
+	HUDClass = ARttHud::StaticClass();
 }
 
 void ARttGameMode::StartPlay()
@@ -48,21 +50,21 @@ void ARttGameMode::StartPlay()
 	{
 		float Delay = 8.f;
 		FParse::Value(FCommandLine::Get(), TEXT("RttShotDelay="), Delay);
-		ShotAt = GetWorld()->GetRealTimeSeconds() + Delay;
+		ShotAt = GetWorld()->GetTimeSeconds() + Delay;
 		GetWorldTimerManager().SetTimer(ShotTimer, this, &ARttGameMode::TickShot, 0.25f, true);
 	}
 }
 
 void ARttGameMode::TickShot()
 {
-	const double Now = GetWorld()->GetRealTimeSeconds();
+	const double Now = GetWorld()->GetTimeSeconds();
 	if (!bShotTaken)
 	{
 		if (Now < ShotAt || CompilingJobs() > 0)
 		{
 			return;
 		}
-		UE_LOG(LogRttShot, Display, TEXT("Screenshot -> %s"), *ShotPath);
+		UE_LOG(LogRttShot, Display, TEXT("Screenshot -> %s after %.1f s of play (%.1f s real, frame %llu)"), *ShotPath, GetWorld()->GetTimeSeconds(), GetWorld()->GetRealTimeSeconds(), static_cast<unsigned long long>(GFrameCounter));
 		if (const APlayerController* Player = GetWorld()->GetFirstPlayerController())
 		{
 			const ACharacter* Hero = Cast<ACharacter>(Player->GetPawn());

@@ -78,7 +78,7 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   - `URttRules`: nạp `Content/Data` vào thư viện luật khi game chạy.
   - `Tests/RttTests.cpp`: test tự động của Unreal (`RungThiTham.Rules.Data`, `RungThiTham.Game.Setup`).
 - **Tài sản Fab (Paragon):** bấm *Add to Project* trong Epic Games Launcher (Unreal Engine → Library → Fab Library) rồi chọn RungThiTham. Launcher chỉ liệt kê dự án nằm trong `Documents\Unreal Projects`, nên ở đó có một junction `RungThiTham` trỏ về `Desktop\RPG\Unreal`. Tải xong thì chạy `ue.cmd hero`. Hiện dùng **Paragon: Greystone** (cao 2,06 m) với animation blueprint của chính nó; khi vừa vào game nó diễn động tác chào sân (LevelStart) vài giây. Bộ Paragon không vào git (`Unreal/.gitignore`): máy nào cũng tự thêm từ Fab.
-- **Chơi thử:** bấm đúp `Unreal/Choi.cmd` (hoặc `ue.cmd play`): mở map thử trong cửa sổ. WASD chạy, chuột xoay camera, Space nhảy, Shift nhấn nhanh để Lướt, giữ để chạy nhanh, Alt+F4 để thoát.
+- **Chơi thử:** bấm đúp `Unreal/Choi.cmd` (hoặc `ue.cmd play`): mở **Hang Gấu** trong cửa sổ. WASD chạy, chuột xoay camera, chuột trái Chém Gió, giữ chuột phải để Trảm, Space nhảy, Shift nhấn nhanh để Lướt, giữ để chạy nhanh, Alt+F4 để thoát. Biến `RTT_MAP` chọn map khác (vd. `/Game/Maps/ThuNghiem`).
 - **Map thử** `Content/Maps/ThuNghiem.umap` do `Tools/Unreal/make_level.py` dựng: nền 400 m, mặt trời, bầu trời, mây, sương (ánh sáng Lumen, không bake), vài khối để so tỉ lệ, PlayerStart. Mọi bề mặt dùng `Content/Materials/M_Grid`: bàn cờ ô 1 m đặt theo toạ độ thế giới. Lưới có sẵn của engine bám theo UV của từng mesh nên vỡ thành nhiễu trên mặt phẳng kéo dài 400 lần.
 - **Script** `Tools/Unreal/ue.cmd`:
 
@@ -86,12 +86,36 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   Tools\Unreal\ue.cmd build    biên dịch (UnrealBuildTool)
   Tools\Unreal\ue.cmd level    dựng lại map thử /Game/Maps/ThuNghiem
   Tools\Unreal\ue.cmd test     chạy test RungThiTham, không mở cửa sổ
-  Tools\Unreal\ue.cmd shot     chơi map trong cửa sổ, chụp ảnh rồi thoát (thêm run: hero tự chạy)
+  Tools\Unreal\ue.cmd shot     chơi map trong cửa sổ, chụp ảnh rồi thoát (run: hero tự chạy; fight: hero tự lao vào đánh)
+  Tools\Unreal\ue.cmd assets   nhập Gấu Ma điêu khắc từ bản Godot và dựng các vật liệu (import_assets.py)
   Tools\Unreal\ue.cmd hero     tìm hero Paragon đã thêm từ Fab, ghi vào Config/DefaultGame.ini
   ```
 
   Log nằm trong `Unreal/Saved/Tools`. Nếu engine cài ở chỗ khác, đặt biến `UE_ROOT`.
 - **Dữ liệu** `Content/Data/`: `Tools/GodotData/unity_to_json.py` giờ ghi cùng một bộ file vào cả `Godot/data` và `Unreal/Content/Data`. Riêng `armour_sets.json` chép tay từ trang Armour của wiki Dauntless (bản Godot để bảng này trong `armour.gd`), và `weapons.json` chép từ `weapons.gd` (bỏ tên hoạt ảnh Godot). Khi đóng gói, thư mục `Data` đi kèm dưới dạng file rời (`DirectoriesToAlwaysStageAsNonUFS`).
+
+## MVP: đánh Gấu Ma (Hang Gấu)
+
+Map `HangGau` (dựng bằng `ue.cmd level`): một bãi trống, Greystone ở giữa, Gấu Ma Rừng Già đứng cách 35 m, hang của nó rộng 38 m.
+
+- **Gấu Ma** (`RttGauMa`): chuyển gần như từng dòng từ `gau_ma.gd` và `colossus.gd`.
+  - Thân ghép từ các mảnh sculpt của bản Godot (`Content/Creatures/GauMa`, nhập từ `Godot/assets/creatures/gau_ma.glb`). Bốn chân bước bằng IK, thân nhún theo bước chân, đầu nhìn theo hero.
+  - Toán giữ nguyên trong hệ trục Godot (`RttGodotSpace.h`), chỉ đổi sang Unreal khi đặt mesh.
+  - Chiêu: Vồ, Dậm Đất, Húc (bị một đòn nặng vào đầu trong lúc mắt sáng vàng thì ngắt, gục 7 giây), Giẫm. Mọi chiêu đều có nhịp báo trước (counter-move, wind-up, run ở đỉnh) và vòng cảnh báo đỏ trên đất. Dưới nửa máu thì Cuồng Nộ.
+  - Máu 3200, cấp 6, hệ Thổ. Thanh Trấn Áp 300 (đầy: choáng 6 giây, nhận thêm 50% sát thương). Đầu (640) và bốn chân (400) phá được. Proc Lôi làm tê liệt, proc Băng làm chậm mọi thứ nó làm. Ngã thì quay lại sau 3 phút.
+- **Hero** (`RttHeroCombat.cpp`):
+  - Chém Gió 3 đòn dùng montage của Greystone, số liệu lấy từ `abilities.json`. Đòn trúng chỗ gần nhất trên thân gấu, ra sát thương bộ phận (lưỡi cắt +50%) và tính choáng theo bộ phận (đầu ×2).
+  - Trảm: giữ chuột phải tụ lực, số liệu từ `weapons.json`.
+  - Trúng đòn thì bị hất văng. Lướt Hoàn Hảo thì slow-motion và đòn kế mạnh ×1,3. Gục thì đứng dậy sau 5 giây.
+  - Hit-stop qua `SetGlobalTimeDilation`.
+- **Máu và luật trên actor** (`URttHealth`): mỗi đòn đi qua `ResolveDamage` của thư viện luật, gây trạng thái, làm đầy Trấn Áp và thanh nguyên tố.
+- **HUD** (`ARttHud`, vẽ thẳng lên canvas): tên, máu và thanh choáng của boss; máu hero; thanh tụ lực Trảm; số sát thương (vàng: bộ phận, xanh trắng: lõi, cam: lúc choáng, đỏ: hero trúng); tên chiêu của gấu giữa màn hình. Chữ tiếng Việt nằm trong `RttText.h`, sinh bằng `Tools/Unreal/make_text.py`, để trình biên dịch không phải đoán bảng mã.
+- **Kiểm tra:** `ue.cmd shot <file> fight` cho hero tự đánh. `LogRttFight` ghi từng đòn (bộ phận, sát thương, máu, choáng) và từng chiêu của gấu.
+  - Một lần chạy 45 giây: 28 nhát chém, gấu choáng, mất 1000 máu, gãy chân sau trái.
+  - Mốc chụp tính bằng thời gian trong game, vì lúc mới vào engine còn biên dịch shader và dựng distance field nên khung hình chậm.
+- **Lưu ý:**
+  - File `.cmd` phải giữ toàn ASCII: `cmd.exe` đọc sai dòng UTF-8 nhiều byte và chạy nhầm mảnh chữ.
+  - Vật liệu và map được tạo lại từ đầu mỗi lần chạy script: tạo lại một vật liệu đang được dùng làm editor dừng ở một assert.
 
 ## Lộ trình
 
@@ -101,7 +125,7 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
 | U1 · Hero và camera | Nhân vật Paragon cầm vũ khí; camera treo sau lưng kiểu SotC; chạy, chạy nhanh, nhảy, Lướt (bất tử ngắn, Lướt Hoàn Hảo); hoạt ảnh hoà trộn theo tốc độ, chân bám đất, đòn đánh bằng montage có root motion |
 | U2 · Luật chiến đấu | Viết lại sang C++ đúng từng con số: Health, StatusEffects, Poise, DamageInfo, Combat, Elements, Armour, Weapons, cấp và chỉ số D&D, 92 chiêu từ dữ liệu; test giữ nguyên các ví dụ của bản Godot. **Đã xong** (thư viện `Rules/`): sát thương, nguyên tố và proc, giáp, bảng nhân vật và XP, trạng thái, Poise, vũ khí, chiêu và thanh kỹ năng. **Còn:** các khối hiệu ứng cần thế giới (vùng sát thương, đạn, lướt, xích sét, tia, cầu, bóng), Health trên actor, cầu hồi máu, dấu Quang, nang Ám; làm cùng U1 và U4 |
 | U3 · Thế giới | Landscape dựng từ độ cao của `WorldMap`; cây cỏ đá theo vùng; vật liệu vẽ tay kiểu Dauntless; Làng Lá Xanh theo kiểu Ramsgate (nhà gỗ sẫm, đèn lồng, sương xanh) |
-| U4 · Behemoth | Gấu Ma: bộ phận phá được, thanh choáng, sát thương lúc choáng, Húc bị gián đoạn, vòng cảnh báo và nhịp báo trước; leo bám kiểu SotC; slime và nấm |
+| U4 · Behemoth | Gấu Ma: bộ phận phá được, thanh choáng, sát thương lúc choáng, Húc bị gián đoạn, vòng cảnh báo và nhịp báo trước; leo bám kiểu SotC; slime và nấm. **Đã có bản MVP** (xem dưới). **Còn:** Ném Đá Lớn, Chụp Quăng, Lắc Mình, leo bám, điểm yếu, quỳ gối, rơi đồ |
 | U5 · Giao diện | HUD, Esc, Cài Đặt (gắn thẳng vào Scalability), Trang Bị (nhân vật giữa màn hình), nhật ký, ô vật phẩm |
 | U6 · Làng | Chín NPC Ramsgate, nói chuyện, cửa hàng, hồ sơ behemoth, bản đồ, bãi tập |
 | U7 · Online | Replication, dedicated server, thay bản Unity cho bạn bè |

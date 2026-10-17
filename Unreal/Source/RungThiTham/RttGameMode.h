@@ -1,6 +1,6 @@
 // The game mode: brings the hero. With -RttShot=<file.png> on the command line it also takes a
-// screenshot once the world has settled (no shaders or assets left compiling, -RttShotDelay seconds,
-// 8 by default) and quits: Tools/Unreal/ue.cmd shot, the way the Godot port's screenshots worked.
+// screenshot once the world has settled (no shaders or assets left compiling, -RttShotDelay seconds
+// of play, 8 by default) and quits: Tools/Unreal/ue.cmd shot, the way the Godot port's screenshots worked.
 #pragma once
 
 #include "CoreMinimal.h"
