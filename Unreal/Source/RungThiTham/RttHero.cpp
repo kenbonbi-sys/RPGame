@@ -1,8 +1,15 @@
 #include "RttHero.h"
 
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimSequenceBase.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Misc/App.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
@@ -36,17 +43,23 @@ ARttHero::ARttHero()
 	Moves->GravityScale = 2100.f / 980.f;
 	Moves->AirControl = 0.35f;
 
+	// The camera rig places the arm itself every frame (UpdateCamera): it hangs from a focus point
+	// that lags behind the hero, so it is not carried rigidly by the capsule. The arm still pulls
+	// in against walls (a 30 cm probe, as Godot's 0.3 m sphere).
 	Boom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Boom"));
 	Boom->SetupAttachment(RootComponent);
-	Boom->TargetArmLength = 380.f;
-	Boom->SocketOffset = FVector(0.f, 55.f, 60.f);
-	Boom->bUsePawnControlRotation = true;
-	Boom->bEnableCameraLag = true;
-	Boom->CameraLagSpeed = 12.f;
+	Boom->SetUsingAbsoluteLocation(true);
+	Boom->SetUsingAbsoluteRotation(true);
+	Boom->TargetArmLength = CameraDistance;
+	Boom->bUsePawnControlRotation = false;
+	Boom->bEnableCameraLag = false;
+	Boom->bEnableCameraRotationLag = false;
+	Boom->bDoCollisionTest = true;
+	Boom->ProbeSize = 30.f;
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(Boom, USpringArmComponent::SocketName);
 	Camera->bUsePawnControlRotation = false;
-	Camera->FieldOfView = 80.f;
+	Camera->FieldOfView = 90.f;
 
 	// A stand-in body: a 1.5 m column and a head, until the Paragon hero (U1).
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
@@ -68,6 +81,44 @@ ARttHero::ARttHero()
 double ARttHero::Now() const
 {
 	return GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0;
+}
+
+double ARttHero::RealNow() const
+{
+	return GetWorld() ? GetWorld()->GetRealTimeSeconds() : 0.0;
+}
+
+void ARttHero::BeginPlay()
+{
+	Super::BeginPlay();
+	TakeParagonBody();
+	bDemoRun = FParse::Param(FCommandLine::Get(), TEXT("RttDemoRun"));
+}
+
+void ARttHero::TakeParagonBody()
+{
+	USkeletalMesh* Asset = HeroMesh.IsNull() ? nullptr : Cast<USkeletalMesh>(HeroMesh.TryLoad());
+	if (!Asset)
+	{
+		if (!HeroMesh.IsNull())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("The hero's mesh %s is missing: the stand-in body stays"), *HeroMesh.ToString());
+		}
+		return;
+	}
+	USkeletalMeshComponent* Skin = GetMesh();
+	Skin->SetSkeletalMeshAsset(Asset);
+	if (UClass* Anim = HeroAnimClass.IsNull() ? nullptr : HeroAnimClass.TryLoadClass<UAnimInstance>())
+	{
+		Skin->SetAnimInstanceClass(Anim);
+	}
+	// Paragon heroes stand on their origin facing +Y: put the feet on the capsule's floor, face +X
+	Skin->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()), FRotator(0.f, -90.f, 0.f));
+	Skin->SetRelativeScale3D(FVector(HeroScale));
+	Dodge = DodgeAnimation.IsNull() ? nullptr : Cast<UAnimSequenceBase>(DodgeAnimation.TryLoad());
+	Body->SetVisibility(false);
+	Head->SetVisibility(false);
+	bParagonBody = true;
 }
 
 bool ARttHero::IsInvulnerable() const
@@ -159,6 +210,7 @@ void ARttHero::PawnClientRestart()
 		Inputs->ClearAllMappings();
 		Inputs->AddMappingContext(Controls, 0);
 	}
+	PlaceCamera();
 }
 
 void ARttHero::Move(const FInputActionValue& Value)
@@ -175,6 +227,10 @@ void ARttHero::Look(const FInputActionValue& Value)
 	const FVector2D Axis = Value.Get<FVector2D>();
 	AddControllerYawInput(Axis.X);
 	AddControllerPitchInput(Axis.Y);
+	if (!Axis.IsNearlyZero())
+	{
+		LastLookInput = RealNow();
+	}
 }
 
 void ARttHero::DodgePressed()
@@ -205,8 +261,15 @@ void ARttHero::Dash()
 	{
 		Direction = GetActorForwardVector();
 	}
-	LaunchCharacter(Direction.GetSafeNormal2D() * DashSpeed, true, false);
+	Direction = Direction.GetSafeNormal2D();
+	SetActorRotation(Direction.Rotation());
+	LaunchCharacter(Direction * DashSpeed, true, false);
 	InvulnerableUntil = Now() + DashInvulnerable;
+	UAnimInstance* Anim = bParagonBody ? GetMesh()->GetAnimInstance() : nullptr;
+	if (Anim && Dodge)
+	{
+		Anim->PlaySlotAnimationAsDynamicMontage(Dodge, TEXT("DefaultSlot"), 0.05f, 0.15f, 1.2f);
+	}
 }
 
 void ARttHero::Tick(float DeltaSeconds)
@@ -217,4 +280,86 @@ void ARttHero::Tick(float DeltaSeconds)
 		bSprinting = true;
 		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 	}
+	if (bDemoRun)
+	{
+		AddMovementInput(GetActorForwardVector(), 1.f);
+	}
+	// the camera runs on real time so hit-stop and slow motion do not freeze it
+	UpdateCamera(FMath::Min(static_cast<float>(FApp::GetDeltaTime()), 0.1f));
+}
+
+void ARttHero::PlaceCamera()
+{
+	if (AController* Control = GetController())
+	{
+		Control->SetControlRotation(FRotator(DefaultPitch, GetActorRotation().Yaw, 0.f));
+	}
+	Focus = GetActorLocation() + FVector(0.f, 0.f, LookHeight - GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
+	ArmLength = CameraDistance;
+	Fov = FovBase;
+	bCameraPlaced = true;
+	UpdateCamera(0.f);
+}
+
+void ARttHero::UpdateCamera(float RealDelta)
+{
+	AController* Control = GetController();
+	if (!Control || !bCameraPlaced)
+	{
+		return;
+	}
+	const float Dt = RealDelta;
+	FRotator View = Control->GetControlRotation();
+	View.Pitch = FMath::Clamp(FRotator::NormalizeAxis(View.Pitch), MinPitch, MaxPitch);
+	View.Roll = 0.f;
+
+	// drift round behind the running hero once the camera has been left alone
+	const FVector Flat(GetVelocity().X, GetVelocity().Y, 0.f);
+	const float Speed = Flat.Size();
+	if (RealNow() - LastLookInput > RecenterDelay && Speed >= 200.f)
+	{
+		const float Turn = FRotator::NormalizeAxis(Flat.Rotation().Yaw - View.Yaw);
+		// running toward the camera: leave it be rather than whip around
+		if (FMath::Abs(Turn) <= 125.f)
+		{
+			const float K = 1.f - FMath::Exp(-RecenterSpeed * FMath::SmoothStep(200.f, 600.f, Speed) * Dt);
+			View.Yaw += Turn * K;
+			View.Pitch = FMath::Lerp(View.Pitch, DefaultPitch, K * 0.5f);
+		}
+	}
+	Control->SetControlRotation(View);
+
+	// follow with a little lag, the height slower; never let the hero slip far out of the frame
+	const FVector Goal = GetActorLocation() + FVector(0.f, 0.f, LookHeight - GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
+	const float K = 1.f - FMath::Exp(-FollowLag * Dt);
+	const float KV = 1.f - FMath::Exp(-VerticalLag * Dt);
+	Focus.X = FMath::Lerp(Focus.X, Goal.X, K);
+	Focus.Y = FMath::Lerp(Focus.Y, Goal.Y, K);
+	Focus.Z = FMath::Lerp(Focus.Z, Goal.Z, KV);
+	const FVector Slip = Focus - Goal;
+	if (Slip.Size() > 160.f)
+	{
+		Focus = Goal + Slip.GetSafeNormal() * 160.f;
+	}
+
+	// a little wider at a sprint
+	const float WantFov = FovBase + FMath::SmoothStep(600.f, 850.f, Speed) * 6.f;
+	ArmLength = FMath::Lerp(ArmLength, CameraDistance, 1.f - FMath::Exp(-2.5f * Dt));
+	Fov = FMath::Lerp(Fov, WantFov, 1.f - FMath::Exp(-3.f * Dt));
+	Boom->SetWorldLocationAndRotation(Focus, View);
+	Boom->TargetArmLength = ArmLength;
+
+	// Godot's field of view is vertical; Unreal's is horizontal
+	float Aspect = 16.f / 9.f;
+	if (const APlayerController* Player = Cast<APlayerController>(Control))
+	{
+		int32 W = 0;
+		int32 H = 0;
+		Player->GetViewportSize(W, H);
+		if (W > 0 && H > 0)
+		{
+			Aspect = static_cast<float>(W) / static_cast<float>(H);
+		}
+	}
+	Camera->SetFieldOfView(FMath::RadiansToDegrees(2.f * FMath::Atan(FMath::Tan(FMath::DegreesToRadians(Fov) * 0.5f) * Aspect)));
 }

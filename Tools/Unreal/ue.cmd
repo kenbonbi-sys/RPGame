@@ -3,7 +3,9 @@ rem The Unreal port (Unreal/) from the command line:
 rem   ue build          compile the game and editor code (UnrealBuildTool)
 rem   ue level          rebuild the test map /Game/Maps/ThuNghiem (make_level.py, editor Python)
 rem   ue test           run the RungThiTham automation tests without a window
-rem   ue shot [file]    play the map in a window, screenshot it once it has settled, quit
+rem   ue shot [file] [run]  play the map in a window, screenshot it once it has settled, quit
+rem                     (run: the hero runs on by itself, for a shot of the run)
+rem   ue hero [Name]    name the Paragon hero added from Fab in Config/DefaultGame.ini
 rem UE_ROOT picks the engine (default: the launcher's UE 5.8). Logs go to Unreal/Saved/Tools.
 setlocal
 set "HERE=%~dp0"
@@ -23,8 +25,17 @@ if /i "%~1"=="build" goto build
 if /i "%~1"=="level" goto level
 if /i "%~1"=="test" goto test
 if /i "%~1"=="shot" goto shot
-echo usage: ue build ^| level ^| test ^| shot [file.png]
+if /i "%~1"=="hero" goto hero
+echo usage: ue build ^| level ^| test ^| shot [file.png] [run] ^| hero [Name]
 exit /b 2
+
+:hero
+"%EDITOR%" "%PROJ%" -run=pythonscript -script="%HERE%setup_hero.py %~2" %COMMON% -abslog="%OUT%\hero.log" >nul
+findstr /c:"RTT_HERO" "%OUT%\hero.log" | findstr /v /c:"Running Python"
+findstr /c:"RTT_HERO_OK" "%OUT%\hero.log" >nul && exit /b 0
+findstr /i /c:"LogPython: Error" "%OUT%\hero.log"
+echo No Paragon hero was set up; see %OUT%\hero.log
+exit /b 1
 
 :build
 call "%UE_ROOT%\Engine\Build\BatchFiles\Build.bat" RungThiThamEditor Win64 Development -Project="%PROJ%" -WaitMutex
@@ -51,8 +62,10 @@ exit /b 0
 :shot
 set "SHOT=%~2"
 if "%SHOT%"=="" set "SHOT=%OUT%\shot.png"
+set "RUN="
+if /i "%~3"=="run" set "RUN=-RttDemoRun -RttShotDelay=4"
 if exist "%SHOT%" del "%SHOT%"
-"%EDITOR%" "%PROJ%" /Game/Maps/ThuNghiem -game -windowed -ResX=1600 -ResY=900 -RttShot="%SHOT%" %COMMON% -abslog="%OUT%\shot.log" >nul
+"%EDITOR%" "%PROJ%" /Game/Maps/ThuNghiem -game -windowed -ResX=1600 -ResY=900 -RttShot="%SHOT%" %RUN% %COMMON% -abslog="%OUT%\shot.log" >nul
 if exist "%SHOT%" (echo %SHOT% & exit /b 0)
 echo No screenshot; see %OUT%\shot.log
 exit /b 1

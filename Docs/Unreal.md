@@ -73,10 +73,11 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
 
   Script tự tìm `vcvars64.bat` của Visual Studio, biên dịch như Unreal (C++20, không exception, cảnh báo là lỗi) rồi chạy với dữ liệu thật. Hiện có 260 kiểm tra, đều đạt.
 - **Game (U0)** trong `Source/RungThiTham/`:
-  - `ARttHero`: chạy 5,4 m/s; giữ Shift để chạy nhanh 8,2 m/s; nhấn Shift để Lướt (bất tử 0,28 giây); nhảy 7,4 m/s với trọng lực 21 m/s². Số liệu và phím lấy từ `hero.gd` và `controls.gd` của bản Godot. Camera treo sau vai. Thân tạm (khối trụ và quả cầu) chờ nhân vật Paragon ở U1. Phím được tạo bằng Enhanced Input ngay trong C++, không cần asset.
+  - `ARttHero`: chạy 5,4 m/s; giữ Shift để chạy nhanh 8,2 m/s; nhấn Shift để Lướt (bất tử 0,28 giây); nhảy 7,4 m/s với trọng lực 21 m/s². Số liệu và phím lấy từ `hero.gd` và `controls.gd` của bản Godot. Camera kiểu SotC theo `sotc_camera.gd`: treo cách 4,4 m, tâm nhìn cao 1,75 m, bám trễ một chút, giữ hero thấp trong khung hình, chạy thì tự xoay ra sau lưng sau 1,3 giây không đụng chuột, chạy nhanh thì mở rộng góc nhìn. FOV giữ số dọc của Godot và đổi sang số ngang của Unreal theo tỉ lệ màn hình. Thân là hero Paragon ghi trong `Config/DefaultGame.ini` (mesh, animation blueprint, động tác Lướt); chưa có thì dùng thân tạm (khối trụ và quả cầu). Phím được tạo bằng Enhanced Input ngay trong C++, không cần asset.
   - `ARttGameMode`: đưa nhân vật vào màn chơi. Với `-RttShot=<file.png>`, nó chờ shader biên dịch xong, chụp ảnh rồi thoát.
   - `URttRules`: nạp `Content/Data` vào thư viện luật khi game chạy.
   - `Tests/RttTests.cpp`: test tự động của Unreal (`RungThiTham.Rules.Data`, `RungThiTham.Game.Setup`).
+- **Tài sản Fab (Paragon):** bấm *Add to Project* trong Epic Games Launcher (Unreal Engine → Library → Fab Library) rồi chọn RungThiTham. Launcher chỉ liệt kê dự án nằm trong `Documents\Unreal Projects`, nên ở đó có một junction `RungThiTham` trỏ về `Desktop\RPG\Unreal`. Tải xong thì chạy `ue.cmd hero`.
 - **Map thử** `Content/Maps/ThuNghiem.umap` do `Tools/Unreal/make_level.py` dựng: nền 400 m, mặt trời, bầu trời, mây, sương (ánh sáng Lumen, không bake), vài khối để so tỉ lệ, PlayerStart. Mọi bề mặt dùng `Content/Materials/M_Grid`: bàn cờ ô 1 m đặt theo toạ độ thế giới. Lưới có sẵn của engine bám theo UV của từng mesh nên vỡ thành nhiễu trên mặt phẳng kéo dài 400 lần.
 - **Script** `Tools/Unreal/ue.cmd`:
 
@@ -84,7 +85,8 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   Tools\Unreal\ue.cmd build    biên dịch (UnrealBuildTool)
   Tools\Unreal\ue.cmd level    dựng lại map thử /Game/Maps/ThuNghiem
   Tools\Unreal\ue.cmd test     chạy test RungThiTham, không mở cửa sổ
-  Tools\Unreal\ue.cmd shot     chơi map trong cửa sổ, chụp ảnh rồi thoát
+  Tools\Unreal\ue.cmd shot     chơi map trong cửa sổ, chụp ảnh rồi thoát (thêm run: hero tự chạy)
+  Tools\Unreal\ue.cmd hero     tìm hero Paragon đã thêm từ Fab, ghi vào Config/DefaultGame.ini
   ```
 
   Log nằm trong `Unreal/Saved/Tools`. Nếu engine cài ở chỗ khác, đặt biến `UE_ROOT`.
