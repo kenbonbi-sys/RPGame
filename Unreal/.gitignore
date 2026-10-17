@@ -1,0 +1,10 @@
+# Unreal Engine generated: rebuilt from Source/ and Content/ on every machine
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+*.sln
+*.code-workspace
+.vsconfig

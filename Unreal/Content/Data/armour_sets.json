@@ -1,0 +1,437 @@
+{
+ "_source": "Dauntless wiki, Armour page: 35 sets in tier order; pieces are head, torso, arms, legs ('' = none). The wiki's torso table leaves out Volcanic Aegis (Charrogg); it is given the set's 10 Blaze.",
+ "perPoint": 0.005,
+ "cap": 0.5,
+ "sets": [
+  {
+   "id": "krolachi",
+   "name": "Krolachi",
+   "element": "neutral",
+   "resist": 3,
+   "pieces": [
+    "Krolachi Shave",
+    "Krolachi Tunic",
+    "Krolachi Wraps",
+    "Krolachi Shorts"
+   ]
+  },
+  {
+   "id": "recruit",
+   "name": "Recruit",
+   "element": "neutral",
+   "resist": 3,
+   "pieces": [
+    "",
+    "Recruit's Breastplate",
+    "Recruit's Gloves",
+    "Recruit's Greaves"
+   ]
+  },
+  {
+   "id": "embermane",
+   "name": "Embermane",
+   "element": "blaze",
+   "resist": 5,
+   "pieces": [
+    "Fiery Helm",
+    "Fiery Breastplate",
+    "Fiery Gauntlets",
+    "Fiery Greaves"
+   ]
+  },
+  {
+   "id": "boreus",
+   "name": "Boreus",
+   "element": "frost",
+   "resist": 5,
+   "pieces": [
+    "Boreal Epiphany",
+    "Boreal Resolve",
+    "Boreal Might",
+    "Boreal March"
+   ]
+  },
+  {
+   "id": "drask",
+   "name": "Drask",
+   "element": "shock",
+   "resist": 5,
+   "pieces": [
+    "Draskscale Helmet",
+    "Draskscale Plate",
+    "Draskscale Gauntlets",
+    "Draskscale Greaves"
+   ]
+  },
+  {
+   "id": "skarn",
+   "name": "Skarn",
+   "element": "terra",
+   "resist": 5,
+   "pieces": [
+    "Sight of Stone",
+    "Heart of Stone",
+    "Might of Stone",
+    "Pillars of Stone"
+   ]
+  },
+  {
+   "id": "charrogg",
+   "name": "Charrogg",
+   "element": "blaze",
+   "resist": 10,
+   "pieces": [
+    "Volcanic Helm",
+    "Volcanic Aegis",
+    "Volcanic Grips",
+    "Volcanic Treads"
+   ]
+  },
+  {
+   "id": "pangar",
+   "name": "Pangar",
+   "element": "frost",
+   "resist": 10,
+   "pieces": [
+    "Brow of Ice",
+    "Core of Ice",
+    "Arms of Ice",
+    "Feet of Ice"
+   ]
+  },
+  {
+   "id": "quillshot",
+   "name": "Quillshot",
+   "element": "frost",
+   "resist": 10,
+   "pieces": [
+    "Quillspike Mask",
+    "Quillspike Jacket",
+    "Quillspike Grips",
+    "Quillspike Boots"
+   ]
+  },
+  {
+   "id": "nayzaga",
+   "name": "Nayzaga",
+   "element": "shock",
+   "resist": 10,
+   "pieces": [
+    "Shocking Gaze",
+    "Shocking Heart",
+    "Shocking Grasp",
+    "Shocking Stride"
+   ]
+  },
+  {
+   "id": "shrike",
+   "name": "Shrike",
+   "element": "shock",
+   "resist": 10,
+   "pieces": [
+    "Shrikedown Helm",
+    "Shrikedown Plate",
+    "Shrikedown Gloves",
+    "Shrikedown Greaves"
+   ]
+  },
+  {
+   "id": "gnasher",
+   "name": "Gnasher",
+   "element": "terra",
+   "resist": 10,
+   "pieces": [
+    "Gnasher Cap",
+    "Gnasher Cloak",
+    "Gnasher Grips",
+    "Gnasher Treads"
+   ]
+  },
+  {
+   "id": "kharabak",
+   "name": "Kharabak",
+   "element": "terra",
+   "resist": 10,
+   "pieces": [
+    "Eye of the Swarm",
+    "Shell of the Swarm",
+    "Clutches of the Swarm",
+    "Dance of the Swarm"
+   ]
+  },
+  {
+   "id": "karkonos",
+   "name": "Karkonos",
+   "element": "umbral",
+   "resist": 10,
+   "pieces": [
+    "Brineguard Visage",
+    "Brineguard Aegis",
+    "Brineguard Embrace",
+    "Brineguard Greaves"
+   ]
+  },
+  {
+   "id": "frostwulf",
+   "name": "Frostwülf",
+   "element": "frost",
+   "resist": 15,
+   "pieces": [
+    "Wülf Mane",
+    "Wülf Plate",
+    "Wülf Claws",
+    "Wülf Paws"
+   ]
+  },
+  {
+   "id": "skraev",
+   "name": "Skraev",
+   "element": "frost",
+   "resist": 15,
+   "pieces": [
+    "Skraevwing Helmet",
+    "Skraevwing Jacket",
+    "Skraevwing Gloves",
+    "Skraevwing Boots"
+   ]
+  },
+  {
+   "id": "valomyr",
+   "name": "Valomyr",
+   "element": "radiant",
+   "resist": 15,
+   "pieces": [
+    "Crest of Valour",
+    "Aegis of Valour",
+    "Gauntlets of Valour",
+    "Greaves of Valour"
+   ]
+  },
+  {
+   "id": "sahvyt",
+   "name": "Sahvyt",
+   "element": "shock",
+   "resist": 15,
+   "pieces": [
+    "Bladed Mask",
+    "Bladed Jacket",
+    "Bladed Gloves",
+    "Bladed Boots"
+   ]
+  },
+  {
+   "id": "fenroar",
+   "name": "Fenroar",
+   "element": "terra",
+   "resist": 15,
+   "pieces": [
+    "Stonewood Great Helm",
+    "Stonewood Chest Plate",
+    "Stonewood Gauntlets",
+    "Stonewood Boots"
+   ]
+  },
+  {
+   "id": "koshai",
+   "name": "Koshai",
+   "element": "terra",
+   "resist": 15,
+   "pieces": [
+    "Visage of Thorns",
+    "Mantle of Thorns",
+    "Grasp of Thorns",
+    "Stride of Thorns"
+   ]
+  },
+  {
+   "id": "riftstalker",
+   "name": "Riftstalker",
+   "element": "umbral",
+   "resist": 15,
+   "pieces": [
+    "Guise of the Rift",
+    "Mantle of the Rift",
+    "Gauntlets of the Rift",
+    "Striders of the Rift"
+   ]
+  },
+  {
+   "id": "hellion",
+   "name": "Hellion",
+   "element": "blaze",
+   "resist": 20,
+   "pieces": [
+    "Hellplate Casque",
+    "Hellplate Cuirass",
+    "Hellplate Bracers",
+    "Hellplate Greaves"
+   ]
+  },
+  {
+   "id": "phaelanx",
+   "name": "Phaelanx",
+   "element": "blaze",
+   "resist": 20,
+   "pieces": [
+    "Phaelanx's Spearhead",
+    "Phaelanx's Vanguard",
+    "Phaelanx's Firearms",
+    "Phaelanx's Heatsinks"
+   ]
+  },
+  {
+   "id": "alyra",
+   "name": "Alyra",
+   "element": "radiant",
+   "resist": 20,
+   "pieces": [
+    "Spellbound Hood",
+    "Spellbound Wings",
+    "Spellbound Gauntlets",
+    "Spellbound Boots"
+   ]
+  },
+  {
+   "id": "rezakiri",
+   "name": "Rezakiri",
+   "element": "radiant",
+   "resist": 20,
+   "pieces": [
+    "Light's Crown",
+    "Light's Virtue",
+    "Light's Refuge",
+    "Light's Walk"
+   ]
+  },
+  {
+   "id": "timeweave",
+   "name": "Timeweave",
+   "element": "radiant",
+   "resist": 20,
+   "pieces": [
+    "Timeweave Helm",
+    "Timeweave Robes",
+    "Timeweave Gauntlets",
+    "Timeweave Leggings"
+   ]
+  },
+  {
+   "id": "stormclaw",
+   "name": "Stormclaw",
+   "element": "shock",
+   "resist": 20,
+   "pieces": [
+    "Lightning Helm",
+    "Lightning Plate",
+    "Lightning Gloves",
+    "Lightning Boots"
+   ]
+  },
+  {
+   "id": "thunderdeep",
+   "name": "Thunderdeep Drask",
+   "element": "shock",
+   "resist": 20,
+   "pieces": [
+    "Thunderdeep's Capacitor",
+    "Thunderdeep's Dynamo",
+    "Thunderdeep's Regulators",
+    "Thunderdeep's Turbines"
+   ]
+  },
+  {
+   "id": "shrowd",
+   "name": "Shrowd",
+   "element": "umbral",
+   "resist": 20,
+   "pieces": [
+    "Dark Watch",
+    "Dark Marrow",
+    "Dark Embrace",
+    "Dark Path"
+   ]
+  },
+  {
+   "id": "torgadoro",
+   "name": "Torgadoro",
+   "element": "blaze",
+   "resist": 25,
+   "pieces": [
+    "Torgadoro's Apex",
+    "Torgadoro's Core",
+    "Torgadoro's Brawn",
+    "Torgadoro's Gait"
+   ]
+  },
+  {
+   "id": "urska",
+   "name": "Urska",
+   "element": "frost",
+   "resist": 25,
+   "pieces": [
+    "Adversary's Guile",
+    "Adversary's Pride",
+    "Adversary's Wrath",
+    "Adversary's Drive"
+   ]
+  },
+  {
+   "id": "chronovore",
+   "name": "The Chronovore",
+   "element": "radiant",
+   "resist": 25,
+   "pieces": [
+    "Chronohelm",
+    "Chronoplate",
+    "Chronogrips",
+    "Chronotreads"
+   ]
+  },
+  {
+   "id": "malkarion",
+   "name": "Malkarion",
+   "element": "shock",
+   "resist": 25,
+   "pieces": [
+    "Malkarion's Sight",
+    "Malkarion's Soul",
+    "Malkarion's Grasp",
+    "Malkarion's March"
+   ]
+  },
+  {
+   "id": "agarus",
+   "name": "Agarus",
+   "element": "terra",
+   "resist": 25,
+   "pieces": [
+    "Agaric Canopy",
+    "Agaric Bole",
+    "Agaric Branches",
+    "Agaric Roots"
+   ]
+  },
+  {
+   "id": "thrax",
+   "name": "Thrax",
+   "element": "umbral",
+   "resist": 25,
+   "pieces": [
+    "Thrax's Scream",
+    "Thrax's Shadow",
+    "Thrax's Embrace",
+    "Thrax's Guile"
+   ]
+  }
+ ],
+ "wardrobe": [
+  "krolachi",
+  "charrogg",
+  "pangar",
+  "shrike",
+  "gnasher",
+  "valomyr",
+  "karkonos"
+ ],
+ "start": "krolachi"
+}

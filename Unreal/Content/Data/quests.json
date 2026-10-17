@@ -1,0 +1,1409 @@
+{
+ "cave_bats": {
+  "_name": "cave_bats",
+  "id": "cave_bats",
+  "title": "Truy Nã: Dơi Pha Lê",
+  "kind": 0,
+  "summary": "Bầy dơi trong Hang Dơi hút máu bất cứ ai mang đèn đi qua. Chúng sợ lửa và ánh sáng. Cấp đề nghị: 14.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/cave_enter"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "bat",
+    "count": 6,
+    "text": "Hạ Dơi Pha Lê",
+    "countPrevious": 0,
+    "marker": "batcave"
+   }
+  ],
+  "xp": 560,
+  "gold": 70,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/cave_spiders"
+   }
+  ]
+ },
+ "cave_beetles": {
+  "_name": "cave_beetles",
+  "id": "cave_beetles",
+  "title": "Truy Nã: Bọ Giáp Đá",
+  "kind": 0,
+  "summary": "Trong mỏ bỏ hoang có loài bọ khoác mai đá. Đánh vào đầu nó chỉ tóe lửa: vòng ra sau lưng, hoặc dụ nó húc vào vách đá. Cấp đề nghị: 17.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/cave_golems"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "beetle",
+    "count": 4,
+    "text": "Hạ Bọ Giáp Đá",
+    "countPrevious": 0,
+    "marker": "mine"
+   }
+  ],
+  "xp": 740,
+  "gold": 95,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/cave_slimes"
+   }
+  ]
+ },
+ "cave_enter": {
+  "_name": "cave_enter",
+  "id": "cave_enter",
+  "title": "Hang Pha Lê",
+  "kind": 0,
+  "summary": "Ngư dân kể phía bắc đầm có một cửa hang tỏa ánh sáng xanh. Thợ mỏ bỏ đi đã lâu, nghe nói trong đó dơi, nhện và đá biết đi. Cấp đề nghị: 14.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/slay_snake"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 3,
+    "target": "Cửa Hang",
+    "count": 1,
+    "text": "Tới Cửa Hang Pha Lê ở phía bắc đầm",
+    "countPrevious": 0,
+    "marker": "cavemouth"
+   }
+  ],
+  "xp": 500,
+  "gold": 0,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/cave_bats"
+   }
+  ]
+ },
+ "cave_eyes": {
+  "_name": "cave_eyes",
+  "id": "cave_eyes",
+  "title": "Truy Nã: Mắt Hang",
+  "kind": 0,
+  "summary": "Những con mắt khổng lồ mọc trong vách hang, bắn tia sáng dội qua vách đá. Mí đá của chúng rất cứng: đánh lúc mắt vừa bắn xong và còn mở. Cấp đề nghị: 18.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/cave_slimes"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "caveeye",
+    "count": 3,
+    "text": "Hạ Mắt Hang",
+    "countPrevious": 0,
+    "marker": "crystalforest"
+   }
+  ],
+  "xp": 840,
+  "gold": 110,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_green"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/slay_crystalgolem"
+   }
+  ]
+ },
+ "cave_golems": {
+  "_name": "cave_golems",
+  "id": "cave_golems",
+  "title": "Truy Nã: Golem Đá",
+  "kind": 0,
+  "summary": "Đá trong mỏ bỏ hoang tự đứng dậy thành Golem. Kiếm chém vào chúng chỉ tóe lửa: lôi điện đánh chúng đau hơn. Cấp đề nghị: 16.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/cave_spiders"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "golem",
+    "count": 3,
+    "text": "Hạ Golem Đá Nhỏ",
+    "countPrevious": 0,
+    "marker": "mine"
+   }
+  ],
+  "xp": 680,
+  "gold": 90,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/cave_beetles"
+   }
+  ]
+ },
+ "cave_mimic": {
+  "_name": "cave_mimic",
+  "id": "cave_mimic",
+  "title": "Lời Đồn: Rương Biết Cắn",
+  "kind": 2,
+  "summary": "Thợ mỏ kể có một rương kho báu trong hang tự đổi chỗ. Kẻ nào mở nó thì mất vàng. Hạ nó trước khi nó chui xuống đất lần thứ ba để lấy lại gấp đôi. Cấp đề nghị: 20.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/cave_enter"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "mimic",
+    "count": 1,
+    "text": "Tìm và hạ Mimic Tham Lam",
+    "countPrevious": 0,
+    "marker": "mine"
+   }
+  ],
+  "xp": 1500,
+  "gold": 200,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/gem_red"
+    },
+    "count": 1
+   }
+  ],
+  "setFlags": [],
+  "followUps": []
+ },
+ "cave_slimes": {
+  "_name": "cave_slimes",
+  "id": "cave_slimes",
+  "title": "Truy Nã: Slime Pha Lê",
+  "kind": 0,
+  "summary": "Slime Pha Lê trong Rừng Pha Lê hắt mọi mũi tên, quả cầu phép bay ngược về người bắn. Dùng đòn cận chiến, và tránh xa khi nó vỡ tung. Cấp đề nghị: 17.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/cave_beetles"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "crystalslime",
+    "count": 4,
+    "text": "Hạ Slime Pha Lê",
+    "countPrevious": 0,
+    "marker": "crystalforest"
+   }
+  ],
+  "xp": 780,
+  "gold": 100,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/cave_eyes"
+   }
+  ]
+ },
+ "cave_spiders": {
+  "_name": "cave_spiders",
+  "id": "cave_spiders",
+  "title": "Truy Nã: Nhện Hang",
+  "kind": 0,
+  "summary": "Nhện Hang phun tơ trói chân người rồi mới lao tới cắn. Tổ của chúng ở sâu trong hang, phía bắc Rừng Pha Lê. Cấp đề nghị: 15.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/cave_bats"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "spider",
+    "count": 4,
+    "text": "Hạ Nhện Hang",
+    "countPrevious": 0,
+    "marker": "spidernest"
+   }
+  ],
+  "xp": 620,
+  "gold": 80,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_green"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/cave_golems"
+   }
+  ]
+ },
+ "clear_forest": {
+  "_name": "clear_forest",
+  "id": "clear_forest",
+  "title": "Dọn Dẹp Rừng Thì Thầm",
+  "kind": 0,
+  "summary": "Lũ Slime Rêu và Nấm Độc tràn ra khắp Rừng Thì Thầm, phía đông làng. Cấp đề nghị: 1.",
+  "giver": "chief",
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/talk_chief"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 0,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "slime",
+    "count": 4,
+    "text": "Hạ Slime Rêu",
+    "countPrevious": 0,
+    "marker": "forest"
+   },
+   {
+    "kind": 1,
+    "target": "shroom",
+    "count": 2,
+    "text": "Nấm Độc",
+    "countPrevious": 0,
+    "marker": "forest"
+   }
+  ],
+  "xp": 120,
+  "gold": 0,
+  "items": [],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/slay_bear"
+   }
+  ]
+ },
+ "hacphong_archers": {
+  "_name": "hacphong_archers",
+  "id": "hacphong_archers",
+  "title": "Truy Nã: Cung Thủ Hắc Phong",
+  "kind": 0,
+  "summary": "Cung thủ Hắc Phong giữ khoảng cách và đọc được gió: tên bắn đón gió vẫn bay trúng đích. Thấy vạch là tên sắp tới; áp sát thì chúng nhảy lùi. Cấp đề nghị: 24.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/steppe_ironbison"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "hp_archer",
+    "count": 5,
+    "text": "Hạ Cung Thủ Hắc Phong",
+    "countPrevious": 0,
+    "marker": "hacphong"
+   }
+  ],
+  "xp": 3600,
+  "gold": 340,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/hacphong_blades"
+   }
+  ]
+ },
+ "hacphong_blades": {
+  "_name": "hacphong_blades",
+  "id": "hacphong_blades",
+  "title": "Truy Nã: Đao Thủ Hắc Phong",
+  "kind": 0,
+  "summary": "Đao thủ Hắc Phong lướt qua người rồi quay lại chém hai nhát. Lướt khỏi vạch, rồi đánh lúc hắn đứng thở sau đường đao: lúc đó hắn hở sườn. Cấp đề nghị: 24.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/hacphong_archers"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "hp_blade",
+    "count": 5,
+    "text": "Hạ Đao Thủ Hắc Phong",
+    "countPrevious": 0,
+    "marker": "hacphong"
+   }
+  ],
+  "xp": 3800,
+  "gold": 360,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_green"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/slay_blackwind"
+   }
+  ]
+ },
+ "mushrooms": {
+  "_name": "mushrooms",
+  "id": "mushrooms",
+  "title": "Nấm Cho Bé Mai",
+  "kind": 1,
+  "summary": "Mẹ Bé Mai bị ốm, cô bé cần 3 Mũ Nấm Đỏ để nấu thuốc.",
+  "giver": "girl",
+  "turnIn": "girl",
+  "turnInText": "Mang nấm về cho Bé Mai",
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/talk_chief"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 0,
+  "availableText": "Nói chuyện với Bé Mai",
+  "objectives": [
+   {
+    "kind": 8,
+    "target": "shroom_cap",
+    "count": 3,
+    "text": "Nhặt Mũ Nấm Đỏ",
+    "countPrevious": 0,
+    "marker": "forest"
+   }
+  ],
+  "xp": 80,
+  "gold": 0,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_green"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": []
+ },
+ "slay_bear": {
+  "_name": "slay_bear",
+  "id": "slay_bear",
+  "title": "Gấu Ma Rừng Già",
+  "kind": 0,
+  "summary": "Gấu Ma Rừng Già ngự ở Rừng Già Cổ Thụ, phía đông bắc. Cấp đề nghị: 5.",
+  "giver": "chief",
+  "turnIn": "chief",
+  "turnInText": "Báo tin cho Trưởng Làng",
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/clear_forest"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 0,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "bear",
+    "count": 1,
+    "text": "Đánh bại Gấu Ma Rừng Già",
+    "countPrevious": 1,
+    "marker": "boss"
+   }
+  ],
+  "xp": 400,
+  "gold": 0,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/gold"
+    },
+    "count": 1
+   },
+   {
+    "item": {
+     "$ref": "items/ring"
+    },
+    "count": 1
+   },
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [
+   "forest_saved"
+  ],
+  "followUps": [
+   {
+    "$ref": "quests/swamp_road"
+   }
+  ]
+ },
+ "slay_blackwind": {
+  "_name": "slay_blackwind",
+  "id": "slay_blackwind",
+  "title": "Thủ Lĩnh Hắc Phong",
+  "kind": 0,
+  "summary": "Thủ Lĩnh Hắc Phong đợi trên đồi cối xay, nơi gió đổi hướng mỗi 12 giây. Lưỡi gió và lốc xoáy của hắn bay theo gió. Khi hắn nổi giận, cát nổi lên che kín đồi; lướt qua đúng nhát thứ ba của Lướt Gió Liên Hoàn để hắn mất thăng bằng. Xa hơn về phía bắc là Đỉnh Tuyết Vĩnh Hằng (sắp mở). Cấp đề nghị: 26.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/hacphong_blades"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "blackwind",
+    "count": 1,
+    "text": "Đánh bại Thủ Lĩnh Hắc Phong",
+    "countPrevious": 0,
+    "marker": "windmillhill"
+   }
+  ],
+  "xp": 4200,
+  "gold": 420,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 4
+   },
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [
+   "steppe_cleared"
+  ],
+  "followUps": []
+ },
+ "slay_crystalgolem": {
+  "_name": "slay_crystalgolem",
+  "id": "slay_crystalgolem",
+  "title": "Golem Pha Lê Cổ",
+  "kind": 0,
+  "summary": "Điện Pha Lê có một Golem cổ canh giữ. Mặt trước nó hắt đạn ngược lại; lõi hổ phách ở sau lưng mới là chỗ yếu. Đừng đứng sau lưng nó quá lâu. Cấp đề nghị: 18.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/cave_eyes"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "crystalgolem",
+    "count": 1,
+    "text": "Đánh bại Golem Pha Lê Cổ",
+    "countPrevious": 0,
+    "marker": "crystalhall"
+   }
+  ],
+  "xp": 1300,
+  "gold": 160,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/slay_queen"
+   }
+  ]
+ },
+ "slay_queen": {
+  "_name": "slay_queen",
+  "id": "slay_queen",
+  "title": "Nhện Chúa Pha Lê",
+  "kind": 0,
+  "summary": "Tận cùng Hang Pha Lê, Nhện Chúa giăng tơ giữa sáu cột pha lê. Tia sáng của nó dội qua các cột: đập vỡ cột sắp bị tia chạm vào để tia dội ngược vào nó. Đường hầm phía tây Rừng Pha Lê dẫn ra Thảo Nguyên Gió. Cấp đề nghị: 20.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/slay_crystalgolem"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "spiderqueen",
+    "count": 1,
+    "text": "Đánh bại Nhện Chúa Pha Lê",
+    "countPrevious": 0,
+    "marker": "queenhall"
+   }
+  ],
+  "xp": 2000,
+  "gold": 240,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 4
+   },
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [
+   "cave_cleared"
+  ],
+  "followUps": [
+   {
+    "$ref": "quests/steppe_enter"
+   }
+  ]
+ },
+ "slay_snake": {
+  "_name": "slay_snake",
+  "id": "slay_snake",
+  "title": "Xà Mẫu Đầm Lầy",
+  "kind": 0,
+  "summary": "Sâu trong đầm, Xà Mẫu cuộn mình giữa hồ nước có bốn gò đất. Dụ nó lao vào gò đất để nó choáng váng. Cấp đề nghị: 14.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/slay_toadking"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "snake",
+    "count": 1,
+    "text": "Đánh bại Xà Mẫu Đầm Lầy",
+    "countPrevious": 0,
+    "marker": "snakelair"
+   }
+  ],
+  "xp": 1200,
+  "gold": 150,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 4
+   },
+   {
+    "item": {
+     "$ref": "items/lotus"
+    },
+    "count": 4
+   }
+  ],
+  "setFlags": [
+   "swamp_saved"
+  ],
+  "followUps": [
+   {
+    "$ref": "quests/cave_enter"
+   }
+  ]
+ },
+ "slay_toadking": {
+  "_name": "slay_toadking",
+  "id": "slay_toadking",
+  "title": "Cóc Tía Ao Độc",
+  "kind": 0,
+  "summary": "Cóc Tía ngự giữa Ao Cóc Tía phía bắc đầm. Lưỡi nó kéo người vào vũng độc. Cấp đề nghị: 11.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/swamp_mud"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "toadking",
+    "count": 1,
+    "text": "Đánh bại Cóc Tía",
+    "countPrevious": 0,
+    "marker": "toadpond"
+   }
+  ],
+  "xp": 600,
+  "gold": 80,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_green"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/slay_snake"
+   }
+  ]
+ },
+ "steppe_bisons": {
+  "_name": "steppe_bisons",
+  "id": "steppe_bisons",
+  "title": "Truy Nã: Bò Rừng",
+  "kind": 0,
+  "summary": "Bò Rừng cào đất rồi lao thẳng. Đầu sừng của nó cứng như đá: đứng trước một tảng đá rồi né, để nó húc vào đá mà choáng váng. Khe Vực chỉ qua được nhờ Cột Gió. Cấp đề nghị: 22.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/steppe_eagles"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "bison",
+    "count": 4,
+    "text": "Hạ Bò Rừng",
+    "countPrevious": 0,
+    "marker": "bisons"
+   }
+  ],
+  "xp": 2800,
+  "gold": 260,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_green"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [
+   "steppe_opened"
+  ],
+  "followUps": [
+   {
+    "$ref": "quests/steppe_scarecrows"
+   }
+  ]
+ },
+ "steppe_eagles": {
+  "_name": "steppe_eagles",
+  "id": "steppe_eagles",
+  "title": "Truy Nã: Chim Ưng Đá",
+  "kind": 0,
+  "summary": "Chim Ưng Đá lượn trên cao rồi bổ nhào xuống chỗ đã đánh dấu. Ra khỏi vòng trước khi nó rơi xuống, rồi đánh lúc nó còn đậu dưới đất. Cấp đề nghị: 21.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/steppe_hyenas"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "eagle",
+    "count": 4,
+    "text": "Hạ Chim Ưng Đá",
+    "countPrevious": 0,
+    "marker": "eagles"
+   }
+  ],
+  "xp": 2600,
+  "gold": 240,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/steppe_bisons"
+   }
+  ]
+ },
+ "steppe_enter": {
+  "_name": "steppe_enter",
+  "id": "steppe_enter",
+  "title": "Thảo Nguyên Gió",
+  "kind": 0,
+  "summary": "Sau Nhện Chúa, gió lùa qua một đường hầm phía tây Rừng Pha Lê. Cuối hầm là một cao nguyên cỏ vàng, gió đổi hướng từng hồi. Dân du mục dựng trại ở đó. Cấp đề nghị: 20.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/slay_queen"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 3,
+    "target": "Cửa Gió",
+    "count": 1,
+    "text": "Theo đường hầm phía tây Rừng Pha Lê ra Cửa Gió",
+    "countPrevious": 0,
+    "marker": "windgate"
+   },
+   {
+    "kind": 3,
+    "target": "Trại Du Mục",
+    "count": 1,
+    "text": "Tới Trại Du Mục",
+    "countPrevious": 0,
+    "marker": "nomadcamp"
+   }
+  ],
+  "xp": 2200,
+  "gold": 200,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/steppe_hyenas"
+   }
+  ]
+ },
+ "steppe_hyenas": {
+  "_name": "steppe_hyenas",
+  "id": "steppe_hyenas",
+  "title": "Truy Nã: Linh Cẩu Gió",
+  "kind": 0,
+  "summary": "Linh Cẩu Gió đi thành bầy, vây quanh con mồi rồi thay nhau lao vào cắn và chạy ra. Thấy vạch dưới đất là con sắp lao: Lướt sang bên. Cấp đề nghị: 20.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/steppe_enter"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "hyena",
+    "count": 6,
+    "text": "Hạ Linh Cẩu Gió",
+    "countPrevious": 0,
+    "marker": "hyenas"
+   }
+  ],
+  "xp": 2400,
+  "gold": 220,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/steppe_eagles"
+   }
+  ]
+ },
+ "steppe_ironbison": {
+  "_name": "steppe_ironbison",
+  "id": "steppe_ironbison",
+  "title": "Bò Rừng Sắt",
+  "kind": 0,
+  "summary": "Bọn Hắc Phong bọc sắt một con bò rừng và thả nó canh lối vào trại, ở bãi đá bờ tây Khe Vực. Giáp sắt ở đầu và vai; dụ nó húc vào tảng sa thạch để giáp bung ra rồi đánh. Cấp đề nghị: 23.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/steppe_scarecrows"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "ironbison",
+    "count": 1,
+    "text": "Đánh bại Bò Rừng Sắt",
+    "countPrevious": 0,
+    "marker": "ironbison"
+   }
+  ],
+  "xp": 3400,
+  "gold": 320,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 3
+   },
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/hacphong_archers"
+   }
+  ]
+ },
+ "steppe_scarecrows": {
+  "_name": "steppe_scarecrows",
+  "id": "steppe_scarecrows",
+  "title": "Ruộng Bỏ Hoang",
+  "kind": 0,
+  "summary": "Dân du mục bỏ ruộng từ khi bù nhìn ngoài đó biết đi. Bù nhìn rơm thật lay theo gió; Bù Nhìn Sống thì đứng im và quay đầu nhìn theo người đi qua. Đánh nó lúc nó còn giả chết thì trúng đau hơn. Cấp đề nghị: 22.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/steppe_bisons"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "scarecrow",
+    "count": 4,
+    "text": "Hạ Bù Nhìn Sống",
+    "countPrevious": 0,
+    "marker": "fields"
+   }
+  ],
+  "xp": 3000,
+  "gold": 280,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/steppe_ironbison"
+   }
+  ]
+ },
+ "swamp_hunters": {
+  "_name": "swamp_hunters",
+  "id": "swamp_hunters",
+  "title": "Truy Nã: Rắn Nước Và Chuồn Chuồn Kim",
+  "kind": 0,
+  "summary": "Rắn Nước rình dưới các vũng nước, ban ngày Chuồn Chuồn Kim lượn trên mặt đầm. Ngư dân không dám ra lưới. Cấp đề nghị: 9.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/swamp_toads"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "watersnake",
+    "count": 3,
+    "text": "Hạ Rắn Nước",
+    "countPrevious": 0,
+    "marker": "snakepools"
+   },
+   {
+    "kind": 1,
+    "target": "dragonfly",
+    "count": 4,
+    "text": "Hạ Chuồn Chuồn Kim (ban ngày)",
+    "countPrevious": 0,
+    "marker": "dragonflies"
+   }
+  ],
+  "xp": 360,
+  "gold": 45,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/swamp_mud"
+   }
+  ]
+ },
+ "swamp_mud": {
+  "_name": "swamp_mud",
+  "id": "swamp_mud",
+  "title": "Truy Nã: Người Bùn",
+  "kind": 0,
+  "summary": "Người Bùn lừ đừ quanh các vũng lầy sâu. Mỗi lần gục chúng lại tách ra thành Bùn Con. Cấp đề nghị: 11.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/swamp_hunters"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "mudman",
+    "count": 3,
+    "text": "Hạ Người Bùn",
+    "countPrevious": 0,
+    "marker": "mudfield"
+   }
+  ],
+  "xp": 380,
+  "gold": 50,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/slay_toadking"
+   }
+  ]
+ },
+ "swamp_road": {
+  "_name": "swamp_road",
+  "id": "swamp_road",
+  "title": "Đường Tới Đầm Lầy",
+  "kind": 0,
+  "summary": "Trưởng Làng kể: qua Rừng Già về phía đông là Đầm Lầy Sương Mù. Ngư dân dựng một trạm nhà sàn ở bìa đầm. Cấp đề nghị: 7.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/slay_bear"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 3,
+    "target": "Trạm Nhà Sàn",
+    "count": 1,
+    "text": "Tới Trạm Nhà Sàn ở bìa đầm",
+    "countPrevious": 0,
+    "marker": "outpost"
+   }
+  ],
+  "xp": 150,
+  "gold": 0,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_green"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/swamp_toads"
+   }
+  ]
+ },
+ "swamp_toads": {
+  "_name": "swamp_toads",
+  "id": "swamp_toads",
+  "title": "Truy Nã: Cóc Độc Và Đỉa Bùn",
+  "kind": 0,
+  "summary": "Ngư dân ở trạm nhà sàn treo thưởng: Cóc Độc và Đỉa Bùn không cho ai thả lưới. Cấp đề nghị: 8.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/swamp_road"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "toad",
+    "count": 6,
+    "text": "Hạ Cóc Độc",
+    "countPrevious": 0,
+    "marker": "swamp"
+   },
+   {
+    "kind": 1,
+    "target": "leech",
+    "count": 3,
+    "text": "Hạ Đỉa Bùn",
+    "countPrevious": 0,
+    "marker": "swamp"
+   }
+  ],
+  "xp": 320,
+  "gold": 40,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/lotus"
+    },
+    "count": 3
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/swamp_hunters"
+   }
+  ]
+ },
+ "swamp_wisps": {
+  "_name": "swamp_wisps",
+  "id": "swamp_wisps",
+  "title": "Ánh Lửa Ma Trơi",
+  "kind": 2,
+  "summary": "Đêm xuống, Ma Trơi dụ người đi lạc vào giữa đầm rồi nổ tung. Hạ chúng trước khi chúng kịp nổ: con nào tự nổ thì không tính. Cấp đề nghị: 11.",
+  "giver": null,
+  "turnIn": null,
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [
+   {
+    "$ref": "quests/swamp_mud"
+   }
+  ],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 1,
+    "target": "wisp",
+    "count": 3,
+    "text": "Hạ Ma Trơi (chỉ có ban đêm)",
+    "countPrevious": 0,
+    "marker": "wisps"
+   }
+  ],
+  "xp": 420,
+  "gold": 60,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/lotus"
+    },
+    "count": 2
+   }
+  ],
+  "setFlags": [],
+  "followUps": []
+ },
+ "talk_chief": {
+  "_name": "talk_chief",
+  "id": "talk_chief",
+  "title": "Lời Nhờ Của Trưởng Làng",
+  "kind": 0,
+  "summary": "Trưởng Làng đang tìm bạn bên đống lửa giữa làng.",
+  "giver": "chief",
+  "turnIn": "chief",
+  "turnInText": null,
+  "minLevel": 1,
+  "requires": [],
+  "requiredFlags": [],
+  "autoStart": 1,
+  "availableText": null,
+  "objectives": [
+   {
+    "kind": 0,
+    "target": "chief",
+    "count": 1,
+    "text": "Nói chuyện với Trưởng Làng",
+    "countPrevious": 0,
+    "marker": null
+   }
+  ],
+  "xp": 20,
+  "gold": 0,
+  "items": [
+   {
+    "item": {
+     "$ref": "items/potion_red"
+    },
+    "count": 2
+   },
+   {
+    "item": {
+     "$ref": "items/potion_blue"
+    },
+    "count": 1
+   }
+  ],
+  "setFlags": [],
+  "followUps": [
+   {
+    "$ref": "quests/clear_forest"
+   }
+  ]
+ }
+}

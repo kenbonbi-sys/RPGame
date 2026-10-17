@@ -36,3 +36,10 @@
 Godot/**/*.bin filter=lfs diff=lfs merge=lfs -text
 *.res       filter=lfs diff=lfs merge=lfs -text
 *.fbx       filter=lfs diff=lfs merge=lfs -text
+
+# ---------------------------------------------------------------- Unreal (the port in Unreal/)
+# Unreal assets and maps are binary; they cannot be merged, only locked or replaced.
+*.uasset    filter=lfs diff=lfs merge=lfs -text
+*.umap      filter=lfs diff=lfs merge=lfs -text
+*.ubulk     filter=lfs diff=lfs merge=lfs -text
+*.uexp      filter=lfs diff=lfs merge=lfs -text

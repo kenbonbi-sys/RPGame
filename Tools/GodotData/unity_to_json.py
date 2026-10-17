@@ -1,9 +1,10 @@
 """Turns the Unity game's ScriptableObject data (Assets/Data/*.asset, Unity YAML) into JSON for
-the Godot version, so numbers live in one place and the 3D game plays by the same rules.
+the 3D versions, so numbers live in one place and every version plays by the same rules.
 
     python Tools/GodotData/unity_to_json.py
 
-Writes Godot/data/<category>.json, each {asset id: fields}. What changes on the way:
+Writes Godot/data/<category>.json and Unreal/Content/Data/<category>.json (the same files), each
+{asset id: fields}. What changes on the way:
 - Unity bookkeeping (m_ObjectHideFlags, m_Script, ...) is dropped; m_Name becomes "_name".
 - [SerializeReference] blocks (an ability's effects, ...) are inlined with their class in "$type".
 - A reference to another data asset becomes {"$ref": "<category>/<asset name>"}; to anything else
@@ -20,7 +21,7 @@ import yaml
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 ASSETS = os.path.join(ROOT, "Assets")
 DATA = os.path.join(ASSETS, "Data")
-OUT = os.path.join(ROOT, "Godot", "data")
+OUTS = [os.path.join(ROOT, "Godot", "data"), os.path.join(ROOT, "Unreal", "Content", "Data")]
 
 # category -> folder or single asset under Assets/Data
 CATEGORIES = {
@@ -132,7 +133,8 @@ class Converter:
 
 def main():
     conv = Converter()
-    os.makedirs(OUT, exist_ok=True)
+    for out in OUTS:
+        os.makedirs(out, exist_ok=True)
     for cat, where in CATEGORIES.items():
         path = os.path.join(DATA, where)
         if where.endswith(".asset"):
@@ -147,12 +149,13 @@ def main():
                 if mono is None:
                     continue
                 result[f[:-6]] = conv.convert(mono)
-        dst = os.path.join(OUT, cat + ".json")
-        with open(dst, "w", encoding="utf-8", newline="\n") as fh:
-            json.dump(result, fh, ensure_ascii=False, indent=1, sort_keys=False)
-            fh.write("\n")
         count = len(result) if not where.endswith(".asset") else 1
-        print(f"{cat}: {count} -> {os.path.relpath(dst, ROOT)}")
+        for out in OUTS:
+            dst = os.path.join(out, cat + ".json")
+            with open(dst, "w", encoding="utf-8", newline="\n") as fh:
+                json.dump(result, fh, ensure_ascii=False, indent=1, sort_keys=False)
+                fh.write("\n")
+            print(f"{cat}: {count} -> {os.path.relpath(dst, ROOT)}")
     return 0
 
 

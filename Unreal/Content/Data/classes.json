@@ -1,0 +1,705 @@
+{
+ "barbarian": {
+  "_name": "barbarian",
+  "id": "barbarian",
+  "displayName": "Cuồng Chiến Binh",
+  "englishName": "Barbarian",
+  "role": "CHIẾN BINH CUỒNG NỘ",
+  "tagline": "Cận chiến · Bền bỉ",
+  "description": "Chiến binh hoang dã sống bằng cơn thịnh nộ nguyên thủy: càng đau càng đánh mạnh.",
+  "complexity": 0,
+  "hitDie": 12,
+  "primary": [
+   0
+  ],
+  "arrayOrder": [
+   0,
+   3,
+   2,
+   4,
+   5,
+   1
+  ],
+  "savingThrows": [
+   0,
+   3
+  ],
+  "casting": 0,
+  "armor": 4,
+  "weapons": [
+   "axe",
+   "sword",
+   "mace",
+   "spear"
+  ],
+  "kit": [
+   null,
+   "rage",
+   "slam",
+   "axethrow",
+   "warcry",
+   "endure",
+   "bladestorm"
+  ],
+  "outfit": "barbarian",
+  "cloth": {
+   "r": 0.45490196,
+   "g": 0.31764707,
+   "b": 0.22745098,
+   "a": 1
+  },
+  "color": {
+   "r": 0.8784314,
+   "g": 0.47843137,
+   "b": 0.16470589,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "bard": {
+  "_name": "bard",
+  "id": "bard",
+  "displayName": "Thi Sĩ",
+  "englishName": "Bard",
+  "role": "NGHỆ SĨ CỔ VŨ",
+  "tagline": "Hỗ trợ · Linh hoạt",
+  "description": "Dùng lời ca và tiếng đàn để cổ vũ đồng đội, chữa lành, chế nhạo và mê hoặc kẻ thù.",
+  "complexity": 2,
+  "hitDie": 8,
+  "primary": [
+   5
+  ],
+  "arrayOrder": [
+   5,
+   2,
+   3,
+   4,
+   1,
+   0
+  ],
+  "savingThrows": [
+   2,
+   5
+  ],
+  "casting": 5,
+  "armor": 1,
+  "weapons": [
+   "rapier",
+   "lute",
+   "dagger"
+  ],
+  "kit": [
+   "notes",
+   "soundwave",
+   "mockery",
+   "anthem",
+   "song",
+   "misty",
+   "hypnotic"
+  ],
+  "outfit": "bard",
+  "cloth": {
+   "r": 0.78431374,
+   "g": 0.3137255,
+   "b": 0.5411765,
+   "a": 1
+  },
+  "color": {
+   "r": 0.8156863,
+   "g": 0.2509804,
+   "b": 0.6039216,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "cleric": {
+  "_name": "cleric",
+  "id": "cleric",
+  "displayName": "Tu Sĩ",
+  "englishName": "Cleric",
+  "role": "TU SĨ THẦN THÁNH",
+  "tagline": "Hồi phục · Thần thuật",
+  "description": "Mượn sức mạnh của thần linh: chữa lành đồng đội, che chở họ và giáng ánh sáng lên kẻ ác.",
+  "complexity": 1,
+  "hitDie": 8,
+  "primary": [
+   4
+  ],
+  "arrayOrder": [
+   4,
+   3,
+   0,
+   5,
+   2,
+   1
+  ],
+  "savingThrows": [
+   4,
+   5
+  ],
+  "casting": 4,
+  "armor": 2,
+  "weapons": [
+   "mace",
+   "staff"
+  ],
+  "kit": [
+   "sacredflame",
+   "guidingbolt",
+   "spiritguard",
+   "lightpillar",
+   "heal",
+   "shield",
+   "radiance"
+  ],
+  "outfit": "cleric",
+  "cloth": {
+   "r": 0.84705883,
+   "g": 0.8627451,
+   "b": 0.9098039,
+   "a": 1
+  },
+  "color": {
+   "r": 0.8156863,
+   "g": 0.627451,
+   "b": 0.1882353,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "druid": {
+  "_name": "druid",
+  "id": "druid",
+  "displayName": "Tế Sư Rừng Xanh",
+  "englishName": "Druid",
+  "role": "TƯ TẾ THIÊN NHIÊN",
+  "tagline": "Thiên nhiên · Khống chế",
+  "description": "Người giữ rừng: gọi rễ cây trói địch, gọi sấm sét, gai nhọn và chữa lành bằng sức sống muôn loài.",
+  "complexity": 2,
+  "hitDie": 8,
+  "primary": [
+   4
+  ],
+  "arrayOrder": [
+   4,
+   3,
+   2,
+   1,
+   5,
+   0
+  ],
+  "savingThrows": [
+   1,
+   4
+  ],
+  "casting": 4,
+  "armor": 2,
+  "weapons": [
+   "staff",
+   "scimitar"
+  ],
+  "kit": [
+   "thornwhip",
+   "entangle",
+   "thunderwave",
+   "lightning",
+   "heal",
+   "barkskin",
+   "thornstorm"
+  ],
+  "outfit": "druid",
+  "cloth": {
+   "r": 0.18039216,
+   "g": 0.5411765,
+   "b": 0.21176471,
+   "a": 1
+  },
+  "color": {
+   "r": 0.3137255,
+   "g": 0.627451,
+   "b": 0.2509804,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "fighter": {
+  "_name": "fighter",
+  "id": "fighter",
+  "displayName": "Chiến Binh",
+  "englishName": "Fighter",
+  "role": "BẬC THẦY VŨ KHÍ",
+  "tagline": "Vũ khí · Đa dụng",
+  "description": "Thạo mọi loại vũ khí và giáp trụ. Xông pha, trụ vững, và không bao giờ bỏ cuộc.",
+  "complexity": 0,
+  "hitDie": 10,
+  "primary": [
+   0,
+   2
+  ],
+  "arrayOrder": [
+   0,
+   3,
+   2,
+   4,
+   5,
+   1
+  ],
+  "savingThrows": [
+   0,
+   3
+  ],
+  "casting": 0,
+  "armor": 3,
+  "weapons": [
+   "sword",
+   "axe",
+   "mace",
+   "spear",
+   "rapier",
+   "bow"
+  ],
+  "kit": [
+   null,
+   "charge",
+   "whirl",
+   "secondwind",
+   "parry",
+   "surge",
+   "bladestorm"
+  ],
+  "outfit": "fighter",
+  "cloth": {
+   "r": 0.70980394,
+   "g": 0.16470589,
+   "b": 0.20392157,
+   "a": 1
+  },
+  "color": {
+   "r": 0.6901961,
+   "g": 0.2901961,
+   "b": 0.1882353,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "monk": {
+  "_name": "monk",
+  "id": "monk",
+  "displayName": "Võ Tăng",
+  "englishName": "Monk",
+  "role": "VÕ SƯ",
+  "tagline": "Võ thuật · Cơ động",
+  "description": "Rèn thân và tâm tới mức nắm đấm nhanh như gió, cú đá làm choáng, bước chân nhẹ như mây.",
+  "complexity": 2,
+  "hitDie": 8,
+  "primary": [
+   2,
+   4
+  ],
+  "arrayOrder": [
+   2,
+   4,
+   3,
+   0,
+   1,
+   5
+  ],
+  "savingThrows": [
+   0,
+   2
+  ],
+  "casting": 4,
+  "armor": 4,
+  "weapons": [
+   "fist",
+   "quarterstaff"
+  ],
+  "kit": [
+   null,
+   "flyingkick",
+   "stunstrike",
+   "flurryblows",
+   "patience",
+   "windstep",
+   "palm"
+  ],
+  "outfit": "monk",
+  "cloth": {
+   "r": 0.8235294,
+   "g": 0.39215687,
+   "b": 0.11764706,
+   "a": 1
+  },
+  "color": {
+   "r": 0.1254902,
+   "g": 0.627451,
+   "b": 0.627451,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "paladin": {
+  "_name": "paladin",
+  "id": "paladin",
+  "displayName": "Hiệp Sĩ Thánh",
+  "englishName": "Paladin",
+  "role": "CHIẾN BINH MỘ ĐẠO",
+  "tagline": "Hộ vệ · Thánh quang",
+  "description": "Chiến binh đã thề nguyện: giáp nặng, đòn trừng phạt thần thánh, bàn tay chữa lành.",
+  "complexity": 1,
+  "hitDie": 10,
+  "primary": [
+   0,
+   5
+  ],
+  "arrayOrder": [
+   0,
+   5,
+   3,
+   4,
+   2,
+   1
+  ],
+  "savingThrows": [
+   4,
+   5
+  ],
+  "casting": 5,
+  "armor": 3,
+  "weapons": [
+   "sword",
+   "mace",
+   "axe",
+   "spear"
+  ],
+  "kit": [
+   null,
+   "smite",
+   "layonhands",
+   "auraprotect",
+   "shield",
+   "holycharge",
+   "heavenfall"
+  ],
+  "outfit": "paladin",
+  "cloth": {
+   "r": 0.17254902,
+   "g": 0.34509805,
+   "b": 0.6901961,
+   "a": 1
+  },
+  "color": {
+   "r": 0.72156864,
+   "g": 0.76862746,
+   "b": 0.84705883,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "ranger": {
+  "_name": "ranger",
+  "id": "ranger",
+  "displayName": "Du Hiệp",
+  "englishName": "Ranger",
+  "role": "CHIẾN BINH HOANG DÃ",
+  "tagline": "Săn đuổi · Tầm xa",
+  "description": "Thợ săn nơi hoang dã: tên bay như mưa, bẫy gai, dấu săn, và luôn giữ khoảng cách.",
+  "complexity": 1,
+  "hitDie": 10,
+  "primary": [
+   2,
+   4
+  ],
+  "arrayOrder": [
+   2,
+   4,
+   3,
+   0,
+   1,
+   5
+  ],
+  "savingThrows": [
+   0,
+   2
+  ],
+  "casting": 4,
+  "armor": 2,
+  "weapons": [
+   "bow",
+   "scimitar",
+   "dagger"
+  ],
+  "kit": [
+   null,
+   "volley",
+   "piercing",
+   "trap",
+   "huntermark",
+   "disengage",
+   "multishot"
+  ],
+  "outfit": "ranger",
+  "cloth": {
+   "r": 0.22745098,
+   "g": 0.41568628,
+   "b": 0.22745098,
+   "a": 1
+  },
+  "color": {
+   "r": 0.41568628,
+   "g": 0.5411765,
+   "b": 0.22745098,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "rogue": {
+  "_name": "rogue",
+  "id": "rogue",
+  "displayName": "Đạo Tặc",
+  "englishName": "Rogue",
+  "role": "CAO THỦ KHÉO LÉO",
+  "tagline": "Ẩn nấp · Chí mạng",
+  "description": "Nhanh tay, lẹ mắt, đánh vào chỗ yếu: dao ném, nhát chí mạng, bom khói và bóng tối.",
+  "complexity": 0,
+  "hitDie": 8,
+  "primary": [
+   2
+  ],
+  "arrayOrder": [
+   2,
+   3,
+   1,
+   4,
+   5,
+   0
+  ],
+  "savingThrows": [
+   2,
+   1
+  ],
+  "casting": 2,
+  "armor": 1,
+  "weapons": [
+   "dagger",
+   "rapier",
+   "scimitar",
+   "bow"
+  ],
+  "kit": [
+   null,
+   "throwknife",
+   "deathstrike",
+   "smokebomb",
+   "evasion",
+   "shadowstep",
+   "bladefan"
+  ],
+  "outfit": "rogue",
+  "cloth": {
+   "r": 0.41568628,
+   "g": 0.11764706,
+   "b": 0.18039216,
+   "a": 1
+  },
+  "color": {
+   "r": 0.22745098,
+   "g": 0.2901961,
+   "b": 0.5411765,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "sorcerer": {
+  "_name": "sorcerer",
+  "id": "sorcerer",
+  "displayName": "Thuật Sĩ",
+  "englishName": "Sorcerer",
+  "role": "PHÉP THUẬT BẨM SINH",
+  "tagline": "Phép bẩm sinh · Bùng nổ",
+  "description": "Sinh ra đã mang ma lực trong máu: lửa, băng, sấm và hỗn loạn tuôn ra theo cảm xúc.",
+  "complexity": 2,
+  "hitDie": 6,
+  "primary": [
+   5
+  ],
+  "arrayOrder": [
+   5,
+   3,
+   2,
+   1,
+   4,
+   0
+  ],
+  "savingThrows": [
+   3,
+   5
+  ],
+  "casting": 5,
+  "armor": 0,
+  "weapons": [
+   "orb",
+   "wand",
+   "staff"
+  ],
+  "kit": [
+   "firebolt",
+   "fireball",
+   "chaosbolt",
+   "lightning",
+   "arcaneshield",
+   "misty",
+   "meteor"
+  ],
+  "outfit": "sorcerer",
+  "cloth": {
+   "r": 0.70980394,
+   "g": 0.16470589,
+   "b": 0.20392157,
+   "a": 1
+  },
+  "color": {
+   "r": 0.8784314,
+   "g": 0.3137255,
+   "b": 0.1882353,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "warlock": {
+  "_name": "warlock",
+  "id": "warlock",
+  "displayName": "Khế Ước Sư",
+  "englishName": "Warlock",
+  "role": "PHÙ THỦY DỊ GIỚI",
+  "tagline": "Khế ước · Ma thuật",
+  "description": "Đổi lấy sức mạnh bằng khế ước với thực thể bên kia bức màn: tia hắc ám, lời nguyền, xúc tu bóng tối.",
+  "complexity": 2,
+  "hitDie": 8,
+  "primary": [
+   5
+  ],
+  "arrayOrder": [
+   5,
+   3,
+   2,
+   4,
+   1,
+   0
+  ],
+  "savingThrows": [
+   4,
+   5
+  ],
+  "casting": 5,
+  "armor": 1,
+  "weapons": [
+   "tome",
+   "wand",
+   "orb"
+  ],
+  "kit": [
+   "eldritch",
+   "hex",
+   "tentacles",
+   "drain",
+   "darkarmor",
+   "misty",
+   "voidstorm"
+  ],
+  "outfit": "warlock",
+  "cloth": {
+   "r": 0.38431373,
+   "g": 0.19607843,
+   "b": 0.627451,
+   "a": 1
+  },
+  "color": {
+   "r": 0.6039216,
+   "g": 0.16470589,
+   "b": 0.2901961,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ },
+ "wizard": {
+  "_name": "wizard",
+  "id": "wizard",
+  "displayName": "Pháp Sư",
+  "englishName": "Wizard",
+  "role": "HỌC GIẢ PHÉP THUẬT",
+  "tagline": "Học thuật · Đa phép",
+  "description": "Học phép từ sách vở suốt đời: cầu lửa, mũi băng, sấm sét, lá chắn và cả hố đen.",
+  "complexity": 1,
+  "hitDie": 6,
+  "primary": [
+   1
+  ],
+  "arrayOrder": [
+   1,
+   3,
+   2,
+   4,
+   5,
+   0
+  ],
+  "savingThrows": [
+   1,
+   4
+  ],
+  "casting": 1,
+  "armor": 0,
+  "weapons": [
+   "staff",
+   "wand",
+   "tome"
+  ],
+  "kit": [
+   "missile",
+   "fireball",
+   "ice",
+   "lightning",
+   "arcaneshield",
+   "misty",
+   "blackhole"
+  ],
+  "outfit": "wizard",
+  "cloth": {
+   "r": 0.17254902,
+   "g": 0.34509805,
+   "b": 0.6901961,
+   "a": 1
+  },
+  "color": {
+   "r": 0.47843137,
+   "g": 0.2901961,
+   "b": 0.8156863,
+   "a": 1
+  },
+  "emblem": {
+   "$asset": "Art/Icons/skills.png"
+  }
+ }
+}
