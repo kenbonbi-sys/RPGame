@@ -2098,7 +2098,7 @@ TextureImporter:
       name: sk_frostarrows
       rect:
         serializedVersion: 2
-        x: 48
+        x: 120
         y: 48
         width: 24
         height: 24
@@ -2120,7 +2120,7 @@ TextureImporter:
       name: sk_frostarmor
       rect:
         serializedVersion: 2
-        x: 72
+        x: 144
         y: 48
         width: 24
         height: 24
@@ -2142,7 +2142,7 @@ TextureImporter:
       name: sk_iceprison
       rect:
         serializedVersion: 2
-        x: 96
+        x: 168
         y: 48
         width: 24
         height: 24
@@ -2164,8 +2164,8 @@ TextureImporter:
       name: sk_blizzard
       rect:
         serializedVersion: 2
-        x: 120
-        y: 48
+        x: 0
+        y: 24
         width: 24
         height: 24
       alignment: 9
@@ -2186,8 +2186,8 @@ TextureImporter:
       name: sk_iceage
       rect:
         serializedVersion: 2
-        x: 144
-        y: 48
+        x: 24
+        y: 24
         width: 24
         height: 24
       alignment: 9
@@ -2208,8 +2208,8 @@ TextureImporter:
       name: sk_chainlightning
       rect:
         serializedVersion: 2
-        x: 168
-        y: 48
+        x: 48
+        y: 24
         width: 24
         height: 24
       alignment: 9
@@ -2230,7 +2230,7 @@ TextureImporter:
       name: sk_thunderstep
       rect:
         serializedVersion: 2
-        x: 0
+        x: 72
         y: 24
         width: 24
         height: 24
@@ -2252,7 +2252,7 @@ TextureImporter:
       name: sk_lightningbrand
       rect:
         serializedVersion: 2
-        x: 24
+        x: 96
         y: 24
         width: 24
         height: 24
@@ -2274,7 +2274,7 @@ TextureImporter:
       name: sk_balllightning
       rect:
         serializedVersion: 2
-        x: 48
+        x: 120
         y: 24
         width: 24
         height: 24
@@ -2296,7 +2296,7 @@ TextureImporter:
       name: sk_stormfield
       rect:
         serializedVersion: 2
-        x: 72
+        x: 144
         y: 24
         width: 24
         height: 24
@@ -2318,7 +2318,7 @@ TextureImporter:
       name: sk_thunderstorm
       rect:
         serializedVersion: 2
-        x: 96
+        x: 168
         y: 24
         width: 24
         height: 24
@@ -2340,8 +2340,8 @@ TextureImporter:
       name: sk_shadowknives
       rect:
         serializedVersion: 2
-        x: 120
-        y: 24
+        x: 0
+        y: 0
         width: 24
         height: 24
       alignment: 9
@@ -2362,8 +2362,8 @@ TextureImporter:
       name: sk_curse
       rect:
         serializedVersion: 2
-        x: 144
-        y: 24
+        x: 24
+        y: 0
         width: 24
         height: 24
       alignment: 9
@@ -2384,8 +2384,8 @@ TextureImporter:
       name: sk_shadowclone
       rect:
         serializedVersion: 2
-        x: 168
-        y: 24
+        x: 48
+        y: 0
         width: 24
         height: 24
       alignment: 9
@@ -2406,7 +2406,7 @@ TextureImporter:
       name: sk_soulsiphon
       rect:
         serializedVersion: 2
-        x: 0
+        x: 72
         y: 0
         width: 24
         height: 24
@@ -2428,7 +2428,7 @@ TextureImporter:
       name: sk_eclipse
       rect:
         serializedVersion: 2
-        x: 24
+        x: 96
         y: 0
         width: 24
         height: 24
@@ -2442,6 +2442,72 @@ TextureImporter:
       bones: []
       spriteID: 7409d27cfc2f670716f58f74d416f304
       internalID: 1979703212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sk_forestspirits
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 48
+        width: 24
+        height: 24
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d6a9add06a2ca20cf782ddff05854bd
+      internalID: 512535716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sk_judgment
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 48
+        width: 24
+        height: 24
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7ae9867ddcd6756e6473749e090d02e
+      internalID: 1403426457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sk_sanctuary
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 48
+        width: 24
+        height: 24
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ced2bc081390c2573079a1933364757
+      internalID: 680291997
       vertices: []
       indices: 
       edges: []
@@ -2503,6 +2569,7 @@ TextureImporter:
       sk_flurry: 1905839102
       sk_flurryblows: -1990925594
       sk_flyingkick: 410942956
+      sk_forestspirits: 512535716
       sk_frostarmor: 1283949638
       sk_frostarrows: -178856918
       sk_guidingbolt: -1379174444
@@ -2515,6 +2582,7 @@ TextureImporter:
       sk_ice: 62970466
       sk_iceage: -864762574
       sk_iceprison: 1032807710
+      sk_judgment: 1403426457
       sk_layonhands: 274756728
       sk_lightning: 2117337303
       sk_lightningbrand: 147466041
@@ -2535,6 +2603,7 @@ TextureImporter:
       sk_roar: -100941958
       sk_rock: 1672721889
       sk_sacredflame: -1238345112
+      sk_sanctuary: 680291997
       sk_secondwind: 1016996601
       sk_shadowclone: 2144953099
       sk_shadowknives: 1181917250
@@ -2568,6 +2637,6 @@ TextureImporter:
       sk_windstep: 1159838845
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  userData: rpg:8d3f6adebc2b56017503249110105ece
+  userData: rpg:e58f7f32357835e6ea83ab64267a0c3a
   assetBundleName: 
   assetBundleVariant: 

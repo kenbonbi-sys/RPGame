@@ -147,6 +147,12 @@ namespace RPG.EditorTools
             Build("lightning_imbue", LightningImbue, 0f);
             Build("curse_sigil", CurseSigil, 1.6f);
             Build("eclipse", Eclipse, 0f);
+            // Thánh Mộc (T64)
+            Build("forest_spirit", ForestSpirit, 0f);
+            Build("spirit_shot", SpiritShot, 0f);
+            Build("judgment_mark", JudgmentMark, 0.5f);
+            Build("judgment", Judgment, 1.6f);
+            Build("sanctuary", Sanctuary, 0f);
 
             EditorUtility.SetDirty(lib);
 
@@ -1255,6 +1261,101 @@ namespace RPG.EditorTools
                 .Col(new Color(0.12f, 0.04f, 0.18f, 0.6f)).Circle(0.5f).Vel(0, 0, 0.6f, 1.2f).Rot().Fade(0.2f).Local();
             PS(r, "Embers", Mat("px_square", true, 2.5f)).Loop().Rate(10).Life(0.5f, 0.9f).Size(0.05f, 0.1f)
                 .Col(new Color(1f, 0.7f, 0.95f), DarkC).Circle(1.2f).Vel(0, 0, 0.5f, 1.5f).Fade().At(0, 3.4f).Local();
+        }
+
+        // ------------------------------------------------------------------ Thánh Mộc (T64)
+        static readonly Color SpiritC = new Color(0.7f, 1f, 0.55f);
+
+        /// <summary>Tinh Linh Rừng: a little forest spirit, a pale green light with a trail of motes and the odd leaf.</summary>
+        static void ForestSpirit(GameObject r)
+        {
+            var core = Spr(r, "Core", "glow_hard", Mat("glow_hard", true, 2.6f), new Color(0.92f, 1f, 0.85f), order: 2, scale: 0.32f);
+            var b = core.gameObject.AddComponent<Bobber>();
+            b.amplitude = 0f;
+            b.pulse = 0.15f;
+            b.speed = 7f;
+            Spr(r, "Glow", "glow", Mat("glow", true, 1.6f), A(SpiritC, 0.75f), order: 1, scale: 1.1f);
+            PS(r, "Trail", Mat("px_square", true, 2.4f), SortingLayerNames.VFX, 0).Loop().Rate(22).Life(0.3f, 0.6f).Size(0.04f, 0.08f)
+                .Col(SpiritC, Color.white).Circle(0.08f).Vel(0, 0, 0.1f, 0.4f).Fade();
+            PS(r, "Leaves", Mat("leaf_green", false, 1f)).Loop().Rate(2.5f).Life(0.8f, 1.3f).Size(0.12f, 0.18f)
+                .Circle(0.12f).Grav(0.25f).Rot().Spin(-180, 180).Fade();
+            Light(r, SpiritC, 1.6f, 0.8f, pulse: false, flicker: 0.15f);
+        }
+
+        /// <summary>A spirit's mote of light flying at a foe.</summary>
+        static void SpiritShot(GameObject r)
+        {
+            Spr(r, "Core", "glow_hard", Mat("glow_hard", true, 2.8f), Color.white, order: 2, scale: 0.22f);
+            Spr(r, "Glow", "glow", Mat("glow", true, 1.6f), A(Holy, 0.7f), order: 1, scale: 0.6f);
+            PS(r, "Trail", Mat("px_square", true, 2.6f), SortingLayerNames.VFX, 0).Loop().Rate(45).Life(0.12f, 0.25f).Size(0.04f, 0.08f)
+                .Col(Holy, SpiritC).Circle(0.04f).Fade();
+            Light(r, Holy, 1.2f, 0.8f, pulse: false);
+        }
+
+        /// <summary>Ánh Sáng Phán Xét's warning: a ring of runes lights up where the pillar will fall (radius 1.5).</summary>
+        static void JudgmentMark(GameObject r)
+        {
+            var circle = Spr(r, "Circle", "magic_circle", Mat("magic_circle", true, 2f), A(Holy, 0.9f), SortingLayerNames.Decal, 2);
+            circle.transform.localScale = new Vector3(1.3f, 0.72f, 1f);
+            SFX(circle, 0.5f, C(0, 0.5f, 0.6f, 1f, 1, 1f), C(0, 0, 0.3f, 1f, 1, 0.6f));
+            PS(r, "Motes", Mat("spark4", true, 2.2f)).Burst(10).Life(0.3f, 0.5f).Size(0.08f, 0.14f).Col(Color.white, Holy)
+                .Circle(1.3f, 360f, 0f).Vel(0, 0, 0.8f, 1.6f).Fade();
+        }
+
+        /// <summary>Ánh Sáng Phán Xét: a tall pillar of gold light falls on the mark, a shockwave runs out from its foot.</summary>
+        static void Judgment(GameObject r)
+        {
+            var beam = Spr(r, "Beam", "beam", Mat("beam", true, 2.4f), A(Holy, 0.95f), scale: 1f, y: 2.3f);
+            beam.transform.localScale = new Vector3(1.25f, 4.6f, 1f);
+            SFX(beam, 0.7f, C(0, 1.4f, 0.2f, 1f, 1, 0.3f), C(0, 1, 0.5f, 0.85f, 1, 0));
+            var core = Spr(r, "Core", "beam", Mat("beam", true, 3f), Color.white, order: 1, scale: 1f, y: 2.3f);
+            core.transform.localScale = new Vector3(0.45f, 4.6f, 1f);
+            SFX(core, 0.45f, C(0, 1.2f, 1, 0.2f), C(0, 1, 1, 0));
+            var foot = Spr(r, "Foot", "glow", Mat("glow", true, 2f), A(Holy, 0.9f), SortingLayerNames.Decal, 2);
+            foot.transform.localScale = new Vector3(3.2f, 1.7f, 1f);
+            SFX(foot, 1f, C(0, 0.6f, 0.2f, 1f, 1, 1.1f), C(0, 1, 0.6f, 0.6f, 1, 0));
+            Ring(r, "Shock", Holy, 0.3f, 3.4f, 0.5f, "ring_thick", SortingLayerNames.Decal, 0.55f);
+            PS(r, "Motes", Mat("spark4", true, 2.4f)).Burst(24).Life(0.5f, 1.1f).Speed(0.4f, 2f).Size(0.12f, 0.24f)
+                .Col(Color.white, Holy).Circle(0.8f).Vel(0, 0, 1.5f, 3.5f).Fade();
+            PS(r, "Feathers", Mat("px_square", true, 2.2f)).Burst(16).Life(0.6f, 1.2f).Speed(1f, 3f).Size(0.05f, 0.1f)
+                .Col(Holy, Color.white).Circle(0.4f).Grav(-0.2f).Drag(2f).Fade();
+            Light(r, Holy, 5.5f, 2.6f, 0.7f);
+        }
+
+        /// <summary>
+        /// Thánh Địa (radius 5 at scale 1): warm light on the ground inside a ring of runes, flowers
+        /// growing and fading around its edge, leaves and motes drifting up, shafts of sunlight.
+        /// </summary>
+        static void Sanctuary(GameObject r)
+        {
+            var glow = Spr(r, "Glow", "glow", Mat("glow", true, 1f), A(Holy, 0.18f), SortingLayerNames.Decal, 0);
+            glow.transform.localScale = new Vector3(10.5f, 5.8f, 1f);
+            SFX(glow, 0.6f, C(0, 0.3f, 1, 1f), C(0, 0, 1, 1));
+            var edge = Spr(r, "Edge", "ring", Mat("ring", true, 1.5f), A(new Color(0.85f, 1f, 0.55f), 0.8f), SortingLayerNames.Decal, 1);
+            edge.transform.localScale = new Vector3(10f, 5.5f, 1f);
+            SFX(edge, 0.5f, C(0, 0.2f, 1, 1f), C(0, 0, 1, 1));
+            // a rune circle lying flat on the ground under the caster (not turning: a turning squashed circle tilts)
+            var circle = Spr(r, "Circle", "magic_circle", Mat("magic_circle", true, 1.6f), A(Holy, 0.5f), SortingLayerNames.Decal, 2);
+            circle.transform.localScale = new Vector3(2.4f, 1.35f, 1f);
+            SFX(circle, 0.6f, C(0, 0.6f, 1, 1f), C(0, 0, 1, 1));
+            // flowers grow and wilt in a ring along the edge, and a few inside
+            PS(r, "Flowers", Mat("flower", false, 1f), SortingLayerNames.Decal, 3).Loop().Rate(26).Life(2f, 3.2f).Size(0.18f, 0.28f)
+                .Col(new Color(1f, 0.85f, 0.95f), new Color(1f, 1f, 0.8f)).Circle(4.7f, 360f, 0.1f).SizeLife(0, 0f, 0.15f, 1f, 0.8f, 1f, 1, 0f).Local();
+            PS(r, "Blooms", Mat("flower", false, 1f), SortingLayerNames.Decal, 3).Loop().Rate(6).Life(1.6f, 2.6f).Size(0.14f, 0.22f)
+                .Col(new Color(0.85f, 0.95f, 1f), new Color(1f, 0.95f, 0.7f)).Circle(4f).SizeLife(0, 0f, 0.2f, 1f, 0.8f, 1f, 1, 0f).Local();
+            PS(r, "Leaves", Mat("leaf_green", false, 1f)).Loop().Rate(7).Life(1.6f, 2.6f).Size(0.14f, 0.22f)
+                .Circle(4.5f).Vel(0, 0, 0.3f, 0.8f).Rot().Spin(-120, 120).Fade(0.2f).Local();
+            PS(r, "Motes", Mat("spark4", true, 2f)).Loop().Rate(18).Life(0.8f, 1.4f).Size(0.1f, 0.18f).Col(Color.white, Holy)
+                .Circle(4.8f).Vel(0, 0, 0.6f, 1.4f).Fade(0.2f).Local();
+            // shafts of sunlight falling into it
+            var shafts = new[] { new Vector2(-2.6f, 0.4f), new Vector2(1.9f, 1.1f), new Vector2(0.3f, -1.3f), new Vector2(3.1f, -0.6f) };
+            for (int i = 0; i < shafts.Length; i++)
+            {
+                var s = Spr(r, "Shaft" + i, "beam", Mat("beam", true, 1.4f), A(Holy, 0.28f), SortingLayerNames.VFX, -1, 1f, shafts[i].x, shafts[i].y + 2.2f);
+                s.transform.localScale = new Vector3(0.7f, 4.4f, 1f);
+                SFX(s, 0.8f + i * 0.2f, C(0, 0.2f, 1, 1f), C(0, 0, 1, 1));
+            }
+            Light(r, new Color(1f, 0.95f, 0.78f), 6f, 0.45f, pulse: false, flicker: 0.04f);
         }
 
         /// <summary>A crescent of wind cut loose by Thủ Lĩnh Hắc Phong's blades (<see cref="EnemyShots.WindBlade"/>).</summary>

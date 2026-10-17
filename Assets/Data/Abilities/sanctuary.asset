@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c0da5ccfbafcc478baaa2f683e7240, type: 3}
+  m_Name: sanctuary
+  m_EditorClassIdentifier: Assembly-CSharp::RPG.AbilityDef
+  id: sanctuary
+  displayName: "Th\xE1nh \u0110\u1ECBa"
+  description: "Bi\u1EBFn ch\u1ED7 ng\u01B0\u01A1i \u0111\u1EE9ng th\xE0nh \u0111\u1EA5t th\xE1nh 5 \xF4 trong 8 gi\xE2y: \u0111\u1ED3ng \u0111\u1ED9i b\xEAn trong h\u1ED3i 4% m\xE1u m\u1ED7i gi\xE2y v\xE0 mi\u1EC5n cho\xE1ng, tr\xF3i, \u0111\xF3ng b\u0103ng; k\u1EBB \u0111\u1ECBch b\xEAn trong ch\u1EADm 25%."
+  icon: {fileID: 680291997, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+  tags: 200768
+  cooldown: 30
+  energyCost: 36
+  targeting: 2
+  maxRange: 12
+  lockTime: 0.5
+  commitTime: 0.15
+  animBase: cast
+  moveWhileCasting: 0.25
+  castSfx: sfx_heal
+  powerPerLevel: 0.12
+  cooldownPerLevel: 0.04
+  effects:
+  - rid: 574317104586031108
+  - rid: 574317104586031109
+  references:
+    version: 2
+    RefIds:
+    - rid: 574317104586031108
+      type: {class: CueEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 0
+          up: 0
+          forward: 0
+        vfx: holy_strike
+        vfxScale: 1.4
+        rotateToDirection: 0
+        flipOnOddCombo: 0
+        attachToCaster: 0
+        sfx: sfx_levelup
+        sfxVolume: 0.7
+        sfxPitchVariance: 0.06
+        sfxAtPoint: 0
+        sfxMinInterval: 0.03
+        shake: 0.2
+        flashColor: {r: 1, g: 0.95, b: 0.6, a: 1}
+        flashStrength: 0.15
+        flashDuration: 0.4
+        impact: 0
+        impactDuration: 0.3
+    - rid: 574317104586031109
+      type: {class: SanctuaryEffect, ns: RPG, asm: Assembly-CSharp}
+      data:
+        delay: 0
+        at:
+          from: 3
+          up: 0
+          forward: 0
+        radius: 5
+        duration: 8
+        interval: 0.5
+        healPerSecond: 0.04
+        slow: 0.25
+        buff:
+          id: sanctuary
+          displayName: "Th\xE1nh \u0110\u1ECBa"
+          icon: {fileID: 680291997, guid: 726ceb09a25de8647b7d8693dc0c4923, type: 3}
+          duration: 8
+          speedMultiplier: 1
+          damageTakenMultiplier: 1
+          stunImmune: 1
+          clearStun: 1
+          attachedVfx: heal_aura
+          endVfx: 
+          damageDealtMultiplier: 1
+          attackSpeedBonus: 0
+          imbuePower: 0
+          imbueCharge: 0
+          critBonus: 0
+          chillAttackers: 0
+        zoneVfx: sanctuary
+        pulseSfx: sfx_crystal
+        pulseSfxInterval: 1.6

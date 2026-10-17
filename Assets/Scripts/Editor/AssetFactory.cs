@@ -338,6 +338,8 @@ namespace RPG.EditorTools
         /// <summary>Names of the spells the Bí Kíp teach (the books come before the abilities).</summary>
         static readonly Dictionary<string, string> SpellNames = new Dictionary<string, string>
         {
+            { "heal", "Hồi Phục" }, { "shield", "Khiên Thánh" }, { "entangle", "Rễ Trói" },
+            { "forestspirits", "Tinh Linh Rừng" }, { "judgment", "Ánh Sáng Phán Xét" }, { "sanctuary", "Thánh Địa" },
             { "ice", "Mũi Băng" }, { "frostarrows", "Băng Tiễn" }, { "frostarmor", "Giáp Sương" },
             { "iceprison", "Ngục Băng" }, { "blizzard", "Bão Tuyết" }, { "iceage", "Kỷ Băng Hà" },
             { "chainlightning", "Xích Lôi" }, { "thunderstep", "Thiểm Bộ" }, { "lightningbrand", "Lôi Ấn" },
@@ -346,14 +348,14 @@ namespace RPG.EditorTools
             { "shadowclone", "Phân Thân" }, { "soulsiphon", "Hút Hồn" }, { "eclipse", "Nhật Thực" },
         };
 
-        /// <summary>Sách Chiêu (T63): one Bí Kíp for each spell of the Băng, Lôi and Ám schools (Spellbook.All).</summary>
+        /// <summary>Sách Chiêu (T63, T64): one Bí Kíp for each spell of the Thánh Mộc, Băng, Lôi and Ám schools (Spellbook.All).</summary>
         static List<ItemDef> TomeItems()
         {
             var list = new List<ItemDef>();
             foreach (var e in Spellbook.All)
             {
                 string name = SpellNames.TryGetValue(e.id, out var n) ? n : e.id;
-                bool ultimate = e.id == "iceage" || e.id == "thunderstorm" || e.id == "eclipse";
+                bool ultimate = Spellbook.IsUltimateId(e.id);
                 string school = Spellbook.SchoolName(e.school);
                 list.Add(Item(e.TomeId, "Bí Kíp: " + name, ItemKind.Tome, ultimate ? ItemRarity.Epic : ItemRarity.Rare,
                     $"Sách cổ hệ {school} chép chiêu {(ultimate ? "Tuyệt kỹ " : "")}{name}, rơi từ {e.from}. Đọc xong, sách tan thành bụi sáng.",

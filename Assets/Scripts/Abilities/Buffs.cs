@@ -3,8 +3,8 @@ using System.Collections.Generic;
 namespace RPG
 {
     /// <summary>
-    /// Finds a buff by id: the ones skills give (a Buff block anywhere in an ability's timeline)
-    /// and Lướt Hoàn Hảo's bonus. Online, the server names a buff and every screen shows it.
+    /// Finds a buff by id: the ones skills give (a Buff block anywhere in an ability's timeline,
+    /// Thánh Địa's ground) and Lướt Hoàn Hảo's bonus. Online, the server names a buff and every screen shows it.
     /// </summary>
     public static class Buffs
     {
@@ -39,6 +39,9 @@ namespace RPG
                 {
                     case BuffEffect b when b.buff != null && !string.IsNullOrEmpty(b.buff.id):
                         if (!map.ContainsKey(b.buff.id)) map[b.buff.id] = b.buff;
+                        break;
+                    case SanctuaryEffect s when s.buff != null && !string.IsNullOrEmpty(s.buff.id):
+                        if (!map.ContainsKey(s.buff.id)) map[s.buff.id] = s.buff;
                         break;
                     case DamageEffect d: Walk(d.onAnyHit); break;
                     case LineEffect l: Walk(l.each); break;

@@ -774,7 +774,53 @@ namespace RPG.EditorTools
                         });
                     }),
 
-                // ============================================== Sách Chiêu (T63): learned from Bí Kíp, see Spellbook
+                // ============================================== Sách Chiêu (T63, T64): learned from Bí Kíp, see Spellbook
+                // ---------------------------------------------- Thánh Mộc (Hồi Phục, Khiên Thánh and Rễ Trói are older skills)
+                Ability("forestspirits", "Tinh Linh Rừng", AbilityTags.Holy | AbilityTags.Summon, 22f, 20f, "cast", 0.35f,
+                    "Gọi hai tinh linh rừng bay quanh ngươi 12 giây, thay phiên bắn hạt sáng vào kẻ địch gần nhất. Hết giờ, chúng tan vào ngươi và hồi 5% máu.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Self;
+                        a.castSfx = "sfx_wisp";
+                        a.effects.Add(Cue(new Anchor(Anchor.From.Caster, 0.6f), "nature_burst", null, 0.8f, 0f, 0.8f));
+                        a.effects.Add(new SpiritsEffect
+                        {
+                            count = 2, duration = 12f, interval = 1.2f, range = 6f, hit = Hit(0.3f, Ho, 0.08f, 0.5f, 1f), healOnEnd = 0.05f
+                        });
+                    }),
+                Ability("judgment", "Ánh Sáng Phán Xét", AbilityTags.Holy | AbilityTags.Area, 10f, 16f, "cast", 0.35f,
+                    "Cột sáng giáng xuống vị trí chuột (1.5 ô): sát thương lớn và Phán Xét 5 giây (chịu thêm 20% sát thương từ mọi nguồn).", a =>
+                    {
+                        a.targeting = AbilityTargeting.Point;
+                        a.maxRange = 9f;
+                        a.castSfx = "sfx_shield";
+                        a.effects.Add(Cue(Point, "judgment_mark", null));
+                        a.effects.Add(new CueEffect
+                        {
+                            delay = 0.3f, at = Point, vfx = "judgment", sfx = "sfx_thunder", sfxVolume = 0.5f, sfxPitchVariance = 0.1f, sfxAtPoint = true,
+                            shake = 0.15f, flashColor = new Color(1f, 0.95f, 0.6f), flashStrength = 0.08f, flashDuration = 0.15f
+                        });
+                        a.effects.Add(Circle(Point, 1.5f, Hit(2f, Ho, 0.12f, 2f, 10f, Status(judgment: 5f)), 0.3f));
+                    }),
+                Ability("sanctuary", "Thánh Địa", AbilityTags.Holy | AbilityTags.Area | AbilityTags.Support | AbilityTags.Ultimate, 30f, 36f, "cast", 0.5f,
+                    "Biến chỗ ngươi đứng thành đất thánh 5 ô trong 8 giây: đồng đội bên trong hồi 4% máu mỗi giây và miễn choáng, trói, đóng băng; kẻ địch bên trong chậm 25%.", a =>
+                    {
+                        a.targeting = AbilityTargeting.Self;
+                        a.castSfx = "sfx_heal";
+                        a.effects.Add(new CueEffect
+                        {
+                            at = Caster, vfx = "holy_strike", vfxScale = 1.4f, sfx = "sfx_levelup", sfxVolume = 0.7f, shake = 0.2f,
+                            flashColor = new Color(1f, 0.95f, 0.6f), flashStrength = 0.15f, flashDuration = 0.4f
+                        });
+                        a.effects.Add(new SanctuaryEffect
+                        {
+                            at = Origin, radius = 5f, duration = 8f, interval = 0.5f, healPerSecond = 0.04f, slow = 0.25f,
+                            buff = new BuffSpec
+                            {
+                                id = "sanctuary", displayName = "Thánh Địa", icon = ArtImporter.S("sk_sanctuary"), duration = 8f,
+                                stunImmune = true, clearStun = true, attachedVfx = "heal_aura"
+                            }
+                        });
+                    }),
                 // ---------------------------------------------- Băng
                 Ability("frostarrows", "Băng Tiễn", AbilityTags.Ice | AbilityTags.Projectile, 4f, 10f, "cast", 0.35f,
                     "Ba mũi tên băng liên tiếp về phía chuột, mỗi mũi gây 1 tầng Lạnh.", a =>

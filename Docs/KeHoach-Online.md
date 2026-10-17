@@ -290,12 +290,24 @@ Giao thức lên **12** (26/09): Hắc Phong (T62, `Docs/ThaoNguyen.md` mục H�
 
 Sửa kèm: chơi một mình thì intro, thanh máu, nhạc của boss và dòng "Kỹ năng: …" trên đầu quái không hiện (chúng tra số hiệu mạng, mà offline không có); nay máy có màn hình tự hiện, máy chủ vẫn gửi cho người chơi như cũ.
 
+Giao thức lên **14** (17/10): hệ Thánh Mộc của Sách Chiêu (T64). Thêm 3 chiêu, 6 Bí Kíp do Gấu Ma giữ; game cũ không biết chúng nên phải tải bản mới.
+- **Tinh Linh Rừng** và **Thánh Địa** không cần tin nhắn riêng: mỗi màn hình tự vẽ tinh linh và đất thánh từ cùng một lần tung chiêu (`CastShown`); máy chủ bắn hạt sáng, hồi máu và làm chậm quái.
+- **Trạng thái Thánh Địa** (miễn choáng, trói, đóng băng) là một buff máy chủ trao khi anh hùng bước vào và gỡ khi bước ra, gửi bằng `BuffMsg` sẵn có. `Buffs.Find` nay tìm cả buff nằm trong khối `Sanctuary`, nên mọi máy biết nó. Buff nào có `clearStun` thì gỡ choáng ngay trên mọi máy nhận nó, không chỉ ở máy chủ.
+
 Giao thức lên **13** (26/09): Sách Chiêu (T63, `Docs/NhanVat.md` mục Sách Chiêu). 18 chiêu hệ Băng, Lôi, Ám học từ Bí Kíp boss rơi.
 - **Chiêu đã học và thanh chiêu nằm trong `HeroLook`** (`spells`, `bar`), nên đi theo đường sẵn có: lưu trong phần `player`, `HeroInfoMsg` gửi tới mọi máy, bản sao của người khác gắn đúng chiêu ở từng ô (`ApplyKit`) để hiện đúng chiêu người đó tung. `CharacterChoice` giữ nguyên hai danh sách này của máy chủ khi người chơi đổi ngoại hình (`ChooseLook` không sửa được chúng).
 - **Học** là `ActKind.UseItem` với một Bí Kíp: máy chủ kiểm tra lớp và chiêu chưa học, rồi mới lấy sách. **Đặt chiêu** là `ActKind.SetSkill` mới (`value` = ô 1–6, `text` = id chiêu, rỗng để trả về chiêu của lớp): máy chủ kiểm tra đã học, lớp được dùng, Tuyệt kỹ chỉ ở ô D, và không đang giao chiến (4 giây không bị đánh, không quái nào đang đuổi). Bị từ chối thì người đó thấy lý do trên đầu nhân vật.
 - **Rương boss** chỉ gieo Bí Kíp cho người còn học được (đúng lớp, chưa học); mỗi người có công gieo riêng như mọi đồ rơi.
 - Hồi chiêu đi theo chiêu chứ không theo ô, trên máy chủ cũng như máy người chơi.
 - Chiêu mới không cần tin nhắn riêng: tia sét nhảy, tia hút hồn, quả cầu điện và phân thân được mỗi màn hình tự vẽ từ cùng một lần tung chiêu (`CastShown`), máy chủ tính sát thương.
+
+### Đã kiểm tra (17/10, giao thức 14)
+
+- 202 test EditMode (2 test phông chữ bỏ qua như trước). `SpellbookTests`: bốn hệ đủ 6 chiêu, lớp đã có chiêu trong bộ kỹ năng thì không có sách của chiêu đó; bài mới cho Tinh Linh Rừng (hạt sáng trúng, hết giờ hồi 5%), Ánh Sáng Phán Xét (trúng và Phán Xét, chỉ chỗ cột sáng rơi) và Thánh Địa (hồi máu, không bị choáng, quái chậm mà không mất máu, bước ra mất bảo vệ, bước vào lại có lại, hết 8 giây thì tắt).
+- `Tools/Server/netsmoke.ps1` 3 vòng, 0 lỗi. Bước mới: SmokeB thành Tế Sư, máy chủ đưa Bí Kíp Thánh Địa, B đọc sách, đặt lên D và dùng cạnh SmokeA; máy của A thấy A được bảo vệ (miễn choáng), máy của B cũng thấy. Vòng hai B vào lại vẫn còn Thánh Địa ở D.
+- Tour `-autoshotOnly spells` (28 ảnh): 0 lỗi.
+- Máy chủ thật trên máy nhà đã lên giao thức 14 (17/10 lúc 23:06, không ai đang chơi, 7 tài khoản giữ nguyên). `RungThiTham.zip` trên Desktop đã đóng gói lại cùng bản build; game giao thức 13 sẽ được báo tải bản mới.
+- Không chạy lại `loadtest.ps1`: không có loại tin nhắn mới, chỉ thêm `BuffMsg` khi vào hoặc ra Thánh Địa.
 
 ### Đã kiểm tra (26/09, giao thức 13)
 

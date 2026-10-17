@@ -72,7 +72,7 @@ namespace RPG
         static readonly List<Health> Buffer = new List<Health>(8);
 
         /// <summary>The caster's healing power (Thông Thái).</summary>
-        static float Power(AbilityContext ctx)
+        internal static float Power(AbilityContext ctx)
         {
             var pc = ctx.caster as PlayerController;
             return pc != null && pc.stats != null ? pc.stats.HealingPower : 1f;

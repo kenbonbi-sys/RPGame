@@ -2,6 +2,7 @@
 #   Vòng 1: SmokeA (có cửa sổ, chụp ảnh) và SmokeB (chạy nền) vào, thấy nhau đi, lập tổ đội, chat tổ đội, nhắn riêng,
 #           SmokeA kết bạn với SmokeB, mặc Kiếm Sắt vào tay phụ, bay qua Khe Vực bằng Cột Gió (SmokeB đứng bờ bên kia
 #           phải thấy A bay lên rồi đáp xuống, và thấy cung thủ Hắc Phong vẽ đúng diện mạo); mỗi người đánh chết một Slime Rêu, nhận XP từ máy chủ.
+#           SmokeB thành Tế Sư, đọc Bí Kíp Thánh Địa máy chủ đưa, đặt lên ô D và dùng cạnh SmokeA: cả hai phải thấy A được Thánh Địa bảo vệ.
 #   Vòng 2: cả hai vào lại; SmokeA phải còn nguyên cấp và XP như lúc thoát (máy chủ đã lưu), còn bạn bè và còn mặc Kiếm Sắt.
 #   Vòng 3: hai kênh trên cùng dữ liệu; SmokeA vào kênh 1, gõ /kenh 2 và phải sang kênh 2 với đúng nhân vật.
 # Kết quả: mã thoát 0 = tất cả qua. Log và ảnh ở thư mục -Out.
@@ -43,7 +44,7 @@ Start-Sleep -Seconds 8
 Write-Host "Vòng 1: hai người chơi mới"
 $a = Start-Game "round1_SmokeA" @("-client", "127.0.0.1", "-login", "SmokeA", "matkhau", "-register", "-screen-width", "1280", "-screen-height", "720", "-screen-fullscreen", "0")
 $b = Start-Game "round1_SmokeB" @("-client", "127.0.0.1", "-login", "SmokeB", "matkhau", "-register", "-batchmode", "-nographics")
-Wait-All @($a, $b) 150
+Wait-All @($a, $b) 190
 Report "round1_SmokeA"; Report "round1_SmokeB"
 $ok = ($a.ExitCode -eq 0) -and ($b.ExitCode -eq 0)
 
@@ -54,7 +55,7 @@ else { $expect = "$($saved.Matches[0].Groups[1].Value) $($saved.Matches[0].Group
 Write-Host "Vòng 2: vào lại, SmokeA phải còn cấp và XP ($expect)"
 $a2 = Start-Game "round2_SmokeA" @("-client", "127.0.0.1", "-login", "SmokeA", "matkhau", "-netsmokeAgain", "-netsmokeExpect", "`"$expect`"", "-screen-width", "1280", "-screen-height", "720", "-screen-fullscreen", "0")
 $b2 = Start-Game "round2_SmokeB" @("-client", "127.0.0.1", "-login", "SmokeB", "matkhau", "-netsmokeAgain", "-batchmode", "-nographics")
-Wait-All @($a2, $b2) 150
+Wait-All @($a2, $b2) 190
 Report "round2_SmokeA"; Report "round2_SmokeB"
 $ok = $ok -and ($a2.ExitCode -eq 0) -and ($b2.ExitCode -eq 0)
 

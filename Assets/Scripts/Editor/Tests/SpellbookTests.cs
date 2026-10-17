@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 namespace RPG.EditorTools.Tests
 {
     /// <summary>
-    /// Sách Chiêu (T63) in the real world scene played offline: the Băng, Lôi and Ám schools have
+    /// Sách Chiêu (T63, T64) in the real world scene played offline: the Thánh Mộc, Băng, Lôi and Ám schools have
     /// six spells each with a Tuyệt kỹ, a book and a boss that keeps it; a Bí Kíp is read only by
     /// the classes whose D&amp;D list has the spell; a learned spell takes a bar slot (W E R A S, or
     /// D for a Tuyệt kỹ) out of a fight, keeps its cooldown when moved, and is saved with the
@@ -122,10 +122,11 @@ namespace RPG.EditorTools.Tests
 
         // ================================================================== the schools
         [UnityTest]
-        public IEnumerator TheThreeSchoolsHaveSixSpellsABookAndAKeeperEach()
+        public IEnumerator TheFourSchoolsHaveSixSpellsABookAndAKeeperEach()
         {
             var db = GameManager.I.db;
-            Assert.AreEqual(18, Spellbook.All.Length, "eighteen spells (plan §06)");
+            Assert.AreEqual(24, Spellbook.All.Length, "twenty-four spells (plan §06)");
+            Assert.AreEqual(4, System.Enum.GetValues(typeof(Spellbook.School)).Length, "Thánh Mộc, Băng, Lôi, Ám");
             foreach (Spellbook.School school in System.Enum.GetValues(typeof(Spellbook.School)))
             {
                 var of = System.Array.FindAll(Spellbook.All, e => e.school == school);
@@ -143,7 +144,12 @@ namespace RPG.EditorTools.Tests
                 Assert.AreEqual(ItemKind.Tome, tome.kind);
                 Assert.NotNull(tome.icon, e.TomeId + " has an icon");
                 Assert.AreSame(e, Spellbook.OfTome(tome));
-                foreach (var c in e.classes) Assert.NotNull(db.Class(c), $"{e.id}: class {c}");
+                foreach (var c in e.classes)
+                {
+                    Assert.NotNull(db.Class(c), $"{e.id}: class {c}");
+                    Assert.AreEqual(-1, System.Array.IndexOf(db.Class(c).kit, e.id), $"{c} has {e.id} in its kit already: no book for it");
+                }
+                Assert.AreEqual(Spellbook.IsUltimate(e.id), Spellbook.IsUltimateId(e.id), e.id + ": a Tuyệt kỹ's book is rarer");
                 var loot = new List<LootEntry>();
                 Spellbook.AddBossBooks(BossId(e.from), loot);
                 Assert.IsTrue(loot.Exists(l => l.itemId == e.TomeId), $"{e.from} keeps {e.TomeId}");
@@ -163,6 +169,7 @@ namespace RPG.EditorTools.Tests
         {
             switch (name)
             {
+                case "Gấu Ma": return "bear";
                 case "Cóc Tía": return "toadking";
                 case "Xà Mẫu": return "snake";
                 case "Golem Pha Lê Cổ": return "crystalgolem";
@@ -277,7 +284,7 @@ namespace RPG.EditorTools.Tests
             ui.Show();
             yield return GameSmokeTests.Frames(3);
             Assert.IsTrue(ui.IsOpen);
-            Assert.GreaterOrEqual(ui.GetComponentsInChildren<UiHover>(true).Length, 24, "six slots and eighteen spells");
+            Assert.GreaterOrEqual(ui.GetComponentsInChildren<UiHover>(true).Length, 30, "six slots and twenty-four spells");
             ui.DebugPick("chainlightning");
             yield return null;
             ui.Close();
@@ -421,6 +428,73 @@ namespace RPG.EditorTools.Tests
             yield return GameSmokeTests.GameSeconds(6.2f);
             Assert.AreEqual(crit, hero.stats.Stats.Get(StatId.CritChance), 0.01f, "for six seconds");
             Assert.IsTrue(Hurt(d[0]), "then the darkness bursts");
+        }
+
+        [UnityTest]
+        public IEnumerator TheHolySpellsSpiritsJudgmentAndSanctuary()
+        {
+            var hero = Hero("druid");
+            Knows(hero, "forestspirits", "judgment", "sanctuary");
+            var d = Dummies(3);
+            Vector2 first = d[0].transform.position;
+
+            // Tinh Linh Rừng: two spirits shoot the foe beside the hero, then heal 5% as they go
+            hero.health.invulnerable = true;
+            OnBar(hero, 1, "forestspirits");
+            hero.motor.Teleport(first + Vector2.left * 2f);
+            hero.energy = hero.maxEnergy;
+            hero.skills.ResetCooldowns();
+            yield return GameSmokeTests.GameSeconds(0.05f);
+            Assert.IsTrue(hero.skills.TryCast(1, first), "Tinh Linh Rừng casts");
+            yield return GameSmokeTests.GameSeconds(2.5f);
+            Assert.IsTrue(Hurt(d[0]), "the spirits' motes strike");
+            yield return GameSmokeTests.GameSeconds(9f);
+            hero.health.invulnerable = false;
+            hero.health.hp = hero.health.maxHp * 0.5f;
+            float before = hero.health.hp;
+            yield return GameSmokeTests.GameSeconds(1.2f);
+            Assert.Greater(hero.health.hp - before, hero.health.maxHp * 0.04f, "they melt into the hero: +5% health");
+            hero.health.invulnerable = true;
+
+            // Ánh Sáng Phán Xét: a pillar on the aim, damage and Phán Xét
+            Heal(d);
+            Line(d);
+            OnBar(hero, 1, "judgment");
+            yield return Cast(hero, 1, first, 0.6f);
+            Assert.IsTrue(Hurt(d[0]), "the pillar strikes");
+            Assert.IsTrue(d[0].status.IsJudged, "and judges");
+            Assert.IsFalse(Hurt(d[2]), "only where it falls");
+
+            // Thánh Địa: heals inside, no stuns, foes slowed; stepping out ends the protection
+            Heal(d);
+            Line(d);
+            OnBar(hero, 6, "sanctuary");
+            hero.health.invulnerable = false;
+            hero.health.hp = hero.health.maxHp * 0.4f;
+            before = hero.health.hp;
+            hero.motor.Teleport(first + Vector2.left * 1.5f);
+            hero.energy = hero.maxEnergy;
+            hero.skills.ResetCooldowns();
+            yield return GameSmokeTests.GameSeconds(0.05f);
+            Assert.IsTrue(hero.skills.TryCast(6, first), "Thánh Địa casts");
+            yield return GameSmokeTests.GameSeconds(1.3f);
+            Assert.IsTrue(hero.HasBuff("sanctuary"), "the hero inside has its protection");
+            Assert.IsTrue(hero.status.stunImmune, "no stuns, roots or freezes inside");
+            hero.status.Stun(2f);
+            Assert.IsFalse(hero.status.IsStunned, "a stun does not take");
+            Assert.Greater(hero.health.hp - before, hero.health.maxHp * 0.03f, "it heals about 4% a second");
+            Assert.IsTrue(d[0].status.IsSlowed, "a foe inside is slowed");
+            Assert.IsFalse(Hurt(d[0]), "but not hurt");
+            hero.motor.Teleport(first + Vector2.left * 9f);
+            yield return GameSmokeTests.GameSeconds(0.7f);
+            Assert.IsFalse(hero.HasBuff("sanctuary"), "stepping out ends it");
+            Assert.IsFalse(hero.status.stunImmune);
+            hero.motor.Teleport(first + Vector2.left * 1.5f);
+            yield return GameSmokeTests.GameSeconds(0.7f);
+            Assert.IsTrue(hero.HasBuff("sanctuary"), "stepping back in gives it again");
+            yield return GameSmokeTests.GameSeconds(6.5f);
+            Assert.IsFalse(hero.HasBuff("sanctuary"), "the ground fades after eight seconds");
+            Assert.IsFalse(hero.status.stunImmune);
         }
 
         [UnityTest]

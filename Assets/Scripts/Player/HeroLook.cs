@@ -29,7 +29,7 @@ namespace RPG
         public int metal;
         /// <summary>Leaves off the class's hood or hat, showing the hair.</summary>
         public bool bareHead;
-        /// <summary>The spells of the schools (Băng, Lôi, Ám) learned from Bí Kíp: ability ids (<see cref="Spellbook"/>).</summary>
+        /// <summary>The spells of the schools (Thánh Mộc, Băng, Lôi, Ám) learned from Bí Kíp: ability ids (<see cref="Spellbook"/>).</summary>
         public string[] spells = new string[0];
         /// <summary>
         /// The skill bar's W E R A S D (slots 1–6): a learned spell put there, or "" for the class's

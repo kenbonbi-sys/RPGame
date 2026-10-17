@@ -5,7 +5,7 @@ using UnityEngine;
 namespace RPG
 {
     /// <summary>
-    /// Sách Chiêu (plan §06, T63): the spells of the Băng, Lôi and Ám schools. Each is learned once
+    /// Sách Chiêu (plan §06, T63, T64): the spells of the Thánh Mộc, Băng, Lôi and Ám schools. Each is learned once
     /// from its Bí Kíp (a book the region's bosses drop) and only by the classes that have it on
     /// their D&D spell list (Chain Lightning for a sorcerer, not a fighter), then put on the skill
     /// bar in place of one of the class's own skills: W E R A S take ordinary spells, D a Tuyệt kỹ.
@@ -15,7 +15,8 @@ namespace RPG
     /// </summary>
     public static class Spellbook
     {
-        public enum School { Ice, Lightning, Dark }
+        /// <summary>The schools in the order of the world's regions (the Sách Chiêu's columns).</summary>
+        public enum School { Holy, Ice, Lightning, Dark }
 
         public class Entry
         {
@@ -33,11 +34,18 @@ namespace RPG
         /// <summary>Slots of the bar a spell may take: W E R A S (1–5) ordinary spells, D (6) a Tuyệt kỹ.</summary>
         public const int FirstSlot = 1, UltimateSlot = 6;
 
-        /// <summary>The eighteen spells, six a school (plan §06), in the order the Sách Chiêu lists them.</summary>
+        /// <summary>The twenty-four spells, six a school (plan §06), in the order the Sách Chiêu lists them.</summary>
         public static readonly Entry[] All =
         {
+            // Thánh Mộc: the forest's Gấu Ma keeps them all (classes that already have a spell in their kit are left out)
+            new Entry { id = "heal", school = School.Holy, classes = new[] { "bard", "paladin", "ranger" }, from = "Gấu Ma" },
+            new Entry { id = "shield", school = School.Holy, classes = new[] { "warlock", "wizard" }, from = "Gấu Ma" },
+            new Entry { id = "entangle", school = School.Holy, classes = new[] { "ranger" }, from = "Gấu Ma" },
+            new Entry { id = "forestspirits", school = School.Holy, classes = new[] { "druid", "ranger", "warlock" }, from = "Gấu Ma" },
+            new Entry { id = "judgment", school = School.Holy, classes = new[] { "druid", "sorcerer", "wizard", "cleric" }, from = "Gấu Ma" },
+            new Entry { id = "sanctuary", school = School.Holy, classes = new[] { "bard", "cleric", "druid", "paladin" }, from = "Gấu Ma" },
             // Băng: Đầm Lầy Sương Mù's bosses keep their books
-            new Entry { id = "ice", school = School.Ice, classes = new[] { "sorcerer", "wizard", "druid" }, from = "Cóc Tía" },
+            new Entry { id = "ice", school = School.Ice, classes = new[] { "sorcerer", "druid" }, from = "Cóc Tía" },
             new Entry { id = "frostarrows", school = School.Ice, classes = new[] { "sorcerer", "wizard", "ranger" }, from = "Cóc Tía" },
             new Entry { id = "frostarmor", school = School.Ice, classes = new[] { "warlock", "wizard", "sorcerer", "barbarian", "fighter" }, from = "Cóc Tía" },
             new Entry { id = "iceprison", school = School.Ice, classes = new[] { "druid", "sorcerer", "wizard" }, from = "Xà Mẫu" },
@@ -60,10 +68,35 @@ namespace RPG
             new Entry { id = "eclipse", school = School.Dark, classes = new[] { "rogue", "warlock", "monk" }, from = "Thủ Lĩnh Hắc Phong" },
         };
 
-        public static string SchoolName(School s) => s == School.Ice ? "Băng" : s == School.Lightning ? "Lôi" : "Ám";
+        public static string SchoolName(School s)
+        {
+            switch (s)
+            {
+                case School.Holy: return "Thánh Mộc";
+                case School.Ice: return "Băng";
+                case School.Lightning: return "Lôi";
+                default: return "Ám";
+            }
+        }
 
-        public static Color SchoolColor(School s) =>
-            s == School.Ice ? new Color(0.55f, 0.85f, 1f) : s == School.Lightning ? new Color(0.75f, 0.7f, 1f) : new Color(0.8f, 0.45f, 0.95f);
+        public static Color SchoolColor(School s)
+        {
+            switch (s)
+            {
+                case School.Holy: return new Color(0.82f, 0.92f, 0.45f);
+                case School.Ice: return new Color(0.55f, 0.85f, 1f);
+                case School.Lightning: return new Color(0.75f, 0.7f, 1f);
+                default: return new Color(0.8f, 0.45f, 0.95f);
+            }
+        }
+
+        /// <summary>"Thánh Mộc, Băng, Lôi, Ám".</summary>
+        public static string SchoolNames()
+        {
+            var names = new List<string>();
+            foreach (School s in Enum.GetValues(typeof(School))) names.Add(SchoolName(s));
+            return string.Join(", ", names);
+        }
 
         public static Entry Find(string id)
         {
@@ -261,6 +294,7 @@ namespace RPG
         {
             switch (name)
             {
+                case "Gấu Ma": return "bear";
                 case "Cóc Tía": return "toadking";
                 case "Xà Mẫu": return "snake";
                 case "Golem Pha Lê Cổ": return "crystalgolem";
@@ -271,7 +305,7 @@ namespace RPG
             }
         }
 
-        // the three Tuyệt kỹ are rarer (the table can be read before the database is: no Ability lookup)
-        static bool IsUltimateId(string id) => id == "iceage" || id == "thunderstorm" || id == "eclipse";
+        /// <summary>The four Tuyệt kỹ (rarer books; the table can be read before the database is: no Ability lookup).</summary>
+        public static bool IsUltimateId(string id) => id == "sanctuary" || id == "iceage" || id == "thunderstorm" || id == "eclipse";
     }
 }

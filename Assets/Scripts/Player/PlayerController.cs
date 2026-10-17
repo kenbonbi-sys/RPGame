@@ -174,6 +174,8 @@ namespace RPG
             b.icon = spec.icon;
             b.duration = spec.duration;
             b.until = Time.time + (remaining >= 0f ? remaining : spec.duration);
+            // a buff that ends stuns (Khiên Thánh, Thánh Địa) ends them on every screen it reaches
+            if (spec.clearStun && status != null) status.ClearStun();
             ApplyBuffs();
             if (GameSession.Serving) NetWorld.BuffChanged(this, spec.id, b.Remaining, true);
         }

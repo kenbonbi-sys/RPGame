@@ -187,6 +187,16 @@ MonoBehaviour:
     prefab: {fileID: 4767206212614951428, guid: 6b68c320ed8397a41ab21c0c839d8f3c, type: 3}
   - id: eclipse
     prefab: {fileID: 8997331594301056987, guid: 048a44e701e27c94cbb91726df44f6e7, type: 3}
+  - id: forest_spirit
+    prefab: {fileID: 975722565702216853, guid: 1f0d0351760a06c42811ef5c9b67b7ef, type: 3}
+  - id: spirit_shot
+    prefab: {fileID: 6102397188753933480, guid: 7f4a6eedc76b60249813c93e52a91e6f, type: 3}
+  - id: judgment_mark
+    prefab: {fileID: 5281382908477346406, guid: 0855f594bf532d548942f753456c1de0, type: 3}
+  - id: judgment
+    prefab: {fileID: 6600708231023695967, guid: 48e8832033b47d140bce9feb02e51d3d, type: 3}
+  - id: sanctuary
+    prefab: {fileID: 4604123851170038131, guid: b87e53d856d438745b4f96aa098a72b0, type: 3}
   particleBudget: 150
   lightBudget: 1
   ultimateIds:

@@ -225,6 +225,18 @@ def leaf(tone):
     return cv
 
 
+def flower():
+    """A tiny flower (Thánh Địa): white petals to tint, a yellow heart."""
+    cv = Canvas(5, 5)
+    rows = [".a.a.", "abcba", ".cyc.", "abcba", ".a.a."]
+    cmap = {"a": (255, 255, 255, 255), "b": (236, 236, 244, 255), "c": (214, 214, 226, 255), "y": hx("#ffd84a")}
+    for y, r in enumerate(rows):
+        for x, ch in enumerate(r):
+            if ch in cmap:
+                cv.px(x, y, cmap[ch])
+    return cv
+
+
 def slash_frames(n=5, S=48):
     """Crescent slash sweeping ~150 degrees. Grayscale."""
     frames = []
@@ -613,7 +625,7 @@ def build():
     }
     pixel_single = [
         ("px_square", px_square()), ("spark4", spark4()), ("plus", plus()),
-        ("leaf_green", leaf(P["leaf"])), ("leaf_autumn", leaf(P["autumn"])),
+        ("leaf_green", leaf(P["leaf"])), ("leaf_autumn", leaf(P["autumn"])), ("flower", flower()),
         ("ice_shard", ice_shard()), ("magic_circle", magic_circle()), ("crack", crack_decal()),
         ("debris_0", debris(1)), ("debris_1", debris(2)),
         ("proj_arrow", proj_arrow()), ("proj_knife", proj_knife()), ("proj_axe", proj_axe()), ("proj_note", proj_note()),

@@ -29,6 +29,8 @@ Mỗi chiêu là một asset `AbilityDef` gồm chi phí, hồi chiêu, nhãn v�
 | **Beam** | Hút Hồn | Tia kênh vào một kẻ trong `duration` giây, mỗi `interval` đánh một lần, `lifesteal` hồi máu theo sát thương |
 | **Orb** | Lôi Cầu | Quả cầu bay chậm theo hướng chiêu, giật mọi kẻ trong `radius` mỗi nhịp, nổ ở cuối đường bay hoặc khi chạm đá |
 | **Clone** | Phân Thân | Bóng của người dùng đứng cạnh `duration` giây, chém kẻ gần nó mỗi `interval`, hết giờ nổ (`burst`) |
+| **Spirits** | Tinh Linh Rừng | `count` tinh linh bay quanh đầu người dùng `duration` giây, thay phiên bắn hạt sáng (`hit`) vào kẻ gần nhất trong `range`, mỗi con một lần mỗi `interval`; hết giờ hồi `healOnEnd` máu tối đa |
+| **Sanctuary** | Thánh Địa | Vùng `radius` đứng yên tại `at` trong `duration` giây, kể cả khi người dùng gục: anh hùng bên trong hồi `healPerSecond` máu tối đa mỗi giây và có `buff` (miễn khống chế) tới khi bước ra; kẻ địch bên trong chậm `slow` |
 
 ## Con số
 

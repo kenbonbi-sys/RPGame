@@ -70,11 +70,17 @@ Q là đòn thường của vũ khí; với vật dẫn phép (trượng, đũa,
 
 ## Sách Chiêu (K)
 
-Ngoài 6 chiêu của lớp, nhân vật học thêm chiêu của ba hệ **Băng**, **Lôi**, **Ám** (T63) từ **Bí Kíp**. Mỗi Bí Kíp dạy một chiêu, chỉ các lớp có phép tương ứng trong D&D 5e mới học được; chuột phải Bí Kíp trong túi để học (sách biến mất), lớp không học được thì sách ở lại. Bí Kíp rơi trong rương boss, mỗi người có công một lần gieo: chiêu thường 22%, Tuyệt kỹ 12%.
+Ngoài 6 chiêu của lớp, nhân vật học thêm chiêu của bốn hệ **Thánh Mộc** (T64), **Băng**, **Lôi**, **Ám** (T63) từ **Bí Kíp**. Mỗi Bí Kíp dạy một chiêu, chỉ các lớp có phép tương ứng trong D&D 5e mới học được; chuột phải Bí Kíp trong túi để học (sách biến mất), lớp không học được thì sách ở lại. Bí Kíp rơi trong rương boss, mỗi người có công một lần gieo: chiêu thường 22%, Tuyệt kỹ 12%.
 
 | Hệ | Chiêu | Lớp học được | Boss giữ sách |
 |---|---|---|---|
-| Băng | Mũi Băng | Thuật Sĩ, Pháp Sư, Tế Sư | Cóc Tía |
+| Thánh Mộc | Hồi Phục: hồi ngay 40 máu và hồi thêm trong 4 s | Thi Sĩ, Hiệp Sĩ Thánh, Du Hiệp | Gấu Ma |
+| Thánh Mộc | Khiên Thánh: 5 s nhận ít hơn 60% và miễn choáng | Khế Ước Sư, Pháp Sư | Gấu Ma |
+| Thánh Mộc | Rễ Trói: rễ trói chân 2 s và gây Độc | Du Hiệp | Gấu Ma |
+| Thánh Mộc | Tinh Linh Rừng: hai tinh linh bay quanh 12 s, thay phiên bắn hạt sáng (30%) vào kẻ gần nhất; hết giờ hồi 5% máu | Tế Sư, Du Hiệp, Khế Ước Sư | Gấu Ma |
+| Thánh Mộc | Ánh Sáng Phán Xét: cột sáng 1.5 ô tại chuột, 200% và Phán Xét 5 s (chịu thêm 20% sát thương) | Tế Sư, Thuật Sĩ, Pháp Sư, Tu Sĩ | Gấu Ma |
+| Thánh Mộc | *Thánh Địa* (Tuyệt kỹ): đất thánh 5 ô quanh chỗ đứng trong 8 s; đồng đội bên trong hồi 4% máu mỗi giây và miễn choáng, trói, đóng băng; kẻ địch bên trong chậm 25% | Thi Sĩ, Tu Sĩ, Tế Sư, Hiệp Sĩ Thánh | Gấu Ma |
+| Băng | Mũi Băng | Thuật Sĩ, Tế Sư | Cóc Tía |
 | Băng | Băng Tiễn: 3 mũi tên băng, mỗi mũi 1 tầng Lạnh | Thuật Sĩ, Pháp Sư, Du Hiệp | Cóc Tía |
 | Băng | Giáp Sương: 6 s nhận ít hơn 40%, kẻ đánh gần bị Lạnh | Khế Ước Sư, Pháp Sư, Thuật Sĩ, Cuồng Chiến Binh, Chiến Binh | Cóc Tía |
 | Băng | Ngục Băng: sau 0.6 s cột băng 2.5 ô, sát thương lớn và Đóng Băng | Tế Sư, Thuật Sĩ, Pháp Sư | Xà Mẫu |
@@ -93,7 +99,9 @@ Ngoài 6 chiêu của lớp, nhân vật học thêm chiêu của ba hệ **Băn
 | Ám | Hút Hồn: tia 2 s, hồi máu bằng 30% sát thương gây ra | Khế Ước Sư, Pháp Sư, Thuật Sĩ | Thủ Lĩnh Hắc Phong |
 | Ám | *Nhật Thực* (Tuyệt kỹ): 6 s chí mạng +50%, sát thương +15%, hết giờ bóng tối nổ 5 ô | Đạo Tặc, Khế Ước Sư, Võ Tăng | Thủ Lĩnh Hắc Phong |
 
-Phím **K** mở Sách Chiêu: trên là thanh W E R A S D với chiêu đang đặt (chiêu của lớp hay chiêu đã học, theo màu hệ), dưới là ba hệ, mỗi chiêu ghi đã học, đang ở ô nào, lớp khác hay chưa học và boss nào giữ sách. Bấm một chiêu đã học, các ô nhận được sẽ sáng lên; bấm ô để đặt. W E R A S nhận chiêu thường, **D chỉ nhận Tuyệt kỹ**. Chuột phải một ô để trả về chiêu của lớp. Chỉ đổi được khi không giao chiến (4 giây không bị đánh và không quái nào đang đuổi). Hồi chiêu đi theo chiêu: gỡ một Tuyệt kỹ vừa dùng rồi đặt lại không làm nó hồi sớm.
+Phím **K** mở Sách Chiêu: trên là thanh W E R A S D với chiêu đang đặt (chiêu của lớp hay chiêu đã học, theo màu hệ), dưới là bốn hệ theo thứ tự các vùng, mỗi chiêu ghi đã học, đang ở ô nào, lớp khác hay chưa học và boss nào giữ sách. Bấm một chiêu đã học, các ô nhận được sẽ sáng lên; bấm ô để đặt. W E R A S nhận chiêu thường, **D chỉ nhận Tuyệt kỹ**. Chuột phải một ô để trả về chiêu của lớp. Chỉ đổi được khi không giao chiến (4 giây không bị đánh và không quái nào đang đuổi). Hồi chiêu đi theo chiêu: gỡ một Tuyệt kỹ vừa dùng rồi đặt lại không làm nó hồi sớm.
+
+Lớp đã có một chiêu trong bộ kỹ năng của mình thì không học lại chiêu đó từ sách (Tu Sĩ và Tế Sư đã có Hồi Phục, Pháp Sư đã có Mũi Băng), nên rương cũng không gieo sách đó cho họ. Hồi Phục, Khiên Thánh và Rễ Trói là chiêu có sẵn của Tu Sĩ, Hiệp Sĩ Thánh và Tế Sư, nay các lớp khác học được từ sách. Thánh Địa vẫn ở yên chỗ đã dùng khi người dùng gục; ai bước ra ngoài thì hết miễn khống chế ngay, bước vào lại thì có lại.
 
 Chiêu đã học và thanh chiêu nằm trong ngoại hình nhân vật (`HeroLook.spells`, `HeroLook.bar`, `Player/Spellbook.cs`), nên được lưu cùng nhân vật và gửi tới mọi máy. Online máy chủ làm việc học (người chơi xin `UseItem`) và đặt chiêu (`SetSkill`), kiểm tra lớp, Tuyệt kỹ và giao chiến; đổi kiểu tóc hay vũ khí không làm mất chiêu.
 

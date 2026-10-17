@@ -18,6 +18,8 @@ namespace RPG
     /// them) and hits it until the server says it fell, and checks the server gave it the XP.
     /// SmokeA, a ranger, is given a Bí Kíp by the server, reads it and puts Băng Tiễn on W (the server
     /// checks both); SmokeB must see A's W become Băng Tiễn, and coming back A still has it there.
+    /// SmokeB, a druid, is given the Bí Kíp of Thánh Địa, puts it on D and casts it beside SmokeA:
+    /// the server's holy ground must give A its protection, and both screens must see A has it.
     /// On the first run SmokeA also flies over Khe Vực on a Cột Gió while SmokeB watches from the
     /// far rim: B must see A rise above the ravine and come down on its side.
     /// With -netsmokeAgain (a second run) SmokeA checks its friend is still listed, and with
@@ -141,16 +143,25 @@ namespace RPG
             Finish(true, $"{rounds} rounds of players came and left");
         }
 
-        readonly HashSet<PlayerController> booked = new HashSet<PlayerController>();
+        readonly HashSet<PlayerController> booked = new HashSet<PlayerController>(), holyBooked = new HashSet<PlayerController>();
 
-        /// <summary>A ranger that does not know Băng Tiễn gets its Bí Kíp, once (Sách Chiêu over the network).</summary>
+        /// <summary>
+        /// A ranger that does not know Băng Tiễn gets its Bí Kíp, a druid that does not know Thánh Địa
+        /// gets that one, once each (Sách Chiêu over the network).
+        /// </summary>
         void GiveBooks()
         {
-            var tome = GameManager.I != null ? GameManager.I.db.Item("tome_frostarrows") : null;
+            Give("ranger", "frostarrows", booked);
+            Give("druid", "sanctuary", holyBooked);
+        }
+
+        void Give(string cls, string spell, HashSet<PlayerController> given)
+        {
+            var tome = GameManager.I != null ? GameManager.I.db.Item(Spellbook.TomePrefix + spell) : null;
             if (tome == null) return;
             foreach (var p in Players.All)
-                if (p != null && p.stats != null && p.inventory != null && p.stats.look.cls == "ranger" &&
-                    !Spellbook.Knows(p.stats.look, "frostarrows") && p.inventory.Count(tome) == 0 && booked.Add(p))
+                if (p != null && p.stats != null && p.inventory != null && p.stats.look.cls == cls &&
+                    !Spellbook.Knows(p.stats.look, spell) && p.inventory.Count(tome) == 0 && given.Add(p))
                     p.inventory.Add(tome, 1, false);
         }
 
@@ -271,6 +282,10 @@ namespace RPG
                 Debug.Log($"[NetSmoke] {role}: sees the other's W as {(other != null && other.skills.slots[1] != null ? other.skills.slots[1].id : "-")} → {(spellOk ? "ok" : "NOT")}");
             }
 
+            // ---------------------------------------------------------------- Thánh Địa, through the server
+            bool holyOk = false;
+            yield return Sanctuary(me, other, expect != null, ok => holyOk = ok);
+
             // ---------------------------------------------------------------- playing together
             bool together = false;
             bool again = expect != null || Array.IndexOf(Environment.GetCommandLineArgs(), "-netsmokeAgain") >= 0;
@@ -329,8 +344,49 @@ namespace RPG
             yield return Shot(again ? "_again" : "");
             // the other player keeps fighting a little longer: stay so they still see this hero
             yield return Wait(GameSession.HasScreen ? 3f : 1f);
-            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk && gearOk && spellOk && flightOk,
-                   $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}, gear {gearOk}, spell {spellOk}, flight {flightOk}");
+            Finish(seen >= MinSeenWalk && killed && gotXp && together && classOk && gearOk && spellOk && holyOk && flightOk,
+                   $"walk {seen:0.0}, together {together}, kill {killed}, xp {gotXp}, class {classOk}, gear {gearOk}, spell {spellOk}, holy {holyOk}, flight {flightOk}");
+        }
+
+        /// <summary>
+        /// Thánh Mộc (T64): SmokeB becomes a druid, reads the Bí Kíp of Thánh Địa the server gave it,
+        /// puts it on D (the server checks both) and casts it beside SmokeA. The server runs the holy
+        /// ground: A must get its protection (no stuns) on its own screen, and B must see A has it.
+        /// </summary>
+        IEnumerator Sanctuary(PlayerController me, PlayerController other, bool cameBack, Action<bool> result)
+        {
+            if (LoginInfo.Name != null && LoginInfo.Name.EndsWith("A"))
+            {
+                yield return Until(() => me.HasBuff("sanctuary"), 45f);
+                bool ok = me.HasBuff("sanctuary") && me.status != null && me.status.stunImmune;
+                Debug.Log($"[NetSmoke] {role}: Thánh Địa's protection {(me.HasBuff("sanctuary") ? "on" : "off")} → {(ok ? "ok" : "NOT")}");
+                // stay inside until it fades, so B sees it too
+                yield return Until(() => !me.HasBuff("sanctuary"), 10f);
+                result(ok);
+                yield break;
+            }
+            var db = GameManager.I.db;
+            if (!cameBack && !me.stats.HasClass)
+                CharacterChoice.Choose(new HeroLook { race = "human", cls = "druid", weapon = db.Class("druid").DefaultWeapon, hair = 1, hairColor = 2 });
+            yield return Until(() => me.stats.look.cls == "druid", 8f);
+            var tome = db.Item("tome_sanctuary");
+            if (!Spellbook.Knows(me.stats.look, "sanctuary"))
+            {
+                yield return Until(() => me.inventory.Count(tome) > 0, 10f);
+                me.UseItem(tome);
+                yield return Until(() => Spellbook.Knows(me.stats.look, "sanctuary"), 8f);
+            }
+            if (Spellbook.OnBar(me.stats.look, Spellbook.UltimateSlot) != "sanctuary") Spellbook.Ask(Spellbook.UltimateSlot, "sanctuary");
+            yield return Until(() => me.skills.slots[Spellbook.UltimateSlot] != null && me.skills.slots[Spellbook.UltimateSlot].id == "sanctuary", 8f);
+            if (other != null) me.motor.Teleport((Vector2)other.transform.position + Vector2.right * 1.5f);
+            yield return Wait(0.6f);
+            yield return Until(() => me.energy >= 36f && me.skills.ReadyIn(Spellbook.UltimateSlot) <= 0f, 20f);
+            bool cast = me.skills.TryCast(Spellbook.UltimateSlot, me.transform.position);
+            yield return Until(() => other != null && other.HasBuff("sanctuary"), 8f);
+            bool seen = other != null && other.HasBuff("sanctuary");
+            Debug.Log($"[NetSmoke] {role}: D {(me.skills.slots[Spellbook.UltimateSlot] != null ? me.skills.slots[Spellbook.UltimateSlot].id : "-")}, cast {cast}, sees the other in Thánh Địa {seen} → {(cast && seen ? "ok" : "NOT")}");
+            yield return Wait(8.5f);
+            result(cast && seen);
         }
 
         /// <summary>

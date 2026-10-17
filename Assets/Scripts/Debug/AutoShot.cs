@@ -606,8 +606,8 @@ namespace RPG
 
         /// <summary>
         /// Sách Chiêu (-autoshotOnly spells): a Bí Kíp's tooltip and its reading, the window with a
-        /// spell picked, then every spell of the Băng, Lôi and Ám schools cast at three slimes that
-        /// stand still (a wizard, a warlock and a rogue between them).
+        /// spell picked, then every spell of the Thánh Mộc, Băng, Lôi and Ám schools cast at three slimes
+        /// that stand still (a wizard, a warlock, a rogue and a druid between them).
         /// </summary>
         IEnumerator Spells(PlayerController p, DayNightCycle dn)
         {
@@ -700,6 +700,7 @@ namespace RPG
                 ("wizard", "stormfield", 1.1f), ("wizard", "thunderstorm", 1.1f),
                 ("warlock", "curse", 0.35f), ("warlock", "shadowclone", 1.2f), ("warlock", "soulsiphon", 0.9f),
                 ("rogue", "shadowknives", 0.16f), ("rogue", "lightningbrand", 0.5f), ("rogue", "eclipse", 1.2f),
+                ("druid", "forestspirits", 1.6f), ("druid", "judgment", 0.42f), ("druid", "sanctuary", 1.4f),
             };
             string cls = "wizard";
             foreach (var c in casts)
@@ -708,7 +709,7 @@ namespace RPG
                 {
                     cls = c.cls;
                     p.stats.look = new HeroLook();
-                    CharacterChoice.Apply(p, new HeroLook { cls = cls, race = cls == "rogue" ? "halfling" : "tiefling", weapon = db.Class(cls).DefaultWeapon, hair = 1, hairColor = 5 });
+                    CharacterChoice.Apply(p, new HeroLook { cls = cls, race = cls == "rogue" ? "halfling" : cls == "druid" ? "elf" : "tiefling", weapon = db.Class(cls).DefaultWeapon, hair = 1, hairColor = 5 });
                     Learn();
                     yield return Wait(0.3f);
                 }
@@ -716,7 +717,7 @@ namespace RPG
                 int slot = ult ? Spellbook.UltimateSlot : 1;
                 Bar(slot, c.id);
                 Line();
-                Place(p, c.id == "stormfield" ? at + new Vector2(-1.4f, 0.2f) : stand);
+                Place(p, c.id == "stormfield" || c.id == "sanctuary" ? at + new Vector2(-1.4f, 0.2f) : c.id == "forestspirits" ? at + new Vector2(-2.2f, 0.2f) : stand);
                 Prep(p);
                 yield return Wait(0.35f);
                 Vector2 aim = c.id == "thunderstep" ? stand + new Vector2(0f, 5f) : c.id == "blizzard" || c.id == "thunderstorm" ? at + new Vector2(1.8f, 0f) : at;
@@ -733,12 +734,26 @@ namespace RPG
                     yield return Wait(0.18f);
                     yield return Shot("spell_lightningbrand_hit");
                 }
+                if (c.id == "forestspirits")
+                {
+                    // the spirits keep shooting, then melt into the hero
+                    yield return Wait(2.4f);
+                    yield return Shot("spell_forestspirits_shots");
+                    yield return Wait(12f - c.wait - 2.4f - 0.1f);
+                    yield return Shot("spell_forestspirits_end");
+                }
+                if (c.id == "sanctuary")
+                {
+                    // the flowers have grown round its edge
+                    yield return Wait(2.2f);
+                    yield return Shot("spell_sanctuary_bloom");
+                }
                 if (c.id == "eclipse")
                 {
                     yield return Wait(6f - c.wait - 0.05f);
                     yield return Shot("spell_eclipse_burst");
                 }
-                yield return Wait(c.id == "blizzard" || c.id == "stormfield" ? 4f : 1.2f);
+                yield return Wait(c.id == "blizzard" || c.id == "stormfield" || c.id == "sanctuary" ? 4f : 1.2f);
             }
             foreach (var e in dummies) if (e != null) e.enabled = true;
         }

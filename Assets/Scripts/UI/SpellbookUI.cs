@@ -9,7 +9,7 @@ namespace RPG
     /// <summary>
     /// Sách Chiêu (K, <see cref="Spellbook"/>): the hero's skill bar on top — W E R A S D, each with
     /// the skill on it and whether it is the class's own or a learned spell — and below it the
-    /// three schools, six spells each, saying which are learned, which are on the bar, which the
+    /// four schools, six spells each, saying which are learned, which are on the bar, which the
     /// class cannot learn and which boss keeps the book. Click a learned spell, then a slot that
     /// takes it (they light up); right-click a slot to give it back to the class. Changing the
     /// bar waits until the hero is out of a fight, which the window says.
@@ -24,7 +24,7 @@ namespace RPG
 
         public static SpellbookUI I { get; private set; }
 
-        const float W = 1500f, H = 880f;
+        const float W = 1760f, H = 880f;
         const float BarY = 150f, Cell = 104f, CellGap = 30f, ColY = 404f, ColGap = 20f, Side = 40f;
 
         UiKit kit;
@@ -214,9 +214,9 @@ namespace RPG
             }
             statusText = Text(body, "Status", "", 19, UiKit.Muted, TextAlignmentOptions.Center, Side, BarY + Cell + 62, W - 2 * Side, 30);
 
-            // the three schools
-            float colW = (W - 2 * Side - 2 * ColGap) / 3f;
-            var schools = new[] { Spellbook.School.Ice, Spellbook.School.Lightning, Spellbook.School.Dark };
+            // the four schools, in the order of the world's regions
+            var schools = (Spellbook.School[])System.Enum.GetValues(typeof(Spellbook.School));
+            float colW = (W - 2 * Side - (schools.Length - 1) * ColGap) / schools.Length;
             for (int c = 0; c < schools.Length; c++)
             {
                 float cx = Side + c * (colW + ColGap);
@@ -241,10 +241,12 @@ namespace RPG
             CellImage(cell);
             r.icon = UiKit.Img(UiKit.Rect(cell, "Icon", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(40, 40)), null, Color.white);
             r.icon.preserveAspect = true;
-            r.name = kit.Txt(rt, "Name", "", 20, UiKit.Cream, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(70 + 105, 11), new Vector2(210, 26), false);
+            // the name and the book's keeper stop short of the badge on the right
+            float textW = Mathf.Min(230f, w - 190f);
+            r.name = kit.Txt(rt, "Name", "", 20, UiKit.Cream, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(70 + textW / 2f, 11), new Vector2(textW, 26), false);
             r.name.textWrappingMode = TextWrappingModes.NoWrap;
             r.name.overflowMode = TextOverflowModes.Ellipsis;
-            r.sub = kit.Txt(rt, "Sub", "", 14, UiKit.Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(70 + 115, -13), new Vector2(230, 22), false);
+            r.sub = kit.Txt(rt, "Sub", "", 14, UiKit.Muted, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.5f), new Vector2(70 + textW / 2f, -13), new Vector2(textW, 22), false);
             r.sub.textWrappingMode = TextWrappingModes.NoWrap;
             r.sub.overflowMode = TextOverflowModes.Ellipsis;
             r.badge = kit.Txt(rt, "Badge", "", 16, UiKit.Good, TextAlignmentOptions.MidlineRight, new Vector2(1, 0.5f), new Vector2(-64, 0), new Vector2(112, 40), false);
@@ -275,7 +277,7 @@ namespace RPG
             if (p == null || p.stats == null || !p.stats.HasClass || body == null) return;
             var look = p.stats.look;
             if (picked != null && !CanPick(p, Spellbook.Find(picked))) picked = null;
-            classText.text = $"{p.stats.Class.displayName}  ·  đã học {Learned(look)}/{Spellbook.All.Length} chiêu hệ Băng, Lôi, Ám";
+            classText.text = $"{p.stats.Class.displayName}  ·  đã học {Learned(look)}/{Spellbook.All.Length} chiêu hệ {Spellbook.SchoolNames()}";
             for (int i = Spellbook.FirstSlot; i <= Spellbook.UltimateSlot; i++)
             {
                 var s = bar[i];
@@ -353,7 +355,7 @@ namespace RPG
             }
             else if (Learned(p.stats.look) == 0)
             {
-                statusText.text = "Chưa học chiêu nào: Bí Kíp rơi từ boss các vùng (Cóc Tía, Xà Mẫu, Golem Pha Lê Cổ...).";
+                statusText.text = "Chưa học chiêu nào: Bí Kíp rơi từ boss các vùng (Gấu Ma, Cóc Tía, Xà Mẫu, Golem Pha Lê Cổ...).";
                 statusText.color = UiKit.Muted;
             }
             else
