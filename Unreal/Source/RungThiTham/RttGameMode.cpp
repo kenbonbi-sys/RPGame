@@ -1,6 +1,10 @@
 #include "RttGameMode.h"
 
+#include "Camera/PlayerCameraManager.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/PlayerController.h"
 #include "HAL/PlatformMisc.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
@@ -59,6 +63,15 @@ void ARttGameMode::TickShot()
 			return;
 		}
 		UE_LOG(LogRttShot, Display, TEXT("Screenshot -> %s"), *ShotPath);
+		if (const APlayerController* Player = GetWorld()->GetFirstPlayerController())
+		{
+			const ACharacter* Hero = Cast<ACharacter>(Player->GetPawn());
+			const USkeletalMeshComponent* Skin = Hero ? Hero->GetMesh() : nullptr;
+			UE_LOG(LogRttShot, Display, TEXT("Hero at %s facing yaw %.1f, body yaw %.1f, root yaw %.1f, pelvis %s, camera %s"),
+				Hero ? *Hero->GetActorLocation().ToString() : TEXT("-"), Hero ? Hero->GetActorRotation().Yaw : 0.0,
+				Skin ? Skin->GetComponentRotation().Yaw : 0.0, Skin ? Skin->GetSocketRotation(TEXT("root")).Yaw : 0.0,
+				Skin ? *Skin->GetSocketRotation(TEXT("pelvis")).ToString() : TEXT("-"), *Player->PlayerCameraManager->GetCameraRotation().ToString());
+		}
 		FScreenshotRequest::RequestScreenshot(ShotPath, false, false);
 		bShotTaken = true;
 		ShotAt = Now + 2.0;

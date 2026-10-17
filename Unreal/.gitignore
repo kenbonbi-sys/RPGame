@@ -8,3 +8,6 @@ Plugins/*/Intermediate/
 *.sln
 *.code-workspace
 .vsconfig
+
+# Fab packs (Paragon heroes, ...): each machine adds them from the launcher (Add to Project); not ours to redistribute
+Content/Paragon*/

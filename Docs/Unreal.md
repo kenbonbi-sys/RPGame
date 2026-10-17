@@ -77,7 +77,8 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   - `ARttGameMode`: đưa nhân vật vào màn chơi. Với `-RttShot=<file.png>`, nó chờ shader biên dịch xong, chụp ảnh rồi thoát.
   - `URttRules`: nạp `Content/Data` vào thư viện luật khi game chạy.
   - `Tests/RttTests.cpp`: test tự động của Unreal (`RungThiTham.Rules.Data`, `RungThiTham.Game.Setup`).
-- **Tài sản Fab (Paragon):** bấm *Add to Project* trong Epic Games Launcher (Unreal Engine → Library → Fab Library) rồi chọn RungThiTham. Launcher chỉ liệt kê dự án nằm trong `Documents\Unreal Projects`, nên ở đó có một junction `RungThiTham` trỏ về `Desktop\RPG\Unreal`. Tải xong thì chạy `ue.cmd hero`.
+- **Tài sản Fab (Paragon):** bấm *Add to Project* trong Epic Games Launcher (Unreal Engine → Library → Fab Library) rồi chọn RungThiTham. Launcher chỉ liệt kê dự án nằm trong `Documents\Unreal Projects`, nên ở đó có một junction `RungThiTham` trỏ về `Desktop\RPG\Unreal`. Tải xong thì chạy `ue.cmd hero`. Hiện dùng **Paragon: Greystone** (cao 2,06 m) với animation blueprint của chính nó; khi vừa vào game nó diễn động tác chào sân (LevelStart) vài giây. Bộ Paragon không vào git (`Unreal/.gitignore`): máy nào cũng tự thêm từ Fab.
+- **Chơi thử:** bấm đúp `Unreal/Choi.cmd` (hoặc `ue.cmd play`): mở map thử trong cửa sổ. WASD chạy, chuột xoay camera, Space nhảy, Shift nhấn nhanh để Lướt, giữ để chạy nhanh, Alt+F4 để thoát.
 - **Map thử** `Content/Maps/ThuNghiem.umap` do `Tools/Unreal/make_level.py` dựng: nền 400 m, mặt trời, bầu trời, mây, sương (ánh sáng Lumen, không bake), vài khối để so tỉ lệ, PlayerStart. Mọi bề mặt dùng `Content/Materials/M_Grid`: bàn cờ ô 1 m đặt theo toạ độ thế giới. Lưới có sẵn của engine bám theo UV của từng mesh nên vỡ thành nhiễu trên mặt phẳng kéo dài 400 lần.
 - **Script** `Tools/Unreal/ue.cmd`:
 

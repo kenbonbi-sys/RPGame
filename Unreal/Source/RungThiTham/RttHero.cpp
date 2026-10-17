@@ -210,7 +210,8 @@ void ARttHero::PawnClientRestart()
 		Inputs->ClearAllMappings();
 		Inputs->AddMappingContext(Controls, 0);
 	}
-	PlaceCamera();
+	// placed on the next tick: the game mode sets the control rotation from the PlayerStart after this
+	bCameraPlaced = false;
 }
 
 void ARttHero::Move(const FInputActionValue& Value)
@@ -283,6 +284,10 @@ void ARttHero::Tick(float DeltaSeconds)
 	if (bDemoRun)
 	{
 		AddMovementInput(GetActorForwardVector(), 1.f);
+	}
+	if (!bCameraPlaced && GetController())
+	{
+		PlaceCamera();
 	}
 	// the camera runs on real time so hit-stop and slow motion do not freeze it
 	UpdateCamera(FMath::Min(static_cast<float>(FApp::GetDeltaTime()), 0.1f));
