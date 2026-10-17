@@ -1,13 +1,13 @@
 """Dresses Hang Gấu's forest from the environment packs in the project (added from Fab with Add to
-Project, e.g. Infinity Blade: Grass Lands), editor Python:
+Project, e.g. Paragon: Agora and Monolith Environment), editor Python:
 
     Tools\\Unreal\\ue.cmd forest
 
 Every static mesh outside the game's own folders is sorted by its name into trees, bushes, rocks
 and grass (WORDS), kept only if its size suits the kind (SIZES), and named in Config/
 DefaultGame.ini for ARttForest, with a scale per kind that brings the kind's middle size to the
-size Dauntless draws it at (TARGET). Until a pack with trees is added, the Paragon monsters'
-rocks stand in. If the pack has ground textures (grass, earth, rock: a colour map and a normal
+size Dauntless draws it at (TARGET). A hero's or monster's pack (one with Characters/Heroes)
+only stands in until an environment pack brings its own: so far, Rampage's rocks. If the pack has ground textures (grass, earth, rock: a colour map and a normal
 map each), MI_Ground paints the terrain with them. Everything found is listed in the log.
 """
 import io
@@ -22,7 +22,8 @@ OURS = ("/Game/Maps", "/Game/Materials", "/Game/Creatures", "/Game/Environment",
 ENVIRONMENT = "/Game/Environment/HangGau"
 # kind -> (words in the name, words that rule it out)
 WORDS = {
-    "Tree": (("tree", "pine", "oak", "birch", "willow", "poplar", "fir", "spruce", "maple", "trunk"),
+    "Tree": (("tree", "pine", "oak", "birch", "beech", "willow", "poplar", "fir", "spruce", "maple", "conifer", "cedar",
+              "redwood", "cypress", "trunk"),
              ("branch", "leaf", "leaves", "log", "stump", "root", "billboard", "impostor", "card", "street", "treeline")),
     "Bush": (("bush", "shrub", "fern", "hedge", "plant", "ivy", "sapling"), ("billboard", "card_")),
     "Rock": (("rock", "boulder", "stone", "pebble"), ("shard", "chunk", "wall", "path", "brick", "tile", "column", "statue", "crater")),
@@ -50,10 +51,13 @@ registry = unreal.AssetRegistryHelpers.get_asset_registry()
 registry.scan_paths_synchronous(["/Game"], True)
 found = {k: [] for k in WORDS}
 textures = []
+hero_packs = set()
 for a in registry.get_assets_by_path("/Game", recursive=True):
     package = str(a.package_name)
     if package.startswith(OURS):
         continue
+    if "/Characters/Heroes/" in package:
+        hero_packs.add(package.split("/")[2])
     cls = str(a.asset_class_path.asset_name)
     name = str(a.asset_name)
     low = name.lower()
@@ -124,8 +128,8 @@ for kind, items in found.items():
             keep.append((package, name, height))
             seen.add(name)
         unreal.log("RTT_FOREST %s %s %.0f cm %s" % (kind, package, height, "kept" if lo <= height <= hi else "too big or small"))
-    # a real environment pack's own beat the Paragon monsters' throwing rocks
-    own = [k for k in keep if not k[0].startswith("/Game/Paragon")]
+    # an environment pack's own beat the stand-ins from a hero's or monster's pack
+    own = [k for k in keep if k[0].split("/")[2] not in hero_packs]
     kinds[kind] = own if own else keep
     for package, name, _ in kinds[kind]:
         allow_instancing(unreal.load_asset(package + "." + name))
@@ -166,7 +170,7 @@ NORMAL = ("_n", "_normal", "_nrm", "_norm")
 def ground_texture(words, ends):
     for package, name in sorted(textures):
         low = name.lower()
-        if any(w in low for w in words) and low.endswith(ends) and not package.startswith("/Game/Paragon"):
+        if any(w in low for w in words) and low.endswith(ends) and package.split("/")[2] not in hero_packs:
             return package + "." + name
     return None
 

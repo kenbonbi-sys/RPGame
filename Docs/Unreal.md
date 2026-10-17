@@ -135,7 +135,7 @@ Nền bàn cờ đã thay bằng một khoảng trống giữa rừng, kiểu Da
   - ghi `[/Script/RungThiTham.RttForest]` với tỉ lệ mỗi loại;
   - bật cờ instanced cho vật liệu của bộ (không bao giờ đụng vật liệu của engine);
   - nếu bộ có texture cỏ / đất / đá thì tạo `MI_Ground` và gán cho nền.
-- **Hiện tại:** chưa có bộ môi trường, nên rừng chỉ có đá của Rampage (3 loại, ×2,12). Khi thêm **Infinity Blade: Grass Lands** (miễn phí trên Fab, *Add to Project* → RungThiTham), chạy `ue.cmd forest` là có cây, bụi, cỏ và texture nền.
+- **Hiện tại:** chưa có bộ môi trường, nên rừng chỉ có đá của Rampage (3 loại, ×2,12). Khi thêm **Paragon: Agora and Monolith Environment** (Epic Games, miễn phí trên Fab, UE 5.0–5.8, cùng nét vẽ với các hero Paragon; *Add to Project* → RungThiTham), chạy `ue.cmd forest` là có cây, bụi, cỏ và texture nền. (Bộ Infinity Blade không còn trên Fab.) Các bộ chứa `Characters/Heroes` (Greystone, Rampage) chỉ đứng tạm cho tới khi có bộ môi trường.
 - **Ánh sáng:** mặt trời ấm cao 52°, sky light 1,6, sương có màu, hậu kỳ tăng bão hoà một chút. Nền tắt distance field lighting: lưới 500 m chỉ có ô distance field 4 m, Lumen vẽ ra vết tối.
 
 ## MVP: đánh Gấu Ma (Hang Gấu)
