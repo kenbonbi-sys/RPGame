@@ -88,11 +88,24 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   Tools\Unreal\ue.cmd test     chạy test RungThiTham, không mở cửa sổ
   Tools\Unreal\ue.cmd shot     chơi map trong cửa sổ, chụp ảnh rồi thoát (run: hero tự chạy; fight: hero tự lao vào đánh)
   Tools\Unreal\ue.cmd assets   nhập Gấu Ma điêu khắc từ bản Godot và dựng các vật liệu (import_assets.py)
+  Tools\Unreal\ue.cmd beast    ghi quái Paragon (Rampage) làm thân colossus trong Config/DefaultGame.ini
   Tools\Unreal\ue.cmd hero     tìm hero Paragon đã thêm từ Fab, ghi vào Config/DefaultGame.ini
   ```
 
   Log nằm trong `Unreal/Saved/Tools`. Nếu engine cài ở chỗ khác, đặt biến `UE_ROOT`.
 - **Dữ liệu** `Content/Data/`: `Tools/GodotData/unity_to_json.py` giờ ghi cùng một bộ file vào cả `Godot/data` và `Unreal/Content/Data`. Riêng `armour_sets.json` chép tay từ trang Armour của wiki Dauntless (bản Godot để bảng này trong `armour.gd`), và `weapons.json` chép từ `weapons.gd` (bỏ tên hoạt ảnh Godot). Khi đóng gói, thư mục `Data` đi kèm dưới dạng file rời (`DirectoriesToAlwaysStageAsNonUFS`).
+
+## Colossus đầu tiên: Cự Thú Rừng Già (Paragon: Rampage)
+
+Gấu Ma điêu khắc từ bản Godot lệch phong cách với Greystone: khối tạc như gỗ chạm, bên cạnh nhân vật Paragon chi tiết mịn. Vì vậy colossus đầu tiên trong Hang Gấu giờ là **Paragon: Rampage** (miễn phí trên Fab), phóng to 4,07 lần, cao khoảng 9 m, đặt tên **Cự Thú Rừng Già**.
+
+- **`ARttBehemoth`**: colossus dùng mesh có xương. Nó đi lại bằng animation blueprint của Paragon (AI controller, CharacterMovement) và đánh theo đúng luật của Gấu Ma (`Rtt::ChooseBearMove`, `Rtt::Beats`, ngưỡng choáng, bộ phận).
+  - Mỗi chiêu phát animation chậm lại cho phần lấy đà kéo dài hết tell, wind và hold, rồi ra đòn ở tốc độ thật.
+  - Chiêu: Đấm Quét (`Attack_Melee_A`), Nện Đất (`Ability_RMB_Smash`), Ném Đá Lớn (`RipNToss_Rip` rồi `RipNToss_Toss`, tảng đá `SM_Rock_To_Hold` bay thành `ARttBoulder` như `boulder.gd`), Húc (gầm `Ability_Enrage_Start`, rồi lao). Một đòn nặng vào đầu khi đèn vàng trên đầu sáng sẽ ngắt Húc.
+  - Bộ phận theo xương của physics asset: đầu, hai tay, hai chân, thân (`Rtt::BeastStats`). Choáng thì phát `Stun_Idle`, gục thì phát `Death_A`.
+- **`ue.cmd beast [Pack]`** (`setup_beast.py`): tìm bộ quái Paragon trong Content (mặc định `ParagonRampage`), lấy capsule từ blueprint nhân vật của nó, tính tỉ lệ cho cao 9 m, chọn animation cho từng chiêu theo bảng `MOVES`, rồi ghi vào `Config/DefaultGame.ini`. Bộ Paragon không vào git: mỗi máy tự thêm từ Fab.
+- **`IRttBoss`**: HUD, đòn đánh của hero và góc chụp nghiêng nhận diện boss qua interface này, nên Gấu Ma (`ARttGauMa`) vẫn dùng được. Đổi `COLOSSUS` trong `make_level.py` là đặt nó vào Hang Gấu.
+- Module `RungThiTham` tắt unity build (`bUseUnity = false`): các file port từ Godot giữ hằng số và hàm phụ riêng (`S`, `Flat`…) sẽ trùng nhau khi Unreal gộp mọi `.cpp`. `Tools/RulesCheck` vẫn biên dịch thư viện luật như một file gộp.
 
 ## MVP: đánh Gấu Ma (Hang Gấu)
 

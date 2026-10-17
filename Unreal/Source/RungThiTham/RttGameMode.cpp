@@ -71,12 +71,20 @@ void ARttGameMode::SetUpView()
 	{
 		return;
 	}
-	const FVector B = Bosses[0].Key->GetActorLocation();
+	// the ground under the colossus (its location may be a capsule's middle, metres up)
+	FVector B = Bosses[0].Key->GetActorLocation();
+	FHitResult Floor;
+	if (World->LineTraceSingleByObjectType(Floor, B + FVector(0.0, 0.0, 2000.0), B - FVector(0.0, 0.0, 20000.0), FCollisionObjectQueryParams(ECC_WorldStatic)))
+	{
+		B.Z = Floor.ImpactPoint.Z;
+	}
 	const FVector F = Bosses[0].Key->GetActorForwardVector();
-	Player->GetPawn()->SetActorLocationAndRotation(B + F * 1300.0 + FVector(0.0, 0.0, 100.0), (-F).Rotation());
-	const FVector Mid = B + F * 700.0 + FVector(0.0, 0.0, 380.0);
+	Player->GetPawn()->SetActorLocationAndRotation(B + F * 1300.0 + FVector(0.0, 0.0, 120.0), (-F).Rotation());
+	const FVector Mid = B + F * 650.0 + FVector(0.0, 0.0, 350.0);
 	const FVector Side = FVector::CrossProduct(F, FVector::UpVector);
-	const FVector At = Mid + Side * 2300.0 + F * 700.0 + FVector(0.0, 0.0, 200.0);
+	const FVector At = Mid + Side * 2600.0 + FVector(0.0, 0.0, 150.0);
+	UE_LOG(LogRttShot, Display, TEXT("Side view: colossus %s facing %s, hero %s, camera %s"), *B.ToString(), *F.ToString(),
+		*Player->GetPawn()->GetActorLocation().ToString(), *At.ToString());
 	ACameraActor* Cam = World->SpawnActor<ACameraActor>(At, (Mid - At).Rotation());
 	if (Cam)
 	{

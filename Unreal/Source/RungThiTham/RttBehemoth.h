@@ -60,8 +60,11 @@ public:
 	FSoftObjectPath SwipeAnimation;
 	UPROPERTY(Config, EditAnywhere, Category = "Body")
 	FSoftObjectPath SlamAnimation;
+	// Ném Đá Lớn: tearing the rock up, then hurling it (ThrowRelease is in the toss)
 	UPROPERTY(Config, EditAnywhere, Category = "Body")
 	FSoftObjectPath ThrowAnimation;
+	UPROPERTY(Config, EditAnywhere, Category = "Body")
+	FSoftObjectPath ThrowTossAnimation;
 	UPROPERTY(Config, EditAnywhere, Category = "Body")
 	FSoftObjectPath ChargeAnimation;
 	UPROPERTY(Config, EditAnywhere, Category = "Body")
@@ -140,6 +143,8 @@ private:
 	TObjectPtr<UAnimSequenceBase> Slam;
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimSequenceBase> Throw;
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimSequenceBase> Toss;
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimSequenceBase> ChargeAnim;
 	UPROPERTY(Transient)

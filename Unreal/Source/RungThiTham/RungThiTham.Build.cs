@@ -7,6 +7,9 @@ public class RungThiTham : ModuleRules
 	public RungThiTham(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		// each file on its own: the ports keep Godot's file-local helpers and constants (S, Flat, ...),
+		// which clash once Unreal glues every .cpp of the module into one unity file
+		bUseUnity = false;
 		PublicIncludePaths.Add(ModuleDirectory);
 		PublicDependencyModuleNames.AddRange(new string[]
 		{

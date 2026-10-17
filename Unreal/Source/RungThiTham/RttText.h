@@ -7,8 +7,8 @@ namespace RttText
 {
 	// Gấu Ma Rừng Già
 	inline const TCHAR* BearName = TEXT("G\u1ea5u Ma R\u1eebng Gi\u00e0");
-	// Khỉ Đá Rừng Già
-	inline const TCHAR* BeastName = TEXT("Kh\u1ec9 \u0110\u00e1 R\u1eebng Gi\u00e0");
+	// Cự Thú Rừng Già
+	inline const TCHAR* BeastName = TEXT("C\u1ef1 Th\u00fa R\u1eebng Gi\u00e0");
 	// Đấm Quét
 	inline const TCHAR* Punch = TEXT("\u0110\u1ea5m Qu\u00e9t");
 	// Nện Đất

@@ -105,6 +105,7 @@ void ARttBehemoth::BeginPlay()
 	Swipe = Load(SwipeAnimation);
 	Slam = Load(SlamAnimation);
 	Throw = Load(ThrowAnimation);
+	Toss = Load(ThrowTossAnimation);
 	ChargeAnim = Load(ChargeAnimation);
 	Roar = Load(RoarAnimation);
 	StunAnim = Load(StunAnimation);
@@ -490,22 +491,36 @@ void ARttBehemoth::DoThrow(double Dt)
 	const double T = ModeTime;
 	const Rtt::Beats& B = ThrowBeats;
 	const double Go = B.StrikeAt();
+	UAnimInstance* A = GetMesh()->GetAnimInstance();
 	if (Once(TEXT("start")))
 	{
-		PlayMove(Throw, ThrowRelease, B);
+		if (Toss && Throw && A)
+		{
+			// tearing the rock up fills the tell and the wind; the toss its hold and release
+			A->PlaySlotAnimationAsDynamicMontage(Throw, MoveSlot, 0.15f, 0.1f, static_cast<float>(FMath::Clamp(Throw->GetPlayLength() / B.HoldAt(), 0.3, 2.0)));
+		}
+		else
+		{
+			PlayMove(Throw, ThrowRelease, B);
+		}
 	}
 	if (Target.IsValid() && T < Go)
 	{
 		Face(Target->GetFeet(), 30.0, Dt);
 	}
-	// it tears the rock up as the wind-up begins
-	if (T >= B.Tell && Once(TEXT("grab")))
+	// the rock comes out of the ground halfway through the wind-up
+	if (T >= B.Tell + B.Wind * 0.5 && Once(TEXT("grab")))
 	{
 		HeldRock = ARttBoulder::Hold(GetWorld(), Rock, 150.f * BodyScale / 3.5f);
 	}
+	if (Toss && A && T >= B.HoldAt() && Once(TEXT("toss")))
+	{
+		A->PlaySlotAnimationAsDynamicMontage(Toss, MoveSlot, 0.05f, 0.3f,
+			static_cast<float>(FMath::Clamp(Toss->GetPlayLength() * ThrowRelease / FMath::Max(0.05, B.Hold), 0.3, 2.5)));
+	}
 	if (T >= Go && Once(TEXT("release")))
 	{
-		Unleash(GetMesh()->GetAnimInstance());
+		Unleash(A);
 		if (HeldRock)
 		{
 			ARttHero* Hero = Target.Get();

@@ -17,12 +17,14 @@ import unreal
 SECTION = "[/Script/RungThiTham.RttBehemoth]"
 HEIGHT_CM = 900.0
 # move -> (preferred animation names, fallback words); the strike's place in the animation (0..1)
+# (Rampage: it walks on all fours, so its quadruped swing; Rip'n'Toss tears up a rock, then hurls it)
 MOVES = {
-    "Swipe": (["Attack_PrimaryA", "Attack_A_Slow", "Attack_A_Med", "Attack_A_Fast"], ["primary", "attack"], 0.4),
-    "Slam": (["Ability_E", "Ability_Slam", "Ability_GroundSlam", "Attack_PrimaryC"], ["slam", "ground", "pound"], 0.45),
-    "Throw": (["Ability_Q", "Ability_Throw", "Ability_RipAndToss"], ["throw", "toss", "rip"], 0.5),
-    "Charge": (["Ability_R", "Ability_Charge", "Ability_Ultimate"], ["charge", "ultimate"], 0.6),
-    "Roar": (["Emote_Roar", "Ability_Enrage", "LevelStart", "Emote_Taunt"], ["roar", "enrage", "taunt", "emote"], 0.5),
+    "Swipe": (["Attack_Melee_A", "Attack_Biped_Melee_A", "Attack_PrimaryA", "Attack_A_Slow"], ["melee", "primary", "attack"], 0.4),
+    "Slam": (["Ability_RMB_Smash", "Ability_GroundSmash_End", "Ability_Slam", "Attack_PrimaryC"], ["smash", "slam", "pound"], 0.45),
+    "Throw": (["Ability_RipNToss_Rip", "Ability_Throw"], ["rip", "throw"], 1.0),
+    "ThrowToss": (["Ability_RipNToss_Toss", "Ability_Toss"], ["toss"], 0.35),
+    "Charge": (["Ability_Enrage_Start", "Ability_Charge", "Ability_R"], ["enrage", "charge"], 0.6),
+    "Roar": (["Ability_Enrage_Start", "Emote_Roar", "Emote_Taunt"], ["roar", "enrage", "taunt"], 0.5),
     "Stun": (["Stun_Idle", "Stun_Loop", "Stun_Start"], ["stun"], 0.5),
     "Flinch": (["HitReact_Front", "HitReact_Back"], ["hitreact"], 0.5),
     "Death": (["Death", "Death_A"], ["death"], 0.5),
@@ -107,7 +109,7 @@ for move in MOVES:
     found, strike = pick(move)
     lines.append("%sAnimation=%s" % (move, path(found[0], found[1]) if found else ""))
     unreal.log("RTT_BEAST %s -> %s" % (move, found[1] if found else "(none)"))
-lines += ["SwipeStrike=%.2f" % MOVES["Swipe"][2], "SlamStrike=%.2f" % MOVES["Slam"][2], "ThrowRelease=%.2f" % MOVES["Throw"][2]]
+lines += ["SwipeStrike=%.2f" % MOVES["Swipe"][2], "SlamStrike=%.2f" % MOVES["Slam"][2], "ThrowRelease=%.2f" % MOVES["ThrowToss"][2]]
 
 unreal.log("RTT_BEAST meshes: " + ", ".join(n for _, n in meshes))
 unreal.log("RTT_BEAST animation blueprints: " + ", ".join(n for _, n in anim_bps))
