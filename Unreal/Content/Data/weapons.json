@@ -1,0 +1,248 @@
+{
+ "_source": "Godot/scripts/items/weapons.gd: Dauntless's seven weapon families on the Unity game's weapon kinds (stat: the kind whose Attack and basic combo they use). cut: +50% part damage on a colossus; stagger: poise multiplier; heavy: the held right-click move, power and poise go from [0] at no charge to [0] + [1] at full; reach and lunge in metres, angle in degrees. The Godot animation names are left out: the Unreal port has its own.",
+ "families": {
+  "sword": {
+   "name": "Kiếm",
+   "stat": "sword",
+   "cut": true,
+   "pierce": false,
+   "dual": false,
+   "stagger": 1.0,
+   "heavy": {
+    "name": "Trảm",
+    "charge": 0.9,
+    "power": [
+     1.4,
+     1.8
+    ],
+    "poise": [
+     30,
+     50
+    ],
+    "shape": "cone",
+    "reach": 2.7,
+    "angle": 130.0,
+    "hits": 1,
+    "lunge": 0.0
+   }
+  },
+  "axe": {
+   "name": "Rìu",
+   "stat": "axe",
+   "cut": true,
+   "pierce": false,
+   "dual": false,
+   "stagger": 1.1,
+   "heavy": {
+    "name": "Bổ Núi",
+    "charge": 1.2,
+    "power": [
+     1.8,
+     2.4
+    ],
+    "poise": [
+     40,
+     60
+    ],
+    "shape": "cone",
+    "reach": 3.0,
+    "angle": 150.0,
+    "hits": 1,
+    "lunge": 0.0
+   }
+  },
+  "hammer": {
+   "name": "Búa",
+   "stat": "mace",
+   "cut": false,
+   "pierce": false,
+   "dual": false,
+   "stagger": 1.6,
+   "heavy": {
+    "name": "Nện Aether",
+    "charge": 1.1,
+    "power": [
+     1.5,
+     1.9
+    ],
+    "poise": [
+     70,
+     110
+    ],
+    "shape": "slam",
+    "reach": 3.2,
+    "angle": 360.0,
+    "hits": 1,
+    "lunge": 0.0
+   }
+  },
+  "chain_blades": {
+   "name": "Song Liêm",
+   "stat": "dagger",
+   "cut": true,
+   "pierce": false,
+   "dual": true,
+   "stagger": 0.8,
+   "heavy": {
+    "name": "Lốc Liêm",
+    "charge": 0.7,
+    "power": [
+     0.7,
+     0.7
+    ],
+    "poise": [
+     12,
+     18
+    ],
+    "shape": "spin",
+    "reach": 2.8,
+    "angle": 360.0,
+    "hits": 3,
+    "lunge": 0.0
+   }
+  },
+  "war_pike": {
+   "name": "Thương",
+   "stat": "spear",
+   "cut": false,
+   "pierce": true,
+   "dual": false,
+   "stagger": 1.0,
+   "heavy": {
+    "name": "Xuyên Phá",
+    "charge": 1.0,
+    "power": [
+     1.5,
+     2.0
+    ],
+    "poise": [
+     30,
+     45
+    ],
+    "shape": "lunge",
+    "reach": 4.4,
+    "angle": 40.0,
+    "hits": 1,
+    "lunge": 3.2
+   }
+  },
+  "aether_strikers": {
+   "name": "Găng Aether",
+   "stat": "fist",
+   "cut": false,
+   "pierce": false,
+   "dual": true,
+   "stagger": 1.6,
+   "heavy": {
+    "name": "Quyền Aether",
+    "charge": 0.7,
+    "power": [
+     1.3,
+     1.7
+    ],
+    "poise": [
+     60,
+     80
+    ],
+    "shape": "lunge",
+    "reach": 2.4,
+    "angle": 90.0,
+    "hits": 1,
+    "lunge": 2.6
+   }
+  },
+  "repeaters": {
+   "name": "Súng Ostia",
+   "stat": "bow",
+   "cut": false,
+   "pierce": true,
+   "dual": true,
+   "stagger": 0.7,
+   "heavy": {
+    "name": "Phát Tụ Lực",
+    "charge": 0.9,
+    "power": [
+     1.6,
+     2.2
+    ],
+    "poise": [
+     20,
+     30
+    ],
+    "shape": "shot",
+    "reach": 30.0,
+    "angle": 0.0,
+    "hits": 1,
+    "lunge": 0.0
+   }
+  }
+ },
+ "armory": {
+  "w_kiem_hong_anh": {
+   "family": "sword",
+   "element": "neutral",
+   "name": "Kiếm Hồng Anh"
+  },
+  "w_riu_hoa_nguc": {
+   "family": "axe",
+   "element": "blaze",
+   "name": "Rìu Hoả Ngục"
+  },
+  "w_bua_bang_phong": {
+   "family": "hammer",
+   "element": "frost",
+   "name": "Búa Băng Phong"
+  },
+  "w_song_liem_loi_dieu": {
+   "family": "chain_blades",
+   "element": "shock",
+   "name": "Song Liêm Lôi Điểu"
+  },
+  "w_thuong_moc_lam": {
+   "family": "war_pike",
+   "element": "terra",
+   "name": "Thương Mộc Lâm"
+  },
+  "w_gang_thanh_quang": {
+   "family": "aether_strikers",
+   "element": "radiant",
+   "name": "Găng Thánh Quang"
+  },
+  "w_sung_hu_anh": {
+   "family": "repeaters",
+   "element": "umbral",
+   "name": "Súng Hư Ảnh"
+  }
+ },
+ "start": [
+  "w_kiem_hong_anh",
+  "w_riu_hoa_nguc",
+  "w_bua_bang_phong",
+  "w_song_liem_loi_dieu",
+  "w_thuong_moc_lam",
+  "w_gang_thanh_quang",
+  "w_sung_hu_anh"
+ ],
+ "props": {
+  "npc_bua_ren": {
+   "family": "hammer",
+   "element": "neutral",
+   "name": "Búa Rèn"
+  },
+  "npc_sung_janek": {
+   "family": "repeaters",
+   "element": "frost",
+   "name": "Súng Ostia"
+  },
+  "npc_kiem_kat": {
+   "family": "sword",
+   "element": "neutral",
+   "name": "Kiếm"
+  },
+  "npc_riu_bulvar": {
+   "family": "axe",
+   "element": "frost",
+   "name": "Rìu"
+  }
+ }
+}

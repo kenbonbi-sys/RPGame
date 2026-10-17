@@ -61,13 +61,17 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   - `RttArmour`: 35 bộ giáp của wiki, điểm kháng từng món, ±0,5% mỗi điểm, tối đa ±50%.
   - `RttDamage`: một đòn trúng mất bao nhiêu máu, đúng thứ tự của `Health.TakeDamage` bản Unity.
   - `RttSheet`: bảng nhân vật D&D (lớp, chủng tộc, sáu chỉ số, máu, năng lượng, Attack, giáp, kháng, XP, lên cấp, cộng điểm).
+  - `RttStatus`: Bỏng, Lạnh và Đóng Băng, Tích Điện và Phóng Điện, Độc, Choáng, Trói, Làm Chậm, Nguyền, Phán Xét; choáng lặp lại trong 6 giây ngắn dần (×0,6); thanh Trấn Áp (Poise) của boss: đầy thì vỡ, choáng 3 giây, nhận thêm 50% sát thương. Thời gian do game truyền vào (`now`); sát thương theo nhịp trả về để game gây qua `ResolveDamage`.
+  - `RttProcs`: đòn vũ khí có nguyên tố làm đầy thanh nguyên tố trên mục tiêu; đủ 12% máu (ít nhất 30) thì kích hoạt (Hoả đốt, Băng làm chậm, Lôi làm tê, Thổ rơi cầu hồi máu, Quang đánh dấu, Ám gieo nang), nghỉ 6 giây.
+  - `RttWeapons`: bảy họ vũ khí Dauntless (`Content/Data/weapons.json`), vũ khí đang cầm, đòn nặng giữ chuột phải (Trảm và các đòn khác) theo mức tụ lực.
+  - `RttAbility`: chiêu từ `abilities.json` (hồi chiêu theo cấp, năng lượng, thời gian khoá dáng), sát thương một đòn của chiêu (`MakeHit`), combo, thanh kỹ năng (hồi chiêu, hồi chung 0,08 giây, nhớ phím bấm sớm 0,15 giây, Lướt cắt ngang dáng), Lướt Hoàn Hảo.
 - **Test luật** `Tests/RulesTests.cpp`: chép lại các ví dụ của bản Godot (Cầu Lửa 56 vào kẻ yếu lửa 30% ra 73, bảng XP, chỉ số cấp 1 của chín lớp, giáp và nguyên tố). Chạy:
 
   ```
   Tools\RulesCheck\check.cmd
   ```
 
-  Script tự tìm `vcvars64.bat` của Visual Studio, biên dịch như Unreal (C++20, không exception, cảnh báo là lỗi) rồi chạy với dữ liệu thật. Hiện có 133 kiểm tra, đều đạt.
+  Script tự tìm `vcvars64.bat` của Visual Studio, biên dịch như Unreal (C++20, không exception, cảnh báo là lỗi) rồi chạy với dữ liệu thật. Hiện có 260 kiểm tra, đều đạt.
 - **Game (U0)** trong `Source/RungThiTham/`:
   - `ARttHero`: chạy 5,4 m/s; giữ Shift để chạy nhanh 8,2 m/s; nhấn Shift để Lướt (bất tử 0,28 giây); nhảy 7,4 m/s với trọng lực 21 m/s². Số liệu và phím lấy từ `hero.gd` và `controls.gd` của bản Godot. Camera treo sau vai. Thân tạm (khối trụ và quả cầu) chờ nhân vật Paragon ở U1. Phím được tạo bằng Enhanced Input ngay trong C++, không cần asset.
   - `ARttGameMode`: đưa nhân vật vào màn chơi. Với `-RttShot=<file.png>`, nó chờ shader biên dịch xong, chụp ảnh rồi thoát.
@@ -84,7 +88,7 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   ```
 
   Log nằm trong `Unreal/Saved/Tools`. Nếu engine cài ở chỗ khác, đặt biến `UE_ROOT`.
-- **Dữ liệu** `Content/Data/`: `Tools/GodotData/unity_to_json.py` giờ ghi cùng một bộ file vào cả `Godot/data` và `Unreal/Content/Data`. Riêng `armour_sets.json` chép tay từ trang Armour của wiki Dauntless (bản Godot để bảng này trong `armour.gd`). Khi đóng gói, thư mục `Data` đi kèm dưới dạng file rời (`DirectoriesToAlwaysStageAsNonUFS`).
+- **Dữ liệu** `Content/Data/`: `Tools/GodotData/unity_to_json.py` giờ ghi cùng một bộ file vào cả `Godot/data` và `Unreal/Content/Data`. Riêng `armour_sets.json` chép tay từ trang Armour của wiki Dauntless (bản Godot để bảng này trong `armour.gd`), và `weapons.json` chép từ `weapons.gd` (bỏ tên hoạt ảnh Godot). Khi đóng gói, thư mục `Data` đi kèm dưới dạng file rời (`DirectoriesToAlwaysStageAsNonUFS`).
 
 ## Lộ trình
 
@@ -92,7 +96,7 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
 |---|---|
 | U0 · Nền móng | Cài engine và Visual Studio; tạo dự án C++; Git LFS; biên dịch, test và chụp ảnh từ dòng lệnh |
 | U1 · Hero và camera | Nhân vật Paragon cầm vũ khí; camera treo sau lưng kiểu SotC; chạy, chạy nhanh, nhảy, Lướt (bất tử ngắn, Lướt Hoàn Hảo); hoạt ảnh hoà trộn theo tốc độ, chân bám đất, đòn đánh bằng montage có root motion |
-| U2 · Luật chiến đấu | Viết lại sang C++ đúng từng con số: Health, StatusEffects, Poise, DamageInfo, Combat, Elements, Armour, Weapons, cấp và chỉ số D&D, 92 chiêu từ dữ liệu; test giữ nguyên các ví dụ của bản Godot. **Đã xong:** sát thương, nguyên tố, giáp, bảng nhân vật và XP (thư viện `Rules/`). **Còn:** trạng thái, choáng (Poise), vũ khí, chiêu |
+| U2 · Luật chiến đấu | Viết lại sang C++ đúng từng con số: Health, StatusEffects, Poise, DamageInfo, Combat, Elements, Armour, Weapons, cấp và chỉ số D&D, 92 chiêu từ dữ liệu; test giữ nguyên các ví dụ của bản Godot. **Đã xong** (thư viện `Rules/`): sát thương, nguyên tố và proc, giáp, bảng nhân vật và XP, trạng thái, Poise, vũ khí, chiêu và thanh kỹ năng. **Còn:** các khối hiệu ứng cần thế giới (vùng sát thương, đạn, lướt, xích sét, tia, cầu, bóng), Health trên actor, cầu hồi máu, dấu Quang, nang Ám; làm cùng U1 và U4 |
 | U3 · Thế giới | Landscape dựng từ độ cao của `WorldMap`; cây cỏ đá theo vùng; vật liệu vẽ tay kiểu Dauntless; Làng Lá Xanh theo kiểu Ramsgate (nhà gỗ sẫm, đèn lồng, sương xanh) |
 | U4 · Behemoth | Gấu Ma: bộ phận phá được, thanh choáng, sát thương lúc choáng, Húc bị gián đoạn, vòng cảnh báo và nhịp báo trước; leo bám kiểu SotC; slime và nấm |
 | U5 · Giao diện | HUD, Esc, Cài Đặt (gắn thẳng vào Scalability), Trang Bị (nhân vật giữa màn hình), nhật ký, ô vật phẩm |

@@ -37,15 +37,17 @@ bool RttLoadRules(const FString& Dir, FRttRuleSet& Out, FString& Error)
 	Rtt::JsonValue Progression;
 	Rtt::JsonValue Combat;
 	Rtt::JsonValue Armour;
+	Rtt::JsonValue Weapons;
 	if (!ReadJson(Dir, TEXT("progression.json"), Progression, Error) || !ReadJson(Dir, TEXT("combat.json"), Combat, Error)
 		|| !ReadJson(Dir, TEXT("armour_sets.json"), Armour, Error) || !ReadJson(Dir, TEXT("classes.json"), Out.Classes, Error)
 		|| !ReadJson(Dir, TEXT("races.json"), Out.Races, Error) || !ReadJson(Dir, TEXT("abilities.json"), Out.Abilities, Error)
-		|| !ReadJson(Dir, TEXT("items.json"), Out.Items, Error))
+		|| !ReadJson(Dir, TEXT("items.json"), Out.Items, Error) || !ReadJson(Dir, TEXT("weapons.json"), Weapons, Error))
 	{
 		return false;
 	}
 	Out.Tuning.Load(Progression, Combat);
 	Out.Armour.Load(Armour);
+	Out.Weapons.Load(Weapons);
 	return true;
 }
 
@@ -56,7 +58,7 @@ void URttRules::Initialize(FSubsystemCollectionBase& Collection)
 	bLoaded = RttLoadRules(RttDataDir(), Rules, Error);
 	if (bLoaded)
 	{
-		UE_LOG(LogRttRules, Log, TEXT("Rules loaded: %d armour sets, max level %d"), static_cast<int32>(Rules.Armour.Sets.size()), Rules.Tuning.MaxLevel);
+		UE_LOG(LogRttRules, Log, TEXT("Rules loaded: %d armour sets, %d weapon families, max level %d"), static_cast<int32>(Rules.Armour.Sets.size()), static_cast<int32>(Rules.Weapons.Families.size()), Rules.Tuning.MaxLevel);
 	}
 	else
 	{

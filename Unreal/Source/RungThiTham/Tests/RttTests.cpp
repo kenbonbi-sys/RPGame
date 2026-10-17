@@ -7,8 +7,11 @@
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Rules/RttAbility.h"
 #include "Rules/RttDamage.h"
 #include "Rules/RttSheet.h"
+#include "Rules/RttStatus.h"
+#include "Rules/RttWeapons.h"
 #include "RttGameMode.h"
 #include "RttHero.h"
 #include "RttRules.h"
@@ -45,6 +48,15 @@ bool FRttRulesDataTest::RunTest(const FString& Parameters)
 
 	const Rtt::ResistPoints Charrogg = Rules.Armour.Points(Rules.Armour.FullSet("charrogg"));
 	TestEqual(TEXT("Charrogg takes Frost hits +20%"), Rules.Armour.Multiplier(Charrogg, Rtt::DElement::Frost), 1.2, 1e-9);
+
+	TestEqual(TEXT("seven weapon families"), static_cast<int32>(Rules.Weapons.Families.size()), 7);
+	TestEqual(TEXT("a full Tr\u1ea3m hits for 3.2x Attack"), Rtt::HeavyBlowAt(Rules.Weapons.FamilyOf("w_kiem_hong_anh").Heavy, 10.0, 1.0, 1.0).Amount, 32.0, 1e-9);
+	Rtt::StatusEffects BossStatus(Rules.Tuning);
+	Rtt::Poise BossPoise(300.0);
+	Rtt::Link(BossStatus, BossPoise);
+	BossPoise.Add(300.0, 0.0);
+	TestTrue(TEXT("a full poise bar breaks into a stun"), BossPoise.IsBroken(0.0) && BossStatus.IsStunned(0.0));
+	TestTrue(TEXT("abilities.json has L\u01b0\u1edbt"), Rtt::FindAbility(Rules.Abilities, "dash").HasTag(Rtt::TagMovement));
 	return true;
 }
 

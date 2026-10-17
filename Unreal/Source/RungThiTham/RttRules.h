@@ -7,6 +7,7 @@
 #include "Rules/RttArmour.h"
 #include "Rules/RttJson.h"
 #include "Rules/RttTuning.h"
+#include "Rules/RttWeapons.h"
 
 #include "RttRules.generated.h"
 
@@ -19,6 +20,7 @@ struct FRttRuleSet
 	Rtt::JsonValue Races;
 	Rtt::JsonValue Abilities;
 	Rtt::JsonValue Items;
+	Rtt::WeaponTable Weapons;
 };
 
 // Content/Data/, where unity_to_json.py writes the data.

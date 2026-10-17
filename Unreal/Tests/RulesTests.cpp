@@ -2,9 +2,13 @@
 //   Tools/RulesCheck/check.cmd
 // The numbers are the Godot port's tests, which follow the Unity game's own (Cầu Lửa 56 on a fire
 // weakness lands for 73, the XP table, every class's level-1 sheet, the wiki's armour sets).
+#include "Rules/RttAbility.h"
 #include "Rules/RttArmour.h"
 #include "Rules/RttDamage.h"
+#include "Rules/RttProcs.h"
 #include "Rules/RttSheet.h"
+#include "Rules/RttStatus.h"
+#include "Rules/RttWeapons.h"
 
 #include <cmath>
 #include <cstdio>
@@ -36,6 +40,8 @@ namespace
 		Rtt::ArmourTable Armour;
 		Rtt::JsonValue Classes;
 		Rtt::JsonValue Races;
+		Rtt::JsonValue Abilities;
+		Rtt::WeaponTable Weapons;
 	};
 
 	// ------------------------------------------------------------------ the damage formula
@@ -332,6 +338,362 @@ namespace
 		Expect(d.Classes.IsObject() && d.Classes["fighter"].Str("displayName").size() > 0, "classes.json loads, Vietnamese names and all");
 		Expect(d.Races.IsObject() && d.Races["human"].IsObject(), "races.json loads");
 		Expect(d.T.MaxLevel == 40 && Near(d.T.XpExponent, 1.6) && d.T.RankMultiplier[3] == 40.0, "progression.json fills the tuning");
+		Expect(d.T.BurnMaxStacks == 3 && Near(d.T.ChillSlowPerStack, 0.12) && Near(d.T.PerfectCounterPoise, 25.0), "combat.json fills the status tuning");
+	}
+
+	// ------------------------------------------------------------------ statuses and poise
+	// Deals burn and poison ticks to a plain target, as the game does (Dot, already scaled).
+	double DealTicks(const std::vector<Rtt::DotTick>& ticks, const Data& d)
+	{
+		double total = 0.0;
+		Rtt::Defender target;
+		target.Side = Rtt::Team::Enemy;
+		for (const Rtt::DotTick& t : ticks)
+		{
+			Rtt::Hit h;
+			h.Amount = t.Amount;
+			h.Type = t.Type;
+			h.SourceTeam = t.Source;
+			h.AttackScaled = true;
+			h.Dot = true;
+			total += Rtt::ResolveDamage(h, target, d.T, d.Armour, 1.0).Amount;
+		}
+		return total;
+	}
+
+	void Statuses(const Data& d)
+	{
+		Current = "burn, chill, freeze, poise, crowd control";
+		using Rtt::Team;
+		Rtt::StatusEffects st(d.T);
+		st.Burn(1, 30.0, Team::Player, 0.0);
+		const double burnt = DealTicks(st.Tick(3.2, 1000.0, false), d);
+		Expect(burnt == 90.0, "one Bỏng stack of 30/s burns 90 over 3 s (" + F(burnt) + ")");
+		Expect(!st.IsBurning(3.2), "and goes out");
+		st.Chill(2, 4.0);
+		Expect(st.LiveChill(4.0) == 2 && Near(st.SpeedMultiplier(4.0), 0.76), "two Lạnh stacks: 24% slower");
+		st.Chill(2, 4.0);
+		Expect(st.IsFrozen(4.0) && st.SpeedMultiplier(4.0) == 0.0 && st.IsStunned(4.0), "the fourth stack freezes");
+		Expect(st.IsFrozen(5.4) && !st.IsFrozen(5.6), "for 1.5 s");
+
+		Rtt::StatusEffects cc(d.T);
+		cc.Stun(2.0, 10.0);
+		const double first = cc.StunRemaining(10.0);
+		cc.ClearStun();
+		cc.Stun(2.0, 10.0);
+		const double second = cc.StunRemaining(10.0);
+		cc.ClearStun();
+		cc.Stun(2.0, 10.0);
+		const double third = cc.StunRemaining(10.0);
+		Expect(Near(first, 2.0) && Near(second, 1.2) && Near(third, 0.72), "a second stun within 6 s lasts 60%, a third 36% (" + F(first) + ", " + F(second) + ", " + F(third) + ")");
+		cc.ClearStun();
+		cc.Stun(2.0, 17.0);
+		Expect(Near(cc.StunRemaining(17.0), 2.0), "after 6 s quiet it is whole again");
+		cc.StunImmune = true;
+		cc.ClearStun();
+		cc.Stun(2.0, 30.0);
+		cc.Root(2.0, 30.0);
+		Expect(!cc.IsStunned(30.0) && !cc.IsRooted(30.0), "a hero immune to crowd control shrugs off Choáng and Trói");
+
+		Rtt::StatusEffects po(d.T);
+		po.AddPoison(2, Team::Player, 0.0);
+		const double poisoned = DealTicks(po.Tick(6.2, 1000.0, false), d);
+		Expect(poisoned == 180.0, "two Độc stacks take 1.5% of 1000 each per second for 6 s: 180 (" + F(poisoned) + ")");
+		po.AddPoison(9, Team::Enemy, 10.0);
+		Expect(po.LivePoison(10.0) == 5, "at most five Độc stacks");
+
+		Rtt::StatusEffects ch(d.T);
+		const Rtt::Discharge a = ch.Charge(1, 50.0, Team::Player, 0.0);
+		const Rtt::Discharge b = ch.Charge(1, 50.0, Team::Player, 1.0);
+		const Rtt::Discharge c = ch.Charge(1, 50.0, Team::Player, 2.0);
+		Expect(!a.Happened && !b.Happened && c.Happened && Near(c.Amount, 40.0) && c.Targets == 3 && Near(c.Radius, 4.0),
+			"the third Tích Điện discharges 80% of the hit onto three others within 4 m");
+		Expect(ch.LiveCharge(2.0) == 0, "and the stacks are spent");
+
+		Rtt::StatusEffects cu(d.T);
+		cu.Curse(5.0, 0.0);
+		Expect(Near(cu.DamageTakenMultiplier(1.0), 1.15) && Near(cu.DamageDealtMultiplier(1.0), 0.8), "Nguyền: takes 15% more, deals 20% less");
+		cu.Judge(5.0, 0.0);
+		Expect(Near(cu.DamageTakenMultiplier(1.0), 1.35), "with Phán Xét on top: 35% more");
+		cu.Slow(0.35, 1.8, 0.0);
+		Expect(Near(cu.SpeedMultiplier(1.0), 0.65) && Near(cu.SpeedMultiplier(2.0), 1.0), "a spore's Làm Chậm: 35% for 1.8 s");
+
+		Rtt::StatusEffects fb(d.T);
+		Rtt::StatusSpec burn;
+		burn.Burn = 1;
+		fb.Apply(burn, 56.0, Team::Player, 0.0);
+		const double fbBurnt = DealTicks(fb.Tick(3.0, 1000.0, false), d);
+		Expect(fbBurnt == 48.0, "Cầu Lửa's 56 leaves a burn of 30%/s: ticks of 8.4 land as 8, 48 in all (" + F(fbBurnt) + ")");
+		fb.Burn(1, 10.0, Team::Player, 4.0);
+		const std::vector<Rtt::DotTick> late = fb.Tick(100.0, 1000.0, true);
+		Expect(late.empty() && !fb.IsBurning(4.1), "the dead stop burning");
+
+		// a boss: poise breaks into a 3 s stun and +50% damage taken
+		Rtt::StatusEffects bst(d.T);
+		Rtt::Poise bp(300.0);
+		Rtt::Link(bst, bp);
+		Expect(!bp.Add(299.0, 0.0), "299 of 300: not yet");
+		Expect(bp.Add(5.0, 0.0) && bp.IsBroken(0.0) && bst.IsStunned(0.0) && Near(bp.DamageTakenMultiplier(0.0), 1.5), "300: Vỡ Trấn Áp, stunned, x1.5");
+		Expect(Near(bp.Threshold, 375.0), "the next break needs 375");
+		bst.Stun(1.0, 0.0);
+		Expect(bst.StunRemaining(0.0) > 2.5 && Near(bst.StunRemaining(0.0), 3.0), "a broken boss is immune to more crowd control");
+		Expect(!bp.Add(500.0, 1.0), "a broken bar fills no more");
+		Expect(!bp.IsBroken(3.1) && Near(bp.DamageTakenMultiplier(3.1), 1.0), "back up after 3 s");
+		bp.Add(100.0, 10.0);
+		bp.Tick(1.0, 11.0);
+		Expect(Near(bp.Current, 100.0), "the bar holds for 2.5 s");
+		bp.Tick(1.0, 13.0);
+		Expect(Near(bp.Current, 60.0), "then drains 40 a second");
+
+		Rtt::StatusEffects heavy(d.T);
+		Rtt::Poise hp(300.0);
+		Rtt::Link(heavy, hp);
+		heavy.Chill(4, 100.0);
+		Expect(heavy.IsFrozen(100.0) && !heavy.IsFrozen(100.7) && Near(hp.Current, 60.0), "a boss freezes for only 0.6 s and takes 60 poise");
+		heavy.Stun(1.0, 101.0);
+		Expect(!heavy.IsStunned(101.0), "then shrugs off crowd control for 4 s");
+		bool sawFrozen = false;
+		for (Rtt::StatusWord w : heavy.Words)
+		{
+			sawFrozen = sawFrozen || w == Rtt::StatusWord::Frozen;
+		}
+		Expect(sawFrozen, "and says Đóng Băng!");
+	}
+
+	// ------------------------------------------------------------------ element procs
+	void Procs(const Data& d)
+	{
+		Current = "elements: the procs on a small monster";
+		using Rtt::DElement;
+		using Rtt::Element;
+		Rtt::ProcMeter m;
+		Rtt::StatusEffects st(d.T);
+		const auto hit = [&](Element type, double amount, double now)
+		{
+			const Rtt::Proc p = m.Fill(type, amount, 1000.0, DElement::None, now);
+			Rtt::ApplyProc(p, Rtt::Team::Player, st, now);
+			return p;
+		};
+		Expect(hit(Element::Fire, 100.0, 0.0).Element == DElement::None && !st.IsBurning(0.0), "below the threshold (12% of 1000) nothing happens");
+		const Rtt::Proc blaze = hit(Element::Fire, 30.0, 0.0);
+		Expect(blaze.Element == DElement::Blaze && Near(blaze.Threshold, 120.0) && st.IsBurning(0.0), "Blaze at the threshold: it burns");
+		const double burnt = DealTicks(st.Tick(3.0, 1000.0, false), d);
+		Expect(burnt == 132.0, "three stacks of 12% of the threshold a second: ticks of 21.6 land as 22, 132 in 3 s (" + F(burnt) + ")");
+		hit(Element::Ice, 130.0, 0.0);
+		Expect(Near(st.SpeedMultiplier(0.0), 0.55), "Frost: slowed 45% (" + F(st.SpeedMultiplier(0.0)) + ")");
+		hit(Element::Lightning, 130.0, 0.0);
+		Expect(st.IsStunned(0.0) && Near(st.StunRemaining(0.0), 2.0), "Shock: paralysed 2 s");
+		const Rtt::Proc terra = hit(Element::Terra, 130.0, 0.0);
+		Expect(terra.Element == DElement::Terra && !Rtt::ApplyProc(terra, Rtt::Team::Player, st, 0.0), "Terra procs, and its healing orbs are the world's");
+		Expect(hit(Element::Holy, 130.0, 0.0).Element == DElement::Radiant, "Radiant procs (a mark)");
+		Expect(hit(Element::Dark, 130.0, 0.0).Element == DElement::Umbral, "Umbral procs (a blast)");
+		Expect(hit(Element::Fire, 130.0, 1.0).Element == DElement::None && m.Resting(DElement::Blaze, 1.0), "an element cannot proc again for 6 s");
+		Expect(hit(Element::Fire, 130.0, 6.5).Element == DElement::Blaze, "then it can");
+		Expect(hit(Element::Physical, 500.0, 7.0).Element == DElement::None && hit(Element::Poison, 500.0, 7.0).Element == DElement::None, "plain and poison blows have no element to proc");
+		Rtt::ProcMeter own;
+		Expect(own.Fill(Element::Fire, 500.0, 1000.0, DElement::Blaze, 0.0).Element == DElement::None, "an element never procs on its own kind");
+		Rtt::ProcMeter small;
+		Expect(small.Fill(Element::Fire, 30.0, 100.0, DElement::None, 0.0).Element == DElement::Blaze, "small monsters need at least 30");
+	}
+
+	// ------------------------------------------------------------------ weapons
+	void Weapons(const Data& d)
+	{
+		Current = "weapons: the seven families";
+		const Rtt::WeaponTable& w = d.Weapons;
+		Expect(w.Families.size() == 7 && w.Armory.size() == 7 && w.Start.size() == 7, "seven families, seven weapons in hand");
+		struct Row { const char* item; const char* family; const char* basic; bool dual; };
+		const Row rows[] = {
+			{"w_kiem_hong_anh", "sword", "slash", false}, {"w_riu_hoa_nguc", "axe", "cleave", false},
+			{"w_bua_bang_phong", "hammer", "smash", false}, {"w_song_liem_loi_dieu", "chain_blades", "stab", true},
+			{"w_thuong_moc_lam", "war_pike", "thrust", false}, {"w_gang_thanh_quang", "aether_strikers", "flurry", true},
+			{"w_sung_hu_anh", "repeaters", "arrow", true},
+		};
+		for (const Row& r : rows)
+		{
+			const std::string item = r.item;
+			Expect(w.IsArmory(item) && w.Item(item).Family == r.family, item + " is a " + r.family);
+			Expect(std::string(w.KindOf(item).Basic) == r.basic, item + ": its basic attack is " + r.basic);
+			Expect(w.FamilyOf(item).Dual == r.dual, item + (r.dual ? ": one in each hand" : ": one in hand"));
+			Expect(Rtt::FindAbility(d.Abilities, r.basic).Valid(), std::string("the basic ") + r.basic + " is in abilities.json");
+		}
+		Expect(w.Item("w_song_liem_loi_dieu").Name == "Song Liêm Lôi Điểu" && w.DamageType("w_song_liem_loi_dieu") == Rtt::Element::Lightning, "Song Liêm Lôi Điểu deals Shock");
+		Expect(w.DamageType("w_kiem_hong_anh") == Rtt::Element::Physical && w.DamageType("w_sung_hu_anh") == Rtt::Element::Dark, "a neutral blade is physical, Súng Hư Ảnh umbral");
+		Expect(w.Next("w_song_liem_loi_dieu") == "w_thuong_moc_lam" && w.Next("w_sung_hu_anh") == "w_kiem_hong_anh", "V takes the next weapon, round again");
+		Expect(w.Item("nothing").Id == "w_kiem_hong_anh", "an unknown weapon is the starting sword");
+		Expect(!w.IsArmory("npc_sung_janek") && w.Item("npc_sung_janek").Element == Rtt::DElement::Frost, "Janek Zai's frost repeater is a prop, never the hero's");
+		const Rtt::WeaponFamily& sword = w.FamilyOf("w_kiem_hong_anh");
+		Expect(sword.Heavy.Name == "Trảm" && Near(sword.Heavy.Charge, 0.9) && sword.Heavy.Shape == Rtt::HeavyShape::Cone, "the sword's heavy move is Trảm, full in 0.9 s");
+		const Rtt::HeavyBlow full = Rtt::HeavyBlowAt(sword.Heavy, 23.0, 1.0, 1.0);
+		const Rtt::HeavyBlow none = Rtt::HeavyBlowAt(sword.Heavy, 23.0, 1.0, 0.0);
+		Expect(Near(full.Amount, 23.0 * 3.2) && Near(full.Poise, 80.0) && Near(full.Knockback, 10.0) && Near(full.HitStop, 0.15), "a full Trảm: 3.2x Attack, 80 poise");
+		Expect(Near(none.Amount, 23.0 * 1.4) && Near(none.Poise, 30.0), "a quick one: 1.4x, 30 poise");
+		const Rtt::WeaponFamily& chain = w.FamilyOf("w_song_liem_loi_dieu");
+		Expect(chain.Heavy.Shape == Rtt::HeavyShape::Spin && chain.Heavy.Hits == 3 && Near(chain.Stagger, 0.8) && chain.Cut, "Lốc Liêm spins three times; chain blades cut and stagger less");
+		const Rtt::WeaponFamily& pike = w.FamilyOf("w_thuong_moc_lam");
+		Expect(pike.Heavy.Shape == Rtt::HeavyShape::Lunge && Near(pike.Heavy.Lunge, 3.2) && pike.Pierce && !pike.Cut, "Xuyên Phá lunges 3.2 m; the pike pierces");
+		Expect(Near(w.FamilyOf("w_bua_bang_phong").Stagger, 1.6) && w.FamilyOf("w_bua_bang_phong").Heavy.Shape == Rtt::HeavyShape::Slam, "the hammer staggers most and slams");
+	}
+
+	// ------------------------------------------------------------------ abilities
+	void Abilities(const Data& d)
+	{
+		Current = "abilities: data, hits, combos";
+		size_t count = 0;
+		bool ultimateCommits = true;
+		int ultimates = 0;
+		for (size_t i = 0; i < d.Abilities.keys.size(); ++i)
+		{
+			const Rtt::Ability a = Rtt::FindAbility(d.Abilities, d.Abilities.keys[i]);
+			if (a.Valid() && d.Abilities.keys[i][0] != '_')
+			{
+				++count;
+				if (a.HasTag(Rtt::TagUltimate))
+				{
+					++ultimates;
+					ultimateCommits = ultimateCommits && Near(a.CommitTime(), a.LockTime());
+				}
+			}
+		}
+		Expect(count == 92, "92 skills (" + std::to_string(count) + ")");
+		Expect(ultimates > 0 && ultimateCommits, "an ultimate commits for its whole pose");
+		const Rtt::Ability fireball = Rtt::FindAbility(d.Abilities, "fireball");
+		Expect(fireball.Valid() && fireball.DisplayName() == "Cầu Lửa", "Cầu Lửa is there");
+		Expect(fireball.HasTag(Rtt::TagFire) && fireball.HasTag(Rtt::TagProjectile) && !fireball.HasTag(Rtt::TagMovement), "a fire projectile");
+		Expect(Near(fireball.Cooldown(), 3.0) && Near(fireball.CooldownAt(3), 2.76) && Near(fireball.CooldownAt(9), 2.52), "3 s, 4% less a skill level up to level 5");
+		Expect(Near(fireball.EnergyCost(), 12.0) && Near(fireball.CommitTime(), 0.15) && Near(fireball.MaxRange(), 15.0), "12 energy, 0.15 s committed, 15 m");
+		Expect(Near(fireball.PowerScale(3), 1.24), "+12% power a skill level");
+		const Rtt::Ability dash = Rtt::FindAbility(d.Abilities, "dash");
+		Expect(dash.HasTag(Rtt::TagMovement) && dash.AnimBase().empty() && Near(dash.CommitTime(), 0.0), "Lướt moves, has no cast pose and commits nothing");
+		Expect(!Rtt::FindAbility(d.Abilities, "nope").Valid(), "an unknown skill is empty");
+
+		Rtt::Sheet wizard(d.T);
+		wizard.Class = Rtt::ReadClass(d.Classes["wizard"]);
+		wizard.WeaponId = wizard.Class.Weapons.empty() ? "staff" : wizard.Class.Weapons[0];
+		wizard.Recalculate();
+		Rtt::Caster mage;
+		mage.Stats = &wizard;
+		Rtt::Cast cast;
+		cast.Skill = fireball;
+		cast.Slot = 1;
+		const Rtt::JsonValue& fireHit = fireball.Effects()[1]["hit"];
+		Rtt::SkillHit h = Rtt::MakeHit(cast, mage, fireHit);
+		Expect(Near(h.Damage.Amount, 1.88 * 23.0) && h.Damage.Type == Rtt::Element::Fire && h.Damage.AttackScaled, "a level-1 wizard's Cầu Lửa: 1.88 x 23 Attack (" + F(h.Damage.Amount) + ")");
+		Expect(h.Status.Burn == 1 && Near(h.Poise, 12.0) && !h.FromWeapon && h.SkillName == "Cầu Lửa", "it burns, staggers 12, is no weapon blow");
+		cast.Level = 3;
+		cast.DamageMultiplier = 1.3;
+		Expect(Near(Rtt::MakeHit(cast, mage, fireHit).Damage.Amount, 1.88 * 23.0 * 1.24 * 1.3), "at skill level 3 after a Lướt Hoàn Hảo: x1.24 x1.3");
+
+		Rtt::Sheet fighter(d.T);
+		fighter.Class = Rtt::ReadClass(d.Classes["fighter"]);
+		fighter.WeaponId = "dagger";
+		fighter.Recalculate();
+		Rtt::Caster blades;
+		blades.Stats = &fighter;
+		blades.Weapon = &d.Weapons.FamilyOf("w_song_liem_loi_dieu");
+		blades.WeaponType = d.Weapons.DamageType("w_song_liem_loi_dieu");
+		Rtt::Cast basic;
+		basic.Skill = Rtt::FindAbility(d.Abilities, "slash");
+		basic.Slot = 0;
+		Rtt::JsonValue swing = Rtt::ParseJson("{\"power\": 0.9, \"type\": 0, \"poise\": 3, \"knockback\": 4, \"critChance\": 0.15}");
+		const Rtt::SkillHit blow = Rtt::MakeHit(basic, blades, swing);
+		Expect(blow.Damage.Type == Rtt::Element::Lightning && Near(blow.Damage.Amount, 0.9 * fighter.AttackFor(Rtt::Element::Lightning)),
+			"a basic swing of Song Liêm Lôi Điểu is a Shock blow");
+		Expect(blow.FromWeapon && blow.Cutting && !blow.Piercing && Near(blow.Poise, 3.0 * 0.8), "a weapon blow: it cuts, staggers by the family");
+		basic.Slot = 2;
+		Expect(!Rtt::MakeHit(basic, blades, swing).FromWeapon, "the same hit from a skill slot is not a weapon blow");
+		basic.Slot = 0;
+		blades.ImbuePower = 0.5;
+		blades.ImbueCharge = 1;
+		const Rtt::SkillHit imbued = Rtt::MakeHit(basic, blades, swing);
+		Expect(Near(imbued.Damage.Amount, blow.Damage.Amount * 1.5) && imbued.Status.Charge == 1, "Lôi Ấn: the basic attack hits 50% harder and charges");
+
+		Rtt::ComboState combo;
+		const int c0 = Rtt::NextCombo(combo, 0.9, 0.0);
+		const int c1 = Rtt::NextCombo(combo, 0.9, 0.5);
+		const int c2 = Rtt::NextCombo(combo, 0.9, 1.3);
+		const int c3 = Rtt::NextCombo(combo, 0.9, 3.0);
+		Expect(c0 == 0 && c1 == 1 && c2 == 2 && c3 == 0, "presses within 0.9 s chain the combo, a late one starts again");
+		Expect(Near(Rtt::ChainShare(0, 0.15), 1.0) && Near(Rtt::ChainShare(3, 0.15), 0.55) && Near(Rtt::ChainShare(10, 0.15), 0.1), "a chain loses 15% a jump, never below 10%");
+		Expect(Near(Rtt::HealAmount(20.0, 0.1, 200.0, 1.5), 60.0), "a heal: (20 + 10% of 200) x healing power 1.5");
+	}
+
+	void SkillBars(const Data& d)
+	{
+		Current = "the skill bar";
+		Rtt::Sheet fighter(d.T);
+		fighter.Class = Rtt::ReadClass(d.Classes["fighter"]);
+		fighter.WeaponId = "sword";
+		fighter.Recalculate();
+		Rtt::SkillBar bar;
+		bar.ApplyKit(d.Abilities, d.Classes["fighter"], "sword");
+		Expect(bar.Slots[0].Id == "slash" && bar.Slots[1].Id == "charge" && bar.Slots[6].Id == "bladestorm" && bar.Slots[7].Id == "dash",
+			"a fighter with a sword: Chém Gió, the class kit, Lướt");
+		Rtt::SkillBar staff;
+		staff.ApplyKit(d.Abilities, d.Classes["wizard"], "staff");
+		Expect(staff.Slots[0].Id == "missile" && staff.Slots[1].Id == "fireball", "a wizard with a staff: the class's cantrip on the left button");
+		std::map<int, std::string> learned{{3, "fireball"}};
+		Rtt::SkillBar learnt;
+		learnt.ApplyKit(d.Abilities, d.Classes["fighter"], "axe", learned);
+		Expect(learnt.Slots[0].Id == "cleave" && learnt.Slots[3].Id == "fireball", "an axe's Bổ basic, and a spell from the Sách Chiêu on slot 3");
+
+		Rtt::SkillBar::Hero hero;
+		hero.Stats = &fighter;
+		hero.Energy = 100.0;
+		using R = Rtt::SkillBar::Result;
+		Expect(bar.TryCast(1, hero, 0.0) == R::Cast && Near(hero.Energy, 90.0), "Xung Phong: cast, 10 energy");
+		const double chargeCd = 7.0 * fighter.CooldownMultiplier(false, true);
+		Expect(Near(bar.CooldownLeft(1, 0.0), chargeCd) && Near(bar.CooldownFraction(1, 0.0), 1.0), "its cooldown runs");
+		Expect(bar.TryCast(2, hero, 0.05) == R::Busy, "the global cooldown and the pose hold the next skill");
+		Expect(bar.TryCast(2, hero, 0.16) == R::Cast, "free once both have passed");
+		Expect(bar.TryCast(1, hero, 1.0) == R::Cooldown, "a skill on cooldown does not cast");
+		hero.Energy = 5.0;
+		Expect(bar.TryCast(6, hero, 2.0) == R::NoEnergy, "Bão Kiếm wants 20 energy");
+		hero.Rooted = true;
+		Expect(bar.TryCast(7, hero, 2.0) == R::Rooted, "no Lướt while bound by Trói");
+		hero.Rooted = false;
+		hero.ActionRemaining = 0.2;
+		Expect(bar.TryCast(7, hero, 2.0) == R::Cast, "Lướt cuts a pose short once its commit time has passed");
+		hero.ActionRemaining = 0.0;
+		hero.Stunned = true;
+		Expect(bar.TryCast(0, hero, 3.0) == R::Busy, "nothing while stunned");
+		hero.Stunned = false;
+
+		Rtt::SkillBar basic;
+		basic.ApplyKit(d.Abilities, d.Classes["fighter"], "sword");
+		const double swing = 0.42 * fighter.CooldownMultiplier(true, false);
+		Expect(basic.TryCast(0, hero, 0.0) == R::Cast && Near(basic.CooldownLeft(0, 0.0), swing), "Chém Gió: 0.42 s by the hero's attack speed");
+		Expect(basic.Request(0, hero, swing - 0.1) == R::Buffered && basic.Buffered() == 0, "pressed 0.1 s early: remembered");
+		Expect(basic.Update(hero, swing - 0.05) == -1, "not yet");
+		Expect(basic.Update(hero, swing + 0.001) == 0, "fires the moment it is ready");
+		Expect(basic.Request(0, hero, swing + 0.1) == R::Cooldown, "pressed well before it is ready: not remembered");
+		Rtt::SkillBar cold;
+		cold.ApplyKit(d.Abilities, d.Classes["fighter"], "sword");
+		hero.ChillMultiplier = 0.76;
+		cold.TryCast(0, hero, 0.0);
+		Expect(Near(cold.CooldownLeft(0, 0.0), swing / 0.76), "two Lạnh stacks slow the basic attack");
+	}
+
+	void Perfect(const Data& d)
+	{
+		Current = "Lướt Hoàn Hảo";
+		Rtt::PerfectDodge p(d.T);
+		const Rtt::Ability fireball = Rtt::FindAbility(d.Abilities, "fireball");
+		const Rtt::Ability dash = Rtt::FindAbility(d.Abilities, "dash");
+		p.StartDash(0.0);
+		Expect(!p.Evaded(true, false, 0.05) && !p.Evaded(false, true, 0.05), "a touch or a tick is no perfect dodge");
+		Expect(p.Evaded(false, false, 0.1), "a blow within 0.15 s of the dash: perfect");
+		Expect(!p.Evaded(false, false, 0.12), "once a dash");
+		Expect(p.TakeBonus(dash, 0.5) == 1.0, "a Movement skill does not spend the bonus");
+		Expect(Near(p.TakeBonus(fireball, 0.5), 1.3) && p.TakeBonus(fireball, 0.6) == 1.0, "the next skill hits 30% harder, only once");
+		Expect(Near(p.CounterPoise("Cầu Lửa", 0.7), 25.0) && p.CounterPoise("Cầu Lửa", 0.8) == 0.0, "its first hit adds 25 to a boss's bar");
+		Rtt::PerfectDodge late(d.T);
+		late.StartDash(0.0);
+		Expect(!late.Evaded(false, false, 0.2), "a blow after the window is an ordinary dodge");
+		Rtt::PerfectDodge slow(d.T);
+		slow.StartDash(0.0);
+		slow.Evaded(false, false, 0.0);
+		Expect(slow.TakeBonus(fireball, 1.6) == 1.0, "the bonus lasts 1.5 s");
 	}
 }
 
@@ -350,7 +712,9 @@ int main(int argc, char** argv)
 	d.Armour.Load(Rtt::LoadJsonFile(dir + "armour_sets.json", &err));
 	d.Classes = Rtt::LoadJsonFile(dir + "classes.json", &err);
 	d.Races = Rtt::LoadJsonFile(dir + "races.json", &err);
-	if (progression.IsNull() || d.Classes.IsNull())
+	d.Abilities = Rtt::LoadJsonFile(dir + "abilities.json", &err);
+	d.Weapons.Load(Rtt::LoadJsonFile(dir + "weapons.json", &err));
+	if (progression.IsNull() || d.Classes.IsNull() || d.Abilities.IsNull() || d.Weapons.Families.empty())
 	{
 		std::printf("cannot read the data in %s: %s\n", dir.c_str(), err.c_str());
 		return 2;
@@ -363,6 +727,12 @@ int main(int argc, char** argv)
 	ArmourSets(d);
 	ArmourMaths(d);
 	ArmourHits(d);
+	Statuses(d);
+	Procs(d);
+	Weapons(d);
+	Abilities(d);
+	SkillBars(d);
+	Perfect(d);
 	std::printf("%d checks, %d failed\n", Checks, Failures);
 	return Failures == 0 ? 0 : 1;
 }

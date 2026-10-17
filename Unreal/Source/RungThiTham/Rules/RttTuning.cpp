@@ -49,10 +49,43 @@ namespace Rtt
 		VeryLowGapFactor = p.Num("veryLowGapFactor", VeryLowGapFactor);
 		DamageSpread = p.Num("damageSpread", DamageSpread);
 
+		TickInterval = c.Num("tickInterval", TickInterval);
+		BurnShare = c.Num("burnShare", BurnShare);
+		BurnMaxStacks = c.Int("burnMaxStacks", BurnMaxStacks);
+		BurnSeconds = c.Num("burnSeconds", BurnSeconds);
+		ChillSlowPerStack = c.Num("chillSlowPerStack", ChillSlowPerStack);
+		ChillMaxStacks = c.Int("chillMaxStacks", ChillMaxStacks);
+		ChillSeconds = c.Num("chillSeconds", ChillSeconds);
+		FreezeSeconds = c.Num("freezeSeconds", FreezeSeconds);
+		HeavyFreezeSeconds = c.Num("heavyFreezeSeconds", HeavyFreezeSeconds);
+		HeavyFreezePoise = c.Num("heavyFreezePoise", HeavyFreezePoise);
+		ChargeMaxStacks = c.Int("chargeMaxStacks", ChargeMaxStacks);
+		ChargeSeconds = c.Num("chargeSeconds", ChargeSeconds);
+		DischargeShare = c.Num("dischargeShare", DischargeShare);
+		DischargeTargets = c.Int("dischargeTargets", DischargeTargets);
+		DischargeRadius = c.Num("dischargeRadius", DischargeRadius);
+		PoisonMaxHpPerSecond = c.Num("poisonMaxHpPerSecond", PoisonMaxHpPerSecond);
+		PoisonMaxStacks = c.Int("poisonMaxStacks", PoisonMaxStacks);
+		PoisonSeconds = c.Num("poisonSeconds", PoisonSeconds);
+		SlowSeconds = c.Num("slowSeconds", SlowSeconds);
 		CurseDamageTaken = c.Num("curseDamageTaken", CurseDamageTaken);
 		CurseDamageDealt = c.Num("curseDamageDealt", CurseDamageDealt);
 		JudgmentDamageTaken = c.Num("judgmentDamageTaken", JudgmentDamageTaken);
+		CrowdControlRepeatWindow = c.Num("crowdControlRepeatWindow", CrowdControlRepeatWindow);
+		CrowdControlRepeatFactor = c.Num("crowdControlRepeatFactor", CrowdControlRepeatFactor);
+		HeavyCrowdControlImmunity = c.Num("heavyCrowdControlImmunity", HeavyCrowdControlImmunity);
+		WallSlamSpeed = c.Num("wallSlamSpeed", WallSlamSpeed);
+		WallSlamStun = c.Num("wallSlamStun", WallSlamStun);
+		HitStopLight = c.Num("hitStopLight", HitStopLight);
+		HitStopHeavy = c.Num("hitStopHeavy", HitStopHeavy);
+		HitStopBreak = c.Num("hitStopBreak", HitStopBreak);
 		PerfectWindow = c.Num("perfectWindow", PerfectWindow);
+		PerfectTimeScale = c.Num("perfectTimeScale", PerfectTimeScale);
+		PerfectSlowSeconds = c.Num("perfectSlowSeconds", PerfectSlowSeconds);
+		PerfectSlowEase = c.Num("perfectSlowEase", PerfectSlowEase);
+		PerfectEnergy = c.Num("perfectEnergy", PerfectEnergy);
 		PerfectDamageMultiplier = c.Num("perfectDamageMultiplier", PerfectDamageMultiplier);
+		PerfectBonusSeconds = c.Num("perfectBonusSeconds", PerfectBonusSeconds);
+		PerfectCounterPoise = c.Num("perfectCounterPoise", PerfectCounterPoise);
 	}
 }
