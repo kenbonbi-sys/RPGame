@@ -51,6 +51,28 @@ anims = {n: (p, n, c) for c, p, n in items if c in ("AnimSequence", "AnimMontage
 blueprints = [(p, n) for c, p, n in items if c == "Blueprint"]
 rocks = [(p, n) for c, p, n in items if c == "StaticMesh" and any(w in n.lower() for w in ("rock", "boulder", "stone"))]
 
+
+def drawable(p, n):
+    """False when the mesh would draw the engine's checker: Rampage's own SM_Rock_To_Hold has an
+    empty texture in M_Rock_To_Throw (its copy among the FX debris is whole)."""
+    mel = unreal.MaterialEditingLibrary
+    mesh = unreal.EditorAssetLibrary.load_asset(path(p, n))
+    for slot in mesh.get_editor_property("static_materials") if mesh else []:
+        mat = slot.get_editor_property("material_interface")
+        base = mat.get_base_material() if mat else None
+        if base is None or base.get_path_name().startswith("/Engine/"):
+            return False
+        for t in mel.get_texture_parameter_names(base):
+            value = (mel.get_material_instance_texture_parameter_value(mat, t) if isinstance(mat, unreal.MaterialInstanceConstant)
+                     else mel.get_material_default_texture_parameter_value(base, t))
+            if value is None:
+                return False
+    return mesh is not None
+
+
+# the rock it tears up and throws: one made to be held, if one draws
+rocks = sorted((r for r in rocks if drawable(*r)), key=lambda pn: (0 if "hold" in pn[1].lower() else 1, pn[1]))
+
 mesh = sorted(meshes, key=lambda pn: (0 if pn[1].lower() == hero.lower() else 1, len(pn[1])))[0]
 anim_bp = sorted(anim_bps, key=lambda pn: (0 if "animblueprint" in pn[1].lower() else 1, len(pn[1])))[0] if anim_bps else None
 

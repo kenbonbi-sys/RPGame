@@ -8,6 +8,7 @@ rem                     (run: the hero runs on by itself, for a shot of the run)
 rem   ue hero [Name]    name the Paragon hero added from Fab in Config/DefaultGame.ini
 rem   ue assets         bring in the game's own art (the sculpted Gau Ma, materials): import_assets.py
 rem   ue beast [Pack]   name the Paragon monster (default ParagonRampage) as the colossus body
+rem   ue forest         plant Hang Gau's forest from the environment packs in the project: setup_forest.py
 rem   ue play           play the game in a window (Unreal/Choi.cmd does this on a double-click)
 rem Keep this file ASCII: cmd.exe misreads multi-byte UTF-8 lines in a .cmd.
 rem UE_ROOT picks the engine (default: the launcher's UE 5.8); RTT_MAP the map shot and play open
@@ -35,12 +36,13 @@ if /i "%~1"=="hero" goto hero
 if /i "%~1"=="play" goto play
 if /i "%~1"=="assets" goto assets
 if /i "%~1"=="beast" goto beast
-echo usage: ue build ^| level ^| test ^| shot [file.png] [run] ^| hero [Name]
+if /i "%~1"=="forest" goto forest
+echo usage: ue build ^| level ^| test ^| shot [file.png] [run^|fight^|side] ^| hero [Name] ^| assets ^| beast [Pack] ^| forest ^| play
 exit /b 2
 
 :assets
 rem the materials are built anew (rebuilding one in place trips an editor assert)
-for %%M in (M_VertexColour M_Creature M_Glow M_Telegraph) do if exist "%ROOT%\Unreal\Content\Materials\%%M.uasset" del "%ROOT%\Unreal\Content\Materials\%%M.uasset"
+for %%M in (M_VertexColour M_Creature M_Glow M_Telegraph M_Ground) do if exist "%ROOT%\Unreal\Content\Materials\%%M.uasset" del "%ROOT%\Unreal\Content\Materials\%%M.uasset"
 "%EDITOR%" "%PROJ%" -run=pythonscript -script="%HERE%import_assets.py" %COMMON% -abslog="%OUT%\assets.log" >nul
 findstr /c:"RTT_ASSETS" "%OUT%\assets.log" | findstr /v /c:"Running Python"
 findstr /c:"RTT_ASSETS_OK" "%OUT%\assets.log" >nul && exit /b 0
@@ -54,6 +56,14 @@ findstr /c:"RTT_BEAST" "%OUT%\beast.log" | findstr /v /c:"Running Python" | find
 findstr /c:"RTT_BEAST_OK" "%OUT%\beast.log" >nul && exit /b 0
 findstr /i /c:"LogPython: Error" "%OUT%\beast.log"
 echo No Paragon monster was set up; see %OUT%\beast.log
+exit /b 1
+
+:forest
+"%EDITOR%" "%PROJ%" -run=pythonscript -script="%HERE%setup_forest.py" %COMMON% -abslog="%OUT%\forest.log" >nul
+findstr /c:"RTT_FOREST" "%OUT%\forest.log" | findstr /v /c:"Running Python" | findstr /v /c:" kept" | findstr /v /c:"too big"
+findstr /c:"RTT_FOREST_OK" "%OUT%\forest.log" >nul && exit /b 0
+findstr /i /c:"LogPython: Error" "%OUT%\forest.log"
+echo The forest was not set up; see %OUT%\forest.log
 exit /b 1
 
 :play

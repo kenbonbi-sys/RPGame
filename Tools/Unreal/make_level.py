@@ -95,27 +95,64 @@ def block(label, mesh, x, y, z, sx, sy, sz, yaw=0.0):
 GRID = make_grid()
 
 
-def outdoors(map_path):
-    """A new map with the ground, a sun, sky, clouds and fog, all lit live."""
+def try_set(obj, prop, value):
+    """Sets a property if this engine version has it (names move between versions)."""
+    try:
+        obj.set_editor_property(prop, value)
+        return True
+    except Exception as e:
+        unreal.log_warning("RTT_LEVEL no %s on %s: %s" % (prop, obj.get_name(), e))
+        return False
+
+
+def outdoors(map_path, ground_mesh=None, forest=False):
+    """A new map with the ground, a sun, sky, clouds and fog, all lit live. `ground_mesh`: a
+    terrain mesh made in world space (else the grid plane); `forest`: Dauntless's daylight, a
+    warm sun, a soft blue-green haze and a touch more colour."""
     # new_level refuses to replace a map, so ue.cmd deletes the old ones first
     if not levels.new_level(map_path):
         raise RuntimeError("cannot create " + map_path + " (delete its .umap first)")
-    # the ground: Plane is 1 m across. Stretched that far its distance field is too coarse to light
-    # anything by, so it stays out of distance-field lighting.
-    ground = block("Ground", PLANE, 0, 0, 0, 400, 400, 1)
-    ground.static_mesh_component.set_editor_property("affect_distance_field_lighting", False)
-    sun = spawn(unreal.DirectionalLight, "Sun", z=800, pitch=-38.0, yaw=-35.0)
+    if ground_mesh:
+        ground = spawn(unreal.StaticMeshActor, "Ground")
+        ground.static_mesh_component.set_static_mesh(ground_mesh)
+        # 500 m across, its distance field has 4 m cells: Lumen reads it as dark blots on the hills
+        ground.static_mesh_component.set_editor_property("affect_distance_field_lighting", False)
+    else:
+        # the ground: Plane is 1 m across. Stretched that far its distance field is too coarse to
+        # light anything by, so it stays out of distance-field lighting.
+        ground = block("Ground", PLANE, 0, 0, 0, 400, 400, 1)
+        ground.static_mesh_component.set_editor_property("affect_distance_field_lighting", False)
+    sun = spawn(unreal.DirectionalLight, "Sun", z=800, pitch=-52.0 if forest else -38.0, yaw=-60.0 if forest else -35.0)
     sun_light = movable(sun, unreal.DirectionalLightComponent)
     sun_light.set_editor_property("atmosphere_sun_light", True)
-    sun_light.set_editor_property("intensity", 10.0)
+    sun_light.set_editor_property("intensity", 9.0 if forest else 10.0)
+    if forest:
+        try_set(sun_light, "light_color", unreal.Color(255, 236, 210, 255))
     spawn(unreal.SkyAtmosphere, "Sky Atmosphere")
     sky = spawn(unreal.SkyLight, "Sky Light", z=600)
     sky_light = movable(sky, unreal.SkyLightComponent)
     sky_light.set_editor_property("real_time_capture", True)
+    if forest:
+        try_set(sky_light, "intensity", 1.6)
     spawn(unreal.VolumetricCloud, "Clouds")
-    spawn(unreal.ExponentialHeightFog, "Height Fog", z=-200)
+    fog = spawn(unreal.ExponentialHeightFog, "Height Fog", z=-200)
+    if forest:
+        fog_c = fog.get_component_by_class(unreal.ExponentialHeightFogComponent)
+        try_set(fog_c, "fog_density", 0.018)
+        try_set(fog_c, "fog_height_falloff", 0.12)
+        if not try_set(fog_c, "fog_inscattering_luminance", unreal.LinearColor(0.42, 0.58, 0.66, 1.0)):
+            try_set(fog_c, "fog_inscattering_color", unreal.LinearColor(0.42, 0.58, 0.66, 1.0))
+        try_set(fog_c, "start_distance", 3000.0)
     post = spawn(unreal.PostProcessVolume, "Post Process")
     post.set_editor_property("unbound", True)
+    if forest:
+        settings = post.get_editor_property("settings")
+        for prop, value in (("override_color_saturation", True), ("color_saturation", unreal.Vector4(1.12, 1.12, 1.12, 1.0)),
+                            ("override_color_contrast", True), ("color_contrast", unreal.Vector4(1.05, 1.05, 1.05, 1.0)),
+                            ("override_bloom_intensity", True), ("bloom_intensity", 0.8),
+                            ("override_vignette_intensity", True), ("vignette_intensity", 0.25)):
+            try_set(settings, prop, value)
+        post.set_editor_property("settings", settings)
 
 
 def save(map_path):
@@ -137,14 +174,34 @@ block("Boulder", SPHERE, -700, 400, 100, 3, 3, 2.2)
 spawn(unreal.PlayerStart, "Player Start", z=120)
 save(MAP)
 
-# HangGau: the first colossus's den, the MVP fight. The colossus (ARttBehemoth, a Paragon monster
-# named by ue.cmd beast) stands 35 m off facing the hero; its den reaches 38 m around where it
-# stands (BearStats::DenRadius). Gấu Ma (ARttGauMa) can stand in for it: COLOSSUS below.
+# HangGau: the first colossus's den, a forest clearing (make_terrain.py's ground, ARttForest's trees,
+# rocks and grass). The colossus (ARttBehemoth, a Paragon monster named by ue.cmd beast) stands
+# 35 m off facing the hero; its den reaches 38 m around where it stands (BearStats::DenRadius).
+# Gấu Ma (ARttGauMa) can stand in for it: COLOSSUS below.
 COLOSSUS = "/Script/RungThiTham.RttBehemoth"
-outdoors(ARENA)
-spawn(unreal.PlayerStart, "Player Start", z=120)
+CLEARING = (1750.0, 0.0)
+
+
+def find_mesh(folder, name):
+    """The static mesh `name` imported under `folder` (the glTF importer adds its own subfolders)."""
+    registry = unreal.AssetRegistryHelpers.get_asset_registry()
+    registry.scan_paths_synchronous([folder], True)
+    for a in registry.get_assets_by_path(folder, recursive=True):
+        if str(a.asset_name) == name and str(a.asset_class_path.asset_name) == "StaticMesh":
+            return a.get_asset()
+    return None
+
+
+terrain = find_mesh("/Game/Environment/HangGau", "HangGau_Ground")
+if terrain is None:
+    unreal.log_warning("RTT_LEVEL no HangGau_Ground: run ue.cmd assets (the grid plane stands in)")
+outdoors(ARENA, terrain, forest=True)
+spawn(unreal.PlayerStart, "Player Start", z=160)
 colossus = unreal.load_class(None, COLOSSUS)
 if colossus is None:
     raise RuntimeError(COLOSSUS + " is not built: run ue.cmd build first")
 spawn(colossus, "Colossus", x=3500, yaw=180.0)
+woods = unreal.load_class(None, "/Script/RungThiTham.RttForest")
+if woods is not None:
+    spawn(woods, "Forest", x=CLEARING[0], y=CLEARING[1])
 save(ARENA)

@@ -89,6 +89,7 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   Tools\Unreal\ue.cmd shot     chơi map trong cửa sổ, chụp ảnh rồi thoát (run: hero tự chạy; fight: hero tự lao vào đánh)
   Tools\Unreal\ue.cmd assets   nhập Gấu Ma điêu khắc từ bản Godot và dựng các vật liệu (import_assets.py)
   Tools\Unreal\ue.cmd beast    ghi quái Paragon (Rampage) làm thân colossus trong Config/DefaultGame.ini
+  Tools\Unreal\ue.cmd forest   lấy cây, bụi, đá, cỏ từ các bộ môi trường trong Content cho rừng Hang Gấu (setup_forest.py)
   Tools\Unreal\ue.cmd hero     tìm hero Paragon đã thêm từ Fab, ghi vào Config/DefaultGame.ini
   ```
 
@@ -107,9 +108,39 @@ Gấu Ma điêu khắc từ bản Godot lệch phong cách với Greystone: kh�
 - **`IRttBoss`**: HUD, đòn đánh của hero và góc chụp nghiêng nhận diện boss qua interface này, nên Gấu Ma (`ARttGauMa`) vẫn dùng được. Đổi `COLOSSUS` trong `make_level.py` là đặt nó vào Hang Gấu.
 - Module `RungThiTham` tắt unity build (`bUseUnity = false`): các file port từ Godot giữ hằng số và hàm phụ riêng (`S`, `Flat`…) sẽ trùng nhau khi Unreal gộp mọi `.cpp`. `Tools/RulesCheck` vẫn biên dịch thư viện luật như một file gộp.
 
+## Hang Gấu: khoảng rừng trống
+
+Nền bàn cờ đã thay bằng một khoảng trống giữa rừng, kiểu Dauntless: chỗ đánh gần như phẳng, đồi lăn dần lên quanh đó, cỏ loang hai màu, đường mòn và hang đất trơ, nắng ấm, sương xanh nhạt.
+
+- **Nền** `Tools/Unreal/make_terrain.py` sinh `Unreal/SourceArt/Terrain/HangGau_Ground.glb`:
+  - lưới 500 m, 256 ô, tâm khoảng trống ở (17,5 m; 0);
+  - khoảng trống bán kính 70 m, cao thấp dưới 1 m; hang của colossus gần như phẳng;
+  - ngoài 70 m là đồi cao 9–31 m;
+  - màu đỉnh: R là đất trơ (đường mòn từ chỗ hero vào tới hang, vài mảng trong khoảng trống), G là đá (chỗ dốc).
+
+  `ue.cmd assets` nhập nó vào `/Game/Environment/HangGau` (va chạm theo đúng lưới). glb phải có một vật liệu có tên, không thì mesh không có ô vật liệu nào và gán vật liệu không ăn.
+- **Vật liệu** `M_Ground` (dựng trong `import_assets.py`):
+  - ba lớp cỏ / đất / đá, mỗi lớp một texture màu và một normal map, là tham số để instance thay bằng texture của bộ môi trường (`UseTextures` = 1);
+  - chưa có bộ môi trường thì chỉ tô màu: cỏ loang giữa xanh vàng nắng và xanh sẫm, theo nhiễu tính ngay trong shader (texture mượn thì lộ vân thành vệt).
+- **Rừng** `ARttForest` (`RttForest.h/.cpp`): khi vào game, rải theo một seed cố định:
+  - cây dày ở mép khoảng trống, thưa dần lên đồi, cách nhau ít nhất 5,5 m;
+  - bụi dưới gốc cây và dọc mép;
+  - đá thành cụm, lún xuống và nghiêng theo mặt đất;
+  - cỏ khắp nơi, thưa ở hang.
+
+  Mỗi loại mesh là một Hierarchical Instanced Static Mesh, mờ dần theo khoảng cách. Cây và đá chặn người và colossus nhưng camera đi xuyên qua.
+- **`ue.cmd forest`** (`setup_forest.py`):
+  - xếp mọi static mesh của các bộ trong Content thành cây, bụi, đá, cỏ theo đầu từng chữ trong tên (`Greystone` không phải đá), bỏ hiệu ứng chiêu của Paragon;
+  - bỏ mesh có vật liệu lỗi (ô trống, vật liệu tạm của engine, texture rỗng như `M_Rock_To_Throw` của Rampage), và giữ mesh theo cỡ;
+  - ghi `[/Script/RungThiTham.RttForest]` với tỉ lệ mỗi loại;
+  - bật cờ instanced cho vật liệu của bộ (không bao giờ đụng vật liệu của engine);
+  - nếu bộ có texture cỏ / đất / đá thì tạo `MI_Ground` và gán cho nền.
+- **Hiện tại:** chưa có bộ môi trường, nên rừng chỉ có đá của Rampage (3 loại, ×2,12). Khi thêm **Infinity Blade: Grass Lands** (miễn phí trên Fab, *Add to Project* → RungThiTham), chạy `ue.cmd forest` là có cây, bụi, cỏ và texture nền.
+- **Ánh sáng:** mặt trời ấm cao 52°, sky light 1,6, sương có màu, hậu kỳ tăng bão hoà một chút. Nền tắt distance field lighting: lưới 500 m chỉ có ô distance field 4 m, Lumen vẽ ra vết tối.
+
 ## MVP: đánh Gấu Ma (Hang Gấu)
 
-Map `HangGau` (dựng bằng `ue.cmd level`): một bãi trống, Greystone ở giữa, Gấu Ma Rừng Già đứng cách 35 m, hang của nó rộng 38 m.
+Map `HangGau` (dựng bằng `ue.cmd level`): khoảng rừng trống ở trên, Greystone ở giữa, colossus đứng cách 35 m, hang của nó rộng 38 m.
 
 - **Gấu Ma** (`RttGauMa`): chuyển gần như từng dòng từ `gau_ma.gd` và `colossus.gd`.
   - Thân ghép từ các mảnh sculpt của bản Godot (`Content/Creatures/GauMa`, nhập từ `Godot/assets/creatures/gau_ma.glb`). Bốn chân bước bằng IK, thân nhún theo bước chân, đầu nhìn theo hero.
@@ -137,7 +168,7 @@ Map `HangGau` (dựng bằng `ue.cmd level`): một bãi trống, Greystone ở 
 | U0 · Nền móng | Cài engine và Visual Studio; tạo dự án C++; Git LFS; biên dịch, test và chụp ảnh từ dòng lệnh |
 | U1 · Hero và camera | Nhân vật Paragon cầm vũ khí; camera treo sau lưng kiểu SotC; chạy, chạy nhanh, nhảy, Lướt (bất tử ngắn, Lướt Hoàn Hảo); hoạt ảnh hoà trộn theo tốc độ, chân bám đất, đòn đánh bằng montage có root motion |
 | U2 · Luật chiến đấu | Viết lại sang C++ đúng từng con số: Health, StatusEffects, Poise, DamageInfo, Combat, Elements, Armour, Weapons, cấp và chỉ số D&D, 92 chiêu từ dữ liệu; test giữ nguyên các ví dụ của bản Godot. **Đã xong** (thư viện `Rules/`): sát thương, nguyên tố và proc, giáp, bảng nhân vật và XP, trạng thái, Poise, vũ khí, chiêu và thanh kỹ năng. **Còn:** các khối hiệu ứng cần thế giới (vùng sát thương, đạn, lướt, xích sét, tia, cầu, bóng), Health trên actor, cầu hồi máu, dấu Quang, nang Ám; làm cùng U1 và U4 |
-| U3 · Thế giới | Landscape dựng từ độ cao của `WorldMap`; cây cỏ đá theo vùng; vật liệu vẽ tay kiểu Dauntless; Làng Lá Xanh theo kiểu Ramsgate (nhà gỗ sẫm, đèn lồng, sương xanh) |
+| U3 · Thế giới | Landscape dựng từ độ cao của `WorldMap`; cây cỏ đá theo vùng; vật liệu vẽ tay kiểu Dauntless; Làng Lá Xanh theo kiểu Ramsgate (nhà gỗ sẫm, đèn lồng, sương xanh). **Đã bắt đầu:** Hang Gấu là khoảng rừng trống (nền, vật liệu, `ARttForest`); chờ bộ môi trường cho cây và cỏ |
 | U4 · Behemoth | Gấu Ma: bộ phận phá được, thanh choáng, sát thương lúc choáng, Húc bị gián đoạn, vòng cảnh báo và nhịp báo trước; leo bám kiểu SotC; slime và nấm. **Đã có bản MVP** (xem dưới). **Còn:** Ném Đá Lớn, Chụp Quăng, Lắc Mình, leo bám, điểm yếu, quỳ gối, rơi đồ |
 | U5 · Giao diện | HUD, Esc, Cài Đặt (gắn thẳng vào Scalability), Trang Bị (nhân vật giữa màn hình), nhật ký, ô vật phẩm |
 | U6 · Làng | Chín NPC Ramsgate, nói chuyện, cửa hàng, hồ sơ behemoth, bản đồ, bãi tập |

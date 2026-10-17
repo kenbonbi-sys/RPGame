@@ -214,6 +214,117 @@ return C * Fr * 0.35 * (1.0 - M.x) + float3(1.6, 1.5, 1.4) * H;""", ["C", "Fr", 
     return finish(m)
 
 
+ENVIRONMENT = "/Game/Environment/HangGau"
+TERRAIN_GLB = os.path.join(ROOT, "Unreal", "SourceArt", "Terrain", "HangGau_Ground.glb")
+
+
+def ground():
+    """The ground's paint: grass, bare earth where vertex colour R says (paths, the den), rock
+    where G says (steep hills), each a colour texture and a normal map (texture parameters, so an
+    instance swaps in an environment pack's and sets UseTextures to 1). Until then the ground is
+    painted in tints alone, as Dauntless paints it: grass mottled between a sunlit yellow-green
+    and a deep shade by broad and middling blotches, so it never tiles plainly."""
+    m = material("M_Ground")
+    # the glTF importer makes the terrain a Nanite mesh: without the flag the game draws the checker
+    m.set_editor_property("used_with_nanite", True)
+    # by object path: the commandlet's asset registry has not scanned the engine's content
+    white = unreal.load_object(None, "/Engine/EngineResources/WhiteSquareTexture.WhiteSquareTexture")
+    flat = unreal.load_object(None, "/Engine/EngineMaterials/DefaultNormal.DefaultNormal")
+    if white is None or flat is None:
+        raise RuntimeError("no engine default textures for M_Ground")
+    vc = node(m, unreal.MaterialExpressionVertexColor, -1400, -300)
+    wp = node(m, unreal.MaterialExpressionWorldPosition, -1400, -150)
+    params = {}
+    y = 0
+    for name, tex in (("GrassColour", white), ("GrassNormal", flat), ("EarthColour", white), ("EarthNormal", flat),
+                      ("RockColour", white), ("RockNormal", flat)):
+        params[name] = node(m, unreal.MaterialExpressionTextureObjectParameter, -1400, y, parameter_name=name, texture=tex)
+        y += 150
+    tints = {}
+    for i, (name, colour) in enumerate((("GrassTint", (0.115, 0.165, 0.035)), ("GrassShade", (0.035, 0.07, 0.018)),
+                                        ("EarthTint", (0.16, 0.11, 0.06)), ("RockTint", (0.19, 0.18, 0.16)))):
+        tints[name] = node(m, unreal.MaterialExpressionVectorParameter, -1100, 600 + 120 * i, parameter_name=name,
+                           default_value=unreal.LinearColor(colour[0], colour[1], colour[2], 1))
+    scalars = {}
+    for i, (name, value) in enumerate((("GrassTile", 300.0), ("EarthTile", 400.0), ("RockTile", 800.0), ("UseTextures", 0.0))):
+        scalars[name] = node(m, unreal.MaterialExpressionScalarParameter, -1100, 1100 + 100 * i, parameter_name=name, default_value=value)
+    # blotches from smooth value noise (no texture: a borrowed one shows its own grain as streaks)
+    common = """
+struct Blotches
+{
+    float Hash(float2 c) { return frac(sin(dot(c, float2(127.1, 311.7))) * 43758.5453); }
+    float Value(float2 q)
+    {
+        float2 i = floor(q);
+        float2 f = frac(q);
+        f = f * f * (3.0 - 2.0 * f);
+        return lerp(lerp(Hash(i), Hash(i + float2(1, 0)), f.x), lerp(Hash(i + float2(0, 1)), Hash(i + float2(1, 1)), f.x), f.y);
+    }
+    float Fbm(float2 q) { return Value(q) * 0.55 + Value(q * 2.03 + 17.0) * 0.3 + Value(q * 4.1 + 41.0) * 0.15; }
+};
+Blotches b;
+float2 p = WP.xy;
+float macro = b.Fbm(p / 2500.0);
+float meso = b.Fbm(p / 450.0 + 7.3);
+float earth = saturate(VC.r * 1.3 + (macro - 0.5) * 0.9 + (meso - 0.5) * 0.4);
+float rock = saturate(VC.g * 1.2);
+"""
+    colour = custom(m, -700, -200, common + """
+float sun = smoothstep(0.25, 0.75, macro * 0.75 + meso * 0.45);
+float3 g = lerp(GS, GT, sun) * lerp(1.0, Texture2DSample(GrassColour, GrassColourSampler, p / GrassTile).rgb, UseTextures);
+float3 e = ET * lerp(0.85, 1.1, meso) * lerp(1.0, Texture2DSample(EarthColour, EarthColourSampler, p / EarthTile).rgb, UseTextures);
+float3 r = RT * lerp(0.8, 1.1, meso) * lerp(1.0, Texture2DSample(RockColour, RockColourSampler, p / RockTile).rgb, UseTextures);
+return lerp(lerp(g, e, earth), r, rock);""", ["VC", "WP", "GrassColour", "EarthColour", "RockColour", "GT", "GS", "ET", "RT",
+                                              "GrassTile", "EarthTile", "RockTile", "UseTextures"])
+    normal = custom(m, -700, 200, common + """
+float3 g = Texture2DSample(GrassNormal, GrassNormalSampler, p / GrassTile).xyz * 2.0 - 1.0;
+float3 e = Texture2DSample(EarthNormal, EarthNormalSampler, p / EarthTile).xyz * 2.0 - 1.0;
+float3 r = Texture2DSample(RockNormal, RockNormalSampler, p / RockTile).xyz * 2.0 - 1.0;
+float3 n = lerp(lerp(g, e, earth), r, rock);
+n.xy *= UseTextures;
+n.z = sqrt(saturate(1.0 - dot(n.xy, n.xy)));
+return normalize(n);""", ["VC", "WP", "GrassNormal", "EarthNormal", "RockNormal", "GrassTile", "EarthTile", "RockTile", "UseTextures"])
+    rough = custom(m, -700, 500, common + """
+return lerp(lerp(0.92, 0.85, earth), 0.75, rock);""", ["VC", "WP"], unreal.CustomMaterialOutputType.CMOT_FLOAT1)
+    for c_node, names in ((colour, ["GrassColour", "EarthColour", "RockColour"]), (normal, ["GrassNormal", "EarthNormal", "RockNormal"])):
+        for nm in names:
+            edit.connect_material_expressions(params[nm], "", c_node, nm)
+        for nm in ("GrassTile", "EarthTile", "RockTile", "UseTextures"):
+            edit.connect_material_expressions(scalars[nm], "", c_node, nm)
+    for c_node in (colour, normal, rough):
+        edit.connect_material_expressions(vc, "", c_node, "VC")
+        edit.connect_material_expressions(wp, "", c_node, "WP")
+    for pin, name in (("GT", "GrassTint"), ("GS", "GrassShade"), ("ET", "EarthTint"), ("RT", "RockTint")):
+        edit.connect_material_expressions(tints[name], "", colour, pin)
+    edit.connect_material_property(colour, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    edit.connect_material_property(normal, "", unreal.MaterialProperty.MP_NORMAL)
+    edit.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    return finish(m)
+
+
+def import_terrain(ground_material):
+    """Hang Gấu's ground (make_terrain.py): walked on exactly as it is drawn."""
+    task = unreal.AssetImportTask()
+    task.filename = TERRAIN_GLB
+    task.destination_path = ENVIRONMENT
+    task.automated = True
+    task.replace_existing = True
+    task.save = True
+    tools.import_asset_tasks([task])
+    registry = unreal.AssetRegistryHelpers.get_asset_registry()
+    registry.scan_paths_synchronous([ENVIRONMENT], True)
+    for a in registry.get_assets_by_path(ENVIRONMENT, recursive=True):
+        obj = a.get_asset()
+        if isinstance(obj, unreal.StaticMesh):
+            obj.set_material(0, ground_material)
+            body = obj.get_editor_property("body_setup")
+            if body:
+                body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
+            assets.save_loaded_asset(obj)
+            unreal.log("RTT_ASSETS terrain %s %s painted %s" % (a.package_name, obj.get_bounding_box(),
+                                                                 obj.get_material(0).get_name() if obj.get_material(0) else "NOTHING"))
+
+
 def telegraph():
     m = material("M_Telegraph")
     m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
@@ -232,6 +343,7 @@ vertex_colour()
 vc = creature(import_textures())
 glow_mat = glow()
 telegraph()
+import_terrain(ground())
 
 task = unreal.AssetImportTask()
 task.filename = GLB
