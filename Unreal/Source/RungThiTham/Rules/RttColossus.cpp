@@ -137,4 +137,17 @@ namespace Rtt
 		parts.push_back({"hr", "Ch\xc3\xa2n sau ph\xe1\xba\xa3i", 400.0, 400.0, false, 1.2, false});
 		return parts;
 	}
+
+	std::vector<BossPart> BeastStats::Parts()
+	{
+		// UTF-8: Đầu, Tay trái, Tay phải, Chân trái, Chân phải, Thân
+		std::vector<BossPart> parts;
+		parts.push_back({"head", "\xc4\x90\xe1\xba\xa7u", 640.0, 640.0, false, 2.0, true});
+		parts.push_back({"arm_l", "Tay tr\xc3\xa1i", 400.0, 400.0, false, 1.2, false});
+		parts.push_back({"arm_r", "Tay ph\xe1\xba\xa3i", 400.0, 400.0, false, 1.2, false});
+		parts.push_back({"leg_l", "Ch\xc3\xa2n tr\xc3\xa1i", 400.0, 400.0, false, 1.2, false});
+		parts.push_back({"leg_r", "Ch\xc3\xa2n ph\xe1\xba\xa3i", 400.0, 400.0, false, 1.2, false});
+		parts.push_back({"body", "Th\xc3\xa2n", 0.0, 0.0, false, 1.0, false});
+		return parts;
+	}
 }

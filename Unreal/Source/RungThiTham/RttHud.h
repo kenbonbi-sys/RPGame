@@ -9,7 +9,7 @@
 
 #include "RttHud.generated.h"
 
-class ARttGauMa;
+class IRttBoss;
 class UFont;
 
 UCLASS()
@@ -27,5 +27,5 @@ private:
 
 	void Bar(float X, float Y, float W, float H, float Fill, float GhostFill, const FLinearColor& Colour);
 	void Text(const FString& S, float X, float Y, UFont* Font, float Scale, const FLinearColor& Colour, bool bCentre);
-	ARttGauMa* Boss() const;
+	IRttBoss* Boss() const;
 };

@@ -15,7 +15,7 @@
 
 #include "RttHero.generated.h"
 
-class ARttGauMa;
+
 class UAnimMontage;
 class UAnimSequenceBase;
 class UCameraComponent;

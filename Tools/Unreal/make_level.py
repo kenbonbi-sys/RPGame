@@ -137,12 +137,14 @@ block("Boulder", SPHERE, -700, 400, 100, 3, 3, 2.2)
 spawn(unreal.PlayerStart, "Player Start", z=120)
 save(MAP)
 
-# HangGau: Gấu Ma's den, the MVP fight. The bear stands 35 m off facing the hero; its den reaches
-# 38 m around where it stands (BearStats::DenRadius).
+# HangGau: the first colossus's den, the MVP fight. The colossus (ARttBehemoth, a Paragon monster
+# named by ue.cmd beast) stands 35 m off facing the hero; its den reaches 38 m around where it
+# stands (BearStats::DenRadius). Gấu Ma (ARttGauMa) can stand in for it: COLOSSUS below.
+COLOSSUS = "/Script/RungThiTham.RttBehemoth"
 outdoors(ARENA)
 spawn(unreal.PlayerStart, "Player Start", z=120)
-bear = unreal.load_class(None, "/Script/RungThiTham.RttGauMa")
-if bear is None:
-    raise RuntimeError("the RttGauMa class is not built: run ue.cmd build first")
-spawn(bear, "Gau Ma", x=3500, yaw=180.0)
+colossus = unreal.load_class(None, COLOSSUS)
+if colossus is None:
+    raise RuntimeError(COLOSSUS + " is not built: run ue.cmd build first")
+spawn(colossus, "Colossus", x=3500, yaw=180.0)
 save(ARENA)

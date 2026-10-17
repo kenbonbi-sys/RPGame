@@ -94,4 +94,12 @@ namespace Rtt
 		// the head (its antlers snap) and the four legs (bark shins) break; neck and trunk do not
 		static std::vector<BossPart> Parts();
 	};
+
+	// A colossus on two legs and two arms (the Paragon behemoths): the same numbers as Gấu Ma, its
+	// head (a heavy hit there interrupts), arms and legs breakable, the trunk not.
+	struct BeastStats
+	{
+		enum Part : int { Head, ArmLeft, ArmRight, LegLeft, LegRight, Body };
+		static std::vector<BossPart> Parts();
+	};
 }

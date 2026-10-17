@@ -7,6 +7,14 @@ namespace RttText
 {
 	// Gấu Ma Rừng Già
 	inline const TCHAR* BearName = TEXT("G\u1ea5u Ma R\u1eebng Gi\u00e0");
+	// Khỉ Đá Rừng Già
+	inline const TCHAR* BeastName = TEXT("Kh\u1ec9 \u0110\u00e1 R\u1eebng Gi\u00e0");
+	// Đấm Quét
+	inline const TCHAR* Punch = TEXT("\u0110\u1ea5m Qu\u00e9t");
+	// Nện Đất
+	inline const TCHAR* Slam = TEXT("N\u1ec7n \u0110\u1ea5t");
+	// Ném Đá Lớn
+	inline const TCHAR* Throw = TEXT("N\u00e9m \u0110\u00e1 L\u1edbn");
 	// Gầm
 	inline const TCHAR* Roar = TEXT("G\u1ea7m");
 	// Vồ

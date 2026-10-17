@@ -6,7 +6,7 @@
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "RttFeed.h"
-#include "RttGauMa.h"
+#include "RttBoss.h"
 #include "RttHero.h"
 #include "RttText.h"
 
@@ -26,16 +26,17 @@ namespace
 	}
 }
 
-ARttGauMa* ARttHud::Boss() const
+IRttBoss* ARttHud::Boss() const
 {
-	ARttGauMa* Best = nullptr;
-	for (TActorIterator<ARttGauMa> It(GetWorld()); It; ++It)
+	IRttBoss* Best = nullptr;
+	for (const TPair<AActor*, IRttBoss*>& Each : IRttBoss::All(this))
 	{
-		if (It->IsEngaged() || It->IsDefeated() || It->IsStaggered())
+		IRttBoss* B = Each.Value;
+		if (B->IsEngaged() || B->IsDefeated() || B->IsStaggered())
 		{
-			return *It;
+			return B;
 		}
-		Best = *It;
+		Best = B;
 	}
 	return Best && Best->IsEngaged() ? Best : nullptr;
 }
@@ -75,15 +76,15 @@ void ARttHud::DrawHUD()
 	LastDraw = Real;
 
 	// the colossus: name, life (with the ghost of what it just lost) and the stagger bar
-	if (ARttGauMa* Bear = Boss())
+	if (IRttBoss* Bear = Boss())
 	{
-		const URttHealth* Life = Bear->Health;
+		const URttHealth* Life = Bear->GetBossHealth();
 		const float W = 720.f * U;
 		const float X = (Sw - W) * 0.5f;
 		const float Y = 58.f * U;
 		const float Fill = Life ? Life->Fraction() : 0.f;
 		Ghost = Fill > Ghost ? Fill : FMath::FInterpTo(Ghost, Fill, Dt, 2.5f);
-		Text(RttText::BearName, Sw * 0.5f, Y - 46.f * U, Large, 1.6f * U, FLinearColor(1.f, 0.95f, 0.85f), true);
+		Text(Bear->GetBossName(), Sw * 0.5f, Y - 46.f * U, Large, 1.6f * U, FLinearColor(1.f, 0.95f, 0.85f), true);
 		if (Bear->IsDefeated())
 		{
 			Text(FString(RttText::BearBack).Replace(TEXT("%d"), *FString::FromInt(FMath::CeilToInt(Bear->RespawnIn()))), Sw * 0.5f, Y, Medium, U, FLinearColor(1.f, 0.86f, 0.55f), true);

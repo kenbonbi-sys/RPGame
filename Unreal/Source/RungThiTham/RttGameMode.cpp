@@ -4,7 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "EngineUtils.h"
-#include "RttGauMa.h"
+#include "RttBoss.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
@@ -66,13 +66,13 @@ void ARttGameMode::SetUpView()
 {
 	UWorld* World = GetWorld();
 	APlayerController* Player = World->GetFirstPlayerController();
-	TActorIterator<ARttGauMa> It(World);
-	if (!Player || !Player->GetPawn() || !It)
+	const TArray<TPair<AActor*, IRttBoss*>> Bosses = IRttBoss::All(World);
+	if (!Player || !Player->GetPawn() || Bosses.Num() == 0)
 	{
 		return;
 	}
-	const FVector B = It->GetActorLocation();
-	const FVector F = It->GetActorForwardVector();
+	const FVector B = Bosses[0].Key->GetActorLocation();
+	const FVector F = Bosses[0].Key->GetActorForwardVector();
 	Player->GetPawn()->SetActorLocationAndRotation(B + F * 1300.0 + FVector(0.0, 0.0, 100.0), (-F).Rotation());
 	const FVector Mid = B + F * 700.0 + FVector(0.0, 0.0, 380.0);
 	const FVector Side = FVector::CrossProduct(F, FVector::UpVector);

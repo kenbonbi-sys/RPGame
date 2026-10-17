@@ -15,6 +15,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "RttBoss.h"
 #include "RttGodotSpace.h"
 #include "RttHealth.h"
 #include "Rules/RttColossus.h"
@@ -30,7 +31,7 @@ class UStaticMesh;
 class UStaticMeshComponent;
 
 UCLASS()
-class RUNGTHITHAM_API ARttGauMa : public AActor
+class RUNGTHITHAM_API ARttGauMa : public AActor, public IRttBoss
 {
 	GENERATED_BODY()
 
@@ -40,21 +41,23 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Colossus")
 	TObjectPtr<URttHealth> Health;
 
-	// what the HUD shows
-	bool IsEngaged() const { return bEngaged; }
-	bool IsDefeated() const { return bDead; }
-	bool IsRaging() const { return bRage; }
-	bool IsStaggered() const;
-	float StaggerFraction() const;
-	float RespawnIn() const;
+	// IRttBoss: what the HUD shows and where heroes' blows land
+	virtual URttHealth* GetBossHealth() const override { return Health; }
+	virtual FString GetBossName() const override;
+	virtual bool IsEngaged() const override { return bEngaged; }
+	virtual bool IsDefeated() const override { return bDead; }
+	virtual bool IsRaging() const override { return bRage; }
+	virtual bool IsStaggered() const override;
+	virtual float StaggerFraction() const override;
+	virtual float RespawnIn() const override;
 	const std::vector<Rtt::BossPart>& GetParts() const { return Parts; }
 	// the head, in Unreal space
 	FVector LookPoint() const;
 
 	// The closest spot on its body to `Point` and the part it is on (Unreal space).
-	FVector ClosestPoint(const FVector& Point, int32& OutPart) const;
+	virtual FVector ClosestPoint(const FVector& Point, int32& OutPart) const override;
 	// A hero's blow landing at Blow.Point on `Part` (from ClosestPoint).
-	float TakeHeroBlow(FRttBlow Blow, int32 Part);
+	virtual float TakeHeroBlow(FRttBlow Blow, int32 Part) override;
 	// A heavy hit on the head now would interrupt Húc.
 	bool CanInterrupt() const;
 

@@ -710,6 +710,9 @@ namespace
 		Expect(!Rtt::DamagePart(head, 100.0, false, false, true) && Near(head.Hp, 365.0), "ticks do not wear parts down");
 		Expect(Rtt::DamagePart(head, 400.0, false, false, false) && head.Broken && head.Hp == 0.0, "at 0 it breaks");
 		Expect(!Rtt::DamagePart(head, 400.0, false, false, false), "only once");
+		const std::vector<Rtt::BossPart> beast = Rtt::BeastStats::Parts();
+		Expect(beast.size() == 6 && beast[Rtt::BeastStats::Head].Name == "Đầu" && beast[Rtt::BeastStats::Head].Interrupt
+			&& beast[Rtt::BeastStats::ArmRight].Name == "Tay phải" && !beast[Rtt::BeastStats::Body].Breakable(), "a two-legged colossus: head, arms, legs break; the trunk does not");
 		Expect(Near(Rtt::AreaFalloff(28.0, 0.0, 8.8), 28.0) && Near(Rtt::AreaFalloff(28.0, 8.8, 8.8), 16.8), "Dậm Đất: 28 at the centre, 40% less at the rim");
 	}
 

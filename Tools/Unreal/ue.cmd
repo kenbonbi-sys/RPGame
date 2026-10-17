@@ -7,6 +7,7 @@ rem   ue shot [file] [run]  play the map in a window, screenshot it once it has 
 rem                     (run: the hero runs on by itself, for a shot of the run)
 rem   ue hero [Name]    name the Paragon hero added from Fab in Config/DefaultGame.ini
 rem   ue assets         bring in the game's own art (the sculpted Gau Ma, materials): import_assets.py
+rem   ue beast [Pack]   name the Paragon monster (default ParagonRampage) as the colossus body
 rem   ue play           play the game in a window (Unreal/Choi.cmd does this on a double-click)
 rem Keep this file ASCII: cmd.exe misreads multi-byte UTF-8 lines in a .cmd.
 rem UE_ROOT picks the engine (default: the launcher's UE 5.8); RTT_MAP the map shot and play open
@@ -33,6 +34,7 @@ if /i "%~1"=="shot" goto shot
 if /i "%~1"=="hero" goto hero
 if /i "%~1"=="play" goto play
 if /i "%~1"=="assets" goto assets
+if /i "%~1"=="beast" goto beast
 echo usage: ue build ^| level ^| test ^| shot [file.png] [run] ^| hero [Name]
 exit /b 2
 
@@ -44,6 +46,14 @@ findstr /c:"RTT_ASSETS" "%OUT%\assets.log" | findstr /v /c:"Running Python"
 findstr /c:"RTT_ASSETS_OK" "%OUT%\assets.log" >nul && exit /b 0
 findstr /i /c:"LogPython: Error" "%OUT%\assets.log"
 echo The art was not brought in; see %OUT%\assets.log
+exit /b 1
+
+:beast
+"%EDITOR%" "%PROJ%" -run=pythonscript -script="%HERE%setup_beast.py %~2" %COMMON% -abslog="%OUT%\beast.log" >nul
+findstr /c:"RTT_BEAST" "%OUT%\beast.log" | findstr /v /c:"Running Python" | findstr /v /c:"RTT_BEAST anim"
+findstr /c:"RTT_BEAST_OK" "%OUT%\beast.log" >nul && exit /b 0
+findstr /i /c:"LogPython: Error" "%OUT%\beast.log"
+echo No Paragon monster was set up; see %OUT%\beast.log
 exit /b 1
 
 :play

@@ -13,6 +13,10 @@ OUT = os.path.join(ROOT, "Unreal", "Source", "RungThiTham", "RttText.h")
 
 TEXT = [
     ("BearName", "Gấu Ma Rừng Già"),
+    ("BeastName", "Khỉ Đá Rừng Già"),
+    ("Punch", "Đấm Quét"),
+    ("Slam", "Nện Đất"),
+    ("Throw", "Ném Đá Lớn"),
     ("Roar", "Gầm"),
     ("Swipe", "Vồ"),
     ("Stomp", "Dậm Đất"),

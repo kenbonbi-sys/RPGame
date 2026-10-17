@@ -13,7 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "RttFeed.h"
-#include "RttGauMa.h"
+#include "RttBoss.h"
 #include "RttRules.h"
 #include "RttText.h"
 
@@ -269,14 +269,14 @@ void ARttHero::FaceFoe()
 		// no stick: turn to the colossus if one is close
 		const FVector Center = GetActorLocation();
 		double Best = 1200.0;
-		for (TActorIterator<ARttGauMa> It(GetWorld()); It; ++It)
+		for (const TPair<AActor*, IRttBoss*>& Each : IRttBoss::All(this))
 		{
-			if (It->IsDefeated())
+			if (Each.Value->IsDefeated())
 			{
 				continue;
 			}
 			int32 Part = 0;
-			FVector To = It->ClosestPoint(Center, Part) - Center;
+			FVector To = Each.Value->ClosestPoint(Center, Part) - Center;
 			To.Z = 0.0;
 			if (To.Size() < Best)
 			{
@@ -296,14 +296,14 @@ int32 ARttHero::Strike(const FRttBlow& Blow, float ReachCm, float AngleDegrees, 
 	const FVector Center = GetActorLocation();
 	const FVector Facing = GetActorForwardVector();
 	int32 Hits = 0;
-	for (TActorIterator<ARttGauMa> It(GetWorld()); It; ++It)
+	for (const TPair<AActor*, IRttBoss*>& Each : IRttBoss::All(this))
 	{
-		if (It->IsDefeated())
+		if (Each.Value->IsDefeated())
 		{
 			continue;
 		}
 		int32 Part = 0;
-		const FVector P = It->ClosestPoint(Center, Part);
+		const FVector P = Each.Value->ClosestPoint(Center, Part);
 		FVector To = P - Center;
 		const double Rise = To.Z;
 		To.Z = 0.0;
@@ -324,7 +324,7 @@ int32 ARttHero::Strike(const FRttBlow& Blow, float ReachCm, float AngleDegrees, 
 		{
 			B.Hit.SourceLevel = Sheet->Level;
 		}
-		if (It->TakeHeroBlow(B, Part) > 0.f)
+		if (Each.Value->TakeHeroBlow(B, Part) > 0.f)
 		{
 			++Hits;
 		}
@@ -478,14 +478,14 @@ void ARttHero::Rise()
 void ARttHero::DemoFight()
 {
 	const FVector Center = GetActorLocation();
-	for (TActorIterator<ARttGauMa> It(GetWorld()); It; ++It)
+	for (const TPair<AActor*, IRttBoss*>& Each : IRttBoss::All(this))
 	{
-		if (It->IsDefeated())
+		if (Each.Value->IsDefeated())
 		{
 			continue;
 		}
 		int32 Part = 0;
-		FVector To = It->ClosestPoint(Center, Part) - Center;
+		FVector To = Each.Value->ClosestPoint(Center, Part) - Center;
 		To.Z = 0.0;
 		if (To.Size() > 220.0)
 		{

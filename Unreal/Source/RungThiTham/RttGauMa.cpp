@@ -947,6 +947,11 @@ void ARttGauMa::Dying(double Dt)
 }
 
 // ================================================================== reacting
+FString ARttGauMa::GetBossName() const
+{
+	return RttText::BearName;
+}
+
 bool ARttGauMa::IsStaggered() const
 {
 	return Health && Health->Poise() && Health->Poise()->IsBroken(Now());
