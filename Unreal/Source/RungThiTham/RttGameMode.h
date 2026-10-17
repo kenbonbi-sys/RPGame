@@ -22,6 +22,9 @@ private:
 	FString ShotPath;
 	double ShotAt = 0.0;
 	bool bShotTaken = false;
+	FString ShotView;
+	bool bViewSet = false;
 
 	void TickShot();
+	void SetUpView();
 };

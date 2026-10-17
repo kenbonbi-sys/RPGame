@@ -111,6 +111,8 @@ private:
 	bool bRage = false;
 	bool bEngaged = false;
 	bool bDead = false;
+	// -RttBearIdle (screenshots): it stands where it is and ignores heroes
+	bool bCalm = false;
 	TWeakObjectPtr<ARttHero> Target;
 
 	// the root in Godot space: the ground under its middle, and its heading

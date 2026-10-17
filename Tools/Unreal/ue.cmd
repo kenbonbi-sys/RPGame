@@ -38,7 +38,7 @@ exit /b 2
 
 :assets
 rem the materials are built anew (rebuilding one in place trips an editor assert)
-for %%M in (M_VertexColour M_Glow M_Telegraph) do if exist "%ROOT%\Unreal\Content\Materials\%%M.uasset" del "%ROOT%\Unreal\Content\Materials\%%M.uasset"
+for %%M in (M_VertexColour M_Creature M_Glow M_Telegraph) do if exist "%ROOT%\Unreal\Content\Materials\%%M.uasset" del "%ROOT%\Unreal\Content\Materials\%%M.uasset"
 "%EDITOR%" "%PROJ%" -run=pythonscript -script="%HERE%import_assets.py" %COMMON% -abslog="%OUT%\assets.log" >nul
 findstr /c:"RTT_ASSETS" "%OUT%\assets.log" | findstr /v /c:"Running Python"
 findstr /c:"RTT_ASSETS_OK" "%OUT%\assets.log" >nul && exit /b 0
@@ -88,6 +88,10 @@ set "RUN="
 if /i "%~3"=="run" set "RUN=-RttDemoRun -RttShotDelay=4"
 if not defined RTT_SHOT_DELAY set "RTT_SHOT_DELAY=12"
 if /i "%~3"=="fight" set "RUN=-RttDemoFight -RttShotDelay=%RTT_SHOT_DELAY%"
+rem side: the hero before the calm colossus, seen from the side (a steady frame to compare looks)
+if /i "%~3"=="side" set "RUN=-RttShotView=side -RttBearIdle -RttShotDelay=10"
+rem RTT_SHOT_ARGS adds anything else (e.g. -RttPlainSkin)
+set "RUN=%RUN% %RTT_SHOT_ARGS%"
 if exist "%SHOT%" del "%SHOT%"
 "%EDITOR%" "%PROJ%" %RTT_MAP% -game -windowed -ResX=1600 -ResY=900 -RttShot="%SHOT%" %RUN% %COMMON% -abslog="%OUT%\shot.log" >nul
 if exist "%SHOT%" (echo %SHOT% & exit /b 0)

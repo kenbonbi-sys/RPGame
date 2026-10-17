@@ -1,6 +1,10 @@
 #include "RttGameMode.h"
 
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
+#include "EngineUtils.h"
+#include "RttGauMa.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
@@ -46,6 +50,7 @@ ARttGameMode::ARttGameMode()
 void ARttGameMode::StartPlay()
 {
 	Super::StartPlay();
+	FParse::Value(FCommandLine::Get(), TEXT("RttShotView="), ShotView);
 	if (FParse::Value(FCommandLine::Get(), TEXT("RttShot="), ShotPath))
 	{
 		float Delay = 8.f;
@@ -55,9 +60,40 @@ void ARttGameMode::StartPlay()
 	}
 }
 
+// -RttShotView=side: the hero stands 13 m in front of the colossus, facing it, and a fixed camera
+// looks at the two of them from the side (a steady frame to compare looks by).
+void ARttGameMode::SetUpView()
+{
+	UWorld* World = GetWorld();
+	APlayerController* Player = World->GetFirstPlayerController();
+	TActorIterator<ARttGauMa> It(World);
+	if (!Player || !Player->GetPawn() || !It)
+	{
+		return;
+	}
+	const FVector B = It->GetActorLocation();
+	const FVector F = It->GetActorForwardVector();
+	Player->GetPawn()->SetActorLocationAndRotation(B + F * 1300.0 + FVector(0.0, 0.0, 100.0), (-F).Rotation());
+	const FVector Mid = B + F * 700.0 + FVector(0.0, 0.0, 380.0);
+	const FVector Side = FVector::CrossProduct(F, FVector::UpVector);
+	const FVector At = Mid + Side * 2300.0 + F * 700.0 + FVector(0.0, 0.0, 200.0);
+	ACameraActor* Cam = World->SpawnActor<ACameraActor>(At, (Mid - At).Rotation());
+	if (Cam)
+	{
+		Cam->GetCameraComponent()->SetFieldOfView(50.f);
+		Cam->GetCameraComponent()->bConstrainAspectRatio = false;
+		Player->SetViewTarget(Cam);
+	}
+}
+
 void ARttGameMode::TickShot()
 {
 	const double Now = GetWorld()->GetTimeSeconds();
+	if (!ShotView.IsEmpty() && !bViewSet && Now >= ShotAt - 2.0)
+	{
+		bViewSet = true;
+		SetUpView();
+	}
 	if (!bShotTaken)
 	{
 		if (Now < ShotAt || CompilingJobs() > 0)

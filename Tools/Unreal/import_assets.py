@@ -75,6 +75,145 @@ def glow():
     return finish(m)
 
 
+TEXTURES = "/Game/Creatures/Textures"
+SOURCE_ART = os.path.join(ROOT, "Unreal", "SourceArt", "Creatures")
+
+
+def import_textures():
+    """The detail textures from make_textures.py: two normal maps and a mask."""
+    out = {}
+    for name, normal in (("T_FibreNormal", True), ("T_LumpNormal", True), ("T_CreatureDetail", False)):
+        task = unreal.AssetImportTask()
+        task.filename = os.path.join(SOURCE_ART, name + ".png")
+        task.destination_path = TEXTURES
+        task.automated = True
+        task.replace_existing = True
+        task.save = False
+        tools.import_asset_tasks([task])
+        tex = assets.load_asset(TEXTURES + "/" + name)
+        tex.set_editor_property("srgb", False)
+        tex.set_editor_property("compression_settings",
+                                unreal.TextureCompressionSettings.TC_NORMALMAP if normal else unreal.TextureCompressionSettings.TC_MASKS)
+        assets.save_loaded_asset(tex)
+        out[name] = tex
+    return out
+
+
+def custom(m, x, y, code, inputs, output=unreal.CustomMaterialOutputType.CMOT_FLOAT3):
+    c = node(m, unreal.MaterialExpressionCustom, x, y)
+    c.set_editor_property("code", code)
+    c.set_editor_property("output_type", output)
+    pins = []
+    for name in inputs:
+        pin = unreal.CustomInput()
+        pin.set_editor_property("input_name", name)
+        pins.append(pin)
+    c.set_editor_property("inputs", pins)
+    return c
+
+
+def wire(m, pairs):
+    for src, dst, pin in pairs:
+        edit.connect_material_expressions(src, "", dst, pin)
+
+
+def creature(textures):
+    """The sculpted creatures' skin, as finely detailed as a Paragon hero's: their painted vertex
+    colours (gamma undone), calmed toward Paragon's palette; fur strands and bark fibres, or moss
+    lumps where the paint is green, projected on three planes in the part's own space (the sculpts
+    have no UVs) into a real normal; rougher moss, smoother bone; a soft fur sheen at the rims; the
+    Hurt flash."""
+    m = material("M_Creature")
+    m.set_editor_property("tangent_space_normal", False)
+    vc = node(m, unreal.MaterialExpressionVertexColor, -1400, -200)
+    if hasattr(unreal, "MaterialExpressionLocalPosition"):
+        pos = node(m, unreal.MaterialExpressionLocalPosition, -1400, 0)
+    else:
+        world = node(m, unreal.MaterialExpressionWorldPosition, -1600, 0)
+        pos = node(m, unreal.MaterialExpressionTransformPosition, -1400, 0,
+                   transform_source_type=unreal.MaterialPositionTransformSource.TRANSFORMPOSSOURCE_WORLD,
+                   transform_type=unreal.MaterialPositionTransformSource.TRANSFORMPOSSOURCE_LOCAL)
+        edit.connect_material_expressions(world, "", pos, "")
+    normal_ws = node(m, unreal.MaterialExpressionVertexNormalWS, -1600, 200)
+    normal_ls = node(m, unreal.MaterialExpressionTransform, -1400, 200,
+                     transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD,
+                     transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_LOCAL)
+    edit.connect_material_expressions(normal_ws, "", normal_ls, "")
+    tile = node(m, unreal.MaterialExpressionScalarParameter, -1400, 350, parameter_name="Tile", default_value=70.0)
+    strength = node(m, unreal.MaterialExpressionScalarParameter, -1400, 450, parameter_name="DetailStrength", default_value=0.55)
+    fibre = node(m, unreal.MaterialExpressionTextureObject, -1400, 550, texture=textures["T_FibreNormal"])
+    lump = node(m, unreal.MaterialExpressionTextureObject, -1400, 700, texture=textures["T_LumpNormal"])
+    detail_tex = node(m, unreal.MaterialExpressionTextureObject, -1400, 850, texture=textures["T_CreatureDetail"])
+
+    # masks: x moss (green paint), y bone (pale, unsaturated paint), z brightness
+    masks = custom(m, -1100, -200, """
+float3 c = pow(saturate(VC), 2.2);
+float hi = max(c.r, max(c.g, c.b));
+float sat = (hi - min(c.r, min(c.g, c.b))) / max(hi, 0.001);
+float lum = dot(c, float3(0.3, 0.59, 0.11));
+float moss = saturate((c.g - c.r) * 8.0 + 0.15) * saturate(sat * 3.0);
+float bone = saturate((lum - 0.32) * 6.0) * saturate(1.0 - sat * 2.2);
+return float3(moss, bone, lum);""", ["VC"])
+    # the detail mask on three planes: x fibre gaps, y broad blotches, z lumps
+    detail = custom(m, -1100, 100, """
+float3 w = pow(abs(normalize(N)), 4.0); w /= (w.x + w.y + w.z);
+float3 a = Texture2DSample(T, TSampler, P.yz / Tile).rgb;
+float3 b = Texture2DSample(T, TSampler, P.xz / Tile).rgb;
+float3 c = Texture2DSample(T, TSampler, P.xy / Tile).rgb;
+return a * w.x + b * w.y + c * w.z;""", ["P", "N", "T", "Tile"])
+    colour = custom(m, -800, -200, """
+float3 c = pow(saturate(VC), 2.2);
+// calm the moss toward olive, and the whole palette a touch, as Paragon's
+c = lerp(c, c * float3(0.78, 0.8, 0.55), M.x);
+float l = dot(c, float3(0.3, 0.59, 0.11));
+c = lerp(float3(l, l, l), c, 0.85) * 0.9;
+// painted variation, dark gaps between strands (not on bone), lumpy moss
+c *= lerp(0.82, 1.12, D.y);
+c *= lerp(1.0, lerp(0.62, 1.04, D.x), 1.0 - M.y);
+c *= lerp(1.0, lerp(0.75, 1.08, D.z), M.x);
+return c;""", ["VC", "M", "D"])
+    rough = custom(m, -800, 0, """
+float r = lerp(0.74, 0.93, M.x);
+r = lerp(r, 0.42, M.y);
+return saturate(r + (D.y - 0.5) * 0.12 + (1.0 - D.x) * 0.06);""", ["M", "D"], unreal.CustomMaterialOutputType.CMOT_FLOAT1)
+    normal = custom(m, -800, 300, """
+float3 n = normalize(N);
+float3 w = pow(abs(n), 4.0); w /= (w.x + w.y + w.z);
+float2 a = Texture2DSample(F, FSampler, P.yz / Tile).xy * 2.0 - 1.0;
+float2 b = Texture2DSample(F, FSampler, P.xz / Tile).xy * 2.0 - 1.0;
+float2 c = Texture2DSample(F, FSampler, P.xy / Tile).xy * 2.0 - 1.0;
+float2 la = Texture2DSample(L, LSampler, P.yz / (Tile * 0.6)).xy * 2.0 - 1.0;
+float2 lb = Texture2DSample(L, LSampler, P.xz / (Tile * 0.6)).xy * 2.0 - 1.0;
+float2 lc = Texture2DSample(L, LSampler, P.xy / (Tile * 0.6)).xy * 2.0 - 1.0;
+a = lerp(a, la, M.x); b = lerp(b, lb, M.x); c = lerp(c, lc, M.x);
+float3 d = w.x * float3(0.0, a.x, a.y) + w.y * float3(b.x, 0.0, b.y) + w.z * float3(c.x, c.y, 0.0);
+return normalize(n + d * S * lerp(1.0, 0.3, M.y));""", ["P", "N", "F", "L", "Tile", "M", "S"])
+    to_world = node(m, unreal.MaterialExpressionTransform, -500, 300,
+                    transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_LOCAL,
+                    transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_WORLD)
+    # a soft sheen on fur at the rims, and the white Hurt flash
+    fresnel = node(m, unreal.MaterialExpressionFresnel, -800, 550, exponent=4.0, base_reflect_fraction=0.0)
+    hurt = node(m, unreal.MaterialExpressionScalarParameter, -800, 700, parameter_name="Hurt", default_value=0.0)
+    glow = custom(m, -500, 550, """
+return C * Fr * 0.35 * (1.0 - M.x) + float3(1.6, 1.5, 1.4) * H;""", ["C", "Fr", "M", "H"])
+    spec = node(m, unreal.MaterialExpressionConstant, -500, 750, r=0.35)
+
+    wire(m, [(vc, masks, "VC"),
+             (pos, detail, "P"), (normal_ls, detail, "N"), (detail_tex, detail, "T"), (tile, detail, "Tile"),
+             (vc, colour, "VC"), (masks, colour, "M"), (detail, colour, "D"),
+             (masks, rough, "M"), (detail, rough, "D"),
+             (pos, normal, "P"), (normal_ls, normal, "N"), (fibre, normal, "F"), (lump, normal, "L"), (tile, normal, "Tile"),
+             (masks, normal, "M"), (strength, normal, "S"),
+             (normal, to_world, ""),
+             (colour, glow, "C"), (fresnel, glow, "Fr"), (masks, glow, "M"), (hurt, glow, "H")])
+    edit.connect_material_property(colour, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    edit.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    edit.connect_material_property(to_world, "", unreal.MaterialProperty.MP_NORMAL)
+    edit.connect_material_property(glow, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    edit.connect_material_property(spec, "", unreal.MaterialProperty.MP_SPECULAR)
+    return finish(m)
+
+
 def telegraph():
     m = material("M_Telegraph")
     m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT)
@@ -89,7 +228,8 @@ def telegraph():
     return finish(m)
 
 
-vc = vertex_colour()
+vertex_colour()
+vc = creature(import_textures())
 glow_mat = glow()
 telegraph()
 

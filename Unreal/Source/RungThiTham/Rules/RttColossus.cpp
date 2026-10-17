@@ -6,19 +6,19 @@ namespace Rtt
 {
 	namespace
 	{
-		constexpr double Pi = 3.14159265358979323846;
+		constexpr double BeatPi = 3.14159265358979323846;
 
-		double Lerp(double a, double b, double t)
+		double BeatLerp(double a, double b, double t)
 		{
 			return a + (b - a) * t;
 		}
 
-		double Clamp(double v, double lo, double hi)
+		double BeatClamp(double v, double lo, double hi)
 		{
 			return v < lo ? lo : (v > hi ? hi : v);
 		}
 
-		double Down(double v, double dt)
+		double CoolDown(double v, double dt)
 		{
 			return v - dt > 0.0 ? v - dt : 0.0;
 		}
@@ -32,12 +32,12 @@ namespace Rtt
 		}
 		if (t < Tell)
 		{
-			return -dip * std::sin(t / Tell * Pi * 0.5);
+			return -dip * std::sin(t / Tell * BeatPi * 0.5);
 		}
 		if (t < Tell + Wind)
 		{
 			const double k = (t - Tell) / Wind;
-			return Lerp(-dip, 1.0, k * k * (3.0 - 2.0 * k));
+			return BeatLerp(-dip, 1.0, k * k * (3.0 - 2.0 * k));
 		}
 		return 1.0;
 	}
@@ -53,17 +53,17 @@ namespace Rtt
 
 	double Beats::Strike(double t, double seconds) const
 	{
-		const double k = Clamp((t - StrikeAt()) / (seconds > 0.001 ? seconds : 0.001), 0.0, 1.0);
+		const double k = BeatClamp((t - StrikeAt()) / (seconds > 0.001 ? seconds : 0.001), 0.0, 1.0);
 		return 1.0 - std::pow(1.0 - k, 3.0);
 	}
 
 	void BearCooldowns::Tick(double dt)
 	{
-		Swipe = Down(Swipe, dt);
-		Stomp = Down(Stomp, dt);
-		Throw = Down(Throw, dt);
-		Pounce = Down(Pounce, dt);
-		Charge = Down(Charge, dt);
+		Swipe = CoolDown(Swipe, dt);
+		Stomp = CoolDown(Stomp, dt);
+		Throw = CoolDown(Throw, dt);
+		Pounce = CoolDown(Pounce, dt);
+		Charge = CoolDown(Charge, dt);
 	}
 
 	BearMove ChooseBearMove(double d, double front, bool rage, BearCooldowns& cd, bool canPounce, bool canThrow)
@@ -121,7 +121,7 @@ namespace Rtt
 
 	double AreaFalloff(double amount, double distance, double radius)
 	{
-		return radius > 0.0 ? amount * (1.0 - 0.4 * Clamp(distance / radius, 0.0, 1.0)) : amount;
+		return radius > 0.0 ? amount * (1.0 - 0.4 * BeatClamp(distance / radius, 0.0, 1.0)) : amount;
 	}
 
 	std::vector<BossPart> BearStats::Parts()

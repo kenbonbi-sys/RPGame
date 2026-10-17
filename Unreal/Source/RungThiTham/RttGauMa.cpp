@@ -13,6 +13,8 @@
 #include "RttHero.h"
 #include "RttTelegraph.h"
 #include "RttText.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "UObject/ConstructorHelpers.h"
 
 using RttG::FBasis;
@@ -178,8 +180,10 @@ void ARttGauMa::AddShape(int32 Body, EShape Kind, const FXf& Local, double Radiu
 			P = C;
 		}
 		P->SetupAttachment(RootComponent);
-		// blocks heroes, and the camera's arm (it pulls in rather than sit inside the body)
+		// blocks heroes; the camera passes through, as in Shadow of the Colossus (blocking it slams
+		// the camera into the bear's face whenever its head comes between)
 		P->SetCollisionProfileName(UCollisionProfile::BlockAllDynamic_ProfileName);
+		P->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 		P->SetCanEverAffectNavigation(false);
 		P->SetHiddenInGame(true);
 		Sh.Blocker = P;
@@ -331,6 +335,23 @@ void ARttGauMa::BeginPlay()
 	{
 		Marks->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.45f, 1.f, 0.85f));
 		Marks->SetScalarParameterValue(TEXT("Strength"), 1.8f);
+	}
+	// screenshots: -RttBearIdle keeps it calm where it stands; -RttPlainSkin shows the bare painted
+	// sculpt (M_VertexColour) instead of the detailed creature skin, to compare
+	bCalm = FParse::Param(FCommandLine::Get(), TEXT("RttBearIdle"));
+	if (FParse::Param(FCommandLine::Get(), TEXT("RttPlainSkin")))
+	{
+		if (UMaterialInterface* Plain = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_VertexColour.M_VertexColour")))
+		{
+			Skin = UMaterialInstanceDynamic::Create(Plain, this);
+			for (const FLook& L : Looks)
+			{
+				if (!L.Mesh->GetName().Contains(TEXT("Glow")))
+				{
+					L.Mesh->SetMaterial(0, Skin);
+				}
+			}
+		}
 	}
 
 	Height = StandHeight;
@@ -488,7 +509,7 @@ void ARttGauMa::Think(double Dt)
 		return;
 	}
 	const bool bWas = bEngaged;
-	ARttHero* Hero = NearestHero(Rtt::BearStats::AggroRange);
+	ARttHero* Hero = bCalm ? nullptr : NearestHero(Rtt::BearStats::AggroRange);
 	Target = Hero;
 	bEngaged = Hero != nullptr;
 	if (bEngaged && !bWas)
@@ -508,7 +529,10 @@ void ARttGauMa::Think(double Dt)
 	}
 	if (!Hero)
 	{
-		Wander(Dt);
+		if (!bCalm)
+		{
+			Wander(Dt);
+		}
 		return;
 	}
 	FVector To = HeroFeet(Hero) - RootPos;

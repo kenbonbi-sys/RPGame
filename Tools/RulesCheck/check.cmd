@@ -34,5 +34,15 @@ if errorlevel 1 (
   echo The rules do not build.
   exit /b 1
 )
+rem Unreal builds a module as "unity" files once it is big enough: every .cpp in one. Two files
+rem with a local helper of the same name then clash, so build the rules that way too.
+(for %%F in ("%ROOT%\Unreal\Source\RungThiTham\Rules\*.cpp") do @echo #include "%%~fF") >"%OUT%\unity.cpp"
+cl /nologo /std:c++20 /W4 /WX /permissive- /utf-8 /EHs-c- /D_HAS_EXCEPTIONS=0 /c ^
+  /I "%ROOT%\Unreal\Source\RungThiTham" /Fo"%OUT%\unity.obj" "%OUT%\unity.cpp" >"%OUT%\unity.log"
+if errorlevel 1 (
+  findstr /v /r "^unity\.cpp$" "%OUT%\unity.log"
+  echo The rules do not build as one unity file: two files share a local name.
+  exit /b 1
+)
 "%OUT%\RulesTests.exe" "%ROOT%\Unreal\Content\Data"
 exit /b %errorlevel%
