@@ -34,11 +34,11 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
 |---|---|---|
 | Card đồ hoạ | RTX 3060 12 GB | Đủ |
 | CPU | i5-12400F, 6 nhân 12 luồng | Đủ (biên dịch shader và C++ sẽ chậm hơn máy nhiều nhân) |
-| RAM | 16 GB | Tối thiểu; 32 GB thì thoải mái |
+| RAM | 32 GB | Đủ |
 | Ổ đĩa | Còn trống khoảng 549 GB | Nên có từ 100 GB trống: engine khoảng 40–60 GB, Visual Studio C++ khoảng 10–20 GB, dự án và bộ nhớ đệm shader khoảng 10–20 GB, tài sản Paragon vài GB mỗi nhân vật |
 | Epic Games Launcher | Đã cài | |
-| Unreal Engine | Chưa có | UE 5.8, cài qua Epic Games Launcher (dự án ghi `EngineAssociation` 5.8) |
-| Visual Studio | Build Tools 2026 (MSVC 14.50, Windows SDK 10.0.26100) | Trình biên dịch C++ cho UnrealBuildTool; nếu engine đòi bản khác, trình cài của Epic sẽ báo |
+| Unreal Engine | UE 5.8.3 trong `C:\Program Files\Epic Games\UE_5.8`, cài qua Epic Games Launcher | Dự án ghi `EngineAssociation` 5.8 |
+| Visual Studio | Build Tools 2026: MSVC 14.50, Windows SDK 10.0.26100, .NET Framework 4.8.1 SDK | Đủ cho UnrealBuildTool. Thiếu .NET Framework SDK thì UBT báo `SwarmInterface ... NetFxSDK`: thêm thành phần `Microsoft.Net.Component.4.8.1.SDK` bằng Visual Studio Installer |
 
 ## Cách làm việc
 
@@ -52,7 +52,7 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
 
 ## Đã có trong `Unreal/`
 
-- **Khung dự án C++:** `RungThiTham.uproject`, hai target (`Source/RungThiTham.Target.cs`, `RungThiThamEditor.Target.cs`), module `RungThiTham` (`RungThiTham.Build.cs`), `Config/DefaultGame.ini`. Chưa mở bằng engine lần nào: chờ cài UE 5.8.
+- **Khung dự án C++:** `RungThiTham.uproject`, hai target (`Source/RungThiTham.Target.cs`, `RungThiThamEditor.Target.cs`), module `RungThiTham` (`RungThiTham.Build.cs`), `Config/` (game mode, map mặc định, Lumen, DX12 SM6, Enhanced Input).
 - **Thư viện luật** `Source/RungThiTham/Rules/`: C++ thuần (namespace `Rtt`), không dùng kiểu nào của Unreal, nên biên dịch và test được ngay khi chưa có engine, và sau này chạy được cả trong dedicated server. Như Unreal, không dùng exception.
   - `RttJson`: đọc các file `Content/Data/*.json`.
   - `RttTuning`: các hằng số cấp độ và chiến đấu (`progression.json`, `combat.json`).
@@ -68,6 +68,22 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
   ```
 
   Script tự tìm `vcvars64.bat` của Visual Studio, biên dịch như Unreal (C++20, không exception, cảnh báo là lỗi) rồi chạy với dữ liệu thật. Hiện có 133 kiểm tra, đều đạt.
+- **Game (U0)** trong `Source/RungThiTham/`:
+  - `ARttHero`: chạy 5,4 m/s; giữ Shift để chạy nhanh 8,2 m/s; nhấn Shift để Lướt (bất tử 0,28 giây); nhảy 7,4 m/s với trọng lực 21 m/s². Số liệu và phím lấy từ `hero.gd` và `controls.gd` của bản Godot. Camera treo sau vai. Thân tạm (khối trụ và quả cầu) chờ nhân vật Paragon ở U1. Phím được tạo bằng Enhanced Input ngay trong C++, không cần asset.
+  - `ARttGameMode`: đưa nhân vật vào màn chơi. Với `-RttShot=<file.png>`, nó chờ shader biên dịch xong, chụp ảnh rồi thoát.
+  - `URttRules`: nạp `Content/Data` vào thư viện luật khi game chạy.
+  - `Tests/RttTests.cpp`: test tự động của Unreal (`RungThiTham.Rules.Data`, `RungThiTham.Game.Setup`).
+- **Map thử** `Content/Maps/ThuNghiem.umap` do `Tools/Unreal/make_level.py` dựng: nền 400 m, mặt trời, bầu trời, mây, sương (ánh sáng Lumen, không bake), vài khối để so tỉ lệ, PlayerStart. Mọi bề mặt dùng `Content/Materials/M_Grid`: bàn cờ ô 1 m đặt theo toạ độ thế giới. Lưới có sẵn của engine bám theo UV của từng mesh nên vỡ thành nhiễu trên mặt phẳng kéo dài 400 lần.
+- **Script** `Tools/Unreal/ue.cmd`:
+
+  ```
+  Tools\Unreal\ue.cmd build    biên dịch (UnrealBuildTool)
+  Tools\Unreal\ue.cmd level    dựng lại map thử /Game/Maps/ThuNghiem
+  Tools\Unreal\ue.cmd test     chạy test RungThiTham, không mở cửa sổ
+  Tools\Unreal\ue.cmd shot     chơi map trong cửa sổ, chụp ảnh rồi thoát
+  ```
+
+  Log nằm trong `Unreal/Saved/Tools`. Nếu engine cài ở chỗ khác, đặt biến `UE_ROOT`.
 - **Dữ liệu** `Content/Data/`: `Tools/GodotData/unity_to_json.py` giờ ghi cùng một bộ file vào cả `Godot/data` và `Unreal/Content/Data`. Riêng `armour_sets.json` chép tay từ trang Armour của wiki Dauntless (bản Godot để bảng này trong `armour.gd`). Khi đóng gói, thư mục `Data` đi kèm dưới dạng file rời (`DirectoriesToAlwaysStageAsNonUFS`).
 
 ## Lộ trình
@@ -85,7 +101,7 @@ InstaLOD chỉ là công cụ tối ưu (giảm tam giác, tạo LOD, gộp text
 
 ## Rủi ro
 
-- **RAM 16 GB** là giới hạn chính của máy này: biên dịch shader lần đầu và mở các map lớn sẽ chậm.
+- **Biên dịch shader lần đầu** trên CPU 6 nhân khá lâu. Bộ nhớ đệm (Zen DDC) nằm trong `%LOCALAPPDATA%\UnrealEngine`.
 - **Lặp lại chậm hơn:** biên dịch C++ và shader của Unreal lâu hơn Godot nhiều; mỗi vòng sửa và chụp ảnh sẽ mất vài phút thay vì vài giây.
 - **Tài sản nhị phân:** mình không sửa được Blueprint và `.uasset` bằng chữ, nên mọi thứ mình làm sẽ đi qua C++ và script Python.
 - **Giấy phép:** Paragon chỉ được dùng trong dự án Unreal. Tài sản từ Fab phải xem giấy phép từng món.
